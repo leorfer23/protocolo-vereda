@@ -26,7 +26,7 @@ El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de p
 
 - El cobro nace `en_mano`, sin `vence`. El pedido va de `creado` a `aceptado` sin pasar por `pagado`.
 - Como reserva sin haber pagado, la reserva se acota por el otro lado: el comercio tiene `plazo_aceptacion_min` (1 a 60 minutos con el comercio abierto, 10 por defecto) para aceptar o rechazar. Si no responde, el pedido se cancela con `sin_respuesta_del_comercio` y se libera todo. Ese plazo vale para cualquier pedido, no solo en efectivo.
-- El comercio se defiende de pedidos falsos con `efectivo.pedidos_entregados_minimo` (historial que le exige al usuario) y `efectivo.modalidades` (por ejemplo, efectivo solo en retiro). Si el usuario no cumple, confirmar responde `efectivo_no_disponible` y puede elegir otro medio.
+- El comercio se defiende de pedidos falsos con `efectivo.pedidos_entregados_minimo` (historial que le exige al usuario), `efectivo.modalidades` (por ejemplo, efectivo solo en retiro) y `efectivo.monto_maximo`. Si el usuario no cumple, confirmar responde `efectivo_no_disponible` y puede elegir otro medio.
 - Al entregar, quien entrega envía `cobrado_en_mano: true`: el pago pasa a `confirmado` y el pedido a `entregado`.
 - Con repartidor, el efectivo lo cobra el repartidor. `reparto` dice cuánto es del comercio y cuánto del envío; cómo se lo rinden entre ellos es asunto de ellos. La red lo muestra y no lo ejecuta, igual que con las devoluciones.
 
@@ -40,6 +40,6 @@ El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de p
 ## Pedido grupal
 
 - Al cerrar el grupo se reserva todo y nace un cobro por participante, todos con el mismo `vence`.
-- Si vence el cobro de un participante, pasa a `no_pago`: sus ítems salen del pedido, se libera su reserva y se emite `grupo.participante_no_pago`. El pedido sigue con los demás.
+- Si vence el cobro de un participante, pasa a `no_pago`, se libera su reserva y se emite `grupo.participante_no_pago`. Qué pasa después lo decide el comercio en `grupal.si_falta_un_pago`: con `sigue` (por defecto) salen sus ítems y el pedido continúa con los demás; con `cancela` se cancela todo con `pago_vencido`.
 - Lo que ya pagaron los otros no cambia. Si la división del envío dejó una parte sin cubrir, `totales.envio` baja en esa parte; el comercio lo ve antes de aceptar y el repartidor ve el monto antes de tomar el viaje.
 - Si no paga nadie, el pedido se cancela con `pago_vencido`.

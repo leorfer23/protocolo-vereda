@@ -48,7 +48,15 @@
       "description": "Solo si 'efectivo' está en medios_cobro. El comercio decide dónde y a quién le acepta efectivo.",
       "properties": {
         "modalidades": { "type": "array", "items": { "type": "string", "enum": ["inmediata", "franja", "consolidada", "ronda", "punto_entrega", "retiro"] }, "description": "Tipos de modalidad en los que acepta efectivo. Ausente o vacío: todas." },
+        "monto_maximo": { "$ref": "comunes.json#/$defs/monto", "description": "Total máximo de un pedido en efectivo. Ausente: sin tope." },
         "pedidos_entregados_minimo": { "type": "integer", "minimum": 0, "default": 0, "description": "Pedidos entregados que debe tener el usuario en la red para pagar en efectivo. 0: cualquiera. Un pedido en efectivo reserva sin haber pagado; este mínimo es la defensa del comercio." }
+      }
+    },
+    "grupal": {
+      "type": "object",
+      "description": "Cómo trata este comercio los pedidos grupales.",
+      "properties": {
+        "si_falta_un_pago": { "type": "string", "enum": ["sigue", "cancela"], "default": "sigue", "description": "'sigue': el que no pagó sale y el pedido continúa con los demás. 'cancela': si falta un pago se cancela todo (un catering que no cierra con menos gente)." }
       }
     },
     "medios_cobro": {
