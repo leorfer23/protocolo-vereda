@@ -23,11 +23,11 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 
 | Carpeta | Contenido |
 | --- | --- |
-| `esquemas/` | 20 esquemas JSON (draft 2020-12): comercio, oferta, modalidad, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
+| `esquemas/` | 21 esquemas JSON (draft 2020-12): comercio, oferta, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
 | `openapi.yaml` | La API abierta, 56 rutas. Apps y agentes usan las mismas |
 | `mcp/herramientas.json` | Las 22 herramientas del servidor MCP, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio |
-| `docs/` | Federación, eventos y webhooks, ranking y despacho, datos y privacidad |
+| `docs/` | Federación, eventos y webhooks, ranking y despacho, carrito y reserva, datos y privacidad |
 | `validar.py` | Valida los ejemplos contra los esquemas, y `openapi.yaml` contra OpenAPI 3.1 |
 
 ```

@@ -1,0 +1,88 @@
+{
+  "$comentario": "Casos mínimos para pago.json.",
+  "esquema": "pago.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Cobro pendiente con vencimiento.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "qr_interoperable",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Efectivo en mano: no hay ventana de pago.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "efectivo",
+        "estado": "en_mano"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Cobro confirmado: el vencimiento ya no importa.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "confirmado_en": "2026-09-21T15:04:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Cobro pendiente sin vencimiento: la reserva no tendría fin.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "qr_interoperable",
+        "estado": "pendiente"
+      }
+    }
+  ]
+}

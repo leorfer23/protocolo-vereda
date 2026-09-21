@@ -27,6 +27,7 @@ MAPA = {
     "mandato.json": "mandato.json",
     "ronda-los-alamos.json": "ronda.json",
     "grupo-edificio.json": "grupo.json",
+    "carrito.json": "carrito.json",
 }
 
 fallos = 0

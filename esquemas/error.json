@@ -6,7 +6,7 @@
   "type": "object",
   "required": ["codigo", "mensaje", "estado_http"],
   "properties": {
-    "codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["oferta_no_disponible", "fuera_de_zona", "falta_opcion", "fuera_de_mandato", "requiere_confirmacion", "cupo_agotado", "version_no_soportada"] },
+    "codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["oferta_no_disponible", "fuera_de_zona", "falta_opcion", "fuera_de_mandato", "requiere_confirmacion", "cupo_agotado", "carrito_vencido", "version_no_soportada"] },
     "mensaje": { "type": "string", "examples": ["Ese comercio no entrega en tu zona después de las 22."] },
     "estado_http": { "type": "integer" },
     "detalle": { "type": "object", "description": "Datos estructurados para el cliente: qué opción falta, hasta qué monto alcanza el mandato, link de confirmación." },

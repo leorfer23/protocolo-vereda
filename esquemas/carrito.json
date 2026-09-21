@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/carrito.json",
+  "title": "Carrito",
+  "description": "Pedido en armado, a un solo comercio. Se valida paso a paso y dice qué falta. No retiene stock ni cupos: la reserva ocurre al confirmar (ver docs/carrito-y-reserva.md). Vive en el nodo del usuario; no se federa.",
+  "type": "object",
+  "required": ["id", "estado", "items", "vence"],
+  "properties": {
+    "id": { "type": "string" },
+    "estado": { "type": "string", "enum": ["valido", "incompleto", "no_disponible"], "description": "'no_disponible': algún ítem, cupo o franja dejó de estar disponible desde que se agregó." },
+    "faltantes": { "type": "array", "items": { "type": "object", "properties": { "item_id": { "type": "string" }, "grupo_id": { "type": "string" }, "mensaje": { "type": "string" }, "opciones": { "type": "array", "items": { "type": "string" } } } } },
+    "items": { "type": "array", "items": { "$ref": "pedido.json#/$defs/item" } },
+    "modalidad": { "$ref": "pedido.json#/properties/modalidad" },
+    "modalidades_disponibles": { "type": "array", "items": { "$ref": "modalidad.json" } },
+    "totales": { "$ref": "pedido.json#/properties/totales" },
+    "reparto": { "$ref": "pedido.json#/properties/reparto" },
+    "eta": { "$ref": "comunes.json#/$defs/instante" },
+    "dentro_del_mandato": { "type": "boolean" },
+    "vence": { "$ref": "comunes.json#/$defs/instante", "description": "24 h después de la última modificación. Es solo limpieza: un carrito vencido no libera nada porque no retenía nada." }
+  }
+}
