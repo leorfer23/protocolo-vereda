@@ -28,6 +28,7 @@ MAPA = {
     "ronda-los-alamos.json": "ronda.json",
     "grupo-edificio.json": "grupo.json",
     "carrito.json": "carrito.json",
+    "supermercado-promocion.json": "promocion.json",
 }
 
 fallos = 0

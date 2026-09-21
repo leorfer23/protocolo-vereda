@@ -13,6 +13,7 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 - **Compra colectiva.** Pedido grupal con link (el edificio, la oficina): cada uno paga lo suyo, un solo envío. Rondas que los propios vecinos abren.
 - **Suscripciones.** Viandas semanales, catering mensual, la compra quincenal: una regla de repetición, ventana de edición, y cada ocurrencia es un pedido común.
 - **Supermercado de verdad.** Listas persistentes con ítems genéricos que se resuelven contra comercios, catálogo maestro por EAN, pesables con monto final, sustituciones con preferencia declarada, franjas con cupo.
+- **Promociones que cualquiera puede calcular.** 2x1, 3x2, segunda unidad al 70 %, precio por cantidad, escalera por total de compra, envío bonificado, descuento por efectivo o por retiro, y puntos por volver al mismo comercio. Son públicas, se calculan con un algoritmo público y no compran posición en el ranking.
 - **Agentes primero.** Mandatos firmados con topes de gasto, carrito que se valida paso a paso y dice qué falta en español, preferencias que viven en la red y no en el agente, agentes de comercio que negocian con agentes de usuario. Servidor MCP como primera interfaz.
 - **Reputación firmada y portable.** Reseñas solo sobre pedidos entregados, firmadas con la clave del autor, sin edición ni borrado. Te la llevás a otro nodo.
 - **Dinero directo.** La red genera la referencia de cobro y confirma. Nunca custodia, nunca reembolsa, nunca retiene.
@@ -23,11 +24,11 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 
 | Carpeta | Contenido |
 | --- | --- |
-| `esquemas/` | 21 esquemas JSON (draft 2020-12): comercio, oferta, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
-| `openapi.yaml` | La API abierta, 56 rutas. Apps y agentes usan las mismas |
-| `mcp/herramientas.json` | Las 22 herramientas del servidor MCP, con descripciones para asistentes |
+| `esquemas/` | 22 esquemas JSON (draft 2020-12): comercio, oferta, promoción, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
+| `openapi.yaml` | La API abierta, 59 rutas. Apps y agentes usan las mismas |
+| `mcp/herramientas.json` | Las 24 herramientas del servidor MCP, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio |
-| `docs/` | Federación, eventos y webhooks, ranking y despacho, carrito y reserva, datos y privacidad |
+| `docs/` | Federación, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad |
 | `validar.py` | Valida los ejemplos contra los esquemas, y `openapi.yaml` contra OpenAPI 3.1 |
 
 ```

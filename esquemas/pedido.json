@@ -82,6 +82,8 @@
         }
       }
     },
+    "descuentos_aplicados": { "type": "array", "items": { "$ref": "#/$defs/descuento_aplicado" }, "description": "Desglose de 'totales.descuentos'. Congelado al crear, como los precios." },
+    "puntos": { "type": "object", "description": "Programa de fidelidad del comercio, si tiene.", "properties": { "canjeados": { "type": "integer", "minimum": 0 }, "ganados": { "type": "integer", "minimum": 0, "description": "Se acreditan al pasar a 'entregado'." } } },
     "pagos": { "type": "array", "items": { "$ref": "pago.json" } },
     "politica_cancelacion_aplicada": { "type": "string", "description": "Copia del texto vigente al crear el pedido." },
     "eta": { "$ref": "comunes.json#/$defs/instante" },
@@ -102,6 +104,17 @@
     }
   },
   "$defs": {
+    "descuento_aplicado": {
+      "type": "object",
+      "required": ["nombre", "alcance", "monto"],
+      "properties": {
+        "promocion_id": { "$ref": "comunes.json#/$defs/id", "description": "Ausente en canje de puntos." },
+        "nombre": { "type": "string" },
+        "alcance": { "type": "string", "enum": ["item", "canasta", "envio", "puntos"] },
+        "item_id": { "type": "string", "description": "Si el alcance es 'item'." },
+        "monto": { "$ref": "comunes.json#/$defs/monto" }
+      }
+    },
     "estado": {
       "type": "string",
       "enum": ["creado", "pagado", "aceptado", "preparando", "listo", "asignado", "en_camino", "entregado", "cancelado"],
