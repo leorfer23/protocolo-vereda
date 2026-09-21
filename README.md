@@ -28,10 +28,10 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | `mcp/herramientas.json` | Las 22 herramientas del servidor MCP, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio |
 | `docs/` | Federación, eventos y webhooks, ranking y despacho, datos y privacidad |
-| `validar.py` | Valida los ejemplos contra los esquemas |
+| `validar.py` | Valida los ejemplos contra los esquemas, y `openapi.yaml` contra OpenAPI 3.1 |
 
 ```
-pip install jsonschema && python3 validar.py
+pip install jsonschema pyyaml openapi-spec-validator && python3 validar.py
 ```
 
 ## Las reglas que el protocolo sí impone

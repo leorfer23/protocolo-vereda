@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Valida los ejemplos contra los esquemas del Protocolo Vereda."""
-import json, sys, glob, os
+"""Valida los ejemplos contra los esquemas del Protocolo Vereda, y el OpenAPI."""
+import json, sys, glob, os, yaml
+from openapi_spec_validator import validate
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 
@@ -42,4 +43,12 @@ for ej, esq in MAPA.items():
     else:
         print(f"✓ {ej} cumple {esq}")
 print(f"\n{len(MAPA) - fallos}/{len(MAPA)} ejemplos válidos")
+
+API = os.path.join(BASE, "openapi.yaml")
+try:
+    validate(yaml.safe_load(open(API)), base_uri="file://" + API)
+    print("✓ openapi.yaml cumple OpenAPI 3.1")
+except Exception as e:
+    fallos += 1
+    print(f"✗ openapi.yaml\n    {str(e).splitlines()[0][:200]}")
 sys.exit(1 if fallos else 0)
