@@ -75,6 +75,8 @@ Un binario, `vereda-nodo`, contra PostgreSQL con PostGIS. SQLite queda fuera de 
 
 Objetivo de huella publicado desde el inicio: nodo de barrio en un VPS de 1 GB, Postgres incluido.
 
+**Decidido el 2026-09-21 (Leo): repo aparte.** `vereda-nodo` vive en su propio repositorio, privado hasta que se defina la licencia; este repo (`protocolo-vereda`) queda solo para la spec CC0. No es una cuestión de orden: si la implementación vive en el mismo repo que la spec, se vuelve "la" spec de hecho — el fallo de ActivityPub con Mastodon que este plan está escrito para evitar. Además la spec es CC0 y versiona a otro ritmo que el código del nodo.
+
 ## Infraestructura
 
 Dos preguntas distintas.
@@ -123,6 +125,6 @@ Al final de la fase 3 y de la 6: prueba de carga con el modelo de `.claudedocs/p
 
 ## Decisiones abiertas
 
-- Repositorio del nodo: aparte (`vereda-nodo`), dejando este solo para la spec CC0, o acá mismo. Y su licencia.
+- Licencia de `vereda-nodo`: es de Leo, estratégica y casi irreversible una vez publicada. Hasta que se decida, el repo queda privado y sin archivo LICENSE.
 - Gobernanza de la referencia: más de una persona con permiso de merge antes de llamarla "la" referencia.
 - PSP para las pruebas de la fase 3.
