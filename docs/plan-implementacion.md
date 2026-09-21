@@ -1,10 +1,10 @@
 # Plan de la implementación de referencia
 
-Borrador 1, 2026-09-21. Estado: a discutir. La evidencia detrás de cada punto está en `.claudedocs/plan-2026-09/` (cinco informes, con fuentes y con lo que no se pudo verificar marcado aparte).
+Borrador 2, 2026-09-21. Lenguaje decidido; el resto a discutir. La evidencia detrás de cada punto está en `.claudedocs/plan-2026-09/` (cinco informes, con fuentes y con lo que no se pudo verificar marcado aparte).
 
 ## Decisión de lenguaje
 
-**Recomendación: Go.** Es una decisión cerrada por poco; abajo está qué la daría vuelta.
+**Decidido el 2026-09-21: Go.** Fue una decisión cerrada por poco; abajo queda qué se resigna.
 
 El rendimiento no decide entre Rust y Go:
 
@@ -32,7 +32,7 @@ Por qué Go:
 - Las partes difíciles del nodo (reclamo exclusivo de viaje, tope de mandato bajo concurrencia, cierre atómico de grupo, cola de salida persistente) se resuelven en transacciones de Postgres, igual en cualquier lenguaje.
 - GoToSocial documenta 250 a 350 MB y 1 vCPU como objetivo de diseño para un nodo federado chico.
 
-Qué la daría vuelta hacia Rust:
+Qué se resigna frente a Rust, y cómo se compensa (linter `exhaustive`, tablas de transición con tests, vectores de firma en `ejemplos/`):
 
 - Priorizar garantías en compilación sobre facilidad de contribución: doce estados de pedido, seis tipos de oferta y cinco modos de precio son donde Go depende de disciplina y tests.
 - Querer un núcleo único (canonicalización, firma, validación) reutilizable desde clientes web y móviles vía WASM. Go lo hace peor.
@@ -75,6 +75,37 @@ Un binario, `vereda-nodo`, contra PostgreSQL con PostGIS. SQLite queda fuera de 
 
 Objetivo de huella publicado desde el inicio: nodo de barrio en un VPS de 1 GB, Postgres incluido.
 
+## Infraestructura
+
+Dos preguntas distintas.
+
+**El artefacto de referencia no se acopla a ningún proveedor.** Lo van a correr terceros en su propio servidor. Se entrega como binario Go estático, imagen de contenedor y un `docker-compose.yml` con Postgres y PostGIS. Nada de Workers, Durable Objects, D1, colas ni servicios propios de una nube dentro del nodo. Imágenes y adjuntos van detrás de una interfaz de almacenamiento compatible con S3.
+
+Por qué Cloudflare no sirve como plataforma del nodo (documentación oficial, 2026-09-21):
+
+- Workers corre JavaScript, TypeScript, Python y Rust; Go solo compilado a WebAssembly. Un servidor Go con `pgx`, `net/http` y trabajos en segundo plano no es eso. "Go en Cloudflare" significa Containers.
+- Containers: "All disk is ephemeral", así que Postgres no puede vivir ahí. La ubicación es automática ("the nearest free container instance"), se duerme tras 10 minutos sin tráfico por defecto y se accede a través de un Worker en JavaScript.
+- Cloudflare no aloja Postgres. Hyperdrive es un pool con caché hacia una base externa.
+- El nodo es un proceso con estado y siempre encendido: lote de despacho cada 60 s, cola de salida con reintentos, SSE, generación de ocurrencias. Y hace 3 a 8 consultas por pedido, así que tiene que estar pegado a su base.
+
+**Para la instancia propia: AWS en São Paulo para cómputo y base, con Cloudflare adelante.**
+
+| | AWS `sa-east-1` | Cloudflare Containers |
+| --- | --- | --- |
+| Cómputo siempre encendido | Fargate ARM 0,25 vCPU y 0,5 GB: USD 12,40/mes | `basic` 0,25 vCPU y 1 GiB: hasta USD 24,73/mes con el plan de USD 5 |
+| Postgres con PostGIS | RDS `db.t4g.micro` Single-AZ con 20 GB gp3: USD 29,20/mes | no existe; hay que contratarlo afuera |
+| Entrada HTTPS | ALB: USD 24,82/mes más LCU | incluida |
+| Salida a Internet | USD 0,15/GB | USD 0,04/GB, 500 GB incluidos |
+| Base junto al cómputo | sí, misma VPC | no: ubicación automática, cada consulta cruza redes |
+| Total mínimo | unos USD 66/mes más salida | unos USD 25/mes más una base externa |
+
+- Cloudflare Containers es más barato en cómputo y salida, pero igual obliga a pagar una base en otro lado y a pagar latencia en cada consulta. Con Postgres dominando el presupuesto de latencia, es el peor lugar para ahorrar.
+- El punto débil de AWS es la salida a USD 0,15/GB. Se resuelve con Cloudflare adelante como DNS, CDN y WAF: las lecturas públicas sin token son el tráfico que puede dispararse, y cacheadas no salen de AWS. Imágenes en R2.
+- El ALB es el 37 % del costo mínimo. Alternativa a evaluar al desplegar: una sola instancia EC2 corriendo el mismo `docker-compose.yml` que usarán los terceros, con Cloudflare Tunnel como entrada. Cuesta menos y prueba el camino de quien se aloja solo; resigna los respaldos administrados de RDS.
+- Esta decisión no bloquea nada hasta la fase 2.
+
+Precios de la API pública de listas de precios de AWS y de la página de precios de Containers. El cómputo de Containers está calculado sobre lo aprovisionado, como cota superior.
+
 ## Orden de construcción
 
 Cada fase cierra con su parte de la suite en verde.
@@ -90,7 +121,6 @@ Al final de la fase 3 y de la 6: prueba de carga con el modelo de `.claudedocs/p
 
 ## Decisiones abiertas
 
-- Lenguaje: Go (recomendado) o Rust.
 - Repositorio del nodo: aparte (`vereda-nodo`), dejando este solo para la spec CC0, o acá mismo. Y su licencia.
 - Gobernanza de la referencia: más de una persona con permiso de merge antes de llamarla "la" referencia.
 - PSP para las pruebas de la fase 3.
