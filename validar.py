@@ -65,6 +65,13 @@ try:
         print(f"✗ operaciones sin operationId: {', '.join(sin_id)}")
     else:
         print("✓ todas las operaciones tienen operationId")
+    sin_cache = [p for p, item in api["paths"].items() for m, o in item.items() if m in METODOS and o.get("security") == []
+                 and not (m == "get" and "304" in o["responses"] and {"ETag", "Cache-Control"} <= set(o["responses"]["200"].get("headers", {})))]
+    if sin_cache:
+        fallos += 1
+        print(f"✗ rutas públicas sin ETag, Cache-Control y 304: {', '.join(sin_cache)}")
+    else:
+        print("✓ todas las rutas públicas son cacheables y revalidables")
 except Exception as e:
     fallos += 1
     print(f"✗ openapi.yaml\n    {str(e).splitlines()[0][:200]}")

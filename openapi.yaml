@@ -37,8 +37,10 @@ paths:
       tags: [descubrimiento]
       summary: Identidad del nodo, versiones soportadas, clave pública, endpoints de federación
       security: []
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" } ]
       responses:
-        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Nodo" } } } }
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "#/components/schemas/Nodo" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
 
   /comercios:
     get:
@@ -47,6 +49,7 @@ paths:
       summary: Comercios que entregan en un punto, ordenados por el ranking público
       security: []
       parameters:
+        - { $ref: "#/components/parameters/ifNoneMatch" }
         - { name: lat, in: query, required: true, schema: { type: number } }
         - { name: lng, in: query, required: true, schema: { type: number } }
         - { name: tipo, in: query, schema: { type: string } }
@@ -55,19 +58,20 @@ paths:
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
         - { name: q, in: query, schema: { type: string }, description: "Texto libre, también semántico" }
       responses:
-        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/comercio.json" } } } } }
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/comercio.json" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
   /comercios/{id}:
-    get: { operationId: verComercio, tags: [comercios], summary: Un comercio, security: [], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } } } }
+    get: { operationId: verComercio, tags: [comercios], summary: Un comercio, security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
   /comercios/{id}/ofertas:
     get:
       operationId: listarOfertas
       tags: [ofertas]
-      summary: Catálogo completo con stock y precios. Soporta ETag.
+      summary: Catálogo completo con stock y precios
       security: []
-      parameters: [ { $ref: "#/components/parameters/id" }, { name: categoria, in: query, schema: { type: string } } ]
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" }, { name: categoria, in: query, schema: { type: string } } ]
       responses:
-        "200": { description: OK, headers: { ETag: { schema: { type: string } } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/oferta.json" } } } } }
-        "304": { description: Sin cambios }
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/oferta.json" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
   /comercios/{id}/stock:
     put:
       operationId: actualizarStock
@@ -86,6 +90,7 @@ paths:
       description: Para agentes. "leche sin lactosa cerca", "algo liviano sin gluten", ean=7790742001009.
       security: []
       parameters:
+        - { $ref: "#/components/parameters/ifNoneMatch" }
         - { name: q, in: query, schema: { type: string } }
         - { name: ean, in: query, schema: { type: string } }
         - { name: lat, in: query, required: true, schema: { type: number } }
@@ -93,7 +98,8 @@ paths:
         - { name: atributos, in: query, schema: { type: string }, description: "sin_tacc=true,refrigerado=false" }
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio] } }
       responses:
-        "200": { description: OK, content: { application/json: { schema: { type: array, items: { type: object, properties: { oferta: { $ref: "esquemas/oferta.json" }, comercio: { $ref: "esquemas/comercio.json" }, distancia_km: { type: number } } } } } } }
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { type: object, properties: { oferta: { $ref: "esquemas/oferta.json" }, comercio: { $ref: "esquemas/comercio.json" }, distancia_km: { type: number } } } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
 
   /carritos:
     post:
@@ -223,10 +229,10 @@ paths:
       responses: { "200": { description: OK } }
 
   /rondas:
-    get: { operationId: buscarRondas, tags: [rondas], summary: Rondas abiertas cerca de un punto, security: [], parameters: [ { name: lat, in: query, schema: { type: number } }, { name: lng, in: query, schema: { type: number } } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/ronda.json" } } } } } } }
+    get: { operationId: buscarRondas, tags: [rondas], summary: Rondas abiertas cerca de un punto, security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { name: lat, in: query, schema: { type: number } }, { name: lng, in: query, schema: { type: number } } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/ronda.json" } } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
     post: { operationId: crearRonda, tags: [rondas], summary: Crear una ronda (comercio o usuario que reúne vecinos), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } }, responses: { "201": { description: Creada } } }
   /rondas/{id}:
-    get: { operationId: verRonda, tags: [rondas], summary: Una ronda (por id o por link), security: [], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } } } }
+    get: { operationId: verRonda, tags: [rondas], summary: Una ronda (por id o por link), security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
 
   /grupos:
     post: { operationId: crearGrupo, tags: [grupos], summary: Crear pedido grupal (carrito abierto con link), security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } }, responses: { "201": { description: Creado } } }
@@ -279,7 +285,7 @@ paths:
   /resenas/{id}/respuesta:
     post: { operationId: responderResena, tags: [resenas], summary: Responder públicamente una reseña, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: OK } } }
   /actores/{identidad}/resenas:
-    get: { operationId: listarResenasDeActor, tags: [resenas], summary: "Reseñas públicas de un comercio, repartidor o usuario", security: [], parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } } } }
+    get: { operationId: listarResenasDeActor, tags: [resenas], summary: "Reseñas públicas de un comercio, repartidor o usuario", security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
 
   /mandatos:
     get: { operationId: listarMandatos, tags: [mandatos], summary: Mis mandatos activos, security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mandato.json" } } } } } } }
@@ -328,8 +334,13 @@ components:
   parameters:
     id: { name: id, in: path, required: true, schema: { type: string } }
     idem: { name: Idempotency-Key, in: header, required: true, schema: { type: string }, description: Reintentar nunca duplica }
+    ifNoneMatch: { name: If-None-Match, in: header, schema: { type: string }, description: "El ETag de la última respuesta. Si el recurso no cambió, el nodo responde 304 sin cuerpo." }
+  headers:
+    ETag: { description: "Validador de la representación. Toda lectura pública lo lleva.", schema: { type: string } }
+    CacheControl: { description: "Siempre `public`: lo público se lee sin token y puede guardarlo cualquier caché intermedia. El tiempo de frescura (`max-age`) lo fija cada nodo; quien necesita el dato al día revalida con `If-None-Match`.", schema: { type: string } }
   responses:
     Error: { description: Error, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    SinCambios: { description: Sin cambios desde el ETag enviado, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } } }
   securitySchemes:
     sesion: { type: http, scheme: bearer, description: Token de sesión (login sin contraseña por WhatsApp o email) }
     mandato:
