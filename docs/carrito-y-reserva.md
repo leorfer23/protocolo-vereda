@@ -22,9 +22,24 @@ La red es sin permiso y los agentes arman carritos con el alcance `armar`, que n
 
 ## Efectivo
 
-Con `metodo: efectivo` el cobro nace `en_mano`, sin `vence`. La reserva dura hasta que el comercio acepta o rechaza.
+El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de primera clase, y el comercio decide cómo lo acepta.
 
-## Abierto
+- El cobro nace `en_mano`, sin `vence`. El pedido va de `creado` a `aceptado` sin pasar por `pagado`.
+- Como reserva sin haber pagado, la reserva se acota por el otro lado: el comercio tiene `plazo_aceptacion_min` (1 a 60 minutos con el comercio abierto, 10 por defecto) para aceptar o rechazar. Si no responde, el pedido se cancela con `sin_respuesta_del_comercio` y se libera todo. Ese plazo vale para cualquier pedido, no solo en efectivo.
+- El comercio se defiende de pedidos falsos con `efectivo.pedidos_entregados_minimo` (historial que le exige al usuario) y `efectivo.modalidades` (por ejemplo, efectivo solo en retiro). Si el usuario no cumple, confirmar responde `efectivo_no_disponible` y puede elegir otro medio.
+- Al entregar, quien entrega envía `cobrado_en_mano: true`: el pago pasa a `confirmado` y el pedido a `entregado`.
+- Con repartidor, el efectivo lo cobra el repartidor. `reparto` dice cuánto es del comercio y cuánto del envío; cómo se lo rinden entre ellos es asunto de ellos. La red lo muestra y no lo ejecuta, igual que con las devoluciones.
 
-- Pedido grupal con N cobros: qué pasa con la reserva si vence el cobro de un participante y no el de los demás.
-- Efectivo: no hay plazo para que el comercio acepte o rechace, así que la reserva no tiene fin garantizado.
+## Retiro por el usuario
+
+- Con modalidad `retiro` no hay viaje ni repartidor: de `listo` el pedido pasa a `entregado`.
+- El pedido lleva un `codigo_retiro` que ve solo el usuario. Al pasar a buscar se lo dice al comercio, que lo envía en `entregar` y firma la entrega. Sin código válido no hay `entregado`, y sin `entregado` no hay reseña.
+- Retiro con efectivo es pagar en el mostrador: el comercio envía el código y `cobrado_en_mano` en la misma llamada.
+- Si nadie pasa a buscar, el comercio cancela con `no_retirado` según su política de cancelación publicada.
+
+## Pedido grupal
+
+- Al cerrar el grupo se reserva todo y nace un cobro por participante, todos con el mismo `vence`.
+- Si vence el cobro de un participante, pasa a `no_pago`: sus ítems salen del pedido, se libera su reserva y se emite `grupo.participante_no_pago`. El pedido sigue con los demás.
+- Lo que ya pagaron los otros no cambia. Si la división del envío dejó una parte sin cubrir, `totales.envio` baja en esa parte; el comercio lo ve antes de aceptar y el repartidor ve el monto antes de tomar el viaje.
+- Si no paga nadie, el pedido se cancela con `pago_vencido`.
