@@ -49,7 +49,7 @@
     },
     {
       "name": "carrito_confirmar",
-      "description": "Crea el pedido y devuelve el QR o link de pago para que la persona pague directo al comercio. Si supera el mandato o es un comercio nuevo, devuelve 'requiere_confirmacion' con un código: pedile a la persona que lo apruebe. Requiere 'pedir'.",
+      "description": "Crea el pedido y devuelve el QR o link de pago para que la persona pague directo al comercio. Recién acá se reservan stock y cupos, y solo hasta que vence el cobro ('vence' en el pago): si no se paga a tiempo el pedido se cancela con 'pago_vencido' y podés confirmar el carrito otra vez. Si algo se agotó mientras se armaba, responde 'oferta_no_disponible' o 'cupo_agotado' y no crea nada. Si supera el mandato o es un comercio nuevo, devuelve 'requiere_confirmacion' con un código: pedile a la persona que lo apruebe. Requiere 'pedir'.",
       "inputSchema": { "type": "object", "required": ["carrito_id", "idempotency_key"], "properties": { "carrito_id": { "type": "string" }, "idempotency_key": { "type": "string" }, "propina_repartidor_centavos": { "type": "integer" }, "propina_comercio_centavos": { "type": "integer" }, "notas": { "type": "string" } } }
     },
     {

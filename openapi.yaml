@@ -119,9 +119,10 @@ paths:
       requestBody: { content: { application/json: { schema: { $ref: "esquemas/pedido.json#/$defs/item" } } } }
       responses:
         "200": { description: Estado del carrito, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }
+        "410": { $ref: "#/components/responses/CarritoVencido" }
         "422": { $ref: "#/components/responses/Error" }
   /carritos/{id}/items/{item}:
-    delete: { operationId: quitarItemCarrito, tags: [carrito], summary: Quitar ítem, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } } } }
+    delete: { operationId: quitarItemCarrito, tags: [carrito], summary: Quitar ítem, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }, "410": { $ref: "#/components/responses/CarritoVencido" } } }
   /carritos/{id}/resolver:
     post:
       operationId: resolverCarrito
@@ -129,7 +130,7 @@ paths:
       summary: Para listas con ítems genéricos, devuelve combinaciones posibles (un comercio o dividido) con precio, distancia y hora
       security: [ { sesion: [] }, { mandato: [armar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      responses: { "200": { description: Opciones, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Resolucion" } } } } } }
+      responses: { "200": { description: Opciones, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Resolucion" } } } } }, "410": { $ref: "#/components/responses/CarritoVencido" } }
   /carritos/{id}/modalidad:
     put:
       operationId: elegirModalidadCarrito
@@ -138,18 +139,20 @@ paths:
       security: [ { sesion: [] }, { mandato: [armar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { $ref: "esquemas/pedido.json#/properties/modalidad" } } } }
-      responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } } }
+      responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }, "410": { $ref: "#/components/responses/CarritoVencido" } }
   /carritos/{id}/confirmar:
     post:
       operationId: confirmarCarrito
       tags: [carrito]
-      summary: Crea el pedido y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
+      summary: Crea el pedido, reserva stock y cupos hasta que venza el cobro, y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
       security: [ { sesion: [] }, { mandato: [pedir] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, notas: { type: string } } } } } }
       responses:
         "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado). No se crea el pedido; el carrito queda no_disponible.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "410": { $ref: "#/components/responses/CarritoVencido" }
 
   /pedidos/{id}:
     get: { operationId: verPedido, tags: [pedidos], summary: "Estado, ítems, ETA, ubicación del repartidor", security: [ { sesion: [] }, { mandato: [leer] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
@@ -340,6 +343,7 @@ components:
     CacheControl: { description: "Siempre `public`: lo público se lee sin token y puede guardarlo cualquier caché intermedia. El tiempo de frescura (`max-age`) lo fija cada nodo; quien necesita el dato al día revalida con `If-None-Match`.", schema: { type: string } }
   responses:
     Error: { description: Error, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    CarritoVencido: { description: "El carrito venció (24 h sin cambios). Código carrito_vencido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinCambios: { description: Sin cambios desde el ETag enviado, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } } }
   securitySchemes:
     sesion: { type: http, scheme: bearer, description: Token de sesión (login sin contraseña por WhatsApp o email) }
@@ -364,19 +368,7 @@ components:
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
         codigo_fuente: { type: string, format: uri }
-    Carrito:
-      type: object
-      properties:
-        id: { type: string }
-        estado: { type: string, enum: [valido, incompleto, no_disponible] }
-        faltantes: { type: array, items: { type: object, properties: { item_id: { type: string }, grupo_id: { type: string }, mensaje: { type: string }, opciones: { type: array, items: { type: string } } } } }
-        items: { type: array, items: { $ref: "esquemas/pedido.json#/$defs/item" } }
-        modalidad: { $ref: "esquemas/pedido.json#/properties/modalidad" }
-        modalidades_disponibles: { type: array, items: { $ref: "esquemas/modalidad.json" } }
-        totales: { $ref: "esquemas/pedido.json#/properties/totales" }
-        reparto: { $ref: "esquemas/pedido.json#/properties/reparto" }
-        eta: { type: string, format: date-time }
-        dentro_del_mandato: { type: boolean }
+    Carrito: { $ref: "esquemas/carrito.json" }
     Resolucion:
       type: object
       properties:

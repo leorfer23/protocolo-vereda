@@ -48,7 +48,8 @@
           "estado": { "$ref": "#/$defs/estado" },
           "instante": { "$ref": "comunes.json#/$defs/instante" },
           "actor": { "$ref": "comunes.json#/$defs/identidad" },
-          "motivo": { "type": "string" }
+          "motivo": { "type": "string" },
+          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
         }
       }
     },

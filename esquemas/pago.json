@@ -6,6 +6,8 @@
   "type": "object",
   "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
   "required": ["pedido_id", "destinatario", "concepto", "monto", "metodo", "estado"],
+  "if": { "properties": { "estado": { "const": "pendiente" } }, "required": ["estado"] },
+  "then": { "required": ["vence"], "description": "Un cobro pendiente siempre dice cuándo vence: hasta ese instante el pedido retiene su stock y sus cupos." },
   "properties": {
     "pedido_id": { "$ref": "comunes.json#/$defs/id" },
     "destinatario": { "$ref": "comunes.json#/$defs/identidad" },
@@ -17,7 +19,7 @@
     "psp_referencia": { "type": "string", "description": "Id opaco del cobro en el PSP." },
     "qr": { "type": "string", "description": "Payload del QR interoperable, si aplica." },
     "link_pago": { "type": "string", "format": "uri" },
-    "vence": { "$ref": "comunes.json#/$defs/instante" },
+    "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados." },
     "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
     "idempotency_key": { "type": "string" }
   }
