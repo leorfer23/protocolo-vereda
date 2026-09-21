@@ -28,7 +28,7 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | `openapi.yaml` | La API abierta, 64 rutas. Apps y agentes usan las mismas |
 | `mcp/herramientas.json` | Las 24 herramientas del servidor MCP, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio, y `vectores-firma.json` con los vectores de prueba de firma |
-| `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad |
+| `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad, diseño de la suite de conformidad (fase 1, todavía sin código) |
 | `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1 y reproduce los vectores de firma |
 | `generar-vectores.py` | Regenera `ejemplos/vectores-firma.json`. Determinista: dos corridas dan el mismo archivo |
 
