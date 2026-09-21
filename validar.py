@@ -7,18 +7,13 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey,
 from cryptography.hazmat.primitives import serialization as sz
 from cryptography.exceptions import InvalidSignature
 from jsonschema import Draft202012Validator
-from referencing import Registry, Resource
+
+from conformidad.oraculo import cargar as cargar_esquemas
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-ESQ = os.path.join(BASE, "esquemas")
 EJ = os.path.join(BASE, "ejemplos")
 
-registry = Registry()
-esquemas = {}
-for f in glob.glob(os.path.join(ESQ, "*.json")):
-    s = json.load(open(f))
-    esquemas[os.path.basename(f)] = s
-    registry = registry.with_resource(s["$id"], Resource.from_contents(s))
+esquemas, registry = cargar_esquemas(BASE)
 
 MAPA = {
     "pizzeria-oferta.json": "oferta.json",
