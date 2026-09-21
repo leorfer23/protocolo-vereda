@@ -31,7 +31,7 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad, diseño de la suite de conformidad (fase 1) |
 | `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1 y reproduce los vectores de firma |
 | `generar-vectores.py` | Regenera `ejemplos/vectores-firma.json`. Determinista: dos corridas dan el mismo archivo |
-| `conformidad/` | Suite de conformidad, fase 1 (`docs/suite-conformidad.md`). Corre por HTTP contra la URL de cualquier nodo. Implementado: nivel A (anónimo, de solo lectura) — `python3 -m conformidad https://un-nodo.ar` |
+| `conformidad/` | Suite de conformidad, fase 1 (`docs/suite-conformidad.md`). Corre por HTTP contra la URL de cualquier nodo: nivel A (anónimo), B (autenticado, `--sesion`/`--mandato`) y C (federación) — `python3 -m conformidad https://un-nodo.ar --nivel a,b,c` |
 
 ```
 pip install jsonschema pyyaml openapi-spec-validator cryptography rfc8785 && python3 validar.py

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Un nodo que no es Vereda, a propósito: sirve por HTTP en localhost para
-probar que el nivel A no se rompe con lo que le llegue. No es parte de
-validar.py ni corre en CI; es la evidencia manual de que pide el PR de
-`conformidad/`: "corré el nivel A contra algo real aunque falle todo".
+probar que la suite no se rompe con lo que le llegue. No es parte de
+validar.py ni corre en CI; es la evidencia manual de cada PR de
+`conformidad/`: "corré la suite contra algo real aunque falle todo".
 
 Uso:
     python3 conformidad/pruebas/nodo_falso.py [puerto]
     # en otra terminal:
-    python3 -m conformidad http://127.0.0.1:<puerto>
+    python3 -m conformidad http://127.0.0.1:<puerto> --nivel a
+    python3 -m conformidad http://127.0.0.1:<puerto> --nivel b --sesion sesion-de-prueba --mandato mandato-de-prueba
+    python3 -m conformidad http://127.0.0.1:<puerto> --nivel c
 
 Cada ruta rompe una cosa distinta a propósito:
 - /.well-known/vereda.json: 200 pero el cuerpo no es JSON, y sin ETag/Cache-Control.
@@ -39,12 +41,30 @@ una por chequeo del nivel C:
 - un mismo id con otro contenido lo pisa en silencio con 202 en vez de
   responder 409 (defecto nº2).
 - 400 version_no_soportada sin 'detalle.versiones' (defecto nº3).
+
+Para el nivel B hay una sesión de prueba fija (SESION_VALIDA) y un mandato
+de prueba fijo (MANDATO_VALIDO, scopes 'armar' + 'pedir_semanal:5000') --
+el nivel B nunca los genera solo, los recibe por flag, así que alguien
+tiene que conocerlos: son estos. El ciclo carrito -> confirmar -> aceptar
+-> listo -> entregar -> reseña, con efectivo y retiro (sin PSP ni
+repartidor), funciona de punta a punta salvo cuatro roturas puntuales:
+- 'listo' no chequea que todos los ítems estén resueltos (defecto nº1).
+- el tope del mandato se calcula pero nunca se aplica: confirmar nunca
+  responde 402 fuera_de_mandato (defecto nº2).
+- POST /yo/claves/rotar acepta un token de mandato como si fuera de sesión
+  -- openapi.yaml lo declara `security: [{sesion: []}]`, sin mandato, y
+  este nodo falso no distingue de qué esquema vino el bearer (defecto nº3,
+  el que más le importa a Leo).
+- una reseña repetida para el mismo par pedido/autor/destinatario no
+  responde 409: se acepta de nuevo (defecto nº4).
 """
 import base64
 import hashlib
 import json
+import os
 import re
 import sys
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from cryptography.exceptions import InvalidSignature
@@ -108,6 +128,54 @@ def _parsear_signature_input(valor):
     return etiqueta, componentes, resto
 
 
+# --- nivel B: sesión y mandato de prueba fijos, nunca generados solos -----
+SESION_VALIDA = "sesion-de-prueba"
+MANDATO_VALIDO = "mandato-de-prueba"
+MANDATO_SCOPES = ["armar", "pedir_semanal:5000"]
+USUARIO_IDENTIDAD = "cliente-de-prueba@nodo-falso.test"
+COMERCIO_B_IDENTIDAD = "super-barrio-b@nodo-falso.test"
+
+OFERTAS_B = {
+    "01920000-0000-7000-8000-0000000000b1": {"nombre": "Pan casero", "centavos": 3000},
+    "01920000-0000-7000-8000-0000000000b2": {"nombre": "Torta especial", "centavos": 4000},
+}
+OFERTA_B_BARATA, OFERTA_B_CARA = list(OFERTAS_B)
+
+ERROR_NO_AUTENTICADO = {"codigo": "no_autenticado", "mensaje": "Falta un token válido.", "estado_http": 401}
+
+_carritos = {}          # id -> {"items": [...], "modalidad": {...} | None}
+_pedidos = {}           # id -> pedido.json-shaped dict, mutado en cada transición
+_resenas_vistas = set()  # (pedido_id, autor, destinatario) -- se llena pero, a propósito, no se usa para bloquear
+_mandatos_revocados = set()
+_gasto_mandato = {}     # token -> centavos acumulados en "el período" (la corrida entera, no hay reloj de prueba)
+_clave_actual = {"clave_publica": "clave-original-de-prueba", "desde": "2026-01-01T00:00:00-03:00", "estado": "activa"}
+
+
+def _id_v7():
+    ahora_ms = int(time.time() * 1000)
+    b = bytearray(ahora_ms.to_bytes(6, "big") + os.urandom(10))
+    b[6] = 0x70 | (b[6] & 0x0F)
+    b[8] = 0x80 | (b[8] & 0x3F)
+    h = b.hex()
+    return f"{h[0:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:32]}"
+
+
+def _instante():
+    return time.strftime("%Y-%m-%dT%H:%M:%S-03:00", time.gmtime())
+
+
+def _monto(centavos):
+    return {"centavos": centavos, "moneda": "ARS"}
+
+
+def _tope_de(scopes):
+    for s in scopes:
+        m = re.match(r"^pedir(?:_diario|_semanal|_mensual)?:(\d+)$", s)
+        if m:
+            return int(m.group(1))
+    return None
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         sys.stderr.write("nodo-falso: " + (fmt % args) + "\n")
@@ -153,6 +221,11 @@ class Handler(BaseHTTPRequestHandler):
         elif p == f"/v1/actores/{IDENTIDAD}/resenas":
             self._responder_con_cache([RESENA_MAL_FIRMADA], "resenas-v1")
         else:
+            m = re.match(r"^/v1/pedidos/([^/]+)$", p)
+            if m:
+                estado, cuerpo = self._ver_pedido(self._actor(), m.group(1))
+                self._json(estado, cuerpo)
+                return
             self._json(404, {"codigo": "ruta_no_reconocida", "mensaje": f"el nodo falso no sirve {p}", "estado_http": 404})
 
     def _responder_con_cache(self, cuerpo, etag):
@@ -161,16 +234,228 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self._json(200, cuerpo, {"ETag": f'"{etag}"', "Cache-Control": "public, max-age=60"})
 
+    def _actor(self):
+        auth = self.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            return None
+        token = auth[len("Bearer "):]
+        if token == SESION_VALIDA:
+            return {"tipo": "sesion", "identidad": USUARIO_IDENTIDAD}
+        if token == MANDATO_VALIDO and token not in _mandatos_revocados:
+            return {"tipo": "mandato", "token": token, "scopes": MANDATO_SCOPES, "identidad": USUARIO_IDENTIDAD}
+        return None
+
+    def _cuerpo(self):
+        crudo = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+        try:
+            return json.loads(crudo) if crudo else {}
+        except ValueError:
+            return {}
+
     def do_POST(self):
-        if self.path != "/v1/federacion/entrantes":
-            self._json(404, {"codigo": "ruta_no_reconocida", "mensaje": f"el nodo falso no sirve POST {self.path}", "estado_http": 404})
+        p = self.path
+        actor = self._actor()
+        if p == "/v1/federacion/entrantes":
+            cuerpo = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+            estado, obj = self._recibir_federacion(cuerpo)
+            self._enviar(estado) if obj is None else self._json(estado, obj)
             return
-        cuerpo = self.rfile.read(int(self.headers.get("Content-Length", 0)))
-        estado, obj = self._recibir_federacion(cuerpo)
-        if obj is None:
-            self._enviar(estado)
+        if p == "/v1/carritos":
+            estado, obj = self._crear_carrito(actor, self._cuerpo())
+        elif re.match(r"^/v1/carritos/[^/]+/items$", p):
+            estado, obj = self._agregar_item(actor, p.split("/")[3], self._cuerpo())
+        elif re.match(r"^/v1/carritos/[^/]+/confirmar$", p):
+            estado, obj = self._confirmar_carrito(actor, p.split("/")[3])
+        elif re.match(r"^/v1/pedidos/[^/]+/aceptar$", p):
+            estado, obj = self._aceptar_pedido(actor, p.split("/")[3])
+        elif re.match(r"^/v1/pedidos/[^/]+/listo$", p):
+            estado, obj = self._marcar_listo(actor, p.split("/")[3])
+        elif re.match(r"^/v1/pedidos/[^/]+/entregar$", p):
+            estado, obj = self._entregar_pedido(actor, p.split("/")[3], self._cuerpo())
+        elif p == "/v1/resenas":
+            estado, obj = self._crear_resena(actor, self._cuerpo())
+        elif re.match(r"^/v1/mandatos/[^/]+/revocar$", p):
+            estado, obj = self._revocar_mandato(actor, p.split("/")[3])
+        elif p == "/v1/yo/claves/rotar":
+            estado, obj = self._rotar_clave(actor)
         else:
-            self._json(estado, obj)
+            estado, obj = 404, {"codigo": "ruta_no_reconocida", "mensaje": f"el nodo falso no sirve POST {p}", "estado_http": 404}
+        self._enviar(estado) if obj is None else self._json(estado, obj)
+
+    def do_PUT(self):
+        p = self.path
+        actor = self._actor()
+        m = re.match(r"^/v1/carritos/([^/]+)/modalidad$", p)
+        if m:
+            estado, obj = self._elegir_modalidad(actor, m.group(1), self._cuerpo())
+        else:
+            estado, obj = 404, {"codigo": "ruta_no_reconocida", "mensaje": f"el nodo falso no sirve PUT {p}", "estado_http": 404}
+        self._enviar(estado) if obj is None else self._json(estado, obj)
+
+    def do_PATCH(self):
+        p = self.path
+        actor = self._actor()
+        m = re.match(r"^/v1/pedidos/([^/]+)/items/([^/]+)$", p)
+        if m:
+            estado, obj = self._resolver_item(actor, m.group(1), m.group(2), self._cuerpo())
+        else:
+            estado, obj = 404, {"codigo": "ruta_no_reconocida", "mensaje": f"el nodo falso no sirve PATCH {p}", "estado_http": 404}
+        self._enviar(estado) if obj is None else self._json(estado, obj)
+
+    # -- nivel B: carrito -------------------------------------------------
+    def _carrito_publico(self, carrito_id):
+        c = _carritos[carrito_id]
+        estado = "valido" if c["items"] and c["modalidad"] else "incompleto"
+        return {
+            "id": carrito_id, "estado": estado, "items": c["items"],
+            "modalidad": c["modalidad"] or {"tipo": "retiro"}, "vence": _instante(),
+        }
+
+    def _crear_carrito(self, actor, cuerpo):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        carrito_id = _id_v7()
+        _carritos[carrito_id] = {"items": [], "modalidad": None}
+        return 201, self._carrito_publico(carrito_id)
+
+    def _agregar_item(self, actor, carrito_id, cuerpo):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        if carrito_id not in _carritos:
+            return 410, {"codigo": "carrito_vencido", "mensaje": "el carrito no existe o venció.", "estado_http": 410}
+        oferta = OFERTAS_B.get(cuerpo.get("oferta_id"))
+        if oferta is None:
+            pub = self._carrito_publico(carrito_id)
+            pub["estado"] = "no_disponible"
+            return 200, pub
+        item = {
+            "id": _id_v7(), "oferta_id": cuerpo["oferta_id"], "nombre": oferta["nombre"],
+            "cantidad": cuerpo.get("cantidad") or {"valor": 1, "unidad": "unidad"},
+            "precio_unitario": _monto(oferta["centavos"]), "estado": "pendiente",
+        }
+        _carritos[carrito_id]["items"].append(item)
+        return 200, self._carrito_publico(carrito_id)
+
+    def _elegir_modalidad(self, actor, carrito_id, cuerpo):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        if carrito_id not in _carritos:
+            return 410, {"codigo": "carrito_vencido", "mensaje": "el carrito no existe o venció.", "estado_http": 410}
+        _carritos[carrito_id]["modalidad"] = cuerpo or {"tipo": "retiro"}
+        return 200, self._carrito_publico(carrito_id)
+
+    def _confirmar_carrito(self, actor, carrito_id):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        c = _carritos.get(carrito_id)
+        if c is None:
+            return 410, {"codigo": "carrito_vencido", "mensaje": "el carrito no existe o venció.", "estado_http": 410}
+        total = sum(it["precio_unitario"]["centavos"] * it["cantidad"]["valor"] for it in c["items"])
+        if actor["tipo"] == "mandato":
+            tope = _tope_de(actor["scopes"])
+            gasto_previo = _gasto_mandato.get(actor["token"], 0)
+            # DEFECTO plantado nº2: se calcula gasto_previo + total contra el
+            # tope, pero a propósito nunca se lo usa para rechazar. Un nodo
+            # conforme respondería 402 fuera_de_mandato acá si se pasa.
+            _gasto_mandato[actor["token"]] = gasto_previo + total
+        pedido_id = _id_v7()
+        ahora = _instante()
+        pedido = {
+            "id": pedido_id, "nodo": "127.0.0.1", "creado": ahora, "actualizado": ahora, "version_esquema": "1.0",
+            "usuario": actor["identidad"], "comercio": COMERCIO_B_IDENTIDAD,
+            "items": [dict(it) for it in c["items"]],
+            "modalidad": c["modalidad"] or {"tipo": "retiro"},
+            "estado": "creado",
+            "historial": [{"estado": "creado", "instante": ahora, "actor": actor["identidad"]}],
+            "totales": {"productos": _monto(total), "envio": _monto(0), "total": _monto(total)},
+            "reparto": [{"destinatario": "comercio", "concepto": "productos", "monto": _monto(total)}],
+            "via": {"canal": "agente" if actor["tipo"] == "mandato" else "app"},
+            "codigo_retiro": "482913",
+        }
+        _pedidos[pedido_id] = pedido
+        return 201, pedido
+
+    # -- nivel B: pedido ----------------------------------------------------
+    def _ver_pedido(self, actor, pedido_id):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        p = _pedidos.get(pedido_id)
+        if p is None:
+            return 404, {"codigo": "pedido_no_encontrado", "mensaje": "no existe ese pedido.", "estado_http": 404}
+        return 200, p
+
+    def _aceptar_pedido(self, actor, pedido_id):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        p = _pedidos.get(pedido_id)
+        if p is None:
+            return 404, {"codigo": "pedido_no_encontrado", "mensaje": "no existe ese pedido.", "estado_http": 404}
+        p["estado"] = "aceptado"
+        p["historial"].append({"estado": "aceptado", "instante": _instante(), "actor": COMERCIO_B_IDENTIDAD})
+        return 200, None
+
+    def _resolver_item(self, actor, pedido_id, item_id, cuerpo):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        p = _pedidos.get(pedido_id)
+        if p is None:
+            return 404, {"codigo": "pedido_no_encontrado", "mensaje": "no existe ese pedido.", "estado_http": 404}
+        for it in p["items"]:
+            if it["id"] == item_id:
+                it["estado"] = cuerpo.get("estado", "confirmado")
+        return 200, None
+
+    def _marcar_listo(self, actor, pedido_id):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        p = _pedidos.get(pedido_id)
+        if p is None:
+            return 404, {"codigo": "pedido_no_encontrado", "mensaje": "no existe ese pedido.", "estado_http": 404}
+        # DEFECTO plantado nº1: openapi.yaml exige 409 si queda algún ítem sin
+        # resolver ("pendiente"); este nodo falso no lo comprueba.
+        p["estado"] = "listo"
+        p["historial"].append({"estado": "listo", "instante": _instante(), "actor": COMERCIO_B_IDENTIDAD})
+        return 200, None
+
+    def _entregar_pedido(self, actor, pedido_id, cuerpo):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        p = _pedidos.get(pedido_id)
+        if p is None:
+            return 404, {"codigo": "pedido_no_encontrado", "mensaje": "no existe ese pedido.", "estado_http": 404}
+        if p["modalidad"].get("tipo") == "retiro" and cuerpo.get("codigo_retiro") != p.get("codigo_retiro"):
+            return 422, {"codigo": "codigo_retiro_invalido", "mensaje": "el código de retiro no coincide.", "estado_http": 422}
+        p["estado"] = "entregado"
+        p["historial"].append({"estado": "entregado", "instante": _instante(), "actor": COMERCIO_B_IDENTIDAD})
+        return 200, None
+
+    def _crear_resena(self, actor, cuerpo):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        p = _pedidos.get(cuerpo.get("pedido_id"))
+        if p is None or p.get("estado") != "entregado":
+            return 409, {"codigo": "pedido_no_entregado", "mensaje": "solo se reseña un pedido entregado.", "estado_http": 409}
+        # DEFECTO plantado nº4: debería ser 409 si (pedido_id, autor,
+        # destinatario) ya se reseñó; se acepta de nuevo, a propósito.
+        _resenas_vistas.add((cuerpo.get("pedido_id"), cuerpo.get("autor"), cuerpo.get("destinatario")))
+        return 201, None
+
+    # -- nivel B: mandato y claves -------------------------------------------
+    def _revocar_mandato(self, actor, mandato_id):
+        if actor is None or actor["tipo"] != "sesion":
+            return 401, ERROR_NO_AUTENTICADO
+        _mandatos_revocados.add(mandato_id)
+        return 200, None
+
+    def _rotar_clave(self, actor):
+        if actor is None:
+            return 401, ERROR_NO_AUTENTICADO
+        # DEFECTO plantado nº3, el importante: openapi.yaml declara esta ruta
+        # `security: [{sesion: []}]`, sin mandato. Un nodo conforme tiene que
+        # rechazar un bearer de mandato acá aunque sea válido en otro lado.
+        # Este nodo falso no distingue de qué esquema vino el token.
+        _clave_actual["clave_publica"] = "clave-rotada-" + _id_v7()[:8]
+        return 200, [dict(_clave_actual)]
 
     def _recibir_federacion(self, cuerpo: bytes):
         sig_input = self.headers.get("Signature-Input")
