@@ -51,7 +51,7 @@
           "instante": { "$ref": "comunes.json#/$defs/instante" },
           "actor": { "$ref": "comunes.json#/$defs/identidad" },
           "motivo": { "type": "string" },
-          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
+          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado", "nodo_no_disponible"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
         }
       }
     },
