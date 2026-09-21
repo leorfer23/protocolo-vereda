@@ -106,7 +106,7 @@ paths:
         - { name: lat, in: query, required: true, schema: { type: number } }
         - { name: lng, in: query, required: true, schema: { type: number } }
         - { name: atributos, in: query, schema: { type: string }, description: "sin_tacc=true,refrigerado=false" }
-        - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio] } }
+        - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { type: object, properties: { oferta: { $ref: "esquemas/oferta.json" }, comercio: { $ref: "esquemas/comercio.json" }, distancia_km: { type: number } } } } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
@@ -303,7 +303,7 @@ paths:
       responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mensaje.json" } } } } } }
 
   /resenas:
-    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
+    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
   /resenas/{id}/respuesta:
     post: { operationId: responderResena, tags: [resenas], summary: Responder públicamente una reseña, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: OK } } }
   /actores/{identidad}/claves:

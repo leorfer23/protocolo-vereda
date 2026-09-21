@@ -33,7 +33,7 @@
         "responde_a": { "$ref": "comunes.json#/$defs/id" }
       }
     },
-    "cifrado": { "type": "object", "properties": { "algoritmo": { "type": "string", "enum": ["ninguno", "x25519-xchacha20"] }, "payload": { "type": "string" } } },
+    "cifrado": { "type": "object", "description": "Con 'x25519-xchacha20': la clave X25519 de cada destinatario sale de 'clave_cifrado' en su entrada de clave activa (GET /actores/{identidad}/claves). Si a alguno le falta, el chat de ese contexto va sin cifrar.", "properties": { "algoritmo": { "type": "string", "enum": ["ninguno", "x25519-xchacha20"], "default": "ninguno" }, "payload": { "type": "string", "description": "Base64url del texto cifrado." } } },
     "adjuntos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
     "leido_por": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } }
   }
