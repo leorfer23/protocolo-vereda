@@ -1,0 +1,357 @@
+openapi: 3.1.0
+info:
+  title: Protocolo Vereda
+  version: "1.0"
+  description: |
+    API abierta de la red Vereda. Es la interfaz principal del sistema: apps y agentes usan
+    exactamente los mismos endpoints. Todo lo público (comercios, ofertas, búsqueda, rondas
+    abiertas) va sin token. Todo lo que actúa en nombre de alguien lleva un token de sesión
+    o un mandato de agente (OAuth 2.1). Los errores siguen esquemas/error.json y traen una
+    frase en español que un agente puede repetirle a la persona.
+  license: { name: CC0-1.0, url: https://creativecommons.org/publicdomain/zero/1.0/ }
+servers:
+  - url: https://{nodo}/v1
+    variables: { nodo: { default: vereda.ar } }
+tags:
+  - { name: descubrimiento, description: Nodo, versiones y federación }
+  - { name: comercios, description: Público }
+  - { name: ofertas, description: Público }
+  - { name: carrito, description: Armado paso a paso; valida y dice qué falta }
+  - { name: pedidos }
+  - { name: listas }
+  - { name: suscripciones }
+  - { name: rondas }
+  - { name: grupos }
+  - { name: cotizaciones }
+  - { name: viajes, description: Lado repartidor }
+  - { name: mensajes }
+  - { name: resenas }
+  - { name: mandatos, description: Agentes }
+  - { name: yo, description: Preferencias y exportación }
+  - { name: eventos }
+
+paths:
+  /.well-known/vereda.json:
+    get:
+      tags: [descubrimiento]
+      summary: Identidad del nodo, versiones soportadas, clave pública, endpoints de federación
+      security: []
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Nodo" } } } }
+
+  /comercios:
+    get:
+      tags: [comercios]
+      summary: Comercios que entregan en un punto, ordenados por el ranking público
+      security: []
+      parameters:
+        - { name: lat, in: query, required: true, schema: { type: number } }
+        - { name: lng, in: query, required: true, schema: { type: number } }
+        - { name: tipo, in: query, schema: { type: string } }
+        - { name: abierto, in: query, schema: { type: boolean } }
+        - { name: modalidad, in: query, schema: { type: string, enum: [inmediata, franja, consolidada, ronda, punto_entrega, retiro] } }
+        - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
+        - { name: q, in: query, schema: { type: string }, description: Texto libre, también semántico }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/comercio.json" } } } } }
+  /comercios/{id}:
+    get: { tags: [comercios], summary: Un comercio, security: [], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } } } }
+  /comercios/{id}/ofertas:
+    get:
+      tags: [ofertas]
+      summary: Catálogo completo con stock y precios. Soporta ETag.
+      security: []
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: categoria, in: query, schema: { type: string } } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { schema: { type: string } } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/oferta.json" } } } } }
+        "304": { description: Sin cambios }
+  /comercios/{id}/stock:
+    put:
+      tags: [ofertas]
+      summary: Actualización de stock en lote (supermercados con sistema)
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: array, items: { type: object, required: [oferta_id], properties: { oferta_id: { type: string }, variante_id: { type: string }, stock: { type: number }, disponible: { type: boolean }, precio_centavos: { type: integer } } } } } } }
+      responses: { "204": { description: Aplicado } }
+
+  /buscar:
+    get:
+      tags: [ofertas]
+      summary: Búsqueda de ofertas entre comercios cercanos, por texto, atributos o EAN
+      description: Para agentes. "leche sin lactosa cerca", "algo liviano sin gluten", ean=7790742001009.
+      security: []
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: ean, in: query, schema: { type: string } }
+        - { name: lat, in: query, required: true, schema: { type: number } }
+        - { name: lng, in: query, required: true, schema: { type: number } }
+        - { name: atributos, in: query, schema: { type: string }, description: "sin_tacc=true,refrigerado=false" }
+        - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio] } }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { type: object, properties: { oferta: { $ref: "esquemas/oferta.json" }, comercio: { $ref: "esquemas/comercio.json" }, distancia_km: { type: number } } } } } } }
+
+  /carritos:
+    post:
+      tags: [carrito]
+      summary: Crear un carrito (a un comercio) o desde una lista (se resuelve contra comercios)
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { comercio_id: { type: string }, lista_id: { type: string }, direccion: { $ref: "esquemas/comunes.json#/$defs/direccion" } } } } } }
+      responses: { "201": { description: Creado, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } } }
+  /carritos/{id}/items:
+    post:
+      tags: [carrito]
+      summary: Agregar un ítem. Responde válido, incompleto (qué falta) o no disponible.
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { $ref: "esquemas/pedido.json#/$defs/item" } } } }
+      responses:
+        "200": { description: Estado del carrito, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /carritos/{id}/items/{item}:
+    delete: { tags: [carrito], summary: Quitar ítem, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } } } }
+  /carritos/{id}/resolver:
+    post:
+      tags: [carrito]
+      summary: Para listas con ítems genéricos, devuelve combinaciones posibles (un comercio o dividido) con precio, distancia y hora
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses: { "200": { description: Opciones, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Resolucion" } } } } } }
+  /carritos/{id}/modalidad:
+    put:
+      tags: [carrito]
+      summary: Elegir modalidad, dirección, franja, ronda o grupo
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { $ref: "esquemas/pedido.json#/properties/modalidad" } } } }
+      responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } } }
+  /carritos/{id}/confirmar:
+    post:
+      tags: [carrito]
+      summary: Crea el pedido y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
+      security: [ { sesion: [] }, { mandato: [pedir] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, notas: { type: string } } } } } }
+      responses:
+        "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
+  /pedidos/{id}:
+    get: { tags: [pedidos], summary: Estado, ítems, ETA, ubicación del repartidor, security: [ { sesion: [] }, { mandato: [leer] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
+  /pedidos/{id}/items/{item}/respuesta:
+    post:
+      tags: [pedidos]
+      summary: Aceptar o rechazar una sustitución propuesta
+      security: [ { sesion: [] }, { mandato: [hablar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ]
+      requestBody: { content: { application/json: { schema: { type: object, required: [respuesta], properties: { respuesta: { type: string, enum: [aceptado, rechazado] } } } } } }
+      responses: { "200": { description: OK } }
+  /pedidos/{id}/cancelar:
+    post:
+      tags: [pedidos]
+      summary: Cancelar según la política publicada por el comercio
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { motivo: { type: string } } } } } }
+      responses: { "200": { description: Cancelado }, "409": { $ref: "#/components/responses/Error" } }
+  /pedidos/{id}/propina:
+    post:
+      tags: [pedidos]
+      summary: Agregar propina después de la entrega, al repartidor o al comercio
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, required: [destinatario, centavos], properties: { destinatario: { type: string, enum: [repartidor, comercio] }, centavos: { type: integer } } } } } }
+      responses: { "201": { description: Cobro generado, content: { application/json: { schema: { $ref: "esquemas/pago.json" } } } } }
+  /pedidos/{id}/aceptar:
+    post: { tags: [pedidos], summary: "Comercio: aceptar", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /pedidos/{id}/rechazar:
+    post: { tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /pedidos/{id}/items/{item}:
+    patch:
+      tags: [pedidos]
+      summary: "Comercio: marcar ítem confirmado, sustituido (propone), faltante o pesado"
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ]
+      requestBody: { content: { application/json: { schema: { type: object, required: [estado], properties: { estado: { type: string, enum: [confirmado, sustituido, faltante, pesado] }, sustituto: { type: object }, cantidad_entregada: { $ref: "esquemas/comunes.json#/$defs/cantidad" } } } } } }
+      responses: { "200": { description: OK } }
+  /pedidos/{id}/listo:
+    post: { tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { $ref: "#/components/responses/Error" } } }
+  /pedidos/{id}/retirar:
+    post: { tags: [pedidos], summary: "Repartidor: retiró del comercio", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /pedidos/{id}/entregar:
+    post:
+      tags: [pedidos]
+      summary: "Repartidor: entregado. Firma la entrega. Con alcohol, marca mayoría de edad verificada."
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri } } } } } }
+      responses: { "200": { description: OK } }
+
+  /listas:
+    get: { tags: [listas], summary: Mis listas, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/lista.json" } } } } } } }
+    post: { tags: [listas], summary: Crear lista, security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/lista.json" } } } }, responses: { "201": { description: Creada } } }
+  /listas/{id}:
+    patch: { tags: [listas], summary: Editar ítems o compartir, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+
+  /suscripciones:
+    get: { tags: [suscripciones], summary: Mis suscripciones (usuario) o mi cartera (comercio), security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/suscripcion.json" } } } } } } }
+    post: { tags: [suscripciones], summary: Crear. Siempre requiere confirmación humana si la crea un agente., security: [ { sesion: [] }, { mandato: [suscribir] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/suscripcion.json" } } } }, responses: { "201": { description: Creada }, "402": { $ref: "#/components/responses/Error" } } }
+  /suscripciones/{id}:
+    patch: { tags: [suscripciones], summary: Pausar, reanudar, cancelar o editar la plantilla, security: [ { sesion: [] }, { mandato: [suscribir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /suscripciones/{id}/ocurrencias/{fecha}:
+    patch:
+      tags: [suscripciones]
+      summary: Editar o saltear una ocurrencia dentro de su ventana
+      security: [ { sesion: [] }, { mandato: [suscribir] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: fecha, in: path, required: true, schema: { type: string, format: date } } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { saltear: { type: boolean }, items: { type: array } } } } } }
+      responses: { "200": { description: OK } }
+
+  /rondas:
+    get: { tags: [rondas], summary: Rondas abiertas cerca de un punto, security: [], parameters: [ { name: lat, in: query, schema: { type: number } }, { name: lng, in: query, schema: { type: number } } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/ronda.json" } } } } } } }
+    post: { tags: [rondas], summary: Crear una ronda (comercio o usuario que reúne vecinos), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } }, responses: { "201": { description: Creada } } }
+  /rondas/{id}:
+    get: { tags: [rondas], summary: Una ronda (por id o por link), security: [], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } } } }
+
+  /grupos:
+    post: { tags: [grupos], summary: Crear pedido grupal (carrito abierto con link), security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } }, responses: { "201": { description: Creado } } }
+  /grupos/{id}:
+    get: { tags: [grupos], summary: Ver grupo, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } } } }
+  /grupos/{id}/unirse:
+    post: { tags: [grupos], summary: Sumarse con el link, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /grupos/{id}/mis-items:
+    put: { tags: [grupos], summary: Mis ítems dentro del grupo, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /grupos/{id}/cerrar:
+    post: { tags: [grupos], summary: "Cerrar: genera el pedido con secciones por persona y un cobro por participante", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: Pedido generado } } }
+
+  /cotizaciones:
+    post: { tags: [cotizaciones], summary: Pedir presupuesto por una oferta a cotizar, security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } }, responses: { "201": { description: Solicitada } } }
+  /cotizaciones/{id}/presupuesto:
+    put: { tags: [cotizaciones], summary: "Comercio: responder con presupuesto firmado", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /cotizaciones/{id}/aceptar:
+    post: { tags: [cotizaciones], summary: Aceptar el presupuesto; crea el pedido con precio fijo, security: [ { sesion: [] }, { mandato: [pedir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: Pedido creado } } }
+
+  /viajes/ofrecidos:
+    get: { tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso y paradas", security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
+  /viajes/{id}/aceptar:
+    post: { tags: [viajes], summary: "Repartidor: aceptar. Rechazar no penaliza.", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { description: Ya asignado } } }
+  /viajes/{id}/rechazar:
+    post: { tags: [viajes], summary: "Repartidor: pasar", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /repartidor/disponibilidad:
+    put: { tags: [viajes], summary: Disponible o no, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { type: object, properties: { disponible: { type: boolean } } } } } }, responses: { "204": { description: OK } } }
+  /repartidor/ubicacion:
+    put: { tags: [viajes], summary: Ubicación cada 5 s mientras hay viaje activo, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/punto" } } } }, responses: { "204": { description: OK } } }
+
+  /mensajes:
+    post:
+      tags: [mensajes]
+      summary: Enviar mensaje en el contexto de un pedido, cotización, suscripción, grupo o ronda
+      description: Texto libre o estructurado (propuesta / aceptar / rechazar). Un agente de voz entra por acá con origen voz_transcripta.
+      security: [ { sesion: [] }, { mandato: [hablar] } ]
+      requestBody: { content: { application/json: { schema: { $ref: "esquemas/mensaje.json" } } } }
+      responses: { "201": { description: Enviado } }
+    get:
+      tags: [mensajes]
+      summary: Mensajes de un contexto
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      parameters: [ { name: contexto_tipo, in: query, required: true, schema: { type: string } }, { name: contexto_id, in: query, required: true, schema: { type: string } } ]
+      responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mensaje.json" } } } } } }
+
+  /resenas:
+    post: { tags: [resenas], summary: Reseñar un pedido entregado (dentro de 7 días, una por par), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
+  /resenas/{id}/respuesta:
+    post: { tags: [resenas], summary: Responder públicamente una reseña, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: OK } } }
+  /actores/{identidad}/resenas:
+    get: { tags: [resenas], summary: Reseñas públicas de un comercio, repartidor o usuario, security: [], parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } } } }
+
+  /mandatos:
+    get: { tags: [mandatos], summary: Mis mandatos activos, security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mandato.json" } } } } } } }
+    post: { tags: [mandatos], summary: Otorgar mandato a un agente (fin del flujo OAuth), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } }, responses: { "201": { description: Otorgado } } }
+  /mandatos/{id}/revocar:
+    post: { tags: [mandatos], summary: Revocar en un toque, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: Revocado } } }
+  /confirmaciones/{codigo}:
+    post: { tags: [mandatos], summary: La persona aprueba una acción del agente que excedía el mandato, security: [ { sesion: [] } ], parameters: [ { name: codigo, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: Aprobada; la acción se ejecuta } } }
+
+  /yo:
+    get: { tags: [yo], summary: Mi perfil y preferencias, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/usuario.json" } } } } } }
+  /yo/preferencias:
+    put: { tags: [yo], summary: Preferencias declarativas que cualquier agente autorizado lee, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/preferencias" } } } }, responses: { "204": { description: OK } } }
+  /yo/exportar:
+    get: { tags: [yo], summary: "Todo lo mío, firmado: identidad, clave, historial, reseñas. Para irme a otro nodo.", security: [ { sesion: [] } ], responses: { "200": { description: Paquete firmado, content: { application/json: { schema: { type: object } } } } } }
+  /yo/borrar:
+    post: { tags: [yo], summary: Borrar mi cuenta y datos personales (las reseñas firmadas quedan anonimizadas), security: [ { sesion: [] } ], responses: { "202": { description: En proceso } } }
+
+  /eventos:
+    get:
+      tags: [eventos]
+      summary: Stream SSE de eventos de mis entidades
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      parameters: [ { name: desde, in: query, schema: { type: string }, description: Último id de evento visto } ]
+      responses: { "200": { description: text/event-stream de esquemas/evento.json } }
+  /webhooks:
+    post:
+      tags: [eventos]
+      summary: Registrar webhook (agentes, PSP, sistemas del comercio). Firmado con la clave del nodo; reintentos exponenciales 24 h.
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      requestBody: { content: { application/json: { schema: { type: object, required: [url, tipos], properties: { url: { type: string, format: uri }, tipos: { type: array, items: { type: string } }, secreto: { type: string } } } } } }
+      responses: { "201": { description: Registrado } }
+
+  /federacion/entrantes:
+    post:
+      tags: [descubrimiento]
+      summary: Otro nodo entrega un pedido, mensaje o evento firmado (ver docs/federacion.md)
+      security: [ { nodo: [] } ]
+      requestBody: { content: { application/json: { schema: { $ref: "esquemas/evento.json" } } } }
+      responses: { "202": { description: Aceptado } }
+
+components:
+  parameters:
+    id: { name: id, in: path, required: true, schema: { type: string } }
+    idem: { name: Idempotency-Key, in: header, required: true, schema: { type: string }, description: Reintentar nunca duplica }
+  responses:
+    Error: { description: Error, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  securitySchemes:
+    sesion: { type: http, scheme: bearer, description: Token de sesión (login sin contraseña por WhatsApp o email) }
+    mandato:
+      type: oauth2
+      description: Agentes. Los scopes son los de esquemas/mandato.json.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://vereda.ar/oauth/autorizar
+          tokenUrl: https://vereda.ar/oauth/token
+          scopes: { leer: Leer, armar: Armar carritos y listas, hablar: Responder en pedidos activos, suscribir: Suscripciones, pedir: "Confirmar pedidos hasta el tope del mandato" }
+    nodo: { type: http, scheme: bearer, description: Firma HTTP entre nodos (RFC 9421) con la clave del nodo emisor }
+  schemas:
+    Nodo:
+      type: object
+      properties:
+        nodo: { type: string }
+        nombre: { type: string }
+        versiones: { type: array, items: { type: string } }
+        clave_publica: { type: string }
+        operador: { type: string }
+        zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
+        endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
+        codigo_fuente: { type: string, format: uri }
+    Carrito:
+      type: object
+      properties:
+        id: { type: string }
+        estado: { type: string, enum: [valido, incompleto, no_disponible] }
+        faltantes: { type: array, items: { type: object, properties: { item_id: { type: string }, grupo_id: { type: string }, mensaje: { type: string }, opciones: { type: array, items: { type: string } } } } }
+        items: { type: array, items: { $ref: "esquemas/pedido.json#/$defs/item" } }
+        modalidad: { $ref: "esquemas/pedido.json#/properties/modalidad" }
+        modalidades_disponibles: { type: array, items: { $ref: "esquemas/modalidad.json" } }
+        totales: { $ref: "esquemas/pedido.json#/properties/totales" }
+        reparto: { $ref: "esquemas/pedido.json#/properties/reparto" }
+        eta: { type: string, format: date-time }
+        dentro_del_mandato: { type: boolean }
+    Resolucion:
+      type: object
+      properties:
+        descripcion: { type: string, description: "Todo en Súper Barrio; o Súper Barrio + La Huerta para la fruta" }
+        carritos: { type: array, items: { $ref: "#/components/schemas/Carrito" } }
+        total: { $ref: "esquemas/comunes.json#/$defs/monto" }
+        envio_total: { $ref: "esquemas/comunes.json#/$defs/monto" }
+        viaje_unico: { type: boolean }
+        hora_estimada: { type: string, format: date-time }
+        items_sin_resolver: { type: array, items: { type: string } }

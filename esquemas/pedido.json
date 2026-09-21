@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/pedido.json",
+  "title": "Pedido",
+  "description": "Un pedido es siempre de un usuario a un solo comercio. Los precios se congelan al crear. Solo visible a las partes.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["usuario", "comercio", "items", "modalidad", "estado", "historial", "totales", "reparto", "via"],
+  "properties": {
+    "usuario": { "$ref": "comunes.json#/$defs/identidad" },
+    "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+    "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
+    "via": {
+      "type": "object",
+      "description": "Quién armó el pedido.",
+      "required": ["canal"],
+      "properties": {
+        "canal": { "type": "string", "enum": ["app", "web", "agente", "voz", "grupal", "suscripcion", "ronda"] },
+        "agente": { "type": "string", "description": "Identificador del agente autorizado, si aplica." },
+        "mandato_id": { "$ref": "comunes.json#/$defs/id" }
+      }
+    },
+    "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/item" } },
+    "modalidad": {
+      "type": "object",
+      "required": ["tipo"],
+      "properties": {
+        "tipo": { "type": "string", "enum": ["inmediata", "franja", "consolidada", "ronda", "punto_entrega", "retiro"] },
+        "modalidad_id": { "type": "string" },
+        "direccion": { "$ref": "comunes.json#/$defs/direccion" },
+        "franja": { "$ref": "comunes.json#/$defs/franja_horaria" },
+        "ronda_id": { "$ref": "comunes.json#/$defs/id" },
+        "grupo_id": { "$ref": "comunes.json#/$defs/id" },
+        "viaje_id": { "$ref": "comunes.json#/$defs/id" },
+        "promesa": { "type": "string", "description": "Lo que el usuario aceptó: 'entre hoy y el jueves'." }
+      }
+    },
+    "programado_para": { "$ref": "comunes.json#/$defs/instante" },
+    "suscripcion_id": { "$ref": "comunes.json#/$defs/id" },
+    "estado": { "$ref": "#/$defs/estado" },
+    "historial": {
+      "type": "array",
+      "description": "Toda transición, con quién y cuándo. Fuente de verdad para pagos, reputación y reclamos.",
+      "items": {
+        "type": "object",
+        "required": ["estado", "instante", "actor"],
+        "properties": {
+          "estado": { "$ref": "#/$defs/estado" },
+          "instante": { "$ref": "comunes.json#/$defs/instante" },
+          "actor": { "$ref": "comunes.json#/$defs/identidad" },
+          "motivo": { "type": "string" }
+        }
+      }
+    },
+    "totales": {
+      "type": "object",
+      "required": ["productos", "envio", "total"],
+      "properties": {
+        "productos": { "$ref": "comunes.json#/$defs/monto" },
+        "envio": { "$ref": "comunes.json#/$defs/monto" },
+        "propina_repartidor": { "$ref": "comunes.json#/$defs/monto" },
+        "propina_comercio": { "$ref": "comunes.json#/$defs/monto" },
+        "descuentos": { "$ref": "comunes.json#/$defs/monto" },
+        "total": { "$ref": "comunes.json#/$defs/monto" },
+        "total_final": { "$ref": "comunes.json#/$defs/monto", "description": "Tras pesables, faltantes y sustituciones." },
+        "diferencia_a_devolver": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que el comercio devuelve al usuario. La red lo muestra; no lo ejecuta." }
+      }
+    },
+    "reparto": {
+      "type": "array",
+      "description": "Adónde va cada peso. Se muestra siempre.",
+      "items": {
+        "type": "object",
+        "required": ["destinatario", "concepto", "monto"],
+        "properties": {
+          "destinatario": { "type": "string", "enum": ["comercio", "repartidor", "punto_entrega", "red"] },
+          "concepto": { "type": "string" },
+          "monto": { "$ref": "comunes.json#/$defs/monto" }
+        }
+      }
+    },
+    "pagos": { "type": "array", "items": { "$ref": "pago.json" } },
+    "politica_cancelacion_aplicada": { "type": "string", "description": "Copia del texto vigente al crear el pedido." },
+    "eta": { "$ref": "comunes.json#/$defs/instante" },
+    "ubicacion_repartidor": { "$ref": "comunes.json#/$defs/punto", "description": "Solo mientras el pedido está en_camino." },
+    "notas_usuario": { "type": "string", "maxLength": 500 },
+    "requiere_mayoria_edad": { "type": "boolean", "default": false },
+    "bultos": { "type": "integer", "minimum": 1 },
+    "peso_estimado_kg": { "type": "number", "minimum": 0 },
+    "firmas": {
+      "type": "object",
+      "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; entrega por el repartidor.",
+      "properties": {
+        "creacion": { "$ref": "comunes.json#/$defs/firma" },
+        "aceptacion": { "$ref": "comunes.json#/$defs/firma" },
+        "entrega": { "$ref": "comunes.json#/$defs/firma" }
+      }
+    }
+  },
+  "$defs": {
+    "estado": {
+      "type": "string",
+      "enum": ["creado", "pagado", "aceptado", "preparando", "listo", "asignado", "en_camino", "entregado", "cancelado"]
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "oferta_id", "nombre", "cantidad", "precio_unitario", "estado"],
+      "properties": {
+        "id": { "type": "string" },
+        "oferta_id": { "$ref": "comunes.json#/$defs/id" },
+        "variante_id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "cantidad": { "$ref": "comunes.json#/$defs/cantidad" },
+        "cantidad_entregada": { "$ref": "comunes.json#/$defs/cantidad" },
+        "precio_unitario": { "$ref": "comunes.json#/$defs/monto", "description": "Congelado al crear." },
+        "opciones": {
+          "type": "array",
+          "items": { "type": "object", "required": ["grupo_id", "opcion_id"], "properties": { "grupo_id": { "type": "string" }, "opcion_id": { "type": "string" }, "nombre": { "type": "string" }, "precio_extra": { "$ref": "comunes.json#/$defs/monto" } } }
+        },
+        "componentes": {
+          "type": "array",
+          "items": { "type": "object", "required": ["componente_id", "oferta_id"], "properties": { "componente_id": { "type": "string" }, "oferta_id": { "$ref": "comunes.json#/$defs/id" }, "nombre": { "type": "string" } } }
+        },
+        "modificador_libre": { "type": "string", "maxLength": 200 },
+        "preferencia_sustitucion": { "type": "string", "enum": ["similar_ok", "misma_marca", "preguntar", "quitar"], "default": "preguntar" },
+        "similar_hasta_pct_mas_caro": { "type": "number", "minimum": 0, "default": 10 },
+        "estado": { "type": "string", "enum": ["pendiente", "confirmado", "sustituido", "faltante", "pesado"] },
+        "sustituto": {
+          "type": "object",
+          "properties": {
+            "oferta_id": { "$ref": "comunes.json#/$defs/id" },
+            "nombre": { "type": "string" },
+            "precio_unitario": { "$ref": "comunes.json#/$defs/monto" },
+            "propuesto_en": { "$ref": "comunes.json#/$defs/instante" },
+            "respuesta": { "type": "string", "enum": ["aceptado", "rechazado", "vencido"] }
+          }
+        },
+        "monto_final": { "$ref": "comunes.json#/$defs/monto" },
+        "para": { "$ref": "comunes.json#/$defs/identidad", "description": "En pedidos grupales: a quién pertenece el ítem." }
+      }
+    }
+  }
+}

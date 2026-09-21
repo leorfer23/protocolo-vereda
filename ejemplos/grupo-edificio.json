@@ -1,0 +1,19 @@
+{
+  "$comentario": "Pedido grupal fijo: 10 familias de un edificio compran al súper cada 15 días con un solo envío. Cada uno paga lo suyo.",
+  "id": "01926b3a-bbbb-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "creado_por": "marta@vereda.ar",
+  "nombre": "Edificio Rivadavia 4520",
+  "comercio": "superbarrio@vereda.ar",
+  "cierre": "2026-10-04T12:00:00-03:00",
+  "modalidad": { "tipo": "franja", "direccion": { "texto": "Av. Rivadavia 4520, portería", "punto": { "lat": -34.6103, "lng": -58.4212 } }, "franja": { "fecha": "2026-10-04", "desde": "17:00", "hasta": "20:00" } },
+  "division_envio": "igual",
+  "estado": "abierto",
+  "fijo": true,
+  "suscripcion_id": "01926b3a-cccc-7000-8000-000000000001",
+  "participantes": [
+    { "identidad": "marta@vereda.ar", "nombre_bolsa": "3B", "estado": "confirmado", "items": [] },
+    { "identidad": "lucas.p@vereda.ar", "nombre_bolsa": "5A", "estado": "armando", "items": [] },
+    { "identidad": "familia.gomez@nodo.rosario.coop", "nombre_bolsa": "1C", "estado": "invitado" }
+  ],
+  "link": "https://vereda.ar/g/rivadavia-4520"
+}

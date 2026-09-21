@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/cotizacion.json",
+  "title": "Cotización",
+  "description": "Intercambio previo al pedido para ofertas 'servicio' con precio a cotizar. Aceptar el presupuesto crea el pedido con precio fijo.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["usuario", "comercio", "oferta_id", "solicitud", "estado"],
+  "properties": {
+    "usuario": { "$ref": "comunes.json#/$defs/identidad" },
+    "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+    "oferta_id": { "$ref": "comunes.json#/$defs/id" },
+    "solicitud": {
+      "type": "object",
+      "required": ["fecha"],
+      "properties": {
+        "fecha": { "$ref": "comunes.json#/$defs/instante" },
+        "personas": { "type": "integer", "minimum": 1 },
+        "lugar": { "$ref": "comunes.json#/$defs/direccion" },
+        "requisitos": { "type": "string", "maxLength": 2000 },
+        "atributos": { "$ref": "comunes.json#/$defs/atributos" }
+      }
+    },
+    "presupuesto": {
+      "type": "object",
+      "properties": {
+        "total": { "$ref": "comunes.json#/$defs/monto" },
+        "detalle": { "type": "array", "items": { "type": "object", "required": ["concepto", "monto"], "properties": { "concepto": { "type": "string" }, "monto": { "$ref": "comunes.json#/$defs/monto" } } } },
+        "condiciones": { "type": "string", "maxLength": 2000 },
+        "sena": { "$ref": "comunes.json#/$defs/monto" },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "firma_comercio": { "$ref": "comunes.json#/$defs/firma" }
+      }
+    },
+    "estado": { "type": "string", "enum": ["solicitada", "presupuestada", "aceptada", "rechazada", "vencida"] },
+    "pedido_id": { "$ref": "comunes.json#/$defs/id" }
+  }
+}

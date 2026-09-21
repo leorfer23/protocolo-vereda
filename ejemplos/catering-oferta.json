@@ -1,0 +1,20 @@
+{
+  "$comentario": "Catering: oferta 'servicio' por persona, a cotizar, con anticipación mínima y componentes a elección.",
+  "id": "01926b3a-3333-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "comercio_id": "01926b3a-0000-7000-8000-000000000003",
+  "tipo": "servicio",
+  "subtipo": "catering",
+  "nombre": "Almuerzo para oficina",
+  "descripcion": "Menú de dos pasos con bebida, servido en bandejas o en viandas individuales. Mínimo 10 personas, avisar con 48 horas.",
+  "precio": { "modo": "por_persona", "monto": { "centavos": 900000, "moneda": "ARS" } },
+  "cantidad": { "unidad": "persona", "minimo": 10, "maximo": 80, "paso": 1 },
+  "componentes": [
+    { "id": "principal", "nombre": "Plato principal", "elegir": { "minimo": 1, "maximo": 2, "de": ["01926b3a-3333-7000-8000-000000000010", "01926b3a-3333-7000-8000-000000000011", "01926b3a-3333-7000-8000-000000000012"] } },
+    { "id": "postre", "nombre": "Postre", "elegir": { "minimo": 1, "maximo": 1, "de": ["01926b3a-3333-7000-8000-000000000020", "01926b3a-3333-7000-8000-000000000021"] } }
+  ],
+  "disponible": true,
+  "disponibilidad": { "franjas": [ { "dias": ["lu","ma","mi","ju","vi"], "desde": "11:00", "hasta": "15:00" } ], "anticipacion_minima_horas": 48 },
+  "servicio": { "personas_minimo": 10, "personas_maximo": 80, "incluye": ["vajilla descartable", "entrega y armado"], "requiere_cotizacion": true },
+  "modalidades": ["franja"],
+  "atributos": { "opcion_vegetariana": true, "opcion_sin_tacc": true }
+}

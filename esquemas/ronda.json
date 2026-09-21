@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/ronda.json",
+  "title": "Ronda",
+  "description": "Una entrega programada y pública a un lugar: se abre, junta pedidos, cierra y sale como un solo viaje. La crea el comercio o un usuario que reúne vecinos. Recurrente: es una suscripción de lugar.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["comercio", "creada_por", "lugar", "entrega", "cierre_pedidos", "estado", "envio"],
+  "properties": {
+    "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+    "creada_por": { "$ref": "comunes.json#/$defs/identidad" },
+    "nombre": { "type": "string", "description": "'Verdulería La Huerta en Los Álamos, viernes'." },
+    "lugar": { "$ref": "comunes.json#/$defs/direccion" },
+    "entrega": { "$ref": "comunes.json#/$defs/instante" },
+    "cierre_pedidos": { "$ref": "comunes.json#/$defs/instante" },
+    "cupo": { "type": "integer", "minimum": 1 },
+    "regla": { "type": "string", "description": "RRULE si es recurrente." },
+    "estado": { "type": "string", "enum": ["abierta", "cerrada", "en_camino", "entregada", "cancelada"] },
+    "envio": {
+      "type": "object",
+      "required": ["modo"],
+      "properties": {
+        "modo": { "type": "string", "enum": ["gratis", "dividido_igual", "dividido_proporcional", "fijo_por_pedido"] },
+        "total": { "$ref": "comunes.json#/$defs/monto" },
+        "por_pedido": { "$ref": "comunes.json#/$defs/monto" }
+      }
+    },
+    "pedidos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/id" } },
+    "viaje_id": { "$ref": "comunes.json#/$defs/id" },
+    "link": { "type": "string", "format": "uri", "description": "Para compartir." },
+    "abierta_a": { "type": "string", "enum": ["cualquiera", "con_link", "lista"], "default": "con_link" },
+    "participantes_permitidos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } }
+  }
+}

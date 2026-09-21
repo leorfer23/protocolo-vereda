@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/mensaje.json",
+  "title": "Mensaje",
+  "description": "Chat entre las partes de un pedido, hospedado por el nodo, cifrado de punta a punta cuando la modalidad lo permite. También es la puerta de los agentes de voz y de texto: una llamada transcripta entra como mensaje. Puede ser texto libre o estructurado (propuesta / aceptar / rechazar) para que agentes negocien.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["contexto", "de", "para", "tipo"],
+  "properties": {
+    "contexto": {
+      "type": "object",
+      "required": ["tipo", "id"],
+      "properties": {
+        "tipo": { "type": "string", "enum": ["pedido", "cotizacion", "suscripcion", "grupo", "ronda"] },
+        "id": { "$ref": "comunes.json#/$defs/id" }
+      }
+    },
+    "de": { "$ref": "comunes.json#/$defs/identidad" },
+    "para": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } },
+    "en_nombre_de": { "$ref": "comunes.json#/$defs/identidad", "description": "Si lo manda un agente." },
+    "origen": { "type": "string", "enum": ["texto", "voz_transcripta", "agente"], "default": "texto" },
+    "tipo": { "type": "string", "enum": ["texto", "propuesta", "aceptar", "rechazar", "sustitucion", "demora", "compartir_telefono", "sistema"] },
+    "texto": { "type": "string", "maxLength": 4000 },
+    "estructurado": {
+      "type": "object",
+      "description": "Para propuesta / sustitucion / demora: el contenido que un agente puede procesar sin leer el texto.",
+      "properties": {
+        "item_id": { "type": "string" },
+        "oferta_id": { "$ref": "comunes.json#/$defs/id" },
+        "monto": { "$ref": "comunes.json#/$defs/monto" },
+        "minutos": { "type": "integer" },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "responde_a": { "$ref": "comunes.json#/$defs/id" }
+      }
+    },
+    "cifrado": { "type": "object", "properties": { "algoritmo": { "type": "string", "enum": ["ninguno", "x25519-xchacha20"] }, "payload": { "type": "string" } } },
+    "adjuntos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
+    "leido_por": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } }
+  }
+}

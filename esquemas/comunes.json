@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/comunes.json",
+  "title": "Definiciones comunes del Protocolo Vereda",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "description": "UUID v7, ordenable por tiempo. Único en toda la red.",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "identidad": {
+      "type": "string",
+      "description": "Identidad federada: actor@nodo, como el email. El nodo es un dominio.",
+      "pattern": "^[a-z0-9._-]+@[a-z0-9.-]+\\.[a-z]{2,}$",
+      "examples": [
+        "juan.pizzas@vereda.ar",
+        "marta@nodo.rosario.coop"
+      ]
+    },
+    "instante": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 con zona horaria."
+    },
+    "monto": {
+      "type": "object",
+      "description": "Dinero en centavos, entero. Nunca decimales.",
+      "required": [
+        "centavos",
+        "moneda"
+      ],
+      "properties": {
+        "centavos": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moneda": {
+          "type": "string",
+          "enum": [
+            "ARS"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "punto": {
+      "type": "object",
+      "description": "Coordenada WGS84.",
+      "required": [
+        "lat",
+        "lng"
+      ],
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lng": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        }
+      },
+      "additionalProperties": false
+    },
+    "poligono": {
+      "type": "array",
+      "description": "Anillo cerrado de puntos (zona de entrega). Primer y último punto iguales.",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/punto"
+      }
+    },
+    "direccion": {
+      "type": "object",
+      "description": "Dirección argentina: texto libre del usuario más un punto que él confirmó en el mapa. El texto manda; el punto sirve para ruteo.",
+      "required": [
+        "texto",
+        "punto"
+      ],
+      "properties": {
+        "texto": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Como lo diría la persona: 'Av. Rivadavia 4520 3° B, entre Yatay y Lambaré, timbre 3B'."
+        },
+        "punto": {
+          "$ref": "#/$defs/punto"
+        },
+        "calle": {
+          "type": "string"
+        },
+        "altura": {
+          "type": "string"
+        },
+        "piso_depto": {
+          "type": "string"
+        },
+        "entre_calles": {
+          "type": "string"
+        },
+        "localidad": {
+          "type": "string"
+        },
+        "provincia": {
+          "type": "string"
+        },
+        "referencia": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "'Casa de rejas verdes', 'tocar timbre dos veces'."
+        },
+        "etiqueta": {
+          "type": "string",
+          "description": "'casa', 'trabajo', 'lo de mamá'."
+        }
+      },
+      "additionalProperties": false
+    },
+    "franja_horaria": {
+      "type": "object",
+      "description": "Ventana de tiempo, con fecha o recurrente por día de semana.",
+      "required": [
+        "desde",
+        "hasta"
+      ],
+      "properties": {
+        "fecha": {
+          "type": "string",
+          "format": "date"
+        },
+        "dias": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa",
+              "do"
+            ]
+          }
+        },
+        "desde": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "hasta": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "cupo": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Pedidos máximos en esta franja. Sin valor: sin límite."
+        }
+      },
+      "additionalProperties": false
+    },
+    "unidad_medida": {
+      "type": "string",
+      "enum": [
+        "unidad",
+        "g",
+        "kg",
+        "ml",
+        "l",
+        "m",
+        "porcion",
+        "persona",
+        "docena",
+        "hora",
+        "dia",
+        "semana",
+        "mes"
+      ]
+    },
+    "cantidad": {
+      "type": "object",
+      "required": [
+        "valor",
+        "unidad"
+      ],
+      "properties": {
+        "valor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unidad": {
+          "$ref": "#/$defs/unidad_medida"
+        },
+        "aproximada": {
+          "type": "boolean",
+          "default": false,
+          "description": "Pesables: el valor final se conoce al preparar."
+        }
+      },
+      "additionalProperties": false
+    },
+    "atributos": {
+      "type": "object",
+      "description": "Etiquetas abiertas. Clave libre en snake_case; valor booleano, número o texto corto. Los agentes las leen; nadie las restringe.",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": [
+          "boolean",
+          "number",
+          "string"
+        ]
+      },
+      "examples": [
+        {
+          "sin_tacc": true,
+          "vegano": true,
+          "refrigerado": true,
+          "picante": "medio",
+          "origen": "Mendoza"
+        }
+      ]
+    },
+    "imagen": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "alt": {
+          "type": "string",
+          "description": "Descripción para agentes y accesibilidad."
+        }
+      },
+      "additionalProperties": false
+    },
+    "firma": {
+      "type": "object",
+      "description": "Firma Ed25519 sobre la representación canónica (JCS, RFC 8785) del objeto sin el campo firma.",
+      "required": [
+        "firmante",
+        "clave_publica",
+        "valor",
+        "instante"
+      ],
+      "properties": {
+        "firmante": {
+          "$ref": "#/$defs/identidad"
+        },
+        "clave_publica": {
+          "type": "string",
+          "description": "Base64url de la clave pública Ed25519."
+        },
+        "valor": {
+          "type": "string",
+          "description": "Base64url de la firma."
+        },
+        "instante": {
+          "$ref": "#/$defs/instante"
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadatos": {
+      "type": "object",
+      "description": "Campos que toda entidad lleva.",
+      "required": [
+        "id",
+        "nodo",
+        "creado",
+        "actualizado",
+        "version_esquema"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "nodo": {
+          "type": "string",
+          "description": "Dominio del nodo que originó la entidad."
+        },
+        "creado": {
+          "$ref": "#/$defs/instante"
+        },
+        "actualizado": {
+          "$ref": "#/$defs/instante"
+        },
+        "version_esquema": {
+          "type": "string",
+          "pattern": "^1\\.[0-9]+$"
+        }
+      }
+    },
+    "monto_signado": {
+      "type": "object",
+      "description": "Dinero en centavos que puede ser negativo: ajustes, descuentos, opciones que abaratan.",
+      "required": [
+        "centavos",
+        "moneda"
+      ],
+      "properties": {
+        "centavos": {
+          "type": "integer"
+        },
+        "moneda": {
+          "type": "string",
+          "enum": [
+            "ARS"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

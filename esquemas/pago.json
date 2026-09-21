@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/pago.json",
+  "title": "Pago",
+  "description": "Referencia a un cobro que va directo del usuario a una parte. La red guarda referencias y estados; nunca datos de cuenta ni tarjeta, nunca custodia.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["pedido_id", "destinatario", "concepto", "monto", "metodo", "estado"],
+  "properties": {
+    "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+    "destinatario": { "$ref": "comunes.json#/$defs/identidad" },
+    "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor", "propina_comercio", "punto_entrega", "periodo_suscripcion", "devolucion"] },
+    "monto": { "$ref": "comunes.json#/$defs/monto" },
+    "metodo": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] },
+    "estado": { "type": "string", "enum": ["pendiente", "confirmado", "vencido", "en_mano", "fallido"] },
+    "psp": { "type": "string", "description": "Proveedor que generó el cobro." },
+    "psp_referencia": { "type": "string", "description": "Id opaco del cobro en el PSP." },
+    "qr": { "type": "string", "description": "Payload del QR interoperable, si aplica." },
+    "link_pago": { "type": "string", "format": "uri" },
+    "vence": { "$ref": "comunes.json#/$defs/instante" },
+    "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
+    "idempotency_key": { "type": "string" }
+  }
+}

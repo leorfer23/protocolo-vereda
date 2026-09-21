@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/repartidor.json",
+  "title": "Repartidor",
+  "description": "Quien lleva. Socio de la red, organizado en cooperativa. Público: nombre, vehículo, reputación. Ubicación en vivo solo a las partes de un pedido activo.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["identidad", "nombre", "vehiculo", "verificacion", "reputacion", "disponible"],
+  "properties": {
+    "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+    "nombre": { "type": "string" },
+    "cooperativa": { "$ref": "comunes.json#/$defs/identidad", "description": "Si cobra a través de su cooperativa." },
+    "vehiculo": { "type": "string", "enum": ["a_pie", "bici", "moto", "auto", "utilitario"] },
+    "caja_termica": { "type": "boolean", "default": false },
+    "capacidad_kg": { "type": "number", "minimum": 0 },
+    "zona": { "$ref": "comunes.json#/$defs/poligono" },
+    "disponible": { "type": "boolean" },
+    "ubicacion": { "$ref": "comunes.json#/$defs/punto" },
+    "ubicacion_actualizada": { "$ref": "comunes.json#/$defs/instante" },
+    "verificacion": {
+      "type": "object",
+      "required": ["dni_prueba_de_vida", "cuenta_cobro_propia"],
+      "properties": { "dni_prueba_de_vida": { "type": "boolean" }, "cuenta_cobro_propia": { "type": "boolean" }, "verificado_en": { "$ref": "comunes.json#/$defs/instante" } }
+    },
+    "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
+    "clave_publica": { "type": "string" },
+    "privado": {
+      "type": "object",
+      "properties": {
+        "dni": { "type": "string" },
+        "cuenta_cobro": { "type": "object", "properties": { "psp": { "type": "string" }, "referencia": { "type": "string" } } },
+        "telefono": { "type": "string" }
+      }
+    }
+  }
+}

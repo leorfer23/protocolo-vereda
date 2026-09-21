@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/lista.json",
+  "title": "Lista de compras",
+  "description": "Carrito persistente que vive fuera del pedido. Ítems concretos (una oferta de un comercio) o genéricos (del catálogo maestro, resueltos contra un comercio al pedir). Se comparte y se convierte en pedido cuando el usuario quiere.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["dueno", "nombre", "items"],
+  "properties": {
+    "dueno": { "$ref": "comunes.json#/$defs/identidad" },
+    "compartida_con": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } },
+    "nombre": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "cantidad"],
+        "oneOf": [
+          { "required": ["oferta_id"] },
+          { "required": ["generico"] }
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "oferta_id": { "$ref": "comunes.json#/$defs/id", "description": "Ítem concreto." },
+          "generico": {
+            "type": "object",
+            "description": "Ítem genérico: se resuelve al pedir.",
+            "properties": {
+              "catalogo_maestro_id": { "$ref": "comunes.json#/$defs/id" },
+              "ean": { "type": "string" },
+              "texto": { "type": "string", "description": "'leche entera 1 L', 'tomates'." },
+              "atributos": { "$ref": "comunes.json#/$defs/atributos" }
+            }
+          },
+          "cantidad": { "$ref": "comunes.json#/$defs/cantidad" },
+          "preferencia_sustitucion": { "type": "string", "enum": ["similar_ok", "misma_marca", "preguntar", "quitar"] },
+          "agregado_por": { "$ref": "comunes.json#/$defs/identidad" },
+          "nota": { "type": "string" }
+        }
+      }
+    },
+    "sustitucion_default": { "type": "string", "enum": ["similar_ok", "misma_marca", "preguntar", "quitar"], "default": "preguntar" }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$comentario": "Ronda semanal de la verdulería al barrio cerrado. Envío dividido entre participantes. Cierra jueves a las 20.",
+  "id": "01926b3a-aaaa-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "comercio": "lahuerta@vereda.ar",
+  "creada_por": "lahuerta@vereda.ar",
+  "nombre": "La Huerta en Los Álamos, viernes",
+  "lugar": { "texto": "Barrio Los Álamos, portería principal, Ruta 8 km 52", "punto": { "lat": -34.42, "lng": -58.88 }, "referencia": "Dejar en portería, avisan por radio" },
+  "entrega": "2026-09-25T18:00:00-03:00",
+  "cierre_pedidos": "2026-09-24T20:00:00-03:00",
+  "cupo": 30,
+  "regla": "FREQ=WEEKLY;BYDAY=FR",
+  "estado": "abierta",
+  "envio": { "modo": "dividido_igual", "total": { "centavos": 1200000, "moneda": "ARS" } },
+  "pedidos": ["01926b3a-7777-7000-8000-000000000011", "01926b3a-7777-7000-8000-000000000012"],
+  "link": "https://vereda.ar/r/los-alamos-viernes",
+  "abierta_a": "con_link"
+}

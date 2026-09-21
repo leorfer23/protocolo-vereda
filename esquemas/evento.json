@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/evento.json",
+  "title": "Evento",
+  "description": "Todo cambio de estado se publica como evento: a clientes por SSE, a agentes y PSP por webhook firmado, a otros nodos por federación. Idempotente por id.",
+  "type": "object",
+  "required": ["id", "tipo", "instante", "nodo", "entidad", "datos", "firma_nodo"],
+  "properties": {
+    "id": { "$ref": "comunes.json#/$defs/id" },
+    "tipo": {
+      "type": "string",
+      "pattern": "^(pedido|item|pago|viaje|suscripcion|ronda|grupo|cotizacion|mensaje|mandato|comercio|oferta)\\.[a-z_]+$",
+      "examples": ["pedido.pagado", "pedido.aceptado", "item.sustitucion_propuesta", "pago.confirmado", "viaje.ofrecido", "suscripcion.ocurrencia_abierta", "ronda.cerrada", "mensaje.nuevo", "oferta.stock_cambiado"]
+    },
+    "instante": { "$ref": "comunes.json#/$defs/instante" },
+    "nodo": { "type": "string" },
+    "entidad": { "type": "object", "required": ["tipo", "id"], "properties": { "tipo": { "type": "string" }, "id": { "$ref": "comunes.json#/$defs/id" } } },
+    "actor": { "$ref": "comunes.json#/$defs/identidad" },
+    "datos": { "type": "object", "description": "El objeto afectado o el delta, según tipo." },
+    "secuencia": { "type": "integer", "minimum": 0, "description": "Monótona por entidad; permite reordenar." },
+    "firma_nodo": { "$ref": "comunes.json#/$defs/firma" }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$comentario": "Supermercado: oferta 'producto' envasado con EAN, variantes por presentación, stock numérico y reserva de mostrador.",
+  "id": "01926b3a-5555-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+  "tipo": "producto",
+  "nombre": "Leche entera La Serenísima",
+  "ean": "7790742001009",
+  "catalogo_maestro_id": "01926b3a-9999-7000-8000-000000000001",
+  "categorias": ["Lácteos"],
+  "precio": { "modo": "fijo", "monto": { "centavos": 195000, "moneda": "ARS" } },
+  "cantidad": { "unidad": "unidad", "minimo": 1, "maximo": 24, "paso": 1 },
+  "variantes": [
+    { "id": "1l", "nombre": "1 litro", "ean": "7790742001009", "precio": { "modo": "fijo", "monto": { "centavos": 195000, "moneda": "ARS" } }, "stock": 48 },
+    { "id": "3l", "nombre": "Pack 3 litros", "ean": "7790742001016", "precio": { "modo": "fijo", "monto": { "centavos": 540000, "moneda": "ARS" } }, "stock": 12 }
+  ],
+  "disponible": true,
+  "stock": { "modo": "numerico", "cantidad": 60, "reserva_mostrador": 10, "actualizado": "2026-09-21T14:45:00-03:00" },
+  "modalidades": ["franja", "punto-porterias", "retiro"],
+  "atributos": { "refrigerado": true, "sin_tacc": true }
+}

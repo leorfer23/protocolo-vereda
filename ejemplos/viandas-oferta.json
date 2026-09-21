@@ -1,0 +1,18 @@
+{
+  "$comentario": "Rotisería: oferta 'recurrente' compuesta. Viandas semanales: 5 platos a elección de una lista, pago por semana, se edita hasta el domingo.",
+  "id": "01926b3a-4444-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "comercio_id": "01926b3a-0000-7000-8000-000000000004",
+  "tipo": "recurrente",
+  "subtipo": "viandas",
+  "nombre": "Viandas de la semana",
+  "descripcion": "Cinco almuerzos de lunes a viernes, elegís los platos cada semana de nuestra carta. Llegan el lunes a la mañana en tuppers retornables.",
+  "precio": { "modo": "por_periodo", "monto": { "centavos": 4500000, "moneda": "ARS" } },
+  "cantidad": { "unidad": "semana", "minimo": 1, "paso": 1 },
+  "componentes": [
+    { "id": "platos", "nombre": "Platos de la semana", "elegir": { "minimo": 5, "maximo": 5, "repetible": true, "de": ["01926b3a-4444-7000-8000-000000000010", "01926b3a-4444-7000-8000-000000000011", "01926b3a-4444-7000-8000-000000000012", "01926b3a-4444-7000-8000-000000000013"] } }
+  ],
+  "disponible": true,
+  "recurrente": { "reglas_permitidas": ["FREQ=WEEKLY;BYDAY=MO"], "pago": "por_periodo", "periodo": "semana", "anticipacion_edicion_horas": 36, "permanencia_minima_ocurrencias": 0 },
+  "modalidades": ["franja", "retiro"],
+  "atributos": { "refrigerado": true, "envase_retornable": true }
+}

@@ -1,0 +1,15 @@
+{
+  "$comentario": "Verdulería: oferta 'pesable' con precio por kg, cantidad aproximada y tolerancia. Modalidad consolidada disponible.",
+  "id": "01926b3a-2222-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+  "tipo": "pesable",
+  "nombre": "Tomate redondo",
+  "descripcion": "De Corrientes esta semana. Maduro para ensalada; si lo querés para salsa, poné 'para salsa' y te elijo los más pasados.",
+  "categorias": ["Verduras"],
+  "precio": { "modo": "por_unidad", "monto": { "centavos": 280000, "moneda": "ARS" } },
+  "cantidad": { "unidad": "kg", "minimo": 0.5, "maximo": 10, "paso": 0.25, "aproximada": true, "tolerancia_pct": 15 },
+  "disponible": true,
+  "stock": { "modo": "binario", "actualizado": "2026-09-21T08:30:00-03:00" },
+  "modalidades": ["franja", "consolidada-martes-jueves", "ronda-los-alamos", "retiro"],
+  "atributos": { "origen": "Corrientes", "refrigerado": false, "estacion": true }
+}

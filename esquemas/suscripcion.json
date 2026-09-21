@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/suscripcion.json",
+  "title": "Suscripción",
+  "description": "Acuerdo entre usuario y comercio que genera pedidos solos según una regla de repetición. Cada ocurrencia termina siendo un pedido común.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["usuario", "comercio", "plantilla", "regla", "modalidad", "pago", "anticipacion_horas", "estado"],
+  "properties": {
+    "usuario": { "$ref": "comunes.json#/$defs/identidad" },
+    "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+    "grupo_id": { "$ref": "comunes.json#/$defs/id", "description": "Si es la suscripción de un pedido grupal (el edificio)." },
+    "plantilla": {
+      "type": "object",
+      "description": "Qué se pide cada vez. Editable dentro de la ventana de cada ocurrencia.",
+      "required": ["items"],
+      "properties": {
+        "items": { "type": "array", "minItems": 1, "items": { "$ref": "pedido.json#/$defs/item" } },
+        "exclusiones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/id" }, "description": "Para ofertas donde el comercio define el contenido." }
+      }
+    },
+    "regla": { "type": "string", "description": "RRULE de RFC 5545: 'FREQ=WEEKLY;BYDAY=MO', 'FREQ=MONTHLY;BYMONTHDAY=1,15'." },
+    "zona_horaria": { "type": "string", "default": "America/Argentina/Buenos_Aires" },
+    "modalidad": { "$ref": "pedido.json#/properties/modalidad" },
+    "pago": {
+      "type": "object",
+      "required": ["modo"],
+      "properties": {
+        "modo": { "type": "string", "enum": ["por_ocurrencia", "por_periodo"] },
+        "periodo": { "type": "string", "enum": ["semana", "quincena", "mes"] },
+        "monto_periodo": { "$ref": "comunes.json#/$defs/monto" },
+        "precio_congelado_ocurrencias": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "anticipacion_horas": { "type": "number", "minimum": 0, "description": "Cuántas horas antes se genera el pedido y se abre la ventana de edición." },
+    "estado": { "type": "string", "enum": ["activa", "pausada", "cancelada"] },
+    "estado_cambiado_por": { "$ref": "comunes.json#/$defs/identidad" },
+    "estado_cambiado_en": { "$ref": "comunes.json#/$defs/instante" },
+    "permanencia_minima_ocurrencias": { "type": "integer", "minimum": 0, "default": 0 },
+    "ocurrencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fecha", "estado"],
+        "properties": {
+          "fecha": { "type": "string", "format": "date" },
+          "estado": { "type": "string", "enum": ["futura", "abierta", "confirmada", "salteada", "generada"] },
+          "pedido_id": { "$ref": "comunes.json#/$defs/id" }
+        }
+      }
+    },
+    "firma_usuario": { "$ref": "comunes.json#/$defs/firma" },
+    "firma_comercio": { "$ref": "comunes.json#/$defs/firma" }
+  }
+}

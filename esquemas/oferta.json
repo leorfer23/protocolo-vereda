@@ -1,0 +1,465 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/oferta.json",
+  "title": "Oferta",
+  "description": "Cualquier cosa que un comercio vende y cualquier forma de venderla. Se compone de piezas: precio, grupos de opciones, variantes, componentes, cantidad, disponibilidad, modalidades, atributos.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "comunes.json#/$defs/metadatos"
+    }
+  ],
+  "required": [
+    "comercio_id",
+    "tipo",
+    "nombre",
+    "precio",
+    "cantidad",
+    "disponible"
+  ],
+  "properties": {
+    "comercio_id": {
+      "$ref": "comunes.json#/$defs/id"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "producto",
+        "pesable",
+        "preparado",
+        "compuesto",
+        "servicio",
+        "recurrente"
+      ],
+      "description": "Seis tipos base. Un comercio puede inventar subtipos en 'subtipo'; apps y agentes solo necesitan reconocer estos seis."
+    },
+    "subtipo": {
+      "type": "string"
+    },
+    "nombre": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "descripcion": {
+      "type": "string",
+      "maxLength": 3000,
+      "description": "En lenguaje natural, para personas y agentes."
+    },
+    "categorias": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Del comercio: 'Pizzas', 'Frutas', 'Ofertas de la semana'."
+    },
+    "ean": {
+      "type": "string",
+      "pattern": "^[0-9]{8,14}$",
+      "description": "Para envasados: liga al catálogo maestro."
+    },
+    "catalogo_maestro_id": {
+      "$ref": "comunes.json#/$defs/id"
+    },
+    "imagenes": {
+      "type": "array",
+      "items": {
+        "$ref": "comunes.json#/$defs/imagen"
+      }
+    },
+    "precio": {
+      "$ref": "#/$defs/precio"
+    },
+    "cantidad": {
+      "type": "object",
+      "description": "Cómo se pide: unidad, mínimo, máximo, paso.",
+      "required": [
+        "unidad"
+      ],
+      "properties": {
+        "unidad": {
+          "$ref": "comunes.json#/$defs/unidad_medida"
+        },
+        "minimo": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1
+        },
+        "maximo": {
+          "type": "number"
+        },
+        "paso": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1
+        },
+        "aproximada": {
+          "type": "boolean",
+          "default": false,
+          "description": "Pesables: la cantidad final se conoce al preparar."
+        },
+        "tolerancia_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 15,
+          "description": "Variación máxima del monto final para pesables."
+        }
+      }
+    },
+    "grupos_opciones": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/grupo_opciones"
+      }
+    },
+    "variantes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/variante"
+      }
+    },
+    "componentes": {
+      "type": "array",
+      "description": "Para 'compuesto' y 'recurrente': partes de la oferta, cada una a su vez una oferta o una elección entre varias.",
+      "items": {
+        "$ref": "#/$defs/componente"
+      }
+    },
+    "acepta_modificador_libre": {
+      "type": "boolean",
+      "default": true,
+      "description": "El usuario puede escribir 'sin cebolla'."
+    },
+    "disponible": {
+      "type": "boolean"
+    },
+    "stock": {
+      "type": "object",
+      "properties": {
+        "modo": {
+          "type": "string",
+          "enum": [
+            "binario",
+            "numerico"
+          ]
+        },
+        "cantidad": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reserva_mostrador": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Unidades que no se venden por la red."
+        },
+        "actualizado": {
+          "$ref": "comunes.json#/$defs/instante"
+        }
+      }
+    },
+    "disponibilidad": {
+      "type": "object",
+      "description": "Cuándo se puede pedir y con cuánta anticipación.",
+      "properties": {
+        "franjas": {
+          "type": "array",
+          "items": {
+            "$ref": "comunes.json#/$defs/franja_horaria"
+          }
+        },
+        "fechas": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "cupo_por_dia": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "anticipacion_minima_horas": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tiempo_preparacion_min": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "modalidades": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ids de modalidades del comercio que aplican a esta oferta. Vacío: todas."
+    },
+    "servicio": {
+      "type": "object",
+      "description": "Solo para tipo 'servicio'.",
+      "properties": {
+        "personas_minimo": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "personas_maximo": {
+          "type": "integer"
+        },
+        "incluye": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "'mozos', 'vajilla', 'armado'."
+        },
+        "requiere_cotizacion": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "recurrente": {
+      "type": "object",
+      "description": "Solo para tipo 'recurrente': cómo se suscribe. Ver suscripcion.json.",
+      "properties": {
+        "reglas_permitidas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "RRULE (RFC 5545) que el comercio ofrece: 'FREQ=WEEKLY;BYDAY=MO'."
+        },
+        "pago": {
+          "type": "string",
+          "enum": [
+            "por_ocurrencia",
+            "por_periodo"
+          ]
+        },
+        "periodo": {
+          "type": "string",
+          "enum": [
+            "semana",
+            "quincena",
+            "mes"
+          ]
+        },
+        "anticipacion_edicion_horas": {
+          "type": "number",
+          "minimum": 0,
+          "default": 24
+        },
+        "permanencia_minima_ocurrencias": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "contenido_lo_define_el_comercio": {
+          "type": "boolean",
+          "default": false,
+          "description": "'Caja de la semana': el comercio arma el contenido cada vez."
+        },
+        "exclusiones_maximas": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "atributos": {
+      "$ref": "comunes.json#/$defs/atributos"
+    },
+    "notas_para_agentes": {
+      "type": "string",
+      "maxLength": 1000
+    }
+  },
+  "$defs": {
+    "precio": {
+      "type": "object",
+      "required": [
+        "modo"
+      ],
+      "properties": {
+        "modo": {
+          "type": "string",
+          "enum": [
+            "fijo",
+            "por_unidad",
+            "por_persona",
+            "por_periodo",
+            "a_cotizar"
+          ]
+        },
+        "monto": {
+          "$ref": "comunes.json#/$defs/monto",
+          "description": "Por la unidad de 'cantidad.unidad', por persona o por período según modo."
+        },
+        "moneda": {
+          "type": "string",
+          "enum": [
+            "ARS"
+          ],
+          "default": "ARS"
+        },
+        "vigente_hasta": {
+          "$ref": "comunes.json#/$defs/instante"
+        }
+      }
+    },
+    "grupo_opciones": {
+      "type": "object",
+      "description": "Una elección dentro de la oferta: 'Gustos' (mín 1, máx 2), 'Agregados' (mín 0, máx 5, +$800 cada uno).",
+      "required": [
+        "id",
+        "nombre",
+        "minimo",
+        "maximo",
+        "opciones"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "string"
+        },
+        "descripcion": {
+          "type": "string"
+        },
+        "minimo": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximo": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repetible": {
+          "type": "boolean",
+          "default": false,
+          "description": "La misma opción puede elegirse más de una vez (2 de muzzarella)."
+        },
+        "opciones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "nombre"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "nombre": {
+                "type": "string"
+              },
+              "descripcion": {
+                "type": "string"
+              },
+              "precio_extra": {
+                "$ref": "comunes.json#/$defs/monto_signado",
+                "description": "Puede ser negativo (una opción que abarata, como un tamaño chico)."
+              },
+              "disponible": {
+                "type": "boolean",
+                "default": true
+              },
+              "atributos": {
+                "$ref": "comunes.json#/$defs/atributos"
+              }
+            }
+          }
+        }
+      }
+    },
+    "variante": {
+      "type": "object",
+      "description": "Versión de la misma oferta con precio y stock propios: '500 ml', '1,5 L'.",
+      "required": [
+        "id",
+        "nombre",
+        "precio"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "string"
+        },
+        "ean": {
+          "type": "string"
+        },
+        "precio": {
+          "$ref": "#/$defs/precio"
+        },
+        "disponible": {
+          "type": "boolean",
+          "default": true
+        },
+        "stock": {
+          "type": "number"
+        },
+        "atributos": {
+          "$ref": "comunes.json#/$defs/atributos"
+        }
+      }
+    },
+    "componente": {
+      "type": "object",
+      "description": "Parte de una oferta compuesta. O una oferta fija, o 'elegí N de esta lista'.",
+      "required": [
+        "id",
+        "nombre"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "string"
+        },
+        "oferta_id": {
+          "$ref": "comunes.json#/$defs/id",
+          "description": "Componente fijo."
+        },
+        "elegir": {
+          "type": "object",
+          "description": "Componente a elección.",
+          "required": [
+            "minimo",
+            "maximo",
+            "de"
+          ],
+          "properties": {
+            "minimo": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maximo": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "repetible": {
+              "type": "boolean",
+              "default": false
+            },
+            "de": {
+              "type": "array",
+              "items": {
+                "$ref": "comunes.json#/$defs/id"
+              },
+              "description": "Ids de ofertas elegibles."
+            }
+          }
+        },
+        "cantidad": {
+          "$ref": "comunes.json#/$defs/cantidad"
+        }
+      }
+    }
+  }
+}

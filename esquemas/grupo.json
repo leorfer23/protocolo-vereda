@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/grupo.json",
+  "title": "Pedido grupal",
+  "description": "Carrito abierto con link: varias personas agregan lo suyo a un mismo comercio, cada una paga su parte, el comercio arma bolsas por nombre, un solo envío. Puede quedar fijo (el edificio) y combinarse con una suscripción.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["creado_por", "comercio", "cierre", "modalidad", "division_envio", "estado", "participantes"],
+  "properties": {
+    "creado_por": { "$ref": "comunes.json#/$defs/identidad" },
+    "nombre": { "type": "string", "description": "'Edificio Rivadavia 4520', 'Almuerzo oficina'." },
+    "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+    "cierre": { "$ref": "comunes.json#/$defs/instante" },
+    "modalidad": { "$ref": "pedido.json#/properties/modalidad" },
+    "division_envio": { "type": "string", "enum": ["igual", "proporcional", "paga_creador", "paga_comercio"] },
+    "estado": { "type": "string", "enum": ["abierto", "cerrado", "pedido_generado", "cancelado"] },
+    "fijo": { "type": "boolean", "default": false, "description": "El grupo persiste entre pedidos." },
+    "suscripcion_id": { "$ref": "comunes.json#/$defs/id" },
+    "participantes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["identidad", "estado"],
+        "properties": {
+          "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+          "nombre_bolsa": { "type": "string", "description": "Cómo se rotula su bolsa: 'Depto 3B'." },
+          "items": { "type": "array", "items": { "$ref": "pedido.json#/$defs/item" } },
+          "estado": { "type": "string", "enum": ["invitado", "armando", "confirmado", "pagado"] },
+          "pago_id": { "$ref": "comunes.json#/$defs/id" }
+        }
+      }
+    },
+    "pedido_id": { "$ref": "comunes.json#/$defs/id", "description": "El pedido generado al cerrar, con secciones por persona." },
+    "link": { "type": "string", "format": "uri" }
+  }
+}

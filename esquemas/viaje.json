@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/viaje.json",
+  "title": "Viaje",
+  "description": "Un recorrido de un repartidor con una o más paradas: varios pedidos del mismo comercio (consolidada, ronda) o varios pedidos del mismo usuario a distintos comercios de la misma zona. El repartidor lo ve entero y lo acepta como uno.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["repartidor", "paradas", "estado", "pago_repartidor"],
+  "properties": {
+    "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
+    "origen_tipo": { "type": "string", "enum": ["pedido_simple", "consolidada", "ronda", "multi_comercio", "grupal"] },
+    "paradas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["orden", "tipo", "direccion"],
+        "properties": {
+          "orden": { "type": "integer", "minimum": 1 },
+          "tipo": { "type": "string", "enum": ["retiro_comercio", "entrega_usuario", "entrega_punto"] },
+          "actor": { "$ref": "comunes.json#/$defs/identidad" },
+          "direccion": { "$ref": "comunes.json#/$defs/direccion" },
+          "pedidos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/id" } },
+          "eta": { "$ref": "comunes.json#/$defs/instante" },
+          "completada_en": { "$ref": "comunes.json#/$defs/instante" }
+        }
+      }
+    },
+    "distancia_km": { "type": "number", "minimum": 0 },
+    "peso_total_kg": { "type": "number", "minimum": 0 },
+    "bultos": { "type": "integer", "minimum": 1 },
+    "requiere_caja_termica": { "type": "boolean", "default": false },
+    "pago_repartidor": {
+      "type": "object",
+      "required": ["total"],
+      "properties": {
+        "total": { "$ref": "comunes.json#/$defs/monto" },
+        "por_pedido": { "type": "array", "items": { "type": "object", "required": ["pedido_id", "monto"], "properties": { "pedido_id": { "$ref": "comunes.json#/$defs/id" }, "monto": { "$ref": "comunes.json#/$defs/monto" } } } }
+      }
+    },
+    "estado": { "type": "string", "enum": ["ofrecido", "aceptado", "en_curso", "completado", "rechazado"] },
+    "ofrecido_en": { "$ref": "comunes.json#/$defs/instante" },
+    "aceptado_en": { "$ref": "comunes.json#/$defs/instante" },
+    "ruta": { "type": "array", "items": { "$ref": "comunes.json#/$defs/punto" }, "description": "Polilínea de OSRM." }
+  }
+}

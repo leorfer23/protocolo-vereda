@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/comercio.json",
+  "title": "Comercio",
+  "description": "Quien vende: restaurante, almacén, verdulería, supermercado, catering, productor. Público salvo los campos marcados como privados.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["identidad", "nombre", "tipo", "ubicacion", "modalidades", "politica_cancelacion", "verificacion", "reputacion"],
+  "properties": {
+    "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+    "nombre": { "type": "string", "maxLength": 120 },
+    "descripcion": { "type": "string", "maxLength": 2000, "description": "En las palabras del comercio. Los agentes la leen." },
+    "tipo": { "type": "string", "enum": ["restaurante", "almacen", "verduleria", "supermercado", "catering", "productor", "panaderia", "farmacia", "otro"] },
+    "subtipo": { "type": "string", "description": "Libre: 'pizzería', 'dietética', 'rotisería'." },
+    "sucursal_de": { "$ref": "comunes.json#/$defs/id", "description": "Si es sucursal, el comercio padre." },
+    "ubicacion": {
+      "type": "object",
+      "required": ["direccion", "zona_entrega"],
+      "properties": {
+        "direccion": { "$ref": "comunes.json#/$defs/direccion" },
+        "zona_entrega": { "$ref": "comunes.json#/$defs/poligono" },
+        "publica_direccion": { "type": "boolean", "default": true, "description": "Un productor sin local puede ocultarla." }
+      }
+    },
+    "horarios": { "type": "array", "items": { "$ref": "comunes.json#/$defs/franja_horaria" }, "description": "Cuándo acepta pedidos. Vacío: siempre." },
+    "tiempo_preparacion_min": { "type": "integer", "minimum": 0, "description": "Minutos típicos para ofertas 'preparado'." },
+    "modalidades": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "modalidad.json" },
+      "description": "Formas de entrega que ofrece, con precio y reglas. Ver modalidad.json."
+    },
+    "politica_cancelacion": {
+      "type": "object",
+      "description": "La define el comercio. El protocolo la muestra y la registra; no la arbitra.",
+      "required": ["texto", "hasta_estado"],
+      "properties": {
+        "texto": { "type": "string", "maxLength": 1000 },
+        "hasta_estado": { "type": "string", "enum": ["pagado", "aceptado", "preparando", "listo", "asignado"], "description": "Último estado en el que el usuario puede cancelar." },
+        "cobra_preparado": { "type": "boolean", "default": false },
+        "plazo_devolucion_horas": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "medios_cobro": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] }
+    },
+    "acepta_propinas": { "type": "boolean", "default": true },
+    "notas_para_agentes": { "type": "string", "maxLength": 2000, "description": "Lo que un mozo diría: 'la fugazzeta tarda 30 min los viernes'." },
+    "atributos": { "$ref": "comunes.json#/$defs/atributos" },
+    "imagenes": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
+    "verificacion": {
+      "type": "object",
+      "required": ["cuit_verificado", "foto_geolocalizada", "cuenta_cobro_coincide"],
+      "properties": {
+        "cuit_verificado": { "type": "boolean" },
+        "foto_geolocalizada": { "type": "boolean" },
+        "cuenta_cobro_coincide": { "type": "boolean" },
+        "verificado_en": { "$ref": "comunes.json#/$defs/instante" }
+      }
+    },
+    "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
+    "clave_publica": { "type": "string", "description": "Ed25519, base64url. Con ella se verifican sus firmas." },
+    "privado": {
+      "type": "object",
+      "description": "Solo visible al nodo y al propio comercio. Nunca se federa.",
+      "properties": {
+        "cuit": { "type": "string", "pattern": "^[0-9]{2}-[0-9]{8}-[0-9]$" },
+        "cuenta_cobro": { "type": "object", "properties": { "psp": { "type": "string" }, "referencia": { "type": "string", "description": "Referencia opaca del PSP, nunca un CBU/CVU en claro." } } },
+        "contacto": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } }
+      }
+    }
+  }
+}

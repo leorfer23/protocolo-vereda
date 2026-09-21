@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/error.json",
+  "title": "Error",
+  "description": "Formato único de error (RFC 9457 Problem Details). El campo 'mensaje' es una frase completa en español que un agente puede citar a la persona.",
+  "type": "object",
+  "required": ["codigo", "mensaje", "estado_http"],
+  "properties": {
+    "codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["oferta_no_disponible", "fuera_de_zona", "falta_opcion", "fuera_de_mandato", "requiere_confirmacion", "cupo_agotado", "version_no_soportada"] },
+    "mensaje": { "type": "string", "examples": ["Ese comercio no entrega en tu zona después de las 22."] },
+    "estado_http": { "type": "integer" },
+    "detalle": { "type": "object", "description": "Datos estructurados para el cliente: qué opción falta, hasta qué monto alcanza el mandato, link de confirmación." },
+    "faltantes": { "type": "array", "items": { "type": "object", "properties": { "campo": { "type": "string" }, "grupo_id": { "type": "string" }, "opciones": { "type": "array", "items": { "type": "string" } } } } },
+    "confirmacion": { "type": "object", "properties": { "url": { "type": "string", "format": "uri" }, "codigo": { "type": "string" }, "vence": { "$ref": "comunes.json#/$defs/instante" } } },
+    "instancia": { "type": "string", "format": "uri" }
+  }
+}

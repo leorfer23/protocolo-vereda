@@ -1,0 +1,37 @@
+{
+  "$comentario": "Pizzería: oferta 'preparado' con grupos de opciones. Muestra gustos con mínimo/máximo, tamaño obligatorio y agregados con precio extra.",
+  "id": "01926b3a-1111-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "comercio_id": "01926b3a-0000-7000-8000-000000000001",
+  "tipo": "preparado",
+  "subtipo": "pizza",
+  "nombre": "Pizza a la piedra",
+  "descripcion": "Masa fina, horno a leña. Elegís hasta dos gustos por pizza (mitad y mitad). Sale en 25 minutos, los viernes puede tardar 40.",
+  "categorias": ["Pizzas"],
+  "precio": { "modo": "fijo", "monto": { "centavos": 1200000, "moneda": "ARS" } },
+  "cantidad": { "unidad": "unidad", "minimo": 1, "maximo": 10, "paso": 1 },
+  "grupos_opciones": [
+    { "id": "tamano", "nombre": "Tamaño", "minimo": 1, "maximo": 1,
+      "opciones": [
+        { "id": "chica", "nombre": "Chica (4 porciones)", "precio_extra": { "centavos": -300000, "moneda": "ARS" } },
+        { "id": "grande", "nombre": "Grande (8 porciones)" }
+      ] },
+    { "id": "gustos", "nombre": "Gustos", "descripcion": "Hasta dos, mitad y mitad", "minimo": 1, "maximo": 2,
+      "opciones": [
+        { "id": "muzza", "nombre": "Muzzarella", "atributos": { "vegetariano": true } },
+        { "id": "napo", "nombre": "Napolitana", "atributos": { "vegetariano": true } },
+        { "id": "fugazzeta", "nombre": "Fugazzeta", "precio_extra": { "centavos": 150000, "moneda": "ARS" }, "atributos": { "vegetariano": true } },
+        { "id": "calabresa", "nombre": "Calabresa", "precio_extra": { "centavos": 200000, "moneda": "ARS" } }
+      ] },
+    { "id": "agregados", "nombre": "Agregados", "minimo": 0, "maximo": 5, "repetible": true,
+      "opciones": [
+        { "id": "huevo", "nombre": "Huevo", "precio_extra": { "centavos": 80000, "moneda": "ARS" } },
+        { "id": "morron", "nombre": "Morrón", "precio_extra": { "centavos": 80000, "moneda": "ARS" } }
+      ] }
+  ],
+  "acepta_modificador_libre": true,
+  "disponible": true,
+  "disponibilidad": { "franjas": [ { "dias": ["ma","mi","ju","vi","sa","do"], "desde": "19:00", "hasta": "23:30" } ], "tiempo_preparacion_min": 25 },
+  "modalidades": ["inmediata", "retiro"],
+  "atributos": { "horno_a_lena": true },
+  "notas_para_agentes": "La fugazzeta tarda 40 minutos los viernes. Si piden 'sin cebolla' en fugazzeta, avisar que no tiene sentido."
+}

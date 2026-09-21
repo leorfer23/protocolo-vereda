@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/resena.json",
+  "title": "Reseña",
+  "description": "Solo existe si hay un pedido entregado. Una por par autor-destinatario por pedido. Firmada, pública, no se edita ni se borra. El reseñado puede responder.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["pedido_id", "autor", "destinatario", "puntaje", "firma"],
+  "properties": {
+    "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+    "autor": { "$ref": "comunes.json#/$defs/identidad" },
+    "destinatario": { "$ref": "comunes.json#/$defs/identidad" },
+    "rol_autor": { "type": "string", "enum": ["usuario", "comercio", "repartidor"] },
+    "puntaje": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "texto": { "type": "string", "maxLength": 2000 },
+    "respuesta": { "type": "object", "properties": { "texto": { "type": "string", "maxLength": 2000 }, "instante": { "$ref": "comunes.json#/$defs/instante" }, "firma": { "$ref": "comunes.json#/$defs/firma" } } },
+    "firma": { "$ref": "comunes.json#/$defs/firma" }
+  },
+  "$defs": {
+    "reputacion": {
+      "type": "object",
+      "description": "Promedio simple de los últimos 12 meses con la cantidad al lado. Sin ponderaciones ocultas.",
+      "required": ["promedio", "cantidad", "pedidos_entregados"],
+      "properties": {
+        "promedio": { "type": "number", "minimum": 0, "maximum": 5 },
+        "cantidad": { "type": "integer", "minimum": 0 },
+        "pedidos_entregados": { "type": "integer", "minimum": 0 },
+        "pedidos_aceptados": { "type": "integer", "minimum": 0 },
+        "pedidos_rechazados": { "type": "integer", "minimum": 0 },
+        "desde": { "type": "string", "format": "date" }
+      }
+    }
+  }
+}

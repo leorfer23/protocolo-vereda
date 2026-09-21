@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/modalidad.json",
+  "title": "Modalidad de entrega",
+  "description": "Una forma de entregar que el comercio ofrece. Un comercio publica varias; una oferta puede restringir cuáles aplican.",
+  "type": "object",
+  "required": ["tipo", "precio_envio"],
+  "properties": {
+    "id": { "type": "string", "description": "Identificador local dentro del comercio: 'consolidada-martes'." },
+    "tipo": { "type": "string", "enum": ["inmediata", "franja", "consolidada", "ronda", "punto_entrega", "retiro"] },
+    "nombre": { "type": "string", "description": "Como lo ve el usuario: 'Envío del jueves, más barato'." },
+    "descripcion": { "type": "string", "maxLength": 1000 },
+    "precio_envio": {
+      "type": "object",
+      "required": ["modo"],
+      "properties": {
+        "modo": { "type": "string", "enum": ["gratis", "fijo", "por_tramo", "dividido", "a_cotizar"] },
+        "fijo": { "$ref": "comunes.json#/$defs/monto" },
+        "tramos": { "type": "array", "items": { "type": "object", "required": ["hasta_km", "monto"], "properties": { "hasta_km": { "type": "number" }, "monto": { "$ref": "comunes.json#/$defs/monto" } } } },
+        "quien_paga": { "type": "string", "enum": ["usuario", "comercio", "participantes"], "default": "usuario" }
+      }
+    },
+    "franjas": { "type": "array", "items": { "$ref": "comunes.json#/$defs/franja_horaria" }, "description": "Para 'franja', 'retiro' con horario y 'punto_entrega'." },
+    "consolidada": {
+      "type": "object",
+      "description": "Solo para tipo 'consolidada'.",
+      "required": ["minimo_pedidos", "plazo_horas"],
+      "properties": {
+        "minimo_pedidos": { "type": "integer", "minimum": 2 },
+        "plazo_horas": { "type": "integer", "minimum": 1, "description": "Si no se junta el mínimo, el comercio decide al vencer." },
+        "zona": { "$ref": "comunes.json#/$defs/poligono" },
+        "descuento_pct": { "type": "number", "minimum": 0, "maximum": 100, "description": "Descuento sobre el envío o el producto que el comercio traslada al que espera." },
+        "descuento_sobre": { "type": "string", "enum": ["envio", "producto", "ambos"], "default": "envio" },
+        "promesa": { "type": "string", "description": "Lo que el usuario acepta: 'llega entre hoy y el jueves'." }
+      }
+    },
+    "punto_entrega": {
+      "type": "object",
+      "description": "Solo para tipo 'punto_entrega'.",
+      "required": ["nombre", "direccion"],
+      "properties": {
+        "nombre": { "type": "string" },
+        "direccion": { "$ref": "comunes.json#/$defs/direccion" },
+        "horarios": { "type": "array", "items": { "$ref": "comunes.json#/$defs/franja_horaria" } },
+        "propina_punto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que el punto puede cobrar por guardar." }
+      }
+    },
+    "requisitos_repartidor": {
+      "type": "object",
+      "properties": {
+        "caja_termica": { "type": "boolean" },
+        "vehiculo": { "type": "array", "items": { "type": "string", "enum": ["bici", "moto", "auto", "utilitario"] } }
+      }
+    },
+    "tiempo_maximo_en_camino_min": { "type": "integer", "minimum": 5 }
+  }
+}

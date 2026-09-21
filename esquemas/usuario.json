@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/usuario.json",
+  "title": "Usuario",
+  "description": "Quien compra. Su nombre y dirección solo los ven el comercio y el repartidor de un pedido activo. Sus preferencias las lee cualquier agente que él autorice.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["identidad", "nombre", "reputacion"],
+  "properties": {
+    "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+    "nombre": { "type": "string" },
+    "direcciones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/direccion" } },
+    "preferencias": { "$ref": "#/$defs/preferencias" },
+    "mi_vereda": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" }, "description": "Comercios a los que ya le compró. Su historial." },
+    "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
+    "clave_publica": { "type": "string" },
+    "custodia_clave": { "type": "string", "enum": ["nodo", "propia"], "default": "nodo", "description": "Quién guarda la clave privada. 'nodo': cifrada por el nodo, exportable." },
+    "privado": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } }
+  },
+  "$defs": {
+    "preferencias": {
+      "type": "object",
+      "description": "Perfil declarativo que vive en la red, no en el agente. Cambiar de asistente no obliga a explicar todo de nuevo.",
+      "properties": {
+        "direccion_habitual": { "type": "string", "description": "Etiqueta de una de sus direcciones." },
+        "restricciones": { "type": "array", "items": { "type": "string" }, "description": "'sin_tacc', 'vegetariano', 'sin_mani'. Coinciden con atributos de oferta." },
+        "sustitucion_default": { "type": "string", "enum": ["similar_ok", "misma_marca", "preguntar", "quitar"], "default": "preguntar" },
+        "comercios_favoritos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } },
+        "modalidad_preferida": { "type": "string", "enum": ["inmediata", "franja", "consolidada", "retiro", "la_mas_barata", "la_mas_rapida"] },
+        "no_recibir": { "type": "array", "items": { "$ref": "comunes.json#/$defs/franja_horaria" }, "description": "Horarios en que no quiere entregas." },
+        "tope_por_pedido": { "$ref": "comunes.json#/$defs/monto" },
+        "propina_habitual_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "idioma": { "type": "string", "default": "es-AR" },
+        "notas": { "type": "string", "maxLength": 1000, "description": "Texto libre para agentes: 'no me gusta la cebolla', 'portero hasta las 20'." }
+      }
+    }
+  }
+}

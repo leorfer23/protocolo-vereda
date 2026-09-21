@@ -1,0 +1,11 @@
+{
+  "$comentario": "Mandato que Marta le dio a su asistente: puede pedir hasta $25.000 por pedido y $60.000 por día, siempre confirma en comercios nuevos y suscripciones.",
+  "id": "01926b3a-8888-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
+  "otorgante": "marta@vereda.ar",
+  "agente": { "id": "claude-asistente", "nombre": "Claude" },
+  "scopes": ["leer", "armar", "hablar", "pedir:2500000", "pedir_diario:6000000"],
+  "confirmar_siempre": ["primer_pedido_a_comercio_nuevo", "toda_suscripcion", "sobre_tope", "pedidos_con_alcohol"],
+  "vence": "2027-09-21T00:00:00-03:00",
+  "estado": "activo",
+  "firma": {"firmante":"marta@vereda.ar","clave_publica":"b64u_clave_publica","valor":"b64u_firma","instante":"2026-09-21T15:00:00-03:00"}
+}

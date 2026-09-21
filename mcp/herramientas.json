@@ -1,0 +1,116 @@
+{
+  "$comentario": "Herramientas del servidor MCP de un nodo Vereda. Es la primera interfaz que se publica. Cada herramienta mapea a endpoints de openapi.yaml y lleva descripción en español con ejemplos, para que cualquier asistente la use sin leer la spec.",
+  "servidor": { "nombre": "vereda", "version": "1.0", "url": "https://{nodo}/mcp", "autenticacion": "OAuth 2.1 con mandato (esquemas/mandato.json). Las herramientas públicas no requieren token." },
+  "herramientas": [
+    {
+      "name": "buscar_comercios",
+      "description": "Comercios que entregan en un lugar, ordenados por cercanía, precio y confiabilidad (fórmula pública). Ej: 'pizzerías abiertas cerca de casa', 'verdulerías con retiro'. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "lat": { "type": "number" }, "lng": { "type": "number" }, "tipo": { "type": "string" }, "abierto": { "type": "boolean" }, "modalidad": { "type": "string" }, "q": { "type": "string", "description": "Texto libre: 'comida liviana', 'sin tacc'" } } }
+    },
+    {
+      "name": "buscar_ofertas",
+      "description": "Busca productos, platos o servicios entre comercios cercanos, por texto, atributos o código de barras. Ej: 'leche sin lactosa', 'quién tiene tomate más barato', ean 7790742001009. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "q": { "type": "string" }, "ean": { "type": "string" }, "lat": { "type": "number" }, "lng": { "type": "number" }, "atributos": { "type": "object" }, "orden": { "type": "string", "enum": ["ranking", "distancia", "precio"] } } }
+    },
+    {
+      "name": "ver_oferta",
+      "description": "Detalle completo de una oferta: precio, opciones (con mínimos y máximos), variantes, disponibilidad, modalidades. Leer antes de armar un carrito para saber qué hay que elegir. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["oferta_id"], "properties": { "oferta_id": { "type": "string" } } }
+    },
+    {
+      "name": "ver_comercio",
+      "description": "Detalle de un comercio: horarios, modalidades de entrega con precios, política de cancelación, reputación, notas para agentes. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string" } } }
+    },
+    {
+      "name": "carrito_crear",
+      "description": "Empieza un carrito a un comercio, o desde una lista de compras (que se resuelve contra comercios). Requiere scope 'armar'.",
+      "inputSchema": { "type": "object", "properties": { "comercio_id": { "type": "string" }, "lista_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "'casa', 'trabajo'; usa las direcciones guardadas del usuario" } } }
+    },
+    {
+      "name": "carrito_agregar",
+      "description": "Agrega un ítem con sus opciones. La respuesta dice si el carrito está válido o qué falta elegir (ej: 'falta Tamaño: chica o grande'), en texto que podés repetirle a la persona. Requiere 'armar'.",
+      "inputSchema": { "type": "object", "required": ["carrito_id", "oferta_id", "cantidad"], "properties": { "carrito_id": { "type": "string" }, "oferta_id": { "type": "string" }, "variante_id": { "type": "string" }, "cantidad": { "type": "number" }, "opciones": { "type": "array", "items": { "type": "object", "properties": { "grupo_id": { "type": "string" }, "opcion_id": { "type": "string" } } } }, "modificador_libre": { "type": "string" }, "preferencia_sustitucion": { "type": "string", "enum": ["similar_ok", "misma_marca", "preguntar", "quitar"] } } }
+    },
+    {
+      "name": "carrito_quitar",
+      "description": "Quita un ítem del carrito. Requiere 'armar'.",
+      "inputSchema": { "type": "object", "required": ["carrito_id", "item_id"], "properties": { "carrito_id": { "type": "string" }, "item_id": { "type": "string" } } }
+    },
+    {
+      "name": "carrito_resolver",
+      "description": "Para listas con ítems genéricos: devuelve combinaciones posibles (todo en un comercio o dividido) con precio total, envío, si es un solo viaje y hora estimada. Elegí una o preguntale a la persona. Requiere 'armar'.",
+      "inputSchema": { "type": "object", "required": ["carrito_id"], "properties": { "carrito_id": { "type": "string" } } }
+    },
+    {
+      "name": "carrito_modalidad",
+      "description": "Elige cómo se entrega: inmediata, franja, consolidada (más barata, llega en días), ronda, punto de entrega o retiro. Proponé la más barata que cumpla el apuro de la persona. Requiere 'armar'.",
+      "inputSchema": { "type": "object", "required": ["carrito_id", "tipo"], "properties": { "carrito_id": { "type": "string" }, "tipo": { "type": "string" }, "modalidad_id": { "type": "string" }, "franja": { "type": "object" }, "ronda_id": { "type": "string" }, "grupo_id": { "type": "string" } } }
+    },
+    {
+      "name": "carrito_confirmar",
+      "description": "Crea el pedido y devuelve el QR o link de pago para que la persona pague directo al comercio. Si supera el mandato o es un comercio nuevo, devuelve 'requiere_confirmacion' con un código: pedile a la persona que lo apruebe. Requiere 'pedir'.",
+      "inputSchema": { "type": "object", "required": ["carrito_id", "idempotency_key"], "properties": { "carrito_id": { "type": "string" }, "idempotency_key": { "type": "string" }, "propina_repartidor_centavos": { "type": "integer" }, "propina_comercio_centavos": { "type": "integer" }, "notas": { "type": "string" } } }
+    },
+    {
+      "name": "estado_pedido",
+      "description": "Estado actual, ítems (con sustituciones pendientes), hora estimada, dónde está el repartidor y el reparto del dinero. Requiere 'leer'.",
+      "inputSchema": { "type": "object", "required": ["pedido_id"], "properties": { "pedido_id": { "type": "string" } } }
+    },
+    {
+      "name": "responder_sustitucion",
+      "description": "Acepta o rechaza el reemplazo que propuso el comercio para un ítem faltante. Hay 5 minutos; si la persona no responde, aplica su preferencia. Requiere 'hablar'.",
+      "inputSchema": { "type": "object", "required": ["pedido_id", "item_id", "respuesta"], "properties": { "pedido_id": { "type": "string" }, "item_id": { "type": "string" }, "respuesta": { "type": "string", "enum": ["aceptado", "rechazado"] } } }
+    },
+    {
+      "name": "enviar_mensaje",
+      "description": "Habla con el comercio o el repartidor de un pedido activo, en nombre de la persona. Puede ser texto o una propuesta estructurada. Requiere 'hablar'.",
+      "inputSchema": { "type": "object", "required": ["contexto_tipo", "contexto_id", "texto"], "properties": { "contexto_tipo": { "type": "string" }, "contexto_id": { "type": "string" }, "texto": { "type": "string" }, "tipo": { "type": "string", "enum": ["texto", "propuesta", "aceptar", "rechazar"] } } }
+    },
+    {
+      "name": "mis_listas",
+      "description": "Listas de compras de la persona (carritos persistentes). Requiere 'leer'.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "lista_editar",
+      "description": "Agrega, quita o cambia ítems de una lista. Un ítem puede ser genérico ('tomates', 'leche entera 1 L') y se resuelve al pedir. Requiere 'armar'.",
+      "inputSchema": { "type": "object", "required": ["lista_id"], "properties": { "lista_id": { "type": "string" }, "agregar": { "type": "array" }, "quitar": { "type": "array", "items": { "type": "string" } } } }
+    },
+    {
+      "name": "mis_suscripciones",
+      "description": "Suscripciones activas y su próxima ocurrencia; si hay una abierta para editar, decilo. Requiere 'leer'.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "suscripcion_editar_ocurrencia",
+      "description": "Cambia o saltea la próxima entrega de una suscripción dentro de su ventana. Ej: 'esta semana sacá el viernes y sumá una torta'. Requiere 'suscribir'.",
+      "inputSchema": { "type": "object", "required": ["suscripcion_id", "fecha"], "properties": { "suscripcion_id": { "type": "string" }, "fecha": { "type": "string" }, "saltear": { "type": "boolean" }, "items": { "type": "array" } } }
+    },
+    {
+      "name": "suscripcion_crear",
+      "description": "Crea una suscripción (viandas, catering mensual, compra quincenal). SIEMPRE requiere que la persona confirme; devuelve el código. Requiere 'suscribir'.",
+      "inputSchema": { "type": "object", "required": ["comercio_id", "regla", "items"], "properties": { "comercio_id": { "type": "string" }, "regla": { "type": "string", "description": "RRULE" }, "items": { "type": "array" }, "modalidad": { "type": "object" }, "pago": { "type": "string", "enum": ["por_ocurrencia", "por_periodo"] } } }
+    },
+    {
+      "name": "rondas_cerca",
+      "description": "Rondas abiertas cerca (entregas programadas a un lugar, como 'La Huerta en Los Álamos los viernes'). Sumarse suele ser lo más barato. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "lat": { "type": "number" }, "lng": { "type": "number" } } }
+    },
+    {
+      "name": "grupo_crear_o_unirse",
+      "description": "Crea un pedido grupal con link (el edificio, la oficina) o se une a uno con el link. Cada uno paga lo suyo, un solo envío. Requiere 'armar'.",
+      "inputSchema": { "type": "object", "properties": { "link": { "type": "string" }, "comercio_id": { "type": "string" }, "nombre": { "type": "string" }, "cierre": { "type": "string" } } }
+    },
+    {
+      "name": "mis_preferencias",
+      "description": "Perfil declarativo de la persona: direcciones, restricciones alimentarias, política de sustituciones, comercios favoritos, tope, horarios en que no recibe, notas. Leelo al empezar. Requiere 'leer'.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "mi_vereda",
+      "description": "Comercios a los que la persona ya le compró, con su reputación. Preferilos ante la duda: es la relación que la red quiere reforzar. Requiere 'leer'.",
+      "inputSchema": { "type": "object", "properties": {} }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/catalogo-maestro.json",
+  "title": "Producto del catálogo maestro",
+  "description": "Un producto envasado descripto una sola vez en la red, por EAN. Los comercios solo agregan precio y stock. Licencia ODbL.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["ean", "nombre", "contenido"],
+  "properties": {
+    "ean": { "type": "string", "pattern": "^[0-9]{8,14}$" },
+    "nombre": { "type": "string" },
+    "marca": { "type": "string" },
+    "contenido": { "$ref": "comunes.json#/$defs/cantidad" },
+    "categoria": { "type": "string" },
+    "imagenes": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
+    "atributos": { "$ref": "comunes.json#/$defs/atributos" },
+    "sustitutos_sugeridos": { "type": "array", "items": { "type": "string", "description": "EAN" } },
+    "aportado_por": { "$ref": "comunes.json#/$defs/identidad" }
+  }
+}
