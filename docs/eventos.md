@@ -29,6 +29,7 @@ Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave
 | `mensaje.nuevo` | Chat |
 | `mandato.otorgado`, `mandato.revocado`, `mandato.requiere_confirmacion`, `mandato.confirmado` | Agentes |
 | `oferta.stock_cambiado`, `oferta.precio_cambiado`, `comercio.abierto`, `comercio.cerrado` | Catálogo (público) |
+| `clave.rotada`, `clave.comprometida` | Claves de un actor o del nodo (público). Quien tenga la clave en caché la vuelve a pedir |
 
 ## Idempotencia
 

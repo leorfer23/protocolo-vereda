@@ -6,7 +6,7 @@ Vereda es una red de nodos que hablan el mismo protocolo, como el email. Cualqui
 
 Toda identidad es `actor@nodo`: `marta@vereda.ar`, `lahuerta@nodo.rosario.coop`. El nodo es un dominio. La identidad se resuelve como el email: el nodo de la derecha responde por el actor de la izquierda.
 
-Cada actor tiene un par de claves Ed25519. La clave privada la custodia su nodo, cifrada, salvo que el actor elija custodiarla él (`custodia_clave: propia`). Con ella se firman reseñas, mandatos y las transiciones clave de un pedido (creación, aceptación, entrega).
+Cada actor tiene un par de claves Ed25519. La clave privada la custodia su nodo, cifrada, salvo que el actor elija custodiarla él (`custodia_clave: propia`). Con ella se firman reseñas, mandatos y las transiciones clave de un pedido (creación, aceptación, entrega). Las claves rotan sin invalidar lo ya firmado: ver `docs/claves-y-firmas.md`.
 
 ## Descubrimiento
 
@@ -28,7 +28,7 @@ Cada actor tiene un par de claves Ed25519. La clave privada la custodia su nodo,
 
 1. `marta@vereda.ar` arma un carrito contra `lahuerta@nodo.rosario.coop`. Su nodo lee ofertas y modalidades del nodo del comercio (API pública, cacheable por ETag).
 2. Al confirmar, el nodo de Marta firma el pedido con la clave de Marta y lo envía a `POST https://nodo.rosario.coop/v1/federacion/entrantes`, con firma HTTP del nodo (RFC 9421).
-3. El nodo del comercio valida la firma contra la clave pública de Marta (obtenida de `vereda.ar`), crea el pedido, genera el cobro con el PSP del comercio y devuelve la referencia de pago.
+3. El nodo del comercio valida la firma contra el historial de claves de Marta (`GET https://vereda.ar/v1/actores/marta@vereda.ar/claves`), crea el pedido, genera el cobro con el PSP del comercio y devuelve la referencia de pago.
 4. Cada transición del pedido se publica como evento firmado al nodo de Marta, que actualiza su copia.
 5. La entrega la firma el repartidor; la reseña la firma cada parte y viaja al nodo del reseñado.
 
@@ -48,4 +48,4 @@ Un nodo acepta pedidos de cualquier nodo que publique un `.well-known` válido y
 
 ## Mudanza
 
-`GET /yo/exportar` devuelve un paquete firmado con identidad, clave, historial, reseñas y preferencias. Otro nodo lo importa y publica una redirección firmada desde la identidad vieja a la nueva (`marta@vereda.ar → marta@otro.ar`) durante 12 meses. La reputación se conserva porque las reseñas están firmadas por sus autores, no por el nodo.
+`GET /yo/exportar` devuelve un paquete firmado con identidad, clave, historial, reseñas y preferencias. Otro nodo lo importa y publica una redirección firmada desde la identidad vieja a la nueva (`marta@vereda.ar → marta@otro.ar`) durante 12 meses. La reputación se conserva porque las reseñas están firmadas por sus autores, no por el nodo. El paquete lleva el historial de claves completo. Si la clave la custodiaba el nodo viejo, el nodo nuevo rota al importar: el nodo viejo conoció la clave privada y ya no tiene por qué poder firmar.

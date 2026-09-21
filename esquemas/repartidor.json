@@ -24,6 +24,7 @@
     },
     "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
     "clave_publica": { "type": "string" },
+    "claves": { "$ref": "comunes.json#/$defs/claves", "description": "Historial de claves. 'clave_publica' repite la activa." },
     "privado": {
       "type": "object",
       "properties": {

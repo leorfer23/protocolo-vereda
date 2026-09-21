@@ -14,6 +14,7 @@
     "mi_vereda": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" }, "description": "Comercios a los que ya le compró. Su historial." },
     "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
     "clave_publica": { "type": "string" },
+    "claves": { "$ref": "comunes.json#/$defs/claves", "description": "Historial de claves. 'clave_publica' repite la activa." },
     "custodia_clave": { "type": "string", "enum": ["nodo", "propia"], "default": "nodo", "description": "Quién guarda la clave privada. 'nodo': cifrada por el nodo, exportable." },
     "privado": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } }
   },
