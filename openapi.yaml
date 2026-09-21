@@ -92,6 +92,17 @@ paths:
       requestBody: { content: { application/json: { schema: { type: array, items: { type: object, required: [oferta_id], properties: { oferta_id: { type: string }, variante_id: { type: string }, stock: { type: number }, disponible: { type: boolean }, precio_centavos: { type: integer } } } } } } }
       responses: { "204": { description: Aplicado } }
 
+  /catalogo/{ean}:
+    get:
+      operationId: verProductoDeCatalogo
+      tags: [ofertas]
+      summary: La versión que este nodo tiene de un producto por EAN. Cada nodo publica la suya; no hay una copia central ni merge automático
+      security: []
+      parameters: [ { name: ean, in: path, required: true, schema: { type: string, pattern: "^[0-9]{8,14}$" } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/catalogo-maestro.json" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { description: Este nodo no tiene ese EAN }
   /buscar:
     get:
       operationId: buscarOfertas
@@ -317,6 +328,17 @@ paths:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
         "404": { $ref: "#/components/responses/Error" }
+  /actores/{identidad}/mudanza:
+    get:
+      operationId: verMudanzaDeActor
+      tags: [descubrimiento]
+      summary: Si este actor se mudó a otro nodo, la declaración firmada por él. La publican el nodo nuevo y, si coopera, también el viejo
+      security: []
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/mudanza" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { description: "No se mudó, o este nodo no sabe" }
   /actores/{identidad}/resenas:
     get: { operationId: listarResenasDeActor, tags: [resenas], summary: "Reseñas públicas de un comercio, repartidor o usuario", security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
 

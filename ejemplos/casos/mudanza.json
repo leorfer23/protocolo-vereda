@@ -1,0 +1,110 @@
+{
+  "$comentario": "Casos para la declaración de mudanza. El válido es el vector firmado de vectores-firma.json.",
+  "esquema": "comunes.json#/$defs/mudanza",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Mudanza firmada por el actor, con su historial de claves.",
+      "doc": {
+        "identidad_anterior": "marta@vereda.ar",
+        "identidad_nueva": "marta@otro.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "claves_anteriores": [
+          {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa"
+          }
+        ],
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "rZXgmpSVqstLSGDWvWJGl0l3WGIyfPT21Gt2WS7ZuPLnsbtzWom2unLhxmlNpEEIexbSrvlBivXbkE0Ux_BjBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin firma: sería la palabra del nodo, no la del actor.",
+      "doc": {
+        "identidad_anterior": "marta@vereda.ar",
+        "identidad_nueva": "marta@otro.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "claves_anteriores": [
+          {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin decir a qué identidad se mudó.",
+      "doc": {
+        "identidad_anterior": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "claves_anteriores": [
+          {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa"
+          }
+        ],
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "rZXgmpSVqstLSGDWvWJGl0l3WGIyfPT21Gt2WS7ZuPLnsbtzWom2unLhxmlNpEEIexbSrvlBivXbkE0Ux_BjBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Identidad nueva que no es actor@nodo.",
+      "doc": {
+        "identidad_anterior": "marta@vereda.ar",
+        "identidad_nueva": "marta",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "claves_anteriores": [
+          {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa"
+          }
+        ],
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "rZXgmpSVqstLSGDWvWJGl0l3WGIyfPT21Gt2WS7ZuPLnsbtzWom2unLhxmlNpEEIexbSrvlBivXbkE0Ux_BjBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Campo inventado en la declaración.",
+      "doc": {
+        "identidad_anterior": "marta@vereda.ar",
+        "identidad_nueva": "marta@otro.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "claves_anteriores": [
+          {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa"
+          }
+        ],
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "rZXgmpSVqstLSGDWvWJGl0l3WGIyfPT21Gt2WS7ZuPLnsbtzWom2unLhxmlNpEEIexbSrvlBivXbkE0Ux_BjBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "motivo": "me fui"
+      }
+    }
+  ]
+}

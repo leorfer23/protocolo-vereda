@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vereda.ar/esquemas/v1/catalogo-maestro.json",
   "title": "Producto del catálogo maestro",
-  "description": "Un producto envasado descripto una sola vez en la red, por EAN. Los comercios solo agregan precio y stock. Licencia ODbL.",
+  "description": "Un producto envasado descripto por EAN. Los comercios solo agregan precio y stock. Cada nodo publica su propia versión y la firma quien la aportó: un mismo EAN puede tener versiones distintas en nodos distintos, y no hay merge automático. Ver docs/federacion.md. Licencia ODbL.",
   "type": "object",
   "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
   "required": ["ean", "nombre", "contenido"],
@@ -15,6 +15,7 @@
     "imagenes": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
     "atributos": { "$ref": "comunes.json#/$defs/atributos" },
     "sustitutos_sugeridos": { "type": "array", "items": { "type": "string", "description": "EAN" } },
-    "aportado_por": { "$ref": "comunes.json#/$defs/identidad" }
+    "aportado_por": { "$ref": "comunes.json#/$defs/identidad", "description": "Quién aportó estos datos. Es el criterio con el que un nodo decide si confía en esta versión." },
+    "firma": { "$ref": "comunes.json#/$defs/firma", "description": "De quien aportó los datos. Permite que otro nodo copie la entrada sin perder de vista de dónde salió." }
   }
 }

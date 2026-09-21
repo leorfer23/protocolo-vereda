@@ -25,10 +25,10 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | Carpeta | Contenido |
 | --- | --- |
 | `esquemas/` | 22 esquemas JSON (draft 2020-12): comercio, oferta, promoción, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
-| `openapi.yaml` | La API abierta, 62 rutas. Apps y agentes usan las mismas |
+| `openapi.yaml` | La API abierta, 64 rutas. Apps y agentes usan las mismas |
 | `mcp/herramientas.json` | Las 24 herramientas del servidor MCP, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio, y `vectores-firma.json` con los vectores de prueba de firma |
-| `docs/` | Federación, claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad |
+| `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad |
 | `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1 y reproduce los vectores de firma |
 | `generar-vectores.py` | Regenera `ejemplos/vectores-firma.json`. Determinista: dos corridas dan el mismo archivo |
 
@@ -50,7 +50,7 @@ Pocas, y todas verificables:
 
 ## Lo que el protocolo no hace, a propósito
 
-No media disputas. No reembolsa. No tiene soporte centralizado. No tiene publicidad ni posiciones pagas. No guarda datos que no necesita. No retiene pagos. Comprarle a un desconocido sin historial da menos seguridad que en una plataforma con garantía central: es intencional, favorece al comercio de la vereda que ya conocés.
+No media disputas ni arbitra entre nodos (`docs/federacion.md`). No reembolsa. No tiene soporte centralizado. No tiene publicidad ni posiciones pagas. No guarda datos que no necesita. No retiene pagos. Comprarle a un desconocido sin historial da menos seguridad que en una plataforma con garantía central: es intencional, favorece al comercio de la vereda que ya conocés.
 
 ## Estado
 

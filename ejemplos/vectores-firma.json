@@ -170,6 +170,45 @@
           "instante": "2026-09-21T15:04:05-03:00"
         }
       }
+    },
+    {
+      "nombre": "mudanza-firmada-por-el-actor",
+      "descripcion": "Marta declara que se mudó de nodo. La firma ella, con la clave que ya usaba en el nodo viejo, y el firmante es su identidad anterior. Cualquiera la verifica contra su historial de claves sin preguntarle al nodo viejo: por eso una mudanza no depende de que el nodo viejo coopere.",
+      "esquema": "comunes.json#/$defs/mudanza",
+      "objeto_sin_firma": {
+        "identidad_anterior": "marta@vereda.ar",
+        "identidad_nueva": "marta@otro.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "claves_anteriores": [
+          {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa"
+          }
+        ]
+      },
+      "jcs_utf8_hex": "7b22636c617665735f616e746572696f726573223a5b7b22636c6176655f7075626c696361223a223741534a4f634d45393247456c69722d64546d7270696267477665366a76356f444d63344f637a63763049222c226465736465223a22323032362d30312d31305431303a30303a30302d30333a3030222c2265737461646f223a22616374697661227d5d2c226964656e74696461645f616e746572696f72223a226d61727461407665726564612e6172222c226964656e74696461645f6e75657661223a226d61727461406f74726f2e6172222c22696e7374616e7465223a22323032362d30392d32315431353a30343a30352d30333a3030227d",
+      "jcs_sha256_hex": "27c5f81fe04b24808a9e26f9de10db58facea463339ef6e0f57d63f3e03dbbe6",
+      "jcs_bytes": 253,
+      "campo_firma": "firma",
+      "objeto_firmado": {
+        "identidad_anterior": "marta@vereda.ar",
+        "identidad_nueva": "marta@otro.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "claves_anteriores": [
+          {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa"
+          }
+        ],
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "rZXgmpSVqstLSGDWvWJGl0l3WGIyfPT21Gt2WS7ZuPLnsbtzWom2unLhxmlNpEEIexbSrvlBivXbkE0Ux_BjBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
     }
   ],
   "casos_jcs": [
