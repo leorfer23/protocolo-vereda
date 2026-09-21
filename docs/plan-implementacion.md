@@ -102,7 +102,9 @@ Por qué Cloudflare no sirve como plataforma del nodo (documentación oficial, 2
 - Cloudflare Containers es más barato en cómputo y salida, pero igual obliga a pagar una base en otro lado y a pagar latencia en cada consulta. Con Postgres dominando el presupuesto de latencia, es el peor lugar para ahorrar.
 - El punto débil de AWS es la salida a USD 0,15/GB. Se resuelve con Cloudflare adelante como DNS, CDN y WAF: las lecturas públicas sin token son el tráfico que puede dispararse, y cacheadas no salen de AWS. Imágenes en R2.
 - El ALB es el 37 % del costo mínimo. Alternativa a evaluar al desplegar: una sola instancia EC2 corriendo el mismo `docker-compose.yml` que usarán los terceros, con Cloudflare Tunnel como entrada. Cuesta menos y prueba el camino de quien se aloja solo; resigna los respaldos administrados de RDS.
-- Esta decisión no bloquea nada hasta la fase 2.
+- Dato que hoy deja a Containers fuera para usuarios en Argentina: los Containers cuelgan de un Durable Object, y la documentación dice "Durable Objects hinted to South America spawn in Eastern North America instead". Cada request no cacheado cruzaría el continente antes de llegar al nodo. Revisar cuando Cloudflare cree Durable Objects en Sudamérica.
+- Reparto que aprovecha Cloudflare donde sí compite, que es casi toda la superficie que se toca al desarrollar: DNS, CDN, WAF, R2 para imágenes, Pages para el cliente web y la documentación, y Tunnel como entrada al nodo. En AWS São Paulo queda solo lo que tiene estado: el binario y Postgres. Con Tunnel como entrada, el ALB sobra.
+- Esta decisión no bloquea nada hasta la fase 2. Al llegar ahí, medir P50 y P99 de `confirmarCarrito` desde Buenos Aires antes de cerrarla.
 
 Precios de la API pública de listas de precios de AWS y de la página de precios de Containers. El cómputo de Containers está calculado sobre lo aprovisionado, como cota superior.
 
