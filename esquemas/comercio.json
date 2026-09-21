@@ -91,7 +91,8 @@
       }
     },
     "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
-    "clave_publica": { "type": "string", "description": "Ed25519, base64url. Con ella se verifican sus firmas." },
+    "clave_publica": { "type": "string", "description": "Ed25519, base64url. La clave activa." },
+    "claves": { "$ref": "comunes.json#/$defs/claves", "description": "Historial de claves. 'clave_publica' repite la activa." },
     "privado": {
       "type": "object",
       "description": "Solo visible al nodo y al propio comercio. Nunca se federa.",

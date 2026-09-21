@@ -243,7 +243,7 @@
     },
     "firma": {
       "type": "object",
-      "description": "Firma Ed25519 sobre la representación canónica (JCS, RFC 8785) del objeto sin el campo firma.",
+      "description": "Firma Ed25519 sobre la representación canónica (JCS, RFC 8785) del objeto sin el campo firma. Vale si verifica con 'clave_publica', esa clave está en el historial de 'firmante' e 'instante' cae dentro de su validez. Ver docs/claves-y-firmas.md.",
       "required": [
         "firmante",
         "clave_publica",
@@ -317,6 +317,143 @@
         }
       },
       "additionalProperties": false
+    },
+    "clave": {
+      "type": "object",
+      "description": "Una clave Ed25519 de un actor o de un nodo, con su período de validez. Ver docs/claves-y-firmas.md.",
+      "required": [
+        "clave_publica",
+        "desde",
+        "estado"
+      ],
+      "properties": {
+        "clave_publica": {
+          "type": "string",
+          "description": "Base64url de la clave pública Ed25519."
+        },
+        "desde": {
+          "$ref": "#/$defs/instante"
+        },
+        "hasta": {
+          "$ref": "#/$defs/instante",
+          "description": "Cuándo dejó de usarse para firmar."
+        },
+        "estado": {
+          "type": "string",
+          "enum": [
+            "activa",
+            "retirada",
+            "comprometida"
+          ],
+          "description": "'retirada': rotación normal; sus firmas anteriores a 'hasta' valen para siempre. 'comprometida': alguien más pudo tenerla; sus firmas valen solo si la otra parte ya las había registrado antes de 'comprometida_desde'."
+        },
+        "comprometida_desde": {
+          "$ref": "#/$defs/instante"
+        },
+        "avalada_por": {
+          "type": "object",
+          "required": [
+            "clave_publica",
+            "valor"
+          ],
+          "description": "La clave anterior firma esta entrada (JCS de la entrada sin 'avalada_por'). Encadena las claves sin depender del nodo, así el historial sobrevive a una mudanza. Ausente en la primera clave y cuando la anterior se perdió o se comprometió; en ese caso responde solo el nodo.",
+          "properties": {
+            "clave_publica": {
+              "type": "string"
+            },
+            "valor": {
+              "type": "string",
+              "description": "Base64url de la firma."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "estado": {
+                "const": "activa"
+              }
+            },
+            "required": [
+              "estado"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "hasta"
+                  ]
+                },
+                {
+                  "required": [
+                    "comprometida_desde"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "estado": {
+                "const": "retirada"
+              }
+            },
+            "required": [
+              "estado"
+            ]
+          },
+          "then": {
+            "required": [
+              "hasta"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "estado": {
+                "const": "comprometida"
+              }
+            },
+            "required": [
+              "estado"
+            ]
+          },
+          "then": {
+            "required": [
+              "comprometida_desde"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "claves": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/clave"
+      },
+      "description": "Historial completo, de la más vieja a la más nueva. Nunca se borra una entrada. Exactamente una 'activa'.",
+      "contains": {
+        "properties": {
+          "estado": {
+            "const": "activa"
+          }
+        },
+        "required": [
+          "estado"
+        ]
+      },
+      "minContains": 1,
+      "maxContains": 1
     }
   }
 }

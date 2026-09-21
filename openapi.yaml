@@ -306,6 +306,17 @@ paths:
     post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
   /resenas/{id}/respuesta:
     post: { operationId: responderResena, tags: [resenas], summary: Responder públicamente una reseña, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: OK } } }
+  /actores/{identidad}/claves:
+    get:
+      operationId: listarClavesDeActor
+      tags: [descubrimiento]
+      summary: Historial de claves públicas de un actor de este nodo. Con esto se verifica cualquier firma suya, nueva o vieja
+      security: []
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { $ref: "#/components/responses/Error" }
   /actores/{identidad}/resenas:
     get: { operationId: listarResenasDeActor, tags: [resenas], summary: "Reseñas públicas de un comercio, repartidor o usuario", security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
 
@@ -323,6 +334,22 @@ paths:
     put: { operationId: guardarPreferencias, tags: [yo], summary: Preferencias declarativas que cualquier agente autorizado lee, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/preferencias" } } } }, responses: { "204": { description: OK } } }
   /yo/puntos:
     get: { operationId: listarMisPuntos, tags: [yo], summary: "Mis saldos de puntos, uno por comercio, cada uno firmado por su comercio", security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/SaldoPuntos" } } } } } } }
+  /yo/claves/rotar:
+    post:
+      operationId: rotarClave
+      tags: [yo]
+      summary: Rotar mi clave. La anterior queda retirada y avala a la nueva. Nunca por mandato
+      security: [ { sesion: [] } ]
+      requestBody: { content: { application/json: { schema: { type: object, description: "Vacío si el nodo custodia la clave. Con custodia propia, la entrada nueva ya avalada.", properties: { clave: { $ref: "esquemas/comunes.json#/$defs/clave" } } } } } }
+      responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "422": { $ref: "#/components/responses/Error" } }
+  /yo/claves/comprometida:
+    post:
+      operationId: declararClaveComprometida
+      tags: [yo]
+      summary: Declarar comprometida una clave mía desde un instante, y rotar. Nunca por mandato
+      security: [ { sesion: [] } ]
+      requestBody: { content: { application/json: { schema: { type: object, required: [clave_publica, comprometida_desde], properties: { clave_publica: { type: string }, comprometida_desde: { $ref: "esquemas/comunes.json#/$defs/instante" }, clave: { $ref: "esquemas/comunes.json#/$defs/clave" } } } } } }
+      responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "422": { $ref: "#/components/responses/Error" } }
   /yo/exportar:
     get: { operationId: exportarCuenta, tags: [yo], summary: "Todo lo mío, firmado: identidad, clave, historial, reseñas. Para irme a otro nodo.", security: [ { sesion: [] } ], responses: { "200": { description: Paquete firmado, content: { application/json: { schema: { type: object } } } } } }
   /yo/borrar:
@@ -384,7 +411,8 @@ components:
         nodo: { type: string }
         nombre: { type: string }
         versiones: { type: array, items: { type: string } }
-        clave_publica: { type: string }
+        clave_publica: { type: string, description: "La clave activa del nodo. Es el keyid de sus firmas HTTP (RFC 9421)." }
+        claves: { $ref: "esquemas/comunes.json#/$defs/claves" }
         operador: { type: string }
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
