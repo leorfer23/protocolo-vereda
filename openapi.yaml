@@ -13,7 +13,7 @@ servers:
   - url: https://{nodo}/v1
     variables: { nodo: { default: vereda.ar } }
 tags:
-  - { name: descubrimiento, description: Nodo, versiones y federación }
+  - { name: descubrimiento, description: "Nodo, versiones y federación" }
   - { name: comercios, description: Público }
   - { name: ofertas, description: Público }
   - { name: carrito, description: Armado paso a paso; valida y dice qué falta }
@@ -51,7 +51,7 @@ paths:
         - { name: abierto, in: query, schema: { type: boolean } }
         - { name: modalidad, in: query, schema: { type: string, enum: [inmediata, franja, consolidada, ronda, punto_entrega, retiro] } }
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
-        - { name: q, in: query, schema: { type: string }, description: Texto libre, también semántico }
+        - { name: q, in: query, schema: { type: string }, description: "Texto libre, también semántico" }
       responses:
         "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/comercio.json" } } } } }
   /comercios/{id}:
@@ -136,7 +136,7 @@ paths:
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /pedidos/{id}:
-    get: { tags: [pedidos], summary: Estado, ítems, ETA, ubicación del repartidor, security: [ { sesion: [] }, { mandato: [leer] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
+    get: { tags: [pedidos], summary: "Estado, ítems, ETA, ubicación del repartidor", security: [ { sesion: [] }, { mandato: [leer] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
   /pedidos/{id}/items/{item}/respuesta:
     post:
       tags: [pedidos]
@@ -196,7 +196,7 @@ paths:
     get: { tags: [suscripciones], summary: Mis suscripciones (usuario) o mi cartera (comercio), security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/suscripcion.json" } } } } } } }
     post: { tags: [suscripciones], summary: Crear. Siempre requiere confirmación humana si la crea un agente., security: [ { sesion: [] }, { mandato: [suscribir] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/suscripcion.json" } } } }, responses: { "201": { description: Creada }, "402": { $ref: "#/components/responses/Error" } } }
   /suscripciones/{id}:
-    patch: { tags: [suscripciones], summary: Pausar, reanudar, cancelar o editar la plantilla, security: [ { sesion: [] }, { mandato: [suscribir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    patch: { tags: [suscripciones], summary: "Pausar, reanudar, cancelar o editar la plantilla", security: [ { sesion: [] }, { mandato: [suscribir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
   /suscripciones/{id}/ocurrencias/{fecha}:
     patch:
       tags: [suscripciones]
@@ -257,11 +257,11 @@ paths:
       responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mensaje.json" } } } } } }
 
   /resenas:
-    post: { tags: [resenas], summary: Reseñar un pedido entregado (dentro de 7 días, una por par), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
+    post: { tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
   /resenas/{id}/respuesta:
     post: { tags: [resenas], summary: Responder públicamente una reseña, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: OK } } }
   /actores/{identidad}/resenas:
-    get: { tags: [resenas], summary: Reseñas públicas de un comercio, repartidor o usuario, security: [], parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } } } }
+    get: { tags: [resenas], summary: "Reseñas públicas de un comercio, repartidor o usuario", security: [], parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } } } }
 
   /mandatos:
     get: { tags: [mandatos], summary: Mis mandatos activos, security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mandato.json" } } } } } } }
