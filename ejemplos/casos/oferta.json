@@ -1,0 +1,621 @@
+{
+  "$comentario": "Casos mínimos para oferta.json: cada inválido es una base válida con un solo cambio.",
+  "esquema": "oferta.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Base mínima: producto.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Base mínima: pesable.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "pesable",
+        "nombre": "Tomate",
+        "precio": {
+          "modo": "por_unidad",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "kg",
+          "aproximada": true
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Base mínima: compuesto.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "compuesto",
+        "nombre": "Combo",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "componentes": [
+          {
+            "id": "bebida",
+            "nombre": "Bebida",
+            "oferta_id": "01926b3a-9999-7000-8000-0000000000aa"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Base mínima: servicio.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "servicio",
+        "nombre": "Catering",
+        "precio": {
+          "modo": "por_persona",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "persona"
+        },
+        "servicio": {
+          "personas_minimo": 10
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Base mínima: recurrente.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "recurrente",
+        "nombre": "Viandas",
+        "precio": {
+          "modo": "por_periodo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "semana"
+        },
+        "recurrente": {
+          "reglas_permitidas": [
+            "FREQ=WEEKLY;BYDAY=MO"
+          ],
+          "pago": "por_periodo",
+          "periodo": "semana"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Base mínima: a_cotizar.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "preparado",
+        "nombre": "Torta a medida",
+        "precio": {
+          "modo": "a_cotizar"
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Precio fijo sin monto.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo"
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "A cotizar con monto publicado.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "preparado",
+        "nombre": "Torta a medida",
+        "precio": {
+          "modo": "a_cotizar",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Pesable con precio fijo.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "pesable",
+        "nombre": "Tomate",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "kg",
+          "aproximada": true
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Pesable sin cantidad aproximada.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "pesable",
+        "nombre": "Tomate",
+        "precio": {
+          "modo": "por_unidad",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "kg"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Compuesto sin componentes.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "compuesto",
+        "nombre": "Combo",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Componente que es a la vez fijo y a elección.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "compuesto",
+        "nombre": "Combo",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "componentes": [
+          {
+            "id": "bebida",
+            "nombre": "Bebida",
+            "oferta_id": "01926b3a-9999-7000-8000-0000000000aa",
+            "elegir": {
+              "minimo": 1,
+              "maximo": 1,
+              "de": [
+                "01926b3a-9999-7000-8000-0000000000aa"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Componente que no es ni fijo ni a elección.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "compuesto",
+        "nombre": "Combo",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "componentes": [
+          {
+            "id": "bebida",
+            "nombre": "Bebida"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Recurrente sin bloque 'recurrente'.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "recurrente",
+        "nombre": "Viandas",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "semana"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Recurrente sin reglas de repetición.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "recurrente",
+        "nombre": "Viandas",
+        "precio": {
+          "modo": "por_periodo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "semana"
+        },
+        "recurrente": {
+          "reglas_permitidas": [],
+          "pago": "por_periodo",
+          "periodo": "semana"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Pago por período sin decir cuál.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "recurrente",
+        "nombre": "Viandas",
+        "precio": {
+          "modo": "por_periodo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "semana"
+        },
+        "recurrente": {
+          "reglas_permitidas": [
+            "FREQ=WEEKLY;BYDAY=MO"
+          ],
+          "pago": "por_periodo"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Precio por período con pago por ocurrencia.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "recurrente",
+        "nombre": "Viandas",
+        "precio": {
+          "modo": "por_periodo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "semana"
+        },
+        "recurrente": {
+          "reglas_permitidas": [
+            "FREQ=WEEKLY;BYDAY=MO"
+          ],
+          "pago": "por_ocurrencia",
+          "periodo": "semana"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Producto con bloque 'recurrente'.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "recurrente": {
+          "reglas_permitidas": [
+            "FREQ=WEEKLY;BYDAY=MO"
+          ],
+          "pago": "por_periodo",
+          "periodo": "semana"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Producto con bloque 'servicio'.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "servicio": {
+          "personas_minimo": 2
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Precio por período en algo que no es recurrente.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "por_periodo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Precio por persona con cantidad en unidades.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "servicio",
+        "nombre": "Catering",
+        "precio": {
+          "modo": "por_persona",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "servicio": {
+          "personas_minimo": 10
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Stock numérico sin cantidad.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "stock": {
+          "modo": "numerico"
+        }
+      }
+    }
+  ]
+}
