@@ -91,6 +91,40 @@
     },
     {
       "espera": "valido",
+      "porque": "Escalera medida a precio de lista.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Más llevás, más ahorrás",
+        "tipo": "escala_canasta",
+        "escala_canasta": {
+          "tramos": [
+            {
+              "desde": {
+                "centavos": 3000000,
+                "moneda": "ARS"
+              },
+              "descuento_pct": 10
+            },
+            {
+              "desde": {
+                "centavos": 6000000,
+                "moneda": "ARS"
+              },
+              "descuento_pct": 15
+            }
+          ],
+          "base": "lista"
+        }
+      }
+    },
+    {
+      "espera": "valido",
       "porque": "Envío gratis desde $30.000.",
       "doc": {
         "id": "01926b3a-7777-7000-8000-000000000001",

@@ -58,6 +58,7 @@
         "centavos_por_punto": { "type": "integer", "minimum": 1, "description": "Cada cuánto gastado en productos se gana 1 punto. 100000: un punto cada $1.000." },
         "valor_punto_centavos": { "type": "integer", "minimum": 1, "description": "Cuánto descuenta cada punto al canjearlo." },
         "minimo_canje": { "type": "integer", "minimum": 1, "default": 1 },
+        "canje_maximo_pct": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "default": 100, "description": "Qué parte del total de productos se puede pagar con puntos en un pedido." },
         "vencen_a_los_dias": { "type": "integer", "minimum": 1, "description": "Desde que se ganan. Ausente: no vencen." },
         "descripcion": { "type": "string", "maxLength": 500 }
       }

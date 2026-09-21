@@ -16,6 +16,8 @@ Las promociones son del comercio, son públicas (`GET /comercios/{id}/promocione
 | 10 % en efectivo, 5 % retirando, martes de verdulería | `descuento` | con `condiciones` |
 | Puntos por volver | `comercio.fidelidad` | ver abajo |
 
+Todo lo comercial lo decide el comercio: qué promociones publica, si se acumulan, contra qué total mide la escalera, cuánto vale un punto y cuánto se puede pagar con puntos. Lo único fijo es el algoritmo, para que todos lleguen a la misma cuenta.
+
 `condiciones` acota cualquiera: vigencia, días, modalidades, medios de cobro, primera compra, máximo de unidades, tope de descuento.
 
 ## El algoritmo
@@ -29,8 +31,8 @@ Se corre al armar el carrito (para mostrar) y al confirmar (para congelar).
    - `descuento`: porcentaje o monto por unidad, nunca por debajo de cero.
    - Se descuenta sobre `precio_unitario`; los extras de opciones no se descuentan.
    - Entre las no acumulables gana la que más descuenta; si empatan, la de `id` menor. Después se aplican las `acumulable`, en orden de `id`, sobre el precio ya descontado.
-3. **Por canasta.** Sobre el total de productos ya descontado en el paso 2, contando solo los ítems del `alcance`. Gana el tramo más alto alcanzado. Se elige por separado la mejor sobre `productos` y la mejor sobre `envio`.
-4. **Puntos.** El canje va último. No baja de cero y no toca envío ni propinas.
+3. **Por canasta.** Sobre el total de productos de los ítems del `alcance`. El comercio elige en `base` contra qué se miden los tramos: `descontado` (por defecto), el total tras el paso 2; o `lista`, a precio de lista. El porcentaje se aplica siempre sobre el total ya descontado. Gana el tramo más alto alcanzado. Se elige por separado la mejor sobre `productos` y la mejor sobre `envio`.
+4. **Puntos.** El canje va último. No baja de cero, no toca envío ni propinas y no supera `fidelidad.canje_maximo_pct` del total de productos.
 5. **Redondeo.** Cada descuento se redondea hacia abajo al centavo.
 6. **Topes.** `maximo_unidades` y `tope_descuento` recortan el resultado de su promoción.
 
@@ -51,7 +53,7 @@ Tres gaseosas de $1.950, dos yerbas de $5.400 y un aceite de $16.000. Promocione
 
 `totales.descuentos` es $5.520. Con un punto cada $1.000, al entregarse gana 27 puntos.
 
-El orden importa: el tramo de canasta se mide después del 3x2. Con $32.650 de lista alcanza igual, pero con una yerba menos ($27.250 de lista, $25.300 tras el 3x2) no llegaría.
+El orden importa: con `base: descontado`, el tramo de canasta se mide después del 3x2. Con $32.650 de lista alcanza igual, pero con una yerba menos ($27.250 de lista, $25.300 tras el 3x2) no llegaría.
 
 ## Puntos
 

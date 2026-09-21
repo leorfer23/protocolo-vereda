@@ -285,7 +285,7 @@
       "required": [
         "tramos"
       ],
-      "description": "Sobre el total de productos ya descontado por ítem. Gana el tramo más alto alcanzado.",
+      "description": "Sobre el total de productos. Gana el tramo más alto alcanzado.",
       "properties": {
         "sobre": {
           "type": "string",
@@ -295,6 +295,15 @@
           ],
           "default": "productos",
           "description": "'envio': bonifica el envío ('envío gratis desde $30.000' es 100 % sobre envío)."
+        },
+        "base": {
+          "type": "string",
+          "enum": [
+            "descontado",
+            "lista"
+          ],
+          "default": "descontado",
+          "description": "Contra qué total se miden los tramos. 'descontado': después de las promociones por ítem. 'lista': antes, a precio de lista. Lo elige el comercio."
         },
         "tramos": {
           "type": "array",
