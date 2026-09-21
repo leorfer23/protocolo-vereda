@@ -7,6 +7,176 @@
   "allOf": [
     {
       "$ref": "comunes.json#/$defs/metadatos"
+    },
+    {
+      "description": "Un pesable se cobra por unidad de medida y su cantidad final se conoce al preparar.",
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "pesable"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "then": {
+        "properties": {
+          "precio": {
+            "properties": {
+              "modo": {
+                "const": "por_unidad"
+              }
+            }
+          },
+          "cantidad": {
+            "required": [
+              "aproximada"
+            ],
+            "properties": {
+              "aproximada": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Un compuesto tiene al menos un componente.",
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "compuesto"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "then": {
+        "required": [
+          "componentes"
+        ],
+        "properties": {
+          "componentes": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "description": "Un recurrente dice cómo se suscribe.",
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "recurrente"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "then": {
+        "required": [
+          "recurrente"
+        ]
+      }
+    },
+    {
+      "description": "El bloque 'recurrente' es solo para tipo 'recurrente'.",
+      "if": {
+        "required": [
+          "recurrente"
+        ]
+      },
+      "then": {
+        "properties": {
+          "tipo": {
+            "const": "recurrente"
+          }
+        }
+      }
+    },
+    {
+      "description": "El bloque 'servicio' es solo para tipo 'servicio'.",
+      "if": {
+        "required": [
+          "servicio"
+        ]
+      },
+      "then": {
+        "properties": {
+          "tipo": {
+            "const": "servicio"
+          }
+        }
+      }
+    },
+    {
+      "description": "Precio por período: solo en recurrentes que se pagan por período.",
+      "if": {
+        "properties": {
+          "precio": {
+            "properties": {
+              "modo": {
+                "const": "por_periodo"
+              }
+            },
+            "required": [
+              "modo"
+            ]
+          }
+        },
+        "required": [
+          "precio"
+        ]
+      },
+      "then": {
+        "properties": {
+          "tipo": {
+            "const": "recurrente"
+          },
+          "recurrente": {
+            "properties": {
+              "pago": {
+                "const": "por_periodo"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Precio por persona: la cantidad se pide en personas.",
+      "if": {
+        "properties": {
+          "precio": {
+            "properties": {
+              "modo": {
+                "const": "por_persona"
+              }
+            },
+            "required": [
+              "modo"
+            ]
+          }
+        },
+        "required": [
+          "precio"
+        ]
+      },
+      "then": {
+        "properties": {
+          "cantidad": {
+            "properties": {
+              "unidad": {
+                "const": "persona"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "required": [
@@ -120,7 +290,7 @@
     },
     "componentes": {
       "type": "array",
-      "description": "Para 'compuesto' y 'recurrente': partes de la oferta, cada una a su vez una oferta o una elección entre varias.",
+      "description": "Obligatorio en 'compuesto'; también lo usan 'recurrente' y 'servicio': partes de la oferta, cada una a su vez una oferta o una elección entre varias.",
       "items": {
         "$ref": "#/$defs/componente"
       }
@@ -155,6 +325,21 @@
         "actualizado": {
           "$ref": "comunes.json#/$defs/instante"
         }
+      },
+      "if": {
+        "properties": {
+          "modo": {
+            "const": "numerico"
+          }
+        },
+        "required": [
+          "modo"
+        ]
+      },
+      "then": {
+        "required": [
+          "cantidad"
+        ]
       }
     },
     "disponibilidad": {
@@ -228,7 +413,8 @@
           "items": {
             "type": "string"
           },
-          "description": "RRULE (RFC 5545) que el comercio ofrece: 'FREQ=WEEKLY;BYDAY=MO'."
+          "description": "RRULE (RFC 5545) que el comercio ofrece: 'FREQ=WEEKLY;BYDAY=MO'.",
+          "minItems": 1
         },
         "pago": {
           "type": "string",
@@ -264,6 +450,25 @@
           "type": "integer",
           "minimum": 0
         }
+      },
+      "required": [
+        "reglas_permitidas",
+        "pago"
+      ],
+      "if": {
+        "properties": {
+          "pago": {
+            "const": "por_periodo"
+          }
+        },
+        "required": [
+          "pago"
+        ]
+      },
+      "then": {
+        "required": [
+          "periodo"
+        ]
       }
     },
     "atributos": {
@@ -305,6 +510,29 @@
         "vigente_hasta": {
           "$ref": "comunes.json#/$defs/instante"
         }
+      },
+      "if": {
+        "properties": {
+          "modo": {
+            "const": "a_cotizar"
+          }
+        },
+        "required": [
+          "modo"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "monto"
+          ]
+        },
+        "description": "A cotizar: no hay monto publicado; el precio sale de una cotización."
+      },
+      "else": {
+        "required": [
+          "monto"
+        ]
       }
     },
     "grupo_opciones": {
@@ -452,14 +680,27 @@
               "items": {
                 "$ref": "comunes.json#/$defs/id"
               },
-              "description": "Ids de ofertas elegibles."
+              "description": "Ids de ofertas elegibles.",
+              "minItems": 1
             }
           }
         },
         "cantidad": {
           "$ref": "comunes.json#/$defs/cantidad"
         }
-      }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "oferta_id"
+          ]
+        },
+        {
+          "required": [
+            "elegir"
+          ]
+        }
+      ]
     }
   }
 }
