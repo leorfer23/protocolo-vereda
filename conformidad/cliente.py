@@ -67,3 +67,10 @@ def post(url, headers=None, json_body=None, timeout=TIMEOUT_S) -> Respuesta:
 
 def solicitud(metodo, url, headers=None, json_body=None, timeout=TIMEOUT_S) -> Respuesta:
     return _pedido(metodo.upper(), url, headers=headers or {}, json=json_body, timeout=timeout)
+
+
+def solicitud_cruda(metodo, url, headers=None, cuerpo: bytes = b"", timeout=TIMEOUT_S) -> Respuesta:
+    """Como `solicitud`, pero manda `cuerpo` tal cual, byte a byte -- para
+    cuando el llamador ya firmó esos bytes exactos (RFC 9421, nivel C) y
+    dejar que `requests` los reserialice como JSON rompería la firma."""
+    return _pedido(metodo.upper(), url, headers=headers or {}, data=cuerpo, timeout=timeout)
