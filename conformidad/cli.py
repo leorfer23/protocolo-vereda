@@ -1,20 +1,17 @@
-"""python3 -m conformidad <url> -- ver docs/suite-conformidad.md.
-
-Nivel B (autenticado) todavía no existe; pedirlo hoy falla explícito en vez
-de correr a medias."""
+"""python3 -m conformidad <url> -- ver docs/suite-conformidad.md."""
 import argparse
 import json
 import sys
 
-from . import nivel_a, nivel_c, reporte
+from . import nivel_a, nivel_b, nivel_c, reporte
 
-NIVELES_DISPONIBLES = {"a", "c"}
+NIVELES_DISPONIBLES = {"a", "b", "c"}
 
 
 def main(argv=None):
     p = argparse.ArgumentParser(prog="python3 -m conformidad", description="Suite de conformidad de Vereda.")
     p.add_argument("url", help="Origen del nodo, ej. https://vereda.ar (sin /v1)")
-    p.add_argument("--nivel", default="a", help="'a' (anónimo), 'c' (federación) o 'a,c'. 'b' todavía no existe.")
+    p.add_argument("--nivel", default="a", help="'a' (anónimo), 'b' (autenticado), 'c' (federación), o una combinación, ej. 'a,b,c'.")
     p.add_argument("--lat", type=float, default=nivel_a.LAT_DEFECTO, help=f"nivel A -- default {nivel_a.LAT_DEFECTO} (Buenos Aires)")
     p.add_argument("--lng", type=float, default=nivel_a.LNG_DEFECTO, help=f"nivel A -- default {nivel_a.LNG_DEFECTO} (Buenos Aires)")
     p.add_argument("--timeout", type=float, default=8.0, help="segundos por request (default 8)")
@@ -29,6 +26,8 @@ def main(argv=None):
             "no golpear un nodo de producción sin que quien corre la suite lo pida explícito."
         ),
     )
+    p.add_argument("--sesion", help="nivel B -- token de sesión de un actor de prueba. Nunca se genera solo: siempre por acá.")
+    p.add_argument("--mandato", help="nivel B -- token de mandato de un actor de prueba. Sin esto, el nivel B corre igual pero omite tope/rotarClave/revocación.")
     args = p.parse_args(argv)
 
     niveles = [n.strip().lower() for n in args.nivel.split(",") if n.strip()]
@@ -36,10 +35,15 @@ def main(argv=None):
     if desconocidos:
         print(f"todavía no existe el nivel {desconocidos[0]!r}; disponibles: {sorted(NIVELES_DISPONIBLES)} (ver docs/suite-conformidad.md)", file=sys.stderr)
         return 2
+    if "b" in niveles and not args.sesion:
+        print("el nivel B necesita --sesion (nunca se autobootstrapea); ver docs/suite-conformidad.md", file=sys.stderr)
+        return 2
 
     resultados = {}
     if "a" in niveles:
         resultados["a"] = nivel_a.correr(args.url, lat=args.lat, lng=args.lng, timeout=args.timeout, incluir_negativos=args.incluir_negativos)
+    if "b" in niveles:
+        resultados["b"] = nivel_b.correr(args.url, sesion=args.sesion, mandato=args.mandato, timeout=args.timeout)
     if "c" in niveles:
         resultados["c"] = nivel_c.correr(args.url, timeout=args.timeout)
 
