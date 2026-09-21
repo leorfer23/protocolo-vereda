@@ -1,0 +1,296 @@
+{
+  "$comentario": "Vectores de prueba de firma del Protocolo Vereda. Una implementación conforme tiene que reproducir cada byte de este archivo.",
+  "version_esquema": "1.0",
+  "como_reproducir": {
+    "1_semilla": "La clave privada de cada actor es Ed25519 a partir de la semilla SHA-256('vereda:vector:<etiqueta>'). Las etiquetas están en 'claves'. Son claves de prueba: nunca se usan en producción.",
+    "2_canonicalizar": "Se quita el campo de firma del objeto y se serializa con JCS (RFC 8785). El resultado está en 'jcs_utf8_hex'.",
+    "3_firmar": "Ed25519 (RFC 8032) sobre esos bytes exactos. La firma va en base64url sin relleno.",
+    "4_verificar": "python3 validar.py comprueba cada vector de este archivo."
+  },
+  "referencias": {
+    "canonicalizacion": "RFC 8785 (JCS)",
+    "firma": "RFC 8032 (Ed25519)",
+    "firma_http": "RFC 9421 (HTTP Message Signatures), único mecanismo; sin draft-cavage ni double-knocking",
+    "digest": "RFC 9530 (Content-Digest)"
+  },
+  "claves": [
+    {
+      "actor": "marta@vereda.ar",
+      "etiqueta_semilla": "marta",
+      "semilla_sha256_de": "vereda:vector:marta",
+      "semilla_hex": "dce38dc158a2f04fdf858648e704647633354fc16b94b9a32a13de39c90d8d76",
+      "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I"
+    },
+    {
+      "actor": "lahuerta@nodo.rosario.coop",
+      "etiqueta_semilla": "lahuerta",
+      "semilla_sha256_de": "vereda:vector:lahuerta",
+      "semilla_hex": "d876b4607f594b3fcf385553eb0fba0a8287e840c7e7e0f2f69ca05d0a19faa4",
+      "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k"
+    },
+    {
+      "actor": "vereda.ar",
+      "etiqueta_semilla": "nodo-vereda",
+      "semilla_sha256_de": "vereda:vector:nodo-vereda",
+      "semilla_hex": "03a144db3cf19477c9239ae983ad6cb4ea5d2605e15b8df362858cd3acefb97f",
+      "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU"
+    },
+    {
+      "actor": "nodo.rosario.coop",
+      "etiqueta_semilla": "nodo-rosario",
+      "semilla_sha256_de": "vereda:vector:nodo-rosario",
+      "semilla_hex": "a53252c256e62c729685aef1adc54dd5c46b3ac479b95bed69b19ff83457f3cf",
+      "clave_publica": "xGDj8g3W0IIBhvwEl78mOEMl-2szOTnTrDzTDLfvbqw"
+    },
+    {
+      "actor": "marta@vereda.ar (clave anterior, rotada)",
+      "etiqueta_semilla": "marta-clave-1",
+      "semilla_sha256_de": "vereda:vector:marta-clave-1",
+      "semilla_hex": "d57feee1bfccc96f599658c697b29b2f7ceb085bd5edff3617ae96567e1e8f5a",
+      "clave_publica": "okgRJSnLG2cF-1uXnsEK4Cta4ZnJtJQ9RP1XQKRyDdM"
+    },
+    {
+      "actor": "marta@vereda.ar (clave nueva del vector de rotación)",
+      "etiqueta_semilla": "marta-clave-2",
+      "semilla_sha256_de": "vereda:vector:marta-clave-2",
+      "semilla_hex": "9ff170759c56c3a0238b4325e032b1b7f202654d478a9c12c2a79fbcab4eecec",
+      "clave_publica": "BUPjbeGtgeFDkRh6qIZqmISgRkQf8ausymaTGIlqwLg"
+    }
+  ],
+  "vectores": [
+    {
+      "nombre": "resena-firmada",
+      "descripcion": "Reseña firmada por su autora. El texto lleva acentos, ñ, cedilla y un símbolo fuera del BMP a propósito: es donde más difieren las implementaciones de JCS.",
+      "esquema": "resena.json",
+      "objeto_sin_firma": {
+        "id": "01926b3a-1111-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000000a",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "texto": "Tomates impecables y llegó antes de la franja. Ñandú, açaí, 5 ★."
+      },
+      "jcs_utf8_hex": "7b2261637475616c697a61646f223a22323032362d30392d32315431353a30343a30352d30333a3030222c226175746f72223a226d61727461407665726564612e6172222c2263726561646f223a22323032362d30392d32315431353a30343a30352d30333a3030222c2264657374696e61746172696f223a226c61687565727461406e6f646f2e726f736172696f2e636f6f70222c226964223a2230313932366233612d313131312d373030302d383030302d303030303030303030303031222c226e6f646f223a227665726564612e6172222c2270656469646f5f6964223a2230313932366233612d303030302d373030302d383030302d303030303030303030303061222c2270756e74616a65223a352c22726f6c5f6175746f72223a227573756172696f222c22746578746f223a22546f6d6174657320696d70656361626c65732079206c6c6567c3b320616e746573206465206c61206672616e6a612e20c391616e64c3ba2c2061c3a761c3ad2c203520e298852e222c2276657273696f6e5f65737175656d61223a22312e30227d",
+      "jcs_sha256_hex": "00bff3767541cb12a599410d70d06f3ad321a300f8940f907fc56f371f7ae6b2",
+      "jcs_bytes": 404,
+      "campo_firma": "firma",
+      "objeto_firmado": {
+        "id": "01926b3a-1111-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000000a",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "texto": "Tomates impecables y llegó antes de la franja. Ñandú, açaí, 5 ★.",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "Ews32kCoDiC-wDNBWr7KyVKk8JmMyoo_TsEo3tH6s2UDWb01KEJbCEPgyINtB1nxy27hslA23Jpng_d7v_EIBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "nombre": "entrada-de-clave-avalada",
+      "descripcion": "Rotación de clave: la clave anterior firma el JCS de la entrada nueva sin 'avalada_por'. Esto es lo que permite verificar el historial sin confiar en el nodo.",
+      "esquema": "comunes.json#/$defs/clave",
+      "objeto_sin_firma": {
+        "clave_publica": "BUPjbeGtgeFDkRh6qIZqmISgRkQf8ausymaTGIlqwLg",
+        "desde": "2026-09-01T10:00:00-03:00",
+        "estado": "activa"
+      },
+      "jcs_utf8_hex": "7b22636c6176655f7075626c696361223a224255506a62654774676546446b52683671495a716d495367526b516638617573796d615447496c71774c67222c226465736465223a22323032362d30392d30315431303a30303a30302d30333a3030222c2265737461646f223a22616374697661227d",
+      "jcs_sha256_hex": "f764b36352a6f07f9ad6dae625f3d98ea3d278c556633cb63b9abf6bfd56a9af",
+      "jcs_bytes": 117,
+      "campo_firma": "avalada_por",
+      "clave_avaladora": {
+        "etiqueta_semilla": "marta-clave-1",
+        "clave_publica": "okgRJSnLG2cF-1uXnsEK4Cta4ZnJtJQ9RP1XQKRyDdM"
+      },
+      "objeto_firmado": {
+        "clave_publica": "BUPjbeGtgeFDkRh6qIZqmISgRkQf8ausymaTGIlqwLg",
+        "desde": "2026-09-01T10:00:00-03:00",
+        "estado": "activa",
+        "avalada_por": {
+          "clave_publica": "okgRJSnLG2cF-1uXnsEK4Cta4ZnJtJQ9RP1XQKRyDdM",
+          "valor": "hd9r0YBVtJmX2WKKMeCDZ1rVw7mwHlZyyA42eMnif0_wmrBo0GWKZD4hl0qvvHFXmDZ8_WlXIfxdUSbeSgjcAg"
+        }
+      }
+    },
+    {
+      "nombre": "evento-firmado-por-el-nodo",
+      "descripcion": "Evento tal como viaja en POST /federacion/entrantes. Lo firma el nodo, no el actor.",
+      "esquema": "evento.json",
+      "objeto_sin_firma": {
+        "id": "01926b3a-2222-7000-8000-000000000002",
+        "tipo": "pedido.aceptado",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "nodo": "nodo.rosario.coop",
+        "entidad": {
+          "tipo": "pedido",
+          "id": "01926b3a-0000-7000-8000-00000000000a"
+        },
+        "actor": "lahuerta@nodo.rosario.coop",
+        "datos": {
+          "estado": "aceptado"
+        },
+        "secuencia": 3
+      },
+      "jcs_utf8_hex": "7b226163746f72223a226c61687565727461406e6f646f2e726f736172696f2e636f6f70222c226461746f73223a7b2265737461646f223a22616365707461646f227d2c22656e7469646164223a7b226964223a2230313932366233612d303030302d373030302d383030302d303030303030303030303061222c227469706f223a2270656469646f227d2c226964223a2230313932366233612d323232322d373030302d383030302d303030303030303030303032222c22696e7374616e7465223a22323032362d30392d32315431353a30343a30352d30333a3030222c226e6f646f223a226e6f646f2e726f736172696f2e636f6f70222c2273656375656e636961223a332c227469706f223a2270656469646f2e616365707461646f227d",
+      "jcs_sha256_hex": "df8c63d6e9d809547b46533046035682893b20aee19f70da501f3556d80e6d87",
+      "jcs_bytes": 289,
+      "campo_firma": "firma_nodo",
+      "objeto_firmado": {
+        "id": "01926b3a-2222-7000-8000-000000000002",
+        "tipo": "pedido.aceptado",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "nodo": "nodo.rosario.coop",
+        "entidad": {
+          "tipo": "pedido",
+          "id": "01926b3a-0000-7000-8000-00000000000a"
+        },
+        "actor": "lahuerta@nodo.rosario.coop",
+        "datos": {
+          "estado": "aceptado"
+        },
+        "secuencia": 3,
+        "firma_nodo": {
+          "firmante": "nodo.rosario.coop",
+          "clave_publica": "xGDj8g3W0IIBhvwEl78mOEMl-2szOTnTrDzTDLfvbqw",
+          "valor": "eiWhMo45DaX0yB7gaMajC8i_y9qv1IEBAa6PCLuPNA7tVO_4f91Q-Qk2iV2ZWA7VXf1sZ_Jq2WDaX4RcKMFCBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    }
+  ],
+  "casos_jcs": [
+    {
+      "nombre": "orden-de-claves",
+      "descripcion": "Las claves se ordenan por sus unidades de código UTF-16, no por alfabeto ni por orden de aparición.",
+      "objeto": {
+        "b": 1,
+        "A": 2,
+        "a": 3,
+        "á": 4,
+        "10": 5,
+        "2": 6
+      },
+      "jcs_utf8": "{\"10\":5,\"2\":6,\"A\":2,\"a\":3,\"b\":1,\"á\":4}",
+      "jcs_utf8_hex": "7b223130223a352c2232223a362c2241223a322c2261223a332c2262223a312c22c3a1223a347d",
+      "jcs_sha256_hex": "39a48f8be4ba4306ee8870c04ca8ecc2487d0847b4b86e665a0b00aadda4fb3a"
+    },
+    {
+      "nombre": "montos-enteros",
+      "descripcion": "Vereda expresa dinero en centavos enteros. Nunca hay decimales en un monto.",
+      "objeto": {
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "descuento": {
+          "centavos": 0,
+          "moneda": "ARS"
+        }
+      },
+      "jcs_utf8": "{\"descuento\":{\"centavos\":0,\"moneda\":\"ARS\"},\"monto\":{\"centavos\":1250000,\"moneda\":\"ARS\"}}",
+      "jcs_utf8_hex": "7b226465736375656e746f223a7b2263656e7461766f73223a302c226d6f6e656461223a22415253227d2c226d6f6e746f223a7b2263656e7461766f73223a313235303030302c226d6f6e656461223a22415253227d7d",
+      "jcs_sha256_hex": "933a5ee6b8e95ef24cef36cefff36eb170e1786b8c78b86636a19e0ac4dbbf9c"
+    },
+    {
+      "nombre": "numeros-no-monetarios",
+      "descripcion": "Pesos, distancias y puntajes sí son decimales. JCS los serializa como ECMAScript.",
+      "objeto": {
+        "peso_kg": 1.5,
+        "lat": -34.6103,
+        "lng": -58.4212,
+        "promedio": 4.5,
+        "cero": 0,
+        "entero_grande": 9007199254740991
+      },
+      "jcs_utf8": "{\"cero\":0,\"entero_grande\":9007199254740991,\"lat\":-34.6103,\"lng\":-58.4212,\"peso_kg\":1.5,\"promedio\":4.5}",
+      "jcs_utf8_hex": "7b226365726f223a302c22656e7465726f5f6772616e6465223a393030373139393235343734303939312c226c6174223a2d33342e363130332c226c6e67223a2d35382e343231322c227065736f5f6b67223a312e352c2270726f6d6564696f223a342e357d",
+      "jcs_sha256_hex": "2d098363cf6ae30836294d3cc5b9c7c063e13313dd00fa72d02ff479a714fa13"
+    },
+    {
+      "nombre": "texto-unicode",
+      "descripcion": "Acentos, ñ y símbolos fuera del BMP van tal cual en UTF-8; JCS no los escapa.",
+      "objeto": {
+        "nombre": "Almacén Doña Ñata",
+        "nota": "café ☕ 100% — 5 ★",
+        "emoji": "😀"
+      },
+      "jcs_utf8": "{\"emoji\":\"😀\",\"nombre\":\"Almacén Doña Ñata\",\"nota\":\"café ☕ 100% — 5 ★\"}",
+      "jcs_utf8_hex": "7b22656d6f6a69223a22f09f9880222c226e6f6d627265223a22416c6d6163c3a96e20446fc3b16120c391617461222c226e6f7461223a22636166c3a920e29895203130302520e28094203520e29885227d",
+      "jcs_sha256_hex": "7e775cdcd6a333a12756370f758d5c8a19578758bb5fa30e7b0c227c682c93db"
+    },
+    {
+      "nombre": "escapes-obligatorios",
+      "descripcion": "Solo se escapan comilla, barra invertida y los controles por debajo de 0x20.",
+      "objeto": {
+        "texto": "Linea1\nLinea2\tcon \"comillas\" y \\barra\\",
+        "control": "\u0001"
+      },
+      "jcs_utf8": "{\"control\":\"\\u0001\",\"texto\":\"Linea1\\nLinea2\\tcon \\\"comillas\\\" y \\\\barra\\\\\"}",
+      "jcs_utf8_hex": "7b22636f6e74726f6c223a225c7530303031222c22746578746f223a224c696e6561315c6e4c696e6561325c74636f6e205c22636f6d696c6c61735c222079205c5c62617272615c5c227d",
+      "jcs_sha256_hex": "ed1174f7633c15dbba790175b941f17a33529e6090f8a6e60c847a611f4dcf3b"
+    },
+    {
+      "nombre": "anidado-y-vacios",
+      "descripcion": "Arrays conservan su orden. Objetos y arrays vacíos se serializan igual que cualquier otro.",
+      "objeto": {
+        "items": [
+          {
+            "z": 1,
+            "a": 2
+          },
+          {}
+        ],
+        "vacio": {},
+        "lista_vacia": [],
+        "nulo": null,
+        "si": true,
+        "no": false
+      },
+      "jcs_utf8": "{\"items\":[{\"a\":2,\"z\":1},{}],\"lista_vacia\":[],\"no\":false,\"nulo\":null,\"si\":true,\"vacio\":{}}",
+      "jcs_utf8_hex": "7b226974656d73223a5b7b2261223a322c227a223a317d2c7b7d5d2c226c697374615f7661636961223a5b5d2c226e6f223a66616c73652c226e756c6f223a6e756c6c2c227369223a747275652c22766163696f223a7b7d7d",
+      "jcs_sha256_hex": "3d862f85bd39d096a4fb211355ca0695169f79114eea166b6b7921b90388032d"
+    }
+  ],
+  "rfc9421": {
+    "descripcion": "POST /federacion/entrantes de nodo.rosario.coop a vereda.ar, firmado con la clave del nodo emisor. Es el único mecanismo de firma HTTP del protocolo: no hay variantes ni fallback a draft-cavage.",
+    "etiqueta_firma": "sig1",
+    "metodo": "POST",
+    "url": "https://vereda.ar/v1/federacion/entrantes",
+    "cuerpo_utf8_hex": "7b226163746f72223a226c61687565727461406e6f646f2e726f736172696f2e636f6f70222c226461746f73223a7b2265737461646f223a22616365707461646f227d2c22656e7469646164223a7b226964223a2230313932366233612d303030302d373030302d383030302d303030303030303030303061222c227469706f223a2270656469646f227d2c226669726d615f6e6f646f223a7b22636c6176655f7075626c696361223a227847446a3867335730494942687677456c37386d4f454d6c2d32737a4f546e5472447a54444c6676627177222c226669726d616e7465223a226e6f646f2e726f736172696f2e636f6f70222c22696e7374616e7465223a22323032362d30392d32315431353a30343a30352d30333a3030222c2276616c6f72223a22656957684d6f34354461583079423767614d616a4338695f793971763149454241613650434c75504e413774564f5f34663931512d516b326956325a57413756586631735a5f4a7132574461583452634b4d46434277227d2c226964223a2230313932366233612d323232322d373030302d383030302d303030303030303030303032222c22696e7374616e7465223a22323032362d30392d32315431353a30343a30352d30333a3030222c226e6f646f223a226e6f646f2e726f736172696f2e636f6f70222c2273656375656e636961223a332c227469706f223a2270656469646f2e616365707461646f227d",
+    "cuerpo_sha256_hex": "e1696168c5be9c942124b0d3c95683088349ffd09e2075750bd395370c6d4cd4",
+    "componentes": [
+      "@method",
+      "@target-uri",
+      "content-digest",
+      "content-type",
+      "vereda-version"
+    ],
+    "created": 1758477845,
+    "keyid": "xGDj8g3W0IIBhvwEl78mOEMl-2szOTnTrDzTDLfvbqw",
+    "alg": "ed25519",
+    "base_de_firma": "\"@method\": POST\n\"@target-uri\": https://vereda.ar/v1/federacion/entrantes\n\"content-digest\": sha-256=:4WlhaMW+nJQhJLDTyVaDCINJ/9CeIHV1C9OVNwxtTNQ=:\n\"content-type\": application/json\n\"vereda-version\": 1.0\n\"@signature-params\": (\"@method\" \"@target-uri\" \"content-digest\" \"content-type\" \"vereda-version\");created=1758477845;keyid=\"xGDj8g3W0IIBhvwEl78mOEMl-2szOTnTrDzTDLfvbqw\";alg=\"ed25519\"",
+    "base_de_firma_hex": "22406d6574686f64223a20504f53540a22407461726765742d757269223a2068747470733a2f2f7665726564612e61722f76312f66656465726163696f6e2f656e7472616e7465730a22636f6e74656e742d646967657374223a207368612d3235363d3a34576c68614d572b6e4a51684a4c44547956614443494e4a2f3943654948563143394f564e777874544e513d3a0a22636f6e74656e742d74797065223a206170706c69636174696f6e2f6a736f6e0a227665726564612d76657273696f6e223a20312e300a22407369676e61747572652d706172616d73223a202822406d6574686f64222022407461726765742d757269222022636f6e74656e742d646967657374222022636f6e74656e742d747970652220227665726564612d76657273696f6e22293b637265617465643d313735383437373834353b6b657969643d227847446a3867335730494942687677456c37386d4f454d6c2d32737a4f546e5472447a54444c6676627177223b616c673d226564323535313922",
+    "cabeceras": {
+      "Content-Type": "application/json",
+      "Vereda-Version": "1.0",
+      "Content-Digest": "sha-256=:4WlhaMW+nJQhJLDTyVaDCINJ/9CeIHV1C9OVNwxtTNQ=:",
+      "Signature-Input": "sig1=(\"@method\" \"@target-uri\" \"content-digest\" \"content-type\" \"vereda-version\");created=1758477845;keyid=\"xGDj8g3W0IIBhvwEl78mOEMl-2szOTnTrDzTDLfvbqw\";alg=\"ed25519\"",
+      "Signature": "sig1=:4tBCBI3jQUr8eyvEpuGVJr/ACfHxGF6WwZXIqReJwwpQVCDyf7P4DN7FGJWvLTAggcUDA3BhsGql1sB4rquUBA==:"
+    },
+    "nota_base64": "Signature y Content-Digest usan base64 estándar con relleno, como manda RFC 9421. Las firmas dentro de los objetos JSON usan base64url sin relleno."
+  }
+}

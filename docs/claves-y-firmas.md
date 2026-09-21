@@ -4,6 +4,16 @@ Cada actor y cada nodo tiene un par de claves Ed25519. Las claves rotan, se pier
 
 No hay autoridad certificante, registro central ni sellado de tiempo externo. Como en el email, el nodo responde por sus actores.
 
+## Vectores de prueba
+
+`ejemplos/vectores-firma.json` tiene los bytes exactos: el objeto, su canonicalización JCS en hexadecimal, la clave, la firma y un request RFC 9421 completo. Una implementación conforme reproduce cada byte.
+
+Las claves de prueba se derivan de una semilla publicada, `SHA-256("vereda:vector:<etiqueta>")`, así que cualquiera llega a la misma clave privada sin que se la pasemos. Son claves de prueba y no se usan en producción.
+
+`python3 validar.py` las verifica: re-deriva cada clave desde su semilla, recanonicaliza cada objeto, comprueba las firmas y rearma la base de firma del request HTTP desde sus cabeceras.
+
+Para regenerarlos, `python3 generar-vectores.py`. Es determinista: dos corridas dan el mismo archivo.
+
 ## Historial
 
 Un actor no tiene una clave: tiene un historial (`claves`), de la más vieja a la más nueva. Nunca se borra una entrada y hay exactamente una `activa`. `clave_publica` repite la activa para quien solo necesita esa.

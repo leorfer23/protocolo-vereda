@@ -17,6 +17,15 @@
         "marta@nodo.rosario.coop"
       ]
     },
+    "dominio": {
+      "type": "string",
+      "pattern": "^[a-z0-9.-]+\\.[a-z]{2,}$",
+      "description": "Dominio de un nodo, sin actor. Un nodo firma con su dominio.",
+      "examples": [
+        "vereda.ar",
+        "nodo.rosario.coop"
+      ]
+    },
     "instante": {
       "type": "string",
       "format": "date-time",
@@ -252,7 +261,15 @@
       ],
       "properties": {
         "firmante": {
-          "$ref": "#/$defs/identidad"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identidad"
+            },
+            {
+              "$ref": "#/$defs/dominio"
+            }
+          ],
+          "description": "Un actor ('marta@vereda.ar') cuando firma una persona o un comercio; el dominio del nodo ('vereda.ar') cuando firma el nodo, como en 'firma_nodo'."
         },
         "clave_publica": {
           "type": "string",
