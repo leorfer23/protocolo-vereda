@@ -27,12 +27,13 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | `esquemas/` | 22 esquemas JSON (draft 2020-12): comercio, oferta, promoción, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
 | `openapi.yaml` | La API abierta, 62 rutas. Apps y agentes usan las mismas |
 | `mcp/herramientas.json` | Las 24 herramientas del servidor MCP, con descripciones para asistentes |
-| `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio |
+| `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio, y `vectores-firma.json` con los vectores de prueba de firma |
 | `docs/` | Federación, claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad |
-| `validar.py` | Valida los ejemplos contra los esquemas, y `openapi.yaml` contra OpenAPI 3.1 |
+| `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1 y reproduce los vectores de firma |
+| `generar-vectores.py` | Regenera `ejemplos/vectores-firma.json`. Determinista: dos corridas dan el mismo archivo |
 
 ```
-pip install jsonschema pyyaml openapi-spec-validator && python3 validar.py
+pip install jsonschema pyyaml openapi-spec-validator cryptography rfc8785 && python3 validar.py
 ```
 
 ## Las reglas que el protocolo sí impone

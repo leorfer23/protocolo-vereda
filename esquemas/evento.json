@@ -13,7 +13,7 @@
       "examples": ["pedido.pagado", "pedido.aceptado", "item.sustitucion_propuesta", "pago.confirmado", "viaje.ofrecido", "suscripcion.ocurrencia_abierta", "ronda.cerrada", "mensaje.nuevo", "oferta.stock_cambiado"]
     },
     "instante": { "$ref": "comunes.json#/$defs/instante" },
-    "nodo": { "type": "string" },
+    "nodo": { "$ref": "comunes.json#/$defs/dominio" },
     "entidad": { "type": "object", "required": ["tipo", "id"], "properties": { "tipo": { "type": "string" }, "id": { "$ref": "comunes.json#/$defs/id" } } },
     "actor": { "$ref": "comunes.json#/$defs/identidad" },
     "datos": { "type": "object", "description": "El objeto afectado o el delta, según tipo." },
