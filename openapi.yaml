@@ -204,10 +204,10 @@ paths:
     post:
       operationId: entregarPedido
       tags: [pedidos]
-      summary: "Repartidor: entregado. Firma la entrega. Con alcohol, marca mayoría de edad verificada."
+      summary: "Repartidor, o comercio en modalidad retiro: entregado. Firma la entrega. En retiro exige el código del usuario; con efectivo marca el cobro en mano; con alcohol, mayoría de edad verificada."
       security: [ { sesion: [] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si el pago está en_mano. Lo pasa a confirmado." } } } } } }
       responses: { "200": { description: OK } }
 
   /listas:

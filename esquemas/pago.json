@@ -4,7 +4,11 @@
   "title": "Pago",
   "description": "Referencia a un cobro que va directo del usuario a una parte. La red guarda referencias y estados; nunca datos de cuenta ni tarjeta, nunca custodia.",
   "type": "object",
-  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "allOf": [
+    { "$ref": "comunes.json#/$defs/metadatos" },
+    { "description": "'en_mano' es solo para efectivo.", "if": { "properties": { "estado": { "const": "en_mano" } }, "required": ["estado"] }, "then": { "properties": { "metodo": { "const": "efectivo" } } } },
+    { "description": "El efectivo nunca está 'pendiente' ni 'vencido': no tiene ventana de pago.", "if": { "properties": { "metodo": { "const": "efectivo" } }, "required": ["metodo"] }, "then": { "properties": { "estado": { "enum": ["en_mano", "confirmado", "fallido"] } } } }
+  ],
   "required": ["pedido_id", "destinatario", "concepto", "monto", "metodo", "estado"],
   "if": { "properties": { "estado": { "const": "pendiente" } }, "required": ["estado"] },
   "then": { "required": ["vence"], "description": "Un cobro pendiente siempre dice cuándo vence: hasta ese instante el pedido retiene su stock y sus cupos." },
@@ -14,7 +18,7 @@
     "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor", "propina_comercio", "punto_entrega", "periodo_suscripcion", "devolucion"] },
     "monto": { "$ref": "comunes.json#/$defs/monto" },
     "metodo": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] },
-    "estado": { "type": "string", "enum": ["pendiente", "confirmado", "vencido", "en_mano", "fallido"] },
+    "estado": { "type": "string", "enum": ["pendiente", "confirmado", "vencido", "en_mano", "fallido"], "description": "'en_mano': efectivo que se cobra al entregar o al retirar. Pasa a 'confirmado' cuando quien entrega marca el cobro en 'entregar'." },
     "psp": { "type": "string", "description": "Proveedor que generó el cobro." },
     "psp_referencia": { "type": "string", "description": "Id opaco del cobro en el PSP." },
     "qr": { "type": "string", "description": "Payload del QR interoperable, si aplica." },

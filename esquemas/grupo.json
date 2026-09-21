@@ -25,7 +25,7 @@
           "identidad": { "$ref": "comunes.json#/$defs/identidad" },
           "nombre_bolsa": { "type": "string", "description": "Cómo se rotula su bolsa: 'Depto 3B'." },
           "items": { "type": "array", "items": { "$ref": "pedido.json#/$defs/item" } },
-          "estado": { "type": "string", "enum": ["invitado", "armando", "confirmado", "pagado"] },
+          "estado": { "type": "string", "enum": ["invitado", "armando", "confirmado", "pagado", "no_pago"], "description": "'no_pago': venció su cobro. Sus ítems salen del pedido y se libera su reserva; el pedido sigue con los demás." },
           "pago_id": { "$ref": "comunes.json#/$defs/id" }
         }
       }

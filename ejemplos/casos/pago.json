@@ -83,6 +83,47 @@
         "metodo": "qr_interoperable",
         "estado": "pendiente"
       }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'en_mano' con un medio que no es efectivo.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "qr_interoperable",
+        "estado": "en_mano"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Efectivo 'pendiente': el efectivo no tiene ventana de pago.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "efectivo",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00"
+      }
     }
   ]
 }

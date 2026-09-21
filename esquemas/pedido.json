@@ -6,6 +6,8 @@
   "type": "object",
   "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
   "required": ["usuario", "comercio", "items", "modalidad", "estado", "historial", "totales", "reparto", "via"],
+  "if": { "properties": { "modalidad": { "properties": { "tipo": { "const": "retiro" } }, "required": ["tipo"] } }, "required": ["modalidad"] },
+  "then": { "required": ["codigo_retiro"] },
   "properties": {
     "usuario": { "$ref": "comunes.json#/$defs/identidad" },
     "comercio": { "$ref": "comunes.json#/$defs/identidad" },
@@ -49,7 +51,7 @@
           "instante": { "$ref": "comunes.json#/$defs/instante" },
           "actor": { "$ref": "comunes.json#/$defs/identidad" },
           "motivo": { "type": "string" },
-          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
+          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
         }
       }
     },
@@ -83,6 +85,7 @@
     "pagos": { "type": "array", "items": { "$ref": "pago.json" } },
     "politica_cancelacion_aplicada": { "type": "string", "description": "Copia del texto vigente al crear el pedido." },
     "eta": { "$ref": "comunes.json#/$defs/instante" },
+    "codigo_retiro": { "type": "string", "pattern": "^[0-9]{4,6}$", "description": "Solo modalidad 'retiro'. Lo ve únicamente el usuario; se lo dice al comercio al pasar a buscar, y el comercio lo envía en 'entregar'. Es la prueba de entrega en mano." },
     "ubicacion_repartidor": { "$ref": "comunes.json#/$defs/punto", "description": "Solo mientras el pedido está en_camino." },
     "notas_usuario": { "type": "string", "maxLength": 500 },
     "requiere_mayoria_edad": { "type": "boolean", "default": false },
@@ -90,7 +93,7 @@
     "peso_estimado_kg": { "type": "number", "minimum": 0 },
     "firmas": {
       "type": "object",
-      "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; entrega por el repartidor.",
+      "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; entrega por el repartidor, o por el comercio en modalidad 'retiro'.",
       "properties": {
         "creacion": { "$ref": "comunes.json#/$defs/firma" },
         "aceptacion": { "$ref": "comunes.json#/$defs/firma" },
@@ -101,7 +104,8 @@
   "$defs": {
     "estado": {
       "type": "string",
-      "enum": ["creado", "pagado", "aceptado", "preparando", "listo", "asignado", "en_camino", "entregado", "cancelado"]
+      "enum": ["creado", "pagado", "aceptado", "preparando", "listo", "asignado", "en_camino", "entregado", "cancelado"],
+      "description": "Con entrega: creado, pagado, aceptado, preparando, listo, asignado, en_camino, entregado. Con retiro: de 'listo' pasa a 'entregado', sin 'asignado' ni 'en_camino'. Con efectivo: de 'creado' pasa a 'aceptado', sin 'pagado'; el pago queda 'en_mano' hasta la entrega. Ver docs/carrito-y-reserva.md."
     },
     "item": {
       "type": "object",

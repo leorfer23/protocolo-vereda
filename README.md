@@ -40,7 +40,7 @@ Pocas, y todas verificables:
 
 1. Un pedido es a un solo comercio. Varios comercios se combinan en un **viaje**, no en un pedido.
 2. Los precios se congelan al crear el pedido. Pesables y sustituciones ajustan el monto final; la diferencia la devuelve el comercio, y la red solo la muestra.
-3. El pago se confirma antes de que el comercio acepte.
+3. El pago se confirma antes de que el comercio acepte. El efectivo es la excepción: se cobra en mano al entregar o al retirar, y el comercio decide dónde y a quién se lo acepta.
 4. Solo se reseña un pedido entregado, una vez por par, dentro de 7 días.
 5. Todo lo público (comercios, ofertas, rondas, reseñas) se lee sin token.
 6. Toda acción de un agente lleva un mandato y queda marcada como tal.
