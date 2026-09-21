@@ -1,0 +1,96 @@
+# Plan de la implementación de referencia
+
+Borrador 1, 2026-09-21. Estado: a discutir. La evidencia detrás de cada punto está en `.claudedocs/plan-2026-09/` (cinco informes, con fuentes y con lo que no se pudo verificar marcado aparte).
+
+## Decisión de lenguaje
+
+**Recomendación: Go.** Es una decisión cerrada por poco; abajo está qué la daría vuelta.
+
+El rendimiento no decide entre Rust y Go:
+
+- En las tres escalas modeladas (barrio, ciudad, estrés) el costo dominante es Postgres: 3 a 8 consultas por pedido, 5 a 20 ms, 70 a 90 % del presupuesto. La federación agrega 10 a 100 ms de red.
+- La brecha estimada entre Rust y Go en esta carga es menor a 2x. Caché de lecturas públicas, pooling, índice geo y escritura por lotes mueven de 10x a 100x.
+- Salir de Python no se justifica por velocidad. Se justifica por memoria en un VPS de 1 GB (unos 150 a 300 MB de base contra decenas) y por distribuir un binario único.
+
+Lo que sí distingue, verificado el 2026-09-21 en crates.io y proxy.golang.org:
+
+| Necesidad | Go | Rust |
+| --- | --- | --- |
+| Firma HTTP RFC 9421 (`federacion.md` la exige) | `yaronf/httpsign` v0.6.1 | `httpsig` 0.0.26 |
+| JSON canónico RFC 8785 | `gowebpki/jcs` v1.0.2 | `serde_json_canonicalizer` 0.3.2 |
+| Ed25519 | stdlib | `ed25519-dalek` 3.0.0 |
+| SDK oficial de MCP | `go-sdk` v1.8.0 | `rmcp` 3.4.0 |
+| Cola de trabajos sobre Postgres | `river` v0.47.0 (encola dentro de la transacción) | `apalis` 1.0.0-rc.10 |
+| Servidor desde OpenAPI 3.1 | `oapi-codegen` v2.8.0, "initial support" | sin herramienta dominante |
+| Geo | SQL a mano sobre PostGIS | SQL a mano sobre PostGIS |
+| Variantes del dominio | campos opcionales, sin chequeo en compilación | `enum` con `match` exhaustivo |
+| Compilación cruzada | nativa (`GOOS`/`GOARCH`) | vía musl o `cross` |
+
+Por qué Go:
+
+- Una implementación de referencia también se lee. "Cualquiera puede correr un nodo" incluye poder auditarlo y forkearlo; la curva de entrada de Go es más baja.
+- Las partes difíciles del nodo (reclamo exclusivo de viaje, tope de mandato bajo concurrencia, cierre atómico de grupo, cola de salida persistente) se resuelven en transacciones de Postgres, igual en cualquier lenguaje.
+- GoToSocial documenta 250 a 350 MB y 1 vCPU como objetivo de diseño para un nodo federado chico.
+
+Qué la daría vuelta hacia Rust:
+
+- Priorizar garantías en compilación sobre facilidad de contribución: doce estados de pedido, seis tipos de oferta y cinco modos de precio son donde Go depende de disciplina y tests.
+- Querer un núcleo único (canonicalización, firma, validación) reutilizable desde clientes web y móviles vía WASM. Go lo hace peor.
+
+En ambos lenguajes los handlers se escriben a mano y se valida en ejecución contra `esquemas/`.
+
+## Fase 0: cerrar la spec antes de escribir el nodo
+
+Cambiar esto con nodos corriendo es caro. Orden sugerido:
+
+1. `operationId` en las 61 operaciones de `openapi.yaml` (hoy ninguna lo tiene).
+2. Uniones formales. En 20 esquemas hay un solo `oneOf` (`lista.json`). `oferta.json` acepta hoy cualquier combinación de `tipo` con bloques opcionales; hace falta `if/then` o `oneOf` para que `pesable`, `servicio`, `recurrente` y cada `modo` de precio exijan lo suyo.
+3. Caché de lecturas públicas: `ETag` y `Cache-Control` en todas las rutas sin token. Hoy solo `GET /comercios/{id}/ofertas` lo declara.
+4. Carrito: esquema propio en `esquemas/`, TTL y reserva de stock mientras se arma (hoy hay riesgo de sobreventa).
+5. Rotación de claves Ed25519 y validez de las firmas históricas.
+6. `POST /federacion/entrantes`: política de reintentos e idempotencia, y negociación de versión entre nodos (`version_no_soportada` existe como error, sin flujo).
+7. `pedir_diario`: zona horaria y corte del día.
+8. Vectores de prueba de firma en `ejemplos/`: objeto, bytes canónicos, clave, firma y un request RFC 9421 completo. RFC 9421 como único mecanismo, versionado, sin variantes.
+9. Menores: ventana de 7 días de reseña en `resena.json` (hoy solo en el README); `orden=reputacion` en `/comercios` pero no en `/buscar` ni en MCP; "misma dirección" sin definir en despacho fase 2; replicación y conflictos del catálogo maestro; intercambio de claves X25519 del chat; mudanza cuando el nodo viejo no coopera; de quién es la responsabilidad en una disputa entre nodos.
+
+## Fase 1: suite de conformidad
+
+- Caja negra, por HTTP, contra la URL de cualquier nodo. Generada de `ejemplos/`, `openapi.yaml` y `esquemas/`.
+- Existe antes que el nodo y es el criterio de salida de cada fase siguiente.
+- Evita que la primera implementación se vuelva la spec de hecho, que es lo que le pasó a ActivityPub con Mastodon.
+
+## Arquitectura del nodo
+
+Un binario, `vereda-nodo`, contra PostgreSQL con PostGIS. SQLite queda fuera de la versión 1: geo, `SKIP LOCKED` y bloqueos por fila son la base del diseño.
+
+- `nucleo`: tipos, JSON canónico, firma y verificación, validadores compilados una vez al arrancar desde `esquemas/` embebidos. La spec es la fuente; el binario no lleva copias editadas.
+- `servicio`: reglas de negocio. La API HTTP y las 22 herramientas MCP llaman a esta misma capa.
+- `estados`: cada máquina de estado como tabla de transiciones. Una transición es una transacción que actualiza la entidad, agrega al historial y escribe el evento firmado.
+- `salida`: cola persistente para webhooks y federación, con reintento y backoff por destino. Nunca una llamada HTTP a otro nodo dentro del request del usuario.
+- `federacion`: `.well-known`, entrantes, RFC 9421, caché de claves públicas de otros nodos.
+- `busqueda`: candidatos por índice GiST, ranking en dos pasadas en memoria (la fórmula normaliza `p_min` por consulta).
+- `despacho`: oferta de viaje con `UPDATE` condicional como reclamo exclusivo, cascada a los 30 s, lote cada 60 s.
+- `tiemporeal`: SSE leyendo el log de eventos por cursor; ubicación de repartidores en memoria con volcado por lotes cada 1 a 2 s.
+- Tope de mandato: contador por mandato actualizado con `UPDATE` condicional en la misma transacción que crea el pedido.
+
+Objetivo de huella publicado desde el inicio: nodo de barrio en un VPS de 1 GB, Postgres incluido.
+
+## Orden de construcción
+
+Cada fase cierra con su parte de la suite en verde.
+
+2. Núcleo y lecturas públicas: comercios, ofertas, búsqueda, ranking, caché.
+3. Carrito, pedido y pago con el PSP detrás de una interfaz; eventos y SSE.
+4. Cola de salida, webhooks y federación entre dos nodos locales.
+5. Mandatos y servidor MCP.
+6. Despacho, viajes y ubicación.
+7. Suscripciones, rondas, grupos, cotizaciones, listas, catálogo maestro, mensajes.
+
+Al final de la fase 3 y de la 6: prueba de carga con el modelo de `.claudedocs/plan-2026-09/4-rendimiento.md` (barrio: unas 10 lecturas/s; ciudad: unas 500 lecturas/s y 130 ubicaciones/s), midiendo memoria y P99. Los números de ese modelo son estimaciones; la prueba los reemplaza.
+
+## Decisiones abiertas
+
+- Lenguaje: Go (recomendado) o Rust.
+- Repositorio del nodo: aparte (`vereda-nodo`), dejando este solo para la spec CC0, o acá mismo. Y su licencia.
+- Gobernanza de la referencia: más de una persona con permiso de merge antes de llamarla "la" referencia.
+- PSP para las pruebas de la fase 3.
