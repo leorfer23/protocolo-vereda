@@ -52,7 +52,9 @@ print(f"\n{len(MAPA) - fallos}/{len(MAPA)} ejemplos válidos")
 
 for f in sorted(glob.glob(os.path.join(EJ, "casos", "*.json"))):
     suite = json.load(open(f))
-    v = Draft202012Validator(esquemas[suite["esquema"]], registry=registry)
+    esq = suite["esquema"]
+    ref = {"$ref": "https://vereda.ar/esquemas/v1/" + esq} if "#" in esq else esquemas[esq]
+    v = Draft202012Validator(ref, registry=registry)
     mal = [c["porque"] for c in suite["casos"] if v.is_valid(c["doc"]) != (c["espera"] == "valido")]
     fallos += len(mal)
     for m in mal:

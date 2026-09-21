@@ -457,6 +457,36 @@
       ],
       "additionalProperties": false
     },
+    "mudanza": {
+      "type": "object",
+      "description": "Declaración de que un actor se mudó de nodo. La firma el actor con su propia clave, no el nodo. Por eso vale sin que el nodo viejo coopere: quien la recibe la verifica contra el historial de claves del actor. Ver docs/federacion.md.",
+      "required": [
+        "identidad_anterior",
+        "identidad_nueva",
+        "instante",
+        "firma"
+      ],
+      "properties": {
+        "identidad_anterior": {
+          "$ref": "#/$defs/identidad"
+        },
+        "identidad_nueva": {
+          "$ref": "#/$defs/identidad"
+        },
+        "instante": {
+          "$ref": "#/$defs/instante"
+        },
+        "claves_anteriores": {
+          "$ref": "#/$defs/claves",
+          "description": "El historial de claves que el actor usaba en el nodo viejo. Encadena las dos identidades: la misma clave firmó antes y después."
+        },
+        "firma": {
+          "$ref": "#/$defs/firma",
+          "description": "Del actor, con una clave de su historial. El firmante es la identidad anterior."
+        }
+      },
+      "additionalProperties": false
+    },
     "claves": {
       "type": "array",
       "minItems": 1,
