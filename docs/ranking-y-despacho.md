@@ -17,8 +17,10 @@ Objetivo: minimizar tiempo muerto del repartidor y cumplir el ETA prometido. No 
 | Fase | Regla |
 | --- | --- |
 | 1 | Ofrecer al repartidor disponible más cercano al comercio; 30 s para aceptar; si no, al siguiente |
-| 2 | Agrupar hasta 2 pedidos de comercios a menos de 500 m con destinos en la misma dirección, con consentimiento del usuario |
+| 2 | Agrupar hasta 2 pedidos de comercios a menos de 500 m entre sí, con destinos a menos de 1 km entre sí y sin que el desvío agregue más de 10 minutos al ETA ya prometido del primer pedido, con consentimiento del usuario |
 | 3 | Lotes cada 60 s con restricciones de frío, peso y vehículo; rondas y consolidadas como un viaje de varias paradas |
+
+El desvío se mide sobre la misma ruta OSRM con la que se calculó el ETA, comparando la ruta agrupada contra la del primer pedido solo. Si agrupar rompe el ETA prometido, no se agrupa.
 
 Garantías: el repartidor ve monto, distancia y peso antes de aceptar; rechazar no penaliza; un solo viaje activo por repartidor en fase 1; congelados con prioridad y máximo 20 min en camino; el ETA es el real (preparación + ruta OSRM).
 

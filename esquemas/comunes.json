@@ -185,6 +185,7 @@
         "hora",
         "dia",
         "semana",
+        "quincena",
         "mes"
       ]
     },
@@ -347,6 +348,10 @@
         "clave_publica": {
           "type": "string",
           "description": "Base64url de la clave pública Ed25519."
+        },
+        "clave_cifrado": {
+          "type": "string",
+          "description": "Clave pública X25519 del actor, base64url, para cifrar mensajes ('x25519-xchacha20' en mensaje.json). Va junto a la de firma y rota con ella; se obtiene del mismo GET /actores/{identidad}/claves. Es una clave distinta, no se deriva de la Ed25519. Ausente: el actor no acepta chat cifrado."
         },
         "desde": {
           "$ref": "#/$defs/instante"

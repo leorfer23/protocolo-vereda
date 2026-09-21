@@ -616,6 +616,84 @@
           "modo": "numerico"
         }
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Variante con EAN bien formado.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "variantes": [
+          {
+            "id": "500ml",
+            "nombre": "500 ml",
+            "ean": "7790742001009",
+            "precio": {
+              "modo": "fijo",
+              "monto": {
+                "centavos": 195000,
+                "moneda": "ARS"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "EAN de variante que no son 8 a 14 dígitos.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "variantes": [
+          {
+            "id": "500ml",
+            "nombre": "500 ml",
+            "ean": "no-es-un-ean",
+            "precio": {
+              "modo": "fijo",
+              "monto": {
+                "centavos": 195000,
+                "moneda": "ARS"
+              }
+            }
+          }
+        ]
+      }
     }
   ]
 }

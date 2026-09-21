@@ -58,6 +58,12 @@ Rotar nunca se puede hacer por mandato. Un agente no toca claves.
 
 Si se pierde una clave de custodia propia, el camino es el mismo: clave nueva sin aval.
 
+## Clave de cifrado
+
+La entrada de clave lleva además `clave_cifrado`, una clave pública X25519 para el chat cifrado (`x25519-xchacha20` en `mensaje.json`). Es una clave distinta de la de firma, no se deriva de ella: una clave se usa para una sola cosa. Viaja en el mismo historial y rota con la de firma, así que sale del mismo `GET /actores/{identidad}/claves` y no hace falta ninguna ruta nueva.
+
+Si un destinatario no publica `clave_cifrado`, el chat de ese contexto va sin cifrar.
+
 ## Claves del nodo
 
 - El `keyid` de las firmas HTTP (RFC 9421) es la clave pública del nodo.
