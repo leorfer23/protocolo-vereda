@@ -44,6 +44,15 @@ for ej, esq in MAPA.items():
         print(f"✓ {ej} cumple {esq}")
 print(f"\n{len(MAPA) - fallos}/{len(MAPA)} ejemplos válidos")
 
+for f in sorted(glob.glob(os.path.join(EJ, "casos", "*.json"))):
+    suite = json.load(open(f))
+    v = Draft202012Validator(esquemas[suite["esquema"]], registry=registry)
+    mal = [c["porque"] for c in suite["casos"] if v.is_valid(c["doc"]) != (c["espera"] == "valido")]
+    fallos += len(mal)
+    for m in mal:
+        print(f"✗ casos/{os.path.basename(f)}: {m}")
+    print(f"{len(suite['casos']) - len(mal)}/{len(suite['casos'])} casos de {suite['esquema']} como se esperaba")
+
 API = os.path.join(BASE, "openapi.yaml")
 try:
     validate(yaml.safe_load(open(API)), base_uri="file://" + API)
