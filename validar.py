@@ -46,8 +46,16 @@ print(f"\n{len(MAPA) - fallos}/{len(MAPA)} ejemplos válidos")
 
 API = os.path.join(BASE, "openapi.yaml")
 try:
-    validate(yaml.safe_load(open(API)), base_uri="file://" + API)
+    api = yaml.safe_load(open(API))
+    validate(api, base_uri="file://" + API)
     print("✓ openapi.yaml cumple OpenAPI 3.1")
+    METODOS = {"get", "post", "put", "patch", "delete"}
+    sin_id = [f"{m.upper()} {p}" for p, item in api["paths"].items() for m, o in item.items() if m in METODOS and "operationId" not in o]
+    if sin_id:
+        fallos += 1
+        print(f"✗ operaciones sin operationId: {', '.join(sin_id)}")
+    else:
+        print("✓ todas las operaciones tienen operationId")
 except Exception as e:
     fallos += 1
     print(f"✗ openapi.yaml\n    {str(e).splitlines()[0][:200]}")
