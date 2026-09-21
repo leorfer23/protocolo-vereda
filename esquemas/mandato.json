@@ -21,8 +21,9 @@
       "type": "array",
       "minItems": 1,
       "items": { "type": "string", "pattern": "^(leer|armar|hablar|suscribir|pedir:[0-9]+|pedir_diario:[0-9]+|comercios:[a-z0-9._@,-]+)$" },
-      "description": "leer, armar, hablar, suscribir, pedir:<centavos por pedido>, pedir_diario:<centavos por día>, comercios:<lista de identidades>."
+      "description": "leer, armar, hablar, suscribir, pedir:<centavos por pedido>, pedir_diario:<centavos por día>, comercios:<lista de identidades>. 'pedir_diario' suma los totales, ya descontados, de los pedidos creados con este mandato en el día, sin contar los cancelados. El día corre en 'zona_horaria'. El nodo lo aplica de forma atómica: dos pedidos simultáneos no pueden pasar juntos el tope."
     },
+    "zona_horaria": { "type": "string", "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+)+)$", "default": "America/Argentina/Buenos_Aires", "description": "Zona IANA en la que corre el día de 'pedir_diario': el tope se reinicia a las 00:00 de esta zona. La declara la persona al firmar el mandato; no es la del nodo, porque el tope protege a la persona y un nodo puede estar en cualquier huso." },
     "confirmar_siempre": {
       "type": "array",
       "items": { "type": "string", "enum": ["primer_pedido_a_comercio_nuevo", "toda_suscripcion", "todo_pedido", "pedidos_con_alcohol", "sobre_tope"] },
