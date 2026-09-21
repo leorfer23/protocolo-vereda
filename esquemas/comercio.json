@@ -50,6 +50,18 @@
     "notas_para_agentes": { "type": "string", "maxLength": 2000, "description": "Lo que un mozo diría: 'la fugazzeta tarda 30 min los viernes'." },
     "atributos": { "$ref": "comunes.json#/$defs/atributos" },
     "imagenes": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
+    "fidelidad": {
+      "type": "object",
+      "description": "Puntos por comprar seguido en este comercio. Valen solo acá; el saldo lo lleva el nodo del comercio y lo entrega firmado.",
+      "required": ["centavos_por_punto", "valor_punto_centavos"],
+      "properties": {
+        "centavos_por_punto": { "type": "integer", "minimum": 1, "description": "Cada cuánto gastado en productos se gana 1 punto. 100000: un punto cada $1.000." },
+        "valor_punto_centavos": { "type": "integer", "minimum": 1, "description": "Cuánto descuenta cada punto al canjearlo." },
+        "minimo_canje": { "type": "integer", "minimum": 1, "default": 1 },
+        "vencen_a_los_dias": { "type": "integer", "minimum": 1, "description": "Desde que se ganan. Ausente: no vencen." },
+        "descripcion": { "type": "string", "maxLength": 500 }
+      }
+    },
     "verificacion": {
       "type": "object",
       "required": ["cuit_verificado", "foto_geolocalizada", "cuenta_cobro_coincide"],

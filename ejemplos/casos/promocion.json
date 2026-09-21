@@ -1,0 +1,348 @@
+{
+  "$comentario": "Casos mínimos para promocion.json.",
+  "esquema": "promocion.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Segunda unidad al 70 %.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Segunda al 70 %",
+        "tipo": "lleva_n",
+        "lleva_n": {
+          "cada": 2,
+          "descuento_pct": 70
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Precio por cantidad: desde 6 y desde 12.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Por caja sale menos",
+        "tipo": "escala_cantidad",
+        "alcance": {
+          "ofertas": [
+            "01926b3a-5555-7000-8000-000000000001"
+          ]
+        },
+        "escala_cantidad": {
+          "tramos": [
+            {
+              "desde": 6,
+              "descuento_pct": 10
+            },
+            {
+              "desde": 12,
+              "precio_unitario": {
+                "centavos": 160000,
+                "moneda": "ARS"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Escalera por total de compra.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Más llevás, más ahorrás",
+        "tipo": "escala_canasta",
+        "escala_canasta": {
+          "tramos": [
+            {
+              "desde": {
+                "centavos": 3000000,
+                "moneda": "ARS"
+              },
+              "descuento_pct": 10
+            },
+            {
+              "desde": {
+                "centavos": 6000000,
+                "moneda": "ARS"
+              },
+              "descuento_pct": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Envío gratis desde $30.000.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Envío gratis desde $30.000",
+        "tipo": "escala_canasta",
+        "escala_canasta": {
+          "sobre": "envio",
+          "tramos": [
+            {
+              "desde": {
+                "centavos": 3000000,
+                "moneda": "ARS"
+              },
+              "descuento_pct": 100
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "10 % pagando en efectivo y retirando, acumulable.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "10 % en efectivo",
+        "tipo": "descuento",
+        "descuento": {
+          "descuento_pct": 10
+        },
+        "condiciones": {
+          "medios_cobro": [
+            "efectivo"
+          ],
+          "modalidades": [
+            "retiro"
+          ]
+        },
+        "acumulable": true
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Tipo 'lleva_n' sin su bloque.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Segunda al 70 %",
+        "tipo": "lleva_n"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Tipo 'lleva_n' con un bloque de otro tipo.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Segunda al 70 %",
+        "tipo": "lleva_n",
+        "lleva_n": {
+          "cada": 2,
+          "descuento_pct": 70
+        },
+        "descuento": {
+          "descuento_pct": 5
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'cada 1' no es una promoción por cantidad.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Segunda al 70 %",
+        "tipo": "lleva_n",
+        "lleva_n": {
+          "cada": 1,
+          "descuento_pct": 70
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Tramo con porcentaje y precio a la vez.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Por caja sale menos",
+        "tipo": "escala_cantidad",
+        "alcance": {
+          "ofertas": [
+            "01926b3a-5555-7000-8000-000000000001"
+          ]
+        },
+        "escala_cantidad": {
+          "tramos": [
+            {
+              "desde": 6,
+              "descuento_pct": 10,
+              "precio_unitario": {
+                "centavos": 170000,
+                "moneda": "ARS"
+              }
+            },
+            {
+              "desde": 12,
+              "precio_unitario": {
+                "centavos": 160000,
+                "moneda": "ARS"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Tramo sin beneficio.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Por caja sale menos",
+        "tipo": "escala_cantidad",
+        "alcance": {
+          "ofertas": [
+            "01926b3a-5555-7000-8000-000000000001"
+          ]
+        },
+        "escala_cantidad": {
+          "tramos": [
+            {
+              "desde": 6
+            },
+            {
+              "desde": 12,
+              "precio_unitario": {
+                "centavos": 160000,
+                "moneda": "ARS"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Escalera sin tramos.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "Más llevás, más ahorrás",
+        "tipo": "escala_canasta",
+        "escala_canasta": {
+          "tramos": []
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Descuento del 0 %.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "10 % en efectivo",
+        "tipo": "descuento",
+        "descuento": {
+          "descuento_pct": 0
+        },
+        "condiciones": {
+          "medios_cobro": [
+            "efectivo"
+          ],
+          "modalidades": [
+            "retiro"
+          ]
+        },
+        "acumulable": true
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Descuento de más del 100 %.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "10 % en efectivo",
+        "tipo": "descuento",
+        "descuento": {
+          "descuento_pct": 150
+        },
+        "condiciones": {
+          "medios_cobro": [
+            "efectivo"
+          ],
+          "modalidades": [
+            "retiro"
+          ]
+        },
+        "acumulable": true
+      }
+    }
+  ]
+}

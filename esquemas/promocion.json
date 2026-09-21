@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/promocion.json",
+  "title": "Promoción",
+  "description": "Descuento que un comercio publica sobre sus propias ofertas. Es pública y se calcula con un algoritmo público (docs/promociones.md): cualquier app o agente llega al mismo monto que el nodo. No compra posición en el ranking.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "comunes.json#/$defs/metadatos"
+    },
+    {
+      "description": "Tipo 'lleva_n': lleva su bloque y ningún otro.",
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "lleva_n"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "then": {
+        "required": [
+          "lleva_n"
+        ],
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "escala_cantidad"
+              ]
+            },
+            {
+              "required": [
+                "escala_canasta"
+              ]
+            },
+            {
+              "required": [
+                "descuento"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "Tipo 'escala_cantidad': lleva su bloque y ningún otro.",
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "escala_cantidad"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "then": {
+        "required": [
+          "escala_cantidad"
+        ],
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "lleva_n"
+              ]
+            },
+            {
+              "required": [
+                "escala_canasta"
+              ]
+            },
+            {
+              "required": [
+                "descuento"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "Tipo 'escala_canasta': lleva su bloque y ningún otro.",
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "escala_canasta"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "then": {
+        "required": [
+          "escala_canasta"
+        ],
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "lleva_n"
+              ]
+            },
+            {
+              "required": [
+                "escala_cantidad"
+              ]
+            },
+            {
+              "required": [
+                "descuento"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "Tipo 'descuento': lleva su bloque y ningún otro.",
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "descuento"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "then": {
+        "required": [
+          "descuento"
+        ],
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "lleva_n"
+              ]
+            },
+            {
+              "required": [
+                "escala_cantidad"
+              ]
+            },
+            {
+              "required": [
+                "escala_canasta"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "required": [
+    "comercio_id",
+    "nombre",
+    "tipo",
+    "activa"
+  ],
+  "properties": {
+    "comercio_id": {
+      "$ref": "comunes.json#/$defs/id"
+    },
+    "nombre": {
+      "type": "string",
+      "maxLength": 120,
+      "description": "Como la ve la persona: '3x2 en gaseosas', '10 % en efectivo', 'Envío gratis desde $30.000'."
+    },
+    "descripcion": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "lleva_n",
+        "escala_cantidad",
+        "escala_canasta",
+        "descuento"
+      ],
+      "description": "lleva_n: 2x1, 3x2, segunda unidad al 70 %. escala_cantidad: más unidades, mejor precio. escala_canasta: más total, más descuento o envío bonificado. descuento: rebaja simple."
+    },
+    "alcance": {
+      "type": "object",
+      "description": "Sobre qué ofertas del comercio aplica. Ausente: todas. En 'escala_canasta' define qué ítems suman al total.",
+      "properties": {
+        "ofertas": {
+          "type": "array",
+          "items": {
+            "$ref": "comunes.json#/$defs/id"
+          }
+        },
+        "categorias": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excluye_ofertas": {
+          "type": "array",
+          "items": {
+            "$ref": "comunes.json#/$defs/id"
+          }
+        }
+      }
+    },
+    "lleva_n": {
+      "type": "object",
+      "required": [
+        "cada",
+        "descuento_pct"
+      ],
+      "description": "De cada 'cada' unidades, la más barata lleva el descuento. 2x1: cada 2, 100. 3x2: cada 3, 100. Segunda al 70 %: cada 2, 70.",
+      "properties": {
+        "cada": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "descuento_pct": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "mezclable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Las unidades pueden ser de ofertas distintas dentro del alcance."
+        }
+      }
+    },
+    "escala_cantidad": {
+      "type": "object",
+      "required": [
+        "tramos"
+      ],
+      "description": "Por ítem. Gana el tramo más alto alcanzado y vale para todas las unidades.",
+      "properties": {
+        "tramos": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "desde"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "descuento_pct"
+                ]
+              },
+              {
+                "required": [
+                  "precio_unitario"
+                ]
+              }
+            ],
+            "properties": {
+              "desde": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "description": "En la unidad de 'cantidad.unidad' de la oferta."
+              },
+              "descuento_pct": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              },
+              "precio_unitario": {
+                "$ref": "comunes.json#/$defs/monto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "escala_canasta": {
+      "type": "object",
+      "required": [
+        "tramos"
+      ],
+      "description": "Sobre el total de productos ya descontado por ítem. Gana el tramo más alto alcanzado.",
+      "properties": {
+        "sobre": {
+          "type": "string",
+          "enum": [
+            "productos",
+            "envio"
+          ],
+          "default": "productos",
+          "description": "'envio': bonifica el envío ('envío gratis desde $30.000' es 100 % sobre envío)."
+        },
+        "tramos": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "desde"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "descuento_pct"
+                ]
+              },
+              {
+                "required": [
+                  "descuento_monto"
+                ]
+              }
+            ],
+            "properties": {
+              "desde": {
+                "$ref": "comunes.json#/$defs/monto"
+              },
+              "descuento_pct": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              },
+              "descuento_monto": {
+                "$ref": "comunes.json#/$defs/monto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "descuento": {
+      "type": "object",
+      "oneOf": [
+        {
+          "required": [
+            "descuento_pct"
+          ]
+        },
+        {
+          "required": [
+            "descuento_monto"
+          ]
+        }
+      ],
+      "description": "Rebaja por unidad.",
+      "properties": {
+        "descuento_pct": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "descuento_monto": {
+          "$ref": "comunes.json#/$defs/monto"
+        }
+      }
+    },
+    "condiciones": {
+      "type": "object",
+      "description": "Todas deben cumplirse. Ausente: siempre.",
+      "properties": {
+        "desde": {
+          "$ref": "comunes.json#/$defs/instante"
+        },
+        "hasta": {
+          "$ref": "comunes.json#/$defs/instante"
+        },
+        "dias": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa",
+              "do"
+            ]
+          }
+        },
+        "modalidades": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "inmediata",
+              "franja",
+              "consolidada",
+              "ronda",
+              "punto_entrega",
+              "retiro"
+            ]
+          },
+          "description": "'Solo con retiro'."
+        },
+        "medios_cobro": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "qr_interoperable",
+              "transferencia",
+              "tarjeta",
+              "efectivo"
+            ]
+          },
+          "description": "'10 % en efectivo'."
+        },
+        "primera_compra": {
+          "type": "boolean",
+          "default": false,
+          "description": "Solo en el primer pedido del usuario a este comercio."
+        },
+        "maximo_unidades": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Unidades por pedido que reciben el beneficio."
+        },
+        "tope_descuento": {
+          "$ref": "comunes.json#/$defs/monto"
+        }
+      }
+    },
+    "acumulable": {
+      "type": "boolean",
+      "default": false,
+      "description": "false: sobre un mismo ítem gana la promoción que más descuenta. true: se suma a la ganadora."
+    },
+    "activa": {
+      "type": "boolean"
+    }
+  }
+}

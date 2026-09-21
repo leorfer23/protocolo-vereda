@@ -1,0 +1,25 @@
+{
+  "$comentario": "Supermercado: 3x2 en lácteos, mezclando productos, hasta fin de mes. De cada tres unidades, la más barata va gratis.",
+  "id": "01926b3a-7777-7000-8000-000000000001",
+  "nodo": "vereda.ar",
+  "creado": "2026-09-21T09:00:00-03:00",
+  "actualizado": "2026-09-21T09:00:00-03:00",
+  "version_esquema": "1.0",
+  "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+  "activa": true,
+  "nombre": "3x2 en lácteos",
+  "tipo": "lleva_n",
+  "alcance": {
+    "categorias": [
+      "Lácteos"
+    ]
+  },
+  "lleva_n": {
+    "cada": 3,
+    "descuento_pct": 100,
+    "mezclable": true
+  },
+  "condiciones": {
+    "hasta": "2026-09-30T23:59:59-03:00"
+  }
+}

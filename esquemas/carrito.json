@@ -15,6 +15,9 @@
     "totales": { "$ref": "pedido.json#/properties/totales" },
     "reparto": { "$ref": "pedido.json#/properties/reparto" },
     "eta": { "$ref": "comunes.json#/$defs/instante" },
+    "descuentos_aplicados": { "type": "array", "items": { "$ref": "pedido.json#/$defs/descuento_aplicado" } },
+    "puntos_a_canjear": { "type": "integer", "minimum": 0 },
+    "sugerencias": { "type": "array", "description": "Promociones a un paso, en texto que se le puede repetir a la persona.", "items": { "type": "object", "required": ["promocion_id", "mensaje"], "properties": { "promocion_id": { "$ref": "comunes.json#/$defs/id" }, "mensaje": { "type": "string", "description": "'Te faltan $2.000 para 10 % de descuento', 'Llevando una más, la tercera es gratis'." } } } },
     "dentro_del_mandato": { "type": "boolean" },
     "vence": { "$ref": "comunes.json#/$defs/instante", "description": "24 h después de la última modificación. Es solo limpieza: un carrito vencido no libera nada porque no retenía nada." }
   }

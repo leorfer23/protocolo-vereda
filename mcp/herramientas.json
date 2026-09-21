@@ -111,6 +111,16 @@
       "name": "mi_vereda",
       "description": "Comercios a los que la persona ya le compró, con su reputación. Preferilos ante la duda: es la relación que la red quiere reforzar. Requiere 'leer'.",
       "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "ver_promociones",
+      "description": "Promociones activas de un comercio: 2x1, 3x2, segunda unidad con descuento, precio por cantidad, descuento por total de compra, envío bonificado, descuento por pagar en efectivo o por retirar. Miralas antes de armar el carrito: muchas veces conviene llevar una unidad más o sumar un producto para llegar a un tramo. El carrito ya las aplica solo y en 'sugerencias' te dice cuál está a un paso. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string" } } }
+    },
+    {
+      "name": "mis_puntos",
+      "description": "Saldos de puntos de la persona, uno por comercio. Los puntos valen solo en el comercio que los dio. Antes de canjear preguntale a la persona: puede preferir juntarlos. Requiere 'leer'.",
+      "inputSchema": { "type": "object", "properties": {} }
     }
   ]
 }

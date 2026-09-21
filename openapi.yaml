@@ -72,6 +72,16 @@ paths:
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/oferta.json" } } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
+  /comercios/{id}/promociones:
+    get:
+      operationId: listarPromociones
+      tags: [ofertas]
+      summary: Promociones activas del comercio. Se calculan con el algoritmo público de docs/promociones.md
+      security: []
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/promocion.json" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
   /comercios/{id}/stock:
     put:
       operationId: actualizarStock
@@ -140,6 +150,15 @@ paths:
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { $ref: "esquemas/pedido.json#/properties/modalidad" } } } }
       responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }, "410": { $ref: "#/components/responses/CarritoVencido" } }
+  /carritos/{id}/puntos:
+    put:
+      operationId: canjearPuntosCarrito
+      tags: [carrito]
+      summary: Elegir cuántos puntos del comercio canjear en este carrito. 0 para no canjear.
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, required: [canjear], properties: { canjear: { type: integer, minimum: 0 } } } } } }
+      responses: { "200": { description: Estado del carrito, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }, "410": { $ref: "#/components/responses/CarritoVencido" }, "422": { $ref: "#/components/responses/Error" } }
   /carritos/{id}/confirmar:
     post:
       operationId: confirmarCarrito
@@ -302,6 +321,8 @@ paths:
     get: { operationId: verPerfil, tags: [yo], summary: Mi perfil y preferencias, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/usuario.json" } } } } } }
   /yo/preferencias:
     put: { operationId: guardarPreferencias, tags: [yo], summary: Preferencias declarativas que cualquier agente autorizado lee, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/preferencias" } } } }, responses: { "204": { description: OK } } }
+  /yo/puntos:
+    get: { operationId: listarMisPuntos, tags: [yo], summary: "Mis saldos de puntos, uno por comercio, cada uno firmado por su comercio", security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/SaldoPuntos" } } } } } } }
   /yo/exportar:
     get: { operationId: exportarCuenta, tags: [yo], summary: "Todo lo mío, firmado: identidad, clave, historial, reseñas. Para irme a otro nodo.", security: [ { sesion: [] } ], responses: { "200": { description: Paquete firmado, content: { application/json: { schema: { type: object } } } } } }
   /yo/borrar:
@@ -369,6 +390,15 @@ components:
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
         codigo_fuente: { type: string, format: uri }
     Carrito: { $ref: "esquemas/carrito.json" }
+    SaldoPuntos:
+      type: object
+      required: [comercio, saldo, actualizado, firma]
+      properties:
+        comercio: { $ref: "esquemas/comunes.json#/$defs/identidad" }
+        saldo: { type: integer, minimum: 0 }
+        proximo_vencimiento: { type: object, properties: { puntos: { type: integer }, fecha: { type: string, format: date } } }
+        actualizado: { $ref: "esquemas/comunes.json#/$defs/instante" }
+        firma: { $ref: "esquemas/comunes.json#/$defs/firma", description: "Del comercio. El usuario guarda la última: es su comprobante si el comercio cambia de nodo o desconoce el saldo." }
     Resolucion:
       type: object
       properties:
