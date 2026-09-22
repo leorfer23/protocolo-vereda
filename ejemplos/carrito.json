@@ -175,8 +175,9 @@
       }
     },
     {
-      "destinatario": "red",
-      "concepto": "Vereda",
+      "destinatario": "nodo",
+      "concepto": "aporte_nodo",
+      "pagador": "comercio",
       "monto": {
         "centavos": 0,
         "moneda": "ARS"

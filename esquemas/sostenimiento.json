@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/sostenimiento.json",
+  "title": "Sostenimiento",
+  "description": "Cómo se sostiene este nodo, en público: a qué cuenta aportar, cuánto sugiere, cuánto recibió y en qué lo gastó. Sin comisión y sin plata en el medio: el aporte es voluntario y va directo a la cuenta del operador. Aportar o no no cambia nada para nadie (docs/sostenimiento.md).",
+  "type": "object",
+  "required": ["nodo", "moneda", "quien_paga", "acepta_propinas_de_usuarios", "gastos_publicados"],
+  "if": {
+    "anyOf": [
+      { "properties": { "acepta_propinas_de_usuarios": { "const": true } }, "required": ["acepta_propinas_de_usuarios"] },
+      { "required": ["monto_sugerido_por_pedido"] },
+      { "required": ["monto_sugerido_mensual"] }
+    ]
+  },
+  "then": { "required": ["cuenta"], "description": "Si el nodo sugiere un aporte o acepta propinas, dice a qué cuenta." },
+  "properties": {
+    "nodo": { "type": "string", "description": "Dominio del nodo." },
+    "operador": { "type": "string", "description": "Quién opera el nodo: una persona, una cooperativa, un club de barrio." },
+    "cuenta": {
+      "type": "object",
+      "description": "La cuenta del operador del nodo. Es pública a propósito: a diferencia de la de un comercio o un repartidor, es la de quien pide aportes a la vista de todos, y cualquiera puede comprobar que el titular que le muestra su banco es este.",
+      "required": ["alias", "titular"],
+      "properties": {
+        "alias": { "type": "string", "minLength": 6, "maxLength": 22, "examples": ["nodo.barrio.norte"] },
+        "titular": { "type": "string", "minLength": 1, "maxLength": 120 }
+      },
+      "additionalProperties": false
+    },
+    "moneda": { "type": "string", "enum": ["ARS"] },
+    "quien_paga": { "type": "string", "enum": ["comercio"], "description": "El aporte sugerido lo pone el comercio, nunca el comprador. Del comprador el nodo solo acepta una propina opcional ('acepta_propinas_de_usuarios')." },
+    "monto_sugerido_por_pedido": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que el nodo sugiere por pedido entregado a un comercio que elige aportar por pedido. Una sugerencia: el comercio pone el monto que quiere, o nada." },
+    "monto_sugerido_mensual": { "$ref": "comunes.json#/$defs/monto", "description": "Lo mismo, para el comercio que prefiere un aporte fijo por mes." },
+    "acepta_propinas_de_usuarios": { "type": "boolean", "description": "Si el nodo acepta 'propina_nodo_centavos' al confirmar un carrito. Solo por transferencia a 'cuenta'." },
+    "gastos_publicados": {
+      "type": "array",
+      "description": "Un período por mes, el más reciente primero. Lo que entró son conteos automáticos de cobros confirmados; lo que salió lo carga el operador. Sin períodos: el nodo todavía no cerró ninguno.",
+      "items": { "$ref": "#/$defs/periodo" }
+    },
+    "actualizado": { "$ref": "comunes.json#/$defs/instante" }
+  },
+  "$defs": {
+    "periodo": {
+      "type": "object",
+      "required": ["periodo", "pedidos", "aportes_recibidos", "propinas_recibidas", "gastos"],
+      "properties": {
+        "periodo": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$", "description": "Año y mes, 'AAAA-MM', en la zona horaria del nodo." },
+        "pedidos": { "type": "integer", "minimum": 0, "description": "Pedidos entregados en el nodo durante el período." },
+        "comercios_que_aportaron": { "type": "integer", "minimum": 0, "description": "Cuántos comercios distintos aportaron. Solo el número: el nodo nunca publica quién aportó y quién no." },
+        "aportes_recibidos": { "$ref": "comunes.json#/$defs/monto", "description": "Suma de los aportes de comercios que el operador marcó recibidos." },
+        "propinas_recibidas": { "$ref": "comunes.json#/$defs/monto", "description": "Suma de las propinas de compradores que el operador marcó recibidas." },
+        "gastos": {
+          "type": "object",
+          "required": ["servidor", "tokens", "otros"],
+          "properties": {
+            "servidor": { "$ref": "comunes.json#/$defs/monto", "description": "Máquinas, base de datos, dominio, ancho de banda." },
+            "tokens": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que cuestan los agentes que administran el nodo." },
+            "otros": { "$ref": "comunes.json#/$defs/monto" }
+          },
+          "additionalProperties": false
+        },
+        "nota": { "type": "string", "maxLength": 500, "description": "Lo que el operador quiera explicar del período: un gasto raro, un sobrante que queda para el mes siguiente." }
+      },
+      "additionalProperties": false
+    }
+  }
+}

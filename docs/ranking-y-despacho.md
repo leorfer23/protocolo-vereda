@@ -33,7 +33,7 @@ Consecuencias para el orden:
   factor `v`. Sin sesión, `v` se cancela y el orden es el mismo para todos.
 - **Un comercio nuevo no arranca en 5.** El promedio ponderado incluye 3 puntos de la media de la
   red, así que una sola reseña perfecta no lo sube arriba de los que tienen historia.
-- **Ninguna posición se compra.** Ni el orden, ni la reputación, ni el peso de una reseña. Cambiar
+- **Ninguna posición se compra.** Ni el orden, ni la reputación, ni el peso de una reseña. Tampoco se gana aportando al nodo: ninguno de los dos algoritmos lee `aporte_nodo` ni los pagos al nodo (`docs/sostenimiento.md`). Cambiar
   cualquiera de los dos algoritmos es cambiar estos archivos en el repositorio público.
 
 ## Despacho

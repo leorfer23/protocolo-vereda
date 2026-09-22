@@ -72,6 +72,7 @@
         "envio": { "$ref": "comunes.json#/$defs/monto" },
         "propina_repartidor": { "$ref": "comunes.json#/$defs/monto" },
         "propina_comercio": { "$ref": "comunes.json#/$defs/monto" },
+        "propina_nodo": { "$ref": "comunes.json#/$defs/monto", "description": "La propina opcional del comprador al nodo (docs/sostenimiento.md). Suma al total pero se transfiere aparte, a la cuenta del nodo." },
         "descuentos": { "$ref": "comunes.json#/$defs/monto" },
         "total": { "$ref": "comunes.json#/$defs/monto" },
         "total_final": { "$ref": "comunes.json#/$defs/monto", "description": "Tras pesables, faltantes y sustituciones." },
@@ -80,15 +81,19 @@
     },
     "reparto": {
       "type": "array",
-      "description": "Adónde va cada peso. Se muestra siempre.",
+      "description": "Adónde va cada peso. Se muestra siempre, calculado por el nodo. Las apps lo agrupan por destinatario en tres líneas —para el comercio, para el repartidor y 'Para el nodo'— y la del nodo está siempre, aunque sea 0: que se vea que el nodo no se queda con nada que no esté escrito acá (docs/sostenimiento.md). Nunca 'Para Vereda': Vereda no es nadie.",
+      "contains": { "properties": { "destinatario": { "const": "nodo" } }, "required": ["destinatario"] },
       "items": {
         "type": "object",
         "required": ["destinatario", "concepto", "monto"],
         "properties": {
-          "destinatario": { "type": "string", "enum": ["comercio", "repartidor", "punto_entrega", "red"] },
-          "concepto": { "type": "string" },
-          "monto": { "$ref": "comunes.json#/$defs/monto" }
-        }
+          "destinatario": { "type": "string", "enum": ["comercio", "repartidor", "punto_entrega", "nodo"] },
+          "concepto": { "type": "string", "description": "Para el nodo: 'aporte_nodo' (del comercio, 0 si no aporta por pedido) y, si la dio, 'propina_nodo' (del comprador)." },
+          "monto": { "$ref": "comunes.json#/$defs/monto" },
+          "pagador": { "type": "string", "enum": ["comprador", "comercio"], "default": "comprador", "description": "'comercio': sale de lo que cobra el comercio, no se suma a lo que paga el comprador. Es el caso de 'aporte_nodo'." }
+        },
+        "if": { "properties": { "concepto": { "const": "aporte_nodo" } }, "required": ["concepto"] },
+        "then": { "required": ["pagador"], "properties": { "destinatario": { "const": "nodo" }, "pagador": { "const": "comercio" } } }
       }
     },
     "descuentos_aplicados": { "type": "array", "items": { "$ref": "#/$defs/descuento_aplicado" }, "description": "Desglose de 'totales.descuentos'. Congelado al crear, como los precios." },

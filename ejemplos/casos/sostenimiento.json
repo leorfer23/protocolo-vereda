@@ -1,0 +1,462 @@
+{
+  "$comentario": "Casos del bloque público de sostenimiento de un nodo (docs/sostenimiento.md).",
+  "esquema": "sostenimiento.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Nodo que sugiere aporte, acepta propinas y publica un mes cerrado.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "cuenta": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte"
+        },
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "monto_sugerido_por_pedido": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 9800000,
+                "moneda": "ARS"
+              },
+              "tokens": {
+                "centavos": 21400000,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 1200000,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre."
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Nodo que no pide nada y todavía no cerró ningún mes: no necesita cuenta.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "acepta_propinas_de_usuarios": false,
+        "gastos_publicados": [],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Acepta propinas pero no dice a qué cuenta.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "monto_sugerido_por_pedido": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 9800000,
+                "moneda": "ARS"
+              },
+              "tokens": {
+                "centavos": 21400000,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 1200000,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre."
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sugiere un aporte mensual pero no dice a qué cuenta.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "acepta_propinas_de_usuarios": false,
+        "gastos_publicados": [],
+        "actualizado": "2026-09-01T09:00:00-03:00",
+        "monto_sugerido_mensual": {
+          "centavos": 1000000,
+          "moneda": "ARS"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El aporte sugerido lo paga el comercio; el comprador solo deja propina.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "cuenta": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte"
+        },
+        "moneda": "ARS",
+        "quien_paga": "comprador",
+        "monto_sugerido_por_pedido": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 9800000,
+                "moneda": "ARS"
+              },
+              "tokens": {
+                "centavos": 21400000,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 1200000,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre."
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La cuenta del nodo es pública: alias sin titular no sirve para comprobarla.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "cuenta": {
+          "alias": "nodo.vereda.norte"
+        },
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "monto_sugerido_por_pedido": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 9800000,
+                "moneda": "ARS"
+              },
+              "tokens": {
+                "centavos": 21400000,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 1200000,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre."
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un período sin el gasto en tokens no es una rendición completa.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "cuenta": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte"
+        },
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "monto_sugerido_por_pedido": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 1,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 0,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre."
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El período es un mes 'AAAA-MM', no un día.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "cuenta": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte"
+        },
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "monto_sugerido_por_pedido": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08-31",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 9800000,
+                "moneda": "ARS"
+              },
+              "tokens": {
+                "centavos": 21400000,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 1200000,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre."
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Nunca se publica quién aportó: el período no admite una lista de comercios.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "cuenta": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte"
+        },
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "monto_sugerido_por_pedido": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 9800000,
+                "moneda": "ARS"
+              },
+              "tokens": {
+                "centavos": 21400000,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 1200000,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre.",
+            "comercios": [
+              "lahuerta@vereda.ar"
+            ]
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Montos en centavos enteros, nunca decimales.",
+      "doc": {
+        "nodo": "vereda.ar",
+        "operador": "Cooperativa de Trabajo Vereda Norte",
+        "cuenta": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte"
+        },
+        "moneda": "ARS",
+        "quien_paga": "comercio",
+        "monto_sugerido_por_pedido": {
+          "centavos": 200.5,
+          "moneda": "ARS"
+        },
+        "monto_sugerido_mensual": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "acepta_propinas_de_usuarios": true,
+        "gastos_publicados": [
+          {
+            "periodo": "2026-08",
+            "pedidos": 1843,
+            "comercios_que_aportaron": 37,
+            "aportes_recibidos": {
+              "centavos": 41200000,
+              "moneda": "ARS"
+            },
+            "propinas_recibidas": {
+              "centavos": 3850000,
+              "moneda": "ARS"
+            },
+            "gastos": {
+              "servidor": {
+                "centavos": 9800000,
+                "moneda": "ARS"
+              },
+              "tokens": {
+                "centavos": 21400000,
+                "moneda": "ARS"
+              },
+              "otros": {
+                "centavos": 1200000,
+                "moneda": "ARS"
+              }
+            },
+            "nota": "Sobraron $128.500: quedan para septiembre."
+          }
+        ],
+        "actualizado": "2026-09-01T09:00:00-03:00"
+      }
+    }
+  ]
+}

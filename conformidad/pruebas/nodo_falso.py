@@ -13,6 +13,8 @@ Uso:
 
 Cada ruta rompe una cosa distinta a propósito:
 - /.well-known/vereda.json: 200 pero el cuerpo no es JSON, y sin ETag/Cache-Control.
+- /v1/sostenimiento: caché y revalidación correctas, pero acepta propinas sin
+  decir a qué cuenta (esquema roto, docs/sostenimiento.md).
 - /v1/comercios: cabeceras de caché presentes pero la revalidación no funciona
   (siempre 200, nunca 304), y al comercio le falta 'ubicacion' (esquema roto).
 - /v1/buscar: cabeceras y revalidación correctas, pero el cuerpo es un objeto
@@ -253,6 +255,10 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, [_mandato_publico()])
         elif p == "/.well-known/vereda.json":
             self._enviar(200, "<html>esto no es JSON</html>", content_type="text/html")
+        elif p == "/v1/sostenimiento":
+            # acepta propinas pero no dice a qué cuenta: esquema roto, caché bien
+            self._responder_con_cache({"nodo": "127.0.0.1", "moneda": "ARS", "quien_paga": "comercio",
+                                       "acepta_propinas_de_usuarios": True, "gastos_publicados": []}, "sostenimiento-v1")
         elif p.startswith("/v1/comercios?") or p == "/v1/comercios":
             self._json(200, [COMERCIO_ROTO], {"ETag": '"comercios-v1"', "Cache-Control": "public, max-age=60"})
         elif p == f"/v1/comercios/{COMERCIO_ID}":
@@ -429,7 +435,10 @@ class Handler(BaseHTTPRequestHandler):
             "estado": "creado",
             "historial": [{"estado": "creado", "instante": ahora, "actor": actor["identidad"]}],
             "totales": {"productos": _monto(total), "envio": _monto(0), "total": _monto(total)},
-            "reparto": [{"destinatario": "comercio", "concepto": "productos", "monto": _monto(total)}],
+            "reparto": [
+                {"destinatario": "comercio", "concepto": "productos", "monto": _monto(total)},
+                {"destinatario": "nodo", "concepto": "aporte_nodo", "pagador": "comercio", "monto": _monto(0)},
+            ],
             "via": {"canal": "agente" if actor["tipo"] == "mandato" else "app"},
             "codigo_retiro": "482913",
         }

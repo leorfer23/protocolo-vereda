@@ -76,9 +76,9 @@ Como referencia, no como norma: primer reintento al minuto, duplicando hasta una
 
 Un viaje lo despacha el nodo del comercio. Puede ofrecerlo a repartidores de su propio nodo o, si hay acuerdo de federación, a cooperativas de otros nodos que cubran la zona. El pago del envío va directo del usuario a la cuenta del repartidor, como siempre.
 
-## Comisión
+## Sostenimiento
 
-Si un nodo cobra comisión, se la cobra a sus propios comercios. Nada se cobra entre nodos.
+Un nodo no cobra comisión. Se sostiene con aportes voluntarios de sus propios comercios y propinas opcionales de compradores, por transferencia directa a la cuenta de su operador, y publica lo que recibe y gasta (`docs/sostenimiento.md`). Nada se cobra entre nodos: un pedido federado aporta, si aporta, al nodo del comercio.
 
 ## Confianza entre nodos
 

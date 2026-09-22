@@ -7,16 +7,19 @@
   "allOf": [
     { "$ref": "comunes.json#/$defs/metadatos" },
     { "description": "'en_mano' es solo para efectivo.", "if": { "properties": { "estado": { "const": "en_mano" } }, "required": ["estado"] }, "then": { "properties": { "metodo": { "const": "efectivo" } } } },
-    { "description": "El efectivo nunca está 'pendiente' ni 'vencido': no tiene ventana de pago.", "if": { "properties": { "metodo": { "const": "efectivo" } }, "required": ["metodo"] }, "then": { "properties": { "estado": { "enum": ["en_mano", "confirmado", "fallido"] } } } }
+    { "description": "El efectivo nunca está 'pendiente' ni 'vencido': no tiene ventana de pago.", "if": { "properties": { "metodo": { "const": "efectivo" } }, "required": ["metodo"] }, "then": { "properties": { "estado": { "enum": ["en_mano", "confirmado", "fallido"] } } } },
+    { "description": "Lo que va al nodo (docs/sostenimiento.md) es solo por transferencia a su cuenta pública, y el destinatario es la identidad 'nodo@<dominio>' del nodo.", "if": { "properties": { "concepto": { "enum": ["aporte_nodo", "propina_nodo"] } }, "required": ["concepto"] }, "then": { "properties": { "metodo": { "const": "transferencia" }, "destinatario": { "pattern": "^nodo@" } } } },
+    { "description": "El aporte al nodo lo paga el comercio: siempre dice quién. Va atado a un pedido entregado ('por_pedido') o a un mes ('mensual').", "if": { "properties": { "concepto": { "const": "aporte_nodo" } }, "required": ["concepto"] }, "then": { "required": ["pagador"], "oneOf": [ { "required": ["pedido_id"], "not": { "required": ["periodo"] } }, { "required": ["periodo"], "not": { "required": ["pedido_id"] } } ] }, "else": { "required": ["pedido_id"], "not": { "required": ["periodo"] } } }
   ],
-  "required": ["pedido_id", "destinatario", "concepto", "monto", "metodo", "estado"],
+  "required": ["destinatario", "concepto", "monto", "metodo", "estado"],
   "if": { "properties": { "estado": { "const": "pendiente" } }, "required": ["estado"] },
-  "then": { "required": ["vence"], "description": "Un cobro pendiente siempre dice cuándo vence: hasta ese instante el pedido retiene su stock y sus cupos." },
+  "then": { "required": ["vence"], "description": "Un cobro pendiente siempre dice cuándo vence: hasta ese instante el pedido retiene su stock y sus cupos. Lo que va al nodo ('aporte_nodo', 'propina_nodo') también vence, pero nunca retiene ni cancela nada." },
   "properties": {
-    "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+    "pedido_id": { "$ref": "comunes.json#/$defs/id", "description": "Siempre, salvo el aporte mensual de un comercio al nodo, que va por 'periodo'." },
+    "periodo": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$", "description": "Solo 'aporte_nodo' mensual: el mes que cubre, 'AAAA-MM'." },
     "destinatario": { "$ref": "comunes.json#/$defs/identidad" },
-    "pagador": { "$ref": "comunes.json#/$defs/identidad", "description": "Quién paga. Ausente: el comprador del pedido. El comercio, cuando le paga el envío al repartidor (cobro_envio 'al_comercio', o la parte de un envío bonificado por promoción). Ver docs/repartidores.md." },
-    "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor", "propina_comercio", "punto_entrega", "periodo_suscripcion", "devolucion"] },
+    "pagador": { "$ref": "comunes.json#/$defs/identidad", "description": "Quién paga. Ausente: el comprador del pedido. El comercio, cuando le paga el envío al repartidor (cobro_envio 'al_comercio', o la parte de un envío bonificado por promoción). Ver docs/repartidores.md. En 'aporte_nodo', siempre el comercio (docs/sostenimiento.md)." },
+    "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor", "propina_comercio", "punto_entrega", "periodo_suscripcion", "devolucion", "aporte_nodo", "propina_nodo"], "description": "'aporte_nodo': lo que el comercio elige aportar al nodo, por pedido o por mes. 'propina_nodo': la propina opcional del comprador al nodo. Ninguno de los dos se suma a lo que cobra el comercio ni lo condiciona (docs/sostenimiento.md)." },
     "monto": { "$ref": "comunes.json#/$defs/monto" },
     "metodo": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] },
     "estado": { "type": "string", "enum": ["pendiente", "confirmado", "vencido", "en_mano", "fallido"], "description": "'en_mano': efectivo que se cobra al entregar o al retirar. Pasa a 'confirmado' cuando quien entrega marca el cobro en 'entregar'." },
@@ -24,12 +27,12 @@
     "psp_referencia": { "type": "string", "description": "Id opaco del cobro en el PSP." },
     "qr": { "type": "string", "description": "Payload del QR interoperable, si aplica." },
     "link_pago": { "type": "string", "format": "uri" },
-    "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados. Un pago al repartidor ('envio', 'propina_repartidor') vence 24 h después de la entrega y nunca cancela el pedido: queda 'vencido' como constancia de que no se marcó recibido (docs/repartidores.md)." },
+    "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados. Un pago al repartidor ('envio', 'propina_repartidor') vence 24 h después de la entrega y nunca cancela el pedido: queda 'vencido' como constancia de que no se marcó recibido (docs/repartidores.md). Lo que va al nodo ('aporte_nodo', 'propina_nodo') vence a los 30 días y tampoco cancela ni cambia nada: queda 'vencido' y listo (docs/sostenimiento.md)." },
     "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
     "idempotency_key": { "type": "string" },
     "instrucciones": {
       "type": "object",
-      "description": "A dónde transferir, solo con metodo 'transferencia'. Las ve únicamente quien paga, y solo mientras el pedido está activo: no salen en la copia de las otras partes ni en el pedido ya cerrado. Con destinatario repartidor, el alias es el de su 'privado.cobro'.",
+      "description": "A dónde transferir, solo con metodo 'transferencia'. Las ve únicamente quien paga, y solo mientras el pedido está activo: no salen en la copia de las otras partes ni en el pedido ya cerrado. Con destinatario repartidor, el alias es el de su 'privado.cobro'. Con destinatario el nodo, es su 'sostenimiento.cuenta', que ya es pública.",
       "required": ["alias", "monto", "referencia"],
       "properties": {
         "alias": { "type": "string" },

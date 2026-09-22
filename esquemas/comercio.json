@@ -93,6 +93,19 @@
       "items": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] }
     },
     "acepta_propinas": { "type": "boolean", "default": true },
+    "aporte_nodo": {
+      "type": "object",
+      "description": "Lo que este comercio eligió aportar al nodo que lo aloja, público en su ficha como cualquier otra política (docs/sostenimiento.md). Es voluntario: 'ninguno' es tan válido como cualquier otro y no cambia ranking, acceso, visibilidad ni nada. Ausente: 'ninguno'. La ficha dice lo que el comercio declaró; si después transfirió o no, el nodo no lo publica comercio por comercio.",
+      "required": ["modo"],
+      "properties": {
+        "modo": { "type": "string", "enum": ["ninguno", "por_pedido", "mensual"], "default": "ninguno", "description": "'por_pedido': 'monto' por cada pedido entregado, que se suma como línea 'Para el nodo' en el reparto. 'mensual': 'monto' una vez por mes." },
+        "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo elige el comercio. El nodo publica un monto sugerido en 'sostenimiento'; es solo eso, una sugerencia." }
+      },
+      "if": { "properties": { "modo": { "enum": ["por_pedido", "mensual"] } } },
+      "then": { "required": ["monto"] },
+      "else": { "not": { "required": ["monto"] } },
+      "additionalProperties": false
+    },
     "notas_para_agentes": { "type": "string", "maxLength": 2000, "description": "Lo que un mozo diría: 'la fugazzeta tarda 30 min los viernes'." },
     "atributos": { "$ref": "comunes.json#/$defs/atributos" },
     "imagenes": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
