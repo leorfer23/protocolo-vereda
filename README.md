@@ -2,7 +2,7 @@
 
 **Vereda. Sin nadie en el medio.**
 
-Un protocolo abierto para comprar y recibir de los comercios de tu barrio: restaurantes, almacenes, verdulerías, supermercados, catering, productores. Sin dueño, sin comisión escondida, sin call center. El dinero va directo del que compra al que vende y al que lleva. La red no custodia plata, no guarda más datos que los necesarios y no arbitra nada: garantiza que quien aparece es quien dice ser y que cada reseña corresponde a un pedido real. Lo demás es entre vecinos.
+Un protocolo abierto para comprar y recibir de los comercios de tu barrio: restaurantes, almacenes, verdulerías, supermercados, catering, productores. Sin dueño, sin comisión escondida, sin call center. El dinero va directo del que compra al que vende y al que lleva. La red no custodia plata, no guarda más datos que los necesarios y no arbitra nada: garantiza que lo firmado por alguien lo firmó él, que cada prueba de identidad se puede rehacer y que cada reseña corresponde a un pedido real. Lo demás es entre vecinos.
 
 Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un cliente o enchufar un agente. La filosofía es la del email, la web o Ethereum: sin permiso, con identidad propia, federado. Sin blockchain ni moneda: los pesos viajan por el sistema de pagos argentino (Transferencias 3.0, QR interoperable).
 
@@ -20,6 +20,7 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 - **Los datos del comercio son del comercio.** Cada comercio fija en su ficha pública cuántos días retiene los datos de un pedido y si guarda lista de clientes (con consentimiento de la persona). El protocolo promueve un default —90 días, sin lista— y le pone el sello `estandar` a quien lo cumple; no obliga a nadie, y el usuario elige sabiendo. Ver `docs/datos-y-privacidad.md`.
 - **Reputación contextual, firmada y portable.** Reseñas solo sobre pedidos entregados, firmadas con la clave del autor, sin edición ni borrado, y te las llevás a otro nodo. La reputación que ves se calcula para vos con una fórmula publicada: pesa más el vecino que volvió a comprar que la identidad creada ayer del otro lado de la ciudad, y las campañas se marcan con un criterio determinista que cualquiera puede rehacer. Ver `docs/resenas.md`.
 - **Dinero directo.** La red genera la referencia de cobro y confirma. Nunca custodia, nunca reembolsa, nunca retiene.
+- **Nadie verifica a nadie; todo se prueba.** No hay tilde azul ni sello de Vereda. Un comercio prueba que su dominio, su Instagram, su WhatsApp, su local y su cuenta de cobro son suyos publicando un código que cualquiera puede ir a mirar; los clientes atestiguan el local escaneando un QR; los duplicados y los comercios del mismo dueño se muestran a la vista, una denuncia de suplantación es pública y firmada, y quien tiene la prueba puede reclamar una ficha que armó otro. Ninguna de esas cosas la resuelve una persona ni un agente: la resuelve la evidencia, sola. Ver `docs/identidad-y-verificacion.md`.
 - **Algoritmos públicos.** Ranking y despacho están en `docs/ranking-y-despacho.md`, el peso de cada reseña en `docs/resenas.md`. Nadie puede pagar para aparecer primero ni para subir su reputación.
 - **Federación desde el día uno.** Identidad `actor@nodo`, pedidos firmados entre nodos, sin registro central.
 
@@ -27,11 +28,11 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 
 | Carpeta | Contenido |
 | --- | --- |
-| `esquemas/` | 22 esquemas JSON (draft 2020-12): comercio, oferta, promoción, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
-| `openapi.yaml` | La API abierta, 78 rutas. Apps y agentes usan las mismas |
-| `mcp/herramientas.json` | Las 52 herramientas del servidor MCP —26 del lado del usuario, 13 del lado del comercio y 13 del lado del repartidor—, con descripciones para asistentes |
+| `esquemas/` | 24 esquemas JSON (draft 2020-12): comercio, oferta, promoción, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, denuncia, reclamo, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
+| `openapi.yaml` | La API abierta, 89 rutas. Apps y agentes usan las mismas |
+| `mcp/herramientas.json` | Las 57 herramientas del servidor MCP —del lado del usuario, del comercio y del repartidor—, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio, y `vectores-firma.json` con los vectores de prueba de firma |
-| `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, repartidores (asignación, responsabilidad, cobro y reputación), reseñas y reputación contextual, carrito y reserva, promociones, datos y privacidad, diseño de la suite de conformidad (fase 1) |
+| `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, repartidores (asignación, responsabilidad, cobro y reputación), reseñas y reputación contextual, identidad y verificación sin autoridad (vinculaciones, duplicados, denuncias, reclamo de fichas), carrito y reserva, promociones, datos y privacidad, diseño de la suite de conformidad (fase 1) |
 | `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1 y reproduce los vectores de firma |
 | `generar-vectores.py` | Regenera `ejemplos/vectores-firma.json`. Determinista: dos corridas dan el mismo archivo |
 | `conformidad/` | Suite de conformidad, fase 1 (`docs/suite-conformidad.md`). Corre por HTTP contra la URL de cualquier nodo: nivel A (anónimo), B (autenticado, `--sesion`/`--mandato`) y C (federación) — `python3 -m conformidad https://un-nodo.ar --nivel a,b,c` |

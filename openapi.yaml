@@ -27,6 +27,7 @@ tags:
   - { name: viajes, description: "Lado repartidor: alta sin aprobación, viajes, cobro del envío, historial y ganancias (docs/repartidores.md)" }
   - { name: mensajes }
   - { name: resenas }
+  - { name: identidad, description: "Vinculaciones, atestaciones y denuncias de suplantación. Nadie verifica a nadie: todo se prueba y cualquiera lo recomprueba (docs/identidad-y-verificacion.md)" }
   - { name: mandatos, description: Agentes }
   - { name: yo, description: Preferencias y exportación }
   - { name: eventos }
@@ -256,6 +257,49 @@ paths:
         "200": { description: Paquete firmado, content: { application/json: { schema: { $ref: "#/components/schemas/ExportacionComercio" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
 
+  /comercios/{id}/reclamos:
+    get:
+      operationId: listarReclamos
+      tags: [identidad]
+      summary: "Reclamos de propiedad sobre una ficha: quién reclama, con qué prueba y en qué quedó"
+      security: []
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/reclamo.json" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+    post:
+      operationId: reclamarComercio
+      tags: [identidad]
+      summary: "Reclamar una ficha existente como propia. Se resuelve solo cuando el reclamante prueba lo que el dueño actual no probó; si no, vence solo a los 30 días"
+      description: |
+        Sin revisor, humano o agente (`docs/identidad-y-verificacion.md`, punto 6). La prueba es un
+        QR propio del reclamo en la ubicación de la ficha (`local`), o una vinculación que la ficha ya
+        declara y que el dueño actual no tiene verificada; cualquier otra: 422 `prueba_no_admitida`.
+        Un reclamo abierto por reclamante y ficha: 409 `reclamo_abierto`. Nunca por mandato: cambia
+        de manos un comercio.
+
+        Si se resuelve, la ficha pasa a la clave del reclamante: la clave anterior queda `retirada`,
+        la nueva lleva `reclamo` en el historial, se revocan los mandatos del dueño anterior y todo
+        lo firmado antes sigue valiendo.
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/reclamo.json" } } } }
+      responses:
+        "201": { description: Abierto, content: { application/json: { schema: { $ref: "#/components/schemas/ReclamoAbierto" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/reclamos/{reclamo}/comprobar:
+    post:
+      operationId: comprobarReclamo
+      tags: [identidad]
+      summary: "El reclamante pide comprobar su prueba ahora. En 'whatsapp', con el código del desafío. Si prueba, se resuelve en el acto"
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: reclamo, in: path, required: true, schema: { type: string } } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { codigo: { type: string, pattern: "^[0-9]{6}$" } } } } } }
+      responses:
+        "200": { description: "Comprobado. Sin prueba no es un error: 'senales.motivo' dice qué faltó", content: { application/json: { schema: { $ref: "esquemas/reclamo.json" } } } }
+        "403": { description: No es el reclamante, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "404": { $ref: "#/components/responses/Error" }
   /catalogo/{ean}:
     get:
       operationId: verProductoDeCatalogo
@@ -437,7 +481,7 @@ paths:
       description: "Lo usa el comprador, y también el comercio cuando es el pagador del envío (docs/repartidores.md). Con 'concepto' se dice cuál de los pagos del pedido."
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." }, comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." }, comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." }, titular_coincide: { type: boolean, description: "Si el titular que le mostró su banco al transferir coincide con 'pago.instrucciones.titular'. El nodo guarda solo este veredicto, y cuenta para la vinculación 'cuenta_cobro' del destinatario (docs/identidad-y-verificacion.md). Ausente: la persona no dijo." } } } } } }
       responses:
         "200": { description: Pedido con la transferencia declarada, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "409": { $ref: "#/components/responses/Error" }
@@ -631,6 +675,133 @@ paths:
   /actores/{identidad}/resenas:
     get: { operationId: listarResenasDeActor, tags: [resenas], summary: "Reseñas públicas de un comercio, repartidor o usuario", security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { name: identidad, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
 
+  /actores/{identidad}/verificacion:
+    get:
+      operationId: verVerificacion
+      tags: [identidad]
+      summary: "Todo lo que distingue a un actor de quien se hace pasar por él: vinculaciones, vinculados, mismo nombre cerca, denuncias e historial, firmado por su nodo"
+      description: |
+        No es un sello: son pruebas y hechos que cualquiera puede rehacer (`docs/identidad-y-verificacion.md`).
+        Las declaraciones adentro van firmadas por el actor y el documento entero por el nodo, así
+        otro nodo lo puede guardar y verificar sin volver a preguntar.
+      security: []
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/verificacion_de_actor" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { $ref: "#/components/responses/Error" }
+  /actores/{identidad}/vinculaciones:
+    post:
+      operationId: declararVinculacion
+      tags: [identidad]
+      summary: "Declarar una vinculación: un dominio, un sitio, un Instagram, un WhatsApp, un local o la cuenta de cobro. Devuelve el texto a publicar"
+      description: |
+        Solo el propio actor, o el dueño si el actor es un comercio suyo; cualquier otro recibe 403
+        `no_es_el_dueno`. Queda `pendiente` hasta que el nodo encuentra la prueba, y `vencida` a los
+        7 días sin prueba. Con custodia del nodo alcanza con `tipo` y `valor`: el nodo arma y firma la
+        declaración. Con custodia propia se manda `vinculacion` ya firmada.
+
+        En `local`, la respuesta trae `qr` con el secreto adentro, **una sola vez**: el nodo no lo
+        vuelve a mostrar. En `cuenta_cobro` no hay nada que publicar: la prueba son los veredictos de
+        los compradores (`titular_coincide` en `declararTransferencia`). Un tipo que este nodo no sabe
+        comprobar (ver `vinculaciones` en `/.well-known/vereda.json`) responde 422
+        `vinculacion_no_soportada`.
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tipo: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }
+                valor: { type: string, maxLength: 253 }
+                vinculacion: { $ref: "esquemas/comunes.json#/$defs/vinculacion", description: "Solo con custodia propia: la declaración ya firmada por el actor." }
+      responses:
+        "201": { description: Declarada, content: { application/json: { schema: { $ref: "#/components/schemas/VinculacionDeclarada" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
+  /actores/{identidad}/vinculaciones/{id}/comprobar:
+    post:
+      operationId: comprobarVinculacion
+      tags: [identidad]
+      summary: "Comprobar ahora una vinculación, sin esperar la recomprobación de cada 7 días. En 'whatsapp', con el código del desafío"
+      description: "Mismos permisos que `declararVinculacion`. Responde 200 con la vinculación y su estado nuevo aunque la prueba no aparezca: no encontrarla no es un error, es un resultado, y `senales.motivo` dice qué faltó."
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { codigo: { type: string, pattern: "^[0-9]{6}$", description: "Solo 'whatsapp': el código que el nodo mandó a ese número." } } } } } }
+      responses:
+        "200": { description: Comprobada, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/vinculacion" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { $ref: "#/components/responses/Error" }
+  /actores/{identidad}/atestaciones:
+    get:
+      operationId: listarAtestaciones
+      tags: [identidad]
+      summary: "Atestaciones visibles sobre un actor: presencias en su local o, si es una persona, comercios que la atestiguan como clienta y que ella aceptó publicar"
+      security: []
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/comunes.json#/$defs/atestacion" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+    post:
+      operationId: atestiguar
+      tags: [identidad]
+      summary: "Atestiguar sobre un actor: 'estuve acá' con el QR de su local, o, desde un comercio, 'es cliente frecuente'"
+      description: |
+        `presencia`: una persona con sesión, con la `prueba` que sale del QR. Prueba que no corresponde
+        al QR vigente de esa vinculación: 422 `prueba_invalida`. Una por autor por vinculación: 409
+        `atestacion_repetida`.
+
+        `cliente_frecuente`: el comercio (su dueño con sesión, o mandato `administrar`) sobre una
+        persona con 3 o más pedidos entregados en él; si no, 422 `sin_pedidos_suficientes`. Queda con
+        `visible: false` hasta que la persona la acepta.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/atestacion" } } } }
+      responses:
+        "201": { description: Registrada, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/atestacion" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /actores/{identidad}/denuncias:
+    get:
+      operationId: listarDenuncias
+      tags: [identidad]
+      summary: "Denuncias de suplantación contra un actor, con su respuesta y el estado que les calcula el nodo"
+      security: []
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/denuncia.json" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+    post:
+      operationId: denunciarSuplantacion
+      tags: [identidad]
+      summary: "Denunciar que este actor se hace pasar por otro, diciendo qué vinculación prueba quién es el verdadero. Pública y firmada; nunca por mandato"
+      description: |
+        Nadie la acepta ni la rechaza, y no mueve ranking, reputación ni despacho. Su estado sale de
+        la evidencia (`docs/identidad-y-verificacion.md`, punto 5). Una por par denunciante–denunciado:
+        409 `denuncia_repetida`. `suplantado` igual a `denunciado`: 422.
+      security: [ { sesion: [] } ]
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/denuncia.json" } } } }
+      responses:
+        "201": { description: Publicada, content: { application/json: { schema: { $ref: "esquemas/denuncia.json" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /actores/{identidad}/denuncias/{id}/respuesta:
+    post:
+      operationId: responderDenuncia
+      tags: [identidad]
+      summary: "El denunciado responde una denuncia, una sola vez, en público y firmado"
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [texto], properties: { texto: { type: string, minLength: 1, maxLength: 1000 }, firma: { $ref: "esquemas/comunes.json#/$defs/firma", description: "Solo con custodia propia." } } } } } }
+      responses:
+        "201": { description: Respondida, content: { application/json: { schema: { $ref: "esquemas/denuncia.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "409": { description: Ya respondida }
+
   /mandatos:
     get: { operationId: listarMandatos, tags: [mandatos], summary: Mis mandatos activos, security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mandato.json" } } } } } } }
     post: { operationId: otorgarMandato, tags: [mandatos], summary: Otorgar mandato a un agente (fin del flujo OAuth), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } }, responses: { "201": { description: Otorgado } } }
@@ -661,6 +832,39 @@ paths:
       security: [ { sesion: [] } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [clave_publica, comprometida_desde], properties: { clave_publica: { type: string }, comprometida_desde: { $ref: "esquemas/comunes.json#/$defs/instante" }, clave: { $ref: "esquemas/comunes.json#/$defs/clave" } } } } } }
       responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "422": { $ref: "#/components/responses/Error" } }
+  /yo/atestaciones/{id}/consentimiento:
+    post:
+      operationId: consentirAtestacion
+      tags: [identidad]
+      summary: "Aceptar o rechazar que se publique un 'cliente frecuente' que un comercio firmó sobre mí"
+      description: "Solo la persona atestiguada, con sesión. Si acepta, pasa a `visible: true`. Si rechaza, no se publica nunca."
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [acepta], properties: { acepta: { type: boolean } } } } } }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/atestacion" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /yo/contacto:
+    post:
+      operationId: pedirConfirmacionDeContacto
+      tags: [identidad]
+      summary: "Mandar un código de 6 dígitos para confirmar un teléfono o un email. El nodo guarda solo un hash del valor"
+      security: [ { sesion: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [canal, valor], properties: { canal: { type: string, enum: [telefono, email] }, valor: { type: string, maxLength: 254 }, via: { type: string, enum: [sms, whatsapp, email], description: "Por dónde mandar el código. Default: 'sms' para teléfono, 'email' para email." } } } } } }
+      responses:
+        "202": { description: "Código enviado. Vence a los 10 minutos" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Reintentar" }
+  /yo/contacto/confirmar:
+    post:
+      operationId: confirmarContacto
+      tags: [identidad]
+      summary: "Devolver el código recibido. Cinco intentos; después hay que pedir otro"
+      security: [ { sesion: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [canal, codigo], properties: { canal: { type: string, enum: [telefono, email] }, codigo: { type: string, pattern: "^[0-9]{6}$" } } } } } }
+      responses:
+        "200": { description: Confirmado, content: { application/json: { schema: { $ref: "esquemas/usuario.json" } } } }
+        "422": { description: "Código vencido o incorrecto (codigo_de_contacto_invalido)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /yo/exportar:
     get: { operationId: exportarCuenta, tags: [yo], summary: "Todo lo mío, firmado: identidad, clave, historial, reseñas. Para irme a otro nodo.", security: [ { sesion: [] } ], responses: { "200": { description: Paquete firmado, content: { application/json: { schema: { type: object } } } } } }
   /yo/borrar:
@@ -738,8 +942,25 @@ components:
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
         codigo_fuente: { type: string, format: uri }
+        vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
     Carrito: { $ref: "esquemas/carrito.json" }
+    ReclamoAbierto:
+      type: object
+      required: [reclamo]
+      properties:
+        reclamo: { $ref: "esquemas/reclamo.json" }
+        publicar: { type: string, pattern: "^vereda:prueba=[A-Za-z0-9_-]{22}$", description: "El texto a publicar en la vinculación reclamada. Ausente en 'local' y 'whatsapp'." }
+        donde: { type: string }
+        qr: { type: string, description: "Solo 'local': el QR del reclamo para imprimir en la ubicación de la ficha. Se muestra esta única vez." }
+    VinculacionDeclarada:
+      type: object
+      required: [vinculacion]
+      properties:
+        vinculacion: { $ref: "esquemas/comunes.json#/$defs/vinculacion" }
+        publicar: { type: string, pattern: "^vereda:prueba=[A-Za-z0-9_-]{22}$", description: "El texto a publicar donde dice 'donde'. Ausente en 'local', 'whatsapp' (va por desafío) y 'cuenta_cobro'." }
+        donde: { type: string, description: "Dónde publicarlo, en una frase: 'Un registro TXT en _vereda.lahuerta.com.ar'." }
+        qr: { type: string, description: "Solo 'local': el contenido del QR a imprimir, 'vereda:presencia?actor=…&vinculacion=…&s=<secreto>'. Se muestra esta única vez." }
     SaldoPuntos:
       type: object
       required: [comercio, saldo, actualizado, firma]

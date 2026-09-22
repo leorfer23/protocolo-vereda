@@ -33,7 +33,15 @@
       "required": ["alias", "monto", "referencia"],
       "properties": {
         "alias": { "type": "string" },
-        "titular": { "type": "string" },
+        "titular": { "type": "string", "description": "A nombre de quién dice el destinatario que está el alias. El banco del comprador le muestra el titular real antes de confirmar: si no coincide, no se transfiere." },
+        "comprobacion_titular": {
+          "type": "object",
+          "description": "Qué dijeron compradores distintos de los últimos 90 días al transferir a este mismo destinatario: si el titular que les mostró su banco coincidía con 'titular'. Solo veredictos, contados; nunca lo que mostró el banco (docs/identidad-y-verificacion.md, cuenta de cobro).",
+          "required": ["coincide", "no_coincide"],
+          "properties": { "coincide": { "type": "integer", "minimum": 0 }, "no_coincide": { "type": "integer", "minimum": 0 } },
+          "additionalProperties": false
+        },
+        "advertencia": { "type": "string", "maxLength": 300, "description": "Frase que la app muestra tal cual antes de que la persona transfiera.", "examples": ["Antes de transferir, fijate que tu banco muestre a Juan Pérez como titular del alias. Si muestra otro nombre, no transfieras y avisale al comercio por el chat del pedido."] },
         "monto": { "$ref": "comunes.json#/$defs/monto" },
         "referencia": { "type": "string", "description": "Texto corto para el concepto de la transferencia, así el comercio sabe qué pedido le pagaron." }
       }

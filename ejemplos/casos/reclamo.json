@@ -1,0 +1,296 @@
+{
+  "$comentario": "Casos para reclamo.json (docs/identidad-y-verificacion.md, punto 6): reclamar una ficha se resuelve por prueba o vence, sin revisor.",
+  "esquema": "reclamo.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Marta reclama la ficha que armó un ex empleado, con el Instagram que la ficha ya declara y el dueño actual no verificó. Abierto.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "instagram",
+          "valor": "@verduleriademarta"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "abierto",
+          "vence": "2026-10-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Reclamo por local resuelto: seis clientes escanearon el QR del reclamo en la verdulería. La ficha pasó a la clave de Marta.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "local"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "resuelto",
+          "vence": "2026-10-21T15:04:05-03:00",
+          "comprobado_en": "2026-09-30T12:00:00-03:00",
+          "resuelto_en": "2026-09-30T12:00:00-03:00",
+          "atestaciones": {
+            "autores": 6,
+            "peso": 3.4
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El dueño actual ya tenía verificado ese Instagram: contradicho, sin que nadie lo decida.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "instagram",
+          "valor": "@verduleriademarta"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "contradicho",
+          "vence": "2026-10-21T15:04:05-03:00",
+          "comprobado_en": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Pasaron 30 días sin prueba: vencido solo.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "instagram",
+          "valor": "@verduleriademarta"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "vencido",
+          "vence": "2026-10-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Recién enviado: sin señales, que las agrega el nodo.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "instagram",
+          "valor": "@verduleriademarta"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Reclamo con la cuenta de cobro: es privada y no hay nada que publicar.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "cuenta_cobro"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "abierto",
+          "vence": "2026-10-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Reclamo por local con 'valor': el QR del reclamo va en la ubicación de la ficha, no en otra.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "local",
+          "valor": "Otra dirección 123"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "abierto",
+          "vence": "2026-10-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Reclamo por dominio sin decir cuál.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "dominio"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "abierto",
+          "vence": "2026-10-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin firma del reclamante.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "instagram",
+          "valor": "@verduleriademarta"
+        },
+        "senales": {
+          "estado": "abierto",
+          "vence": "2026-10-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Estado 'aprobado': nadie aprueba reclamos; se resuelven por la prueba o vencen.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "instagram",
+          "valor": "@verduleriademarta"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "aprobado",
+          "vence": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Resuelto sin 'resuelto_en': el cambio de dueño tiene que quedar fechado.",
+      "doc": {
+        "id": "01926b3a-5555-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "comercio": "verduleria-de-marta@vereda.ar",
+        "reclamante": "marta@vereda.ar",
+        "prueba": {
+          "tipo": "local"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "resuelto",
+          "vence": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,759 @@
+{
+  "$comentario": "Casos para la respuesta de GET /actores/{identidad}/verificacion: lo público de un actor que permite distinguirlo de un duplicado, sin exponer ningún dato privado.",
+  "esquema": "comunes.json#/$defs/verificacion_de_actor",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "La Huerta: dominio, local y cuenta de cobro verificados, una sucursal vinculada por dueño y CUIT, y un homónimo a 600 m con tres días y cero pedidos.",
+      "doc": {
+        "identidad": "lahuerta@vereda.ar",
+        "tipo_actor": "comercio",
+        "vinculaciones": [
+          {
+            "id": "01926b3a-2222-7000-8000-000000000001",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "dominio",
+            "valor": "lahuerta.com.ar",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00"
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000005",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "local",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 4,
+                "peso": 2.6
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000006",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "cuenta_cobro",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 5,
+                "peso": 3.1
+              },
+              "en_contra": {
+                "autores": 0,
+                "peso": 0
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          }
+        ],
+        "vinculados": [
+          {
+            "identidad": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "dueno",
+              "cuit"
+            ]
+          }
+        ],
+        "mismo_nombre_cerca": [
+          {
+            "identidad": "la-huerta-almagro@vereda.ar",
+            "nombre": "La Huerta Almagro",
+            "distancia_m": 600,
+            "alta": "2026-09-18",
+            "pedidos_entregados": 0,
+            "vinculaciones_verificadas": 0
+          }
+        ],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 1
+        },
+        "historial": {
+          "alta": "2024-05-02",
+          "pedidos_entregados": 812
+        },
+        "atestaciones": {
+          "presencia": {
+            "autores": 4,
+            "peso": 2.6
+          }
+        },
+        "calculada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Una persona: historial, crédito, contacto confirmado sin el valor, y dos comercios que la atestiguan como clienta.",
+      "doc": {
+        "identidad": "marta@vereda.ar",
+        "tipo_actor": "usuario",
+        "vinculaciones": [],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 0
+        },
+        "historial": {
+          "alta": "2025-11-10",
+          "pedidos_entregados": 23,
+          "comercios_distintos": 6,
+          "credito": 1
+        },
+        "contacto": {
+          "telefono": true,
+          "email": false
+        },
+        "atestaciones": {
+          "cliente_frecuente": 2
+        },
+        "calculada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Vinculado con el CUIT a la vista: se publica el criterio, nunca el valor.",
+      "doc": {
+        "identidad": "lahuerta@vereda.ar",
+        "tipo_actor": "comercio",
+        "vinculaciones": [
+          {
+            "id": "01926b3a-2222-7000-8000-000000000001",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "dominio",
+            "valor": "lahuerta.com.ar",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00"
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000005",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "local",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 4,
+                "peso": 2.6
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000006",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "cuenta_cobro",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 5,
+                "peso": 3.1
+              },
+              "en_contra": {
+                "autores": 0,
+                "peso": 0
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          }
+        ],
+        "vinculados": [
+          {
+            "identidad": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "cuit"
+            ],
+            "cuit": "30-12345678-9"
+          }
+        ],
+        "mismo_nombre_cerca": [
+          {
+            "identidad": "la-huerta-almagro@vereda.ar",
+            "nombre": "La Huerta Almagro",
+            "distancia_m": 600,
+            "alta": "2026-09-18",
+            "pedidos_entregados": 0,
+            "vinculaciones_verificadas": 0
+          }
+        ],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 1
+        },
+        "historial": {
+          "alta": "2024-05-02",
+          "pedidos_entregados": 812
+        },
+        "atestaciones": {
+          "presencia": {
+            "autores": 4,
+            "peso": 2.6
+          }
+        },
+        "calculada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Contacto con el número: afuera se publica solo que está confirmado.",
+      "doc": {
+        "identidad": "marta@vereda.ar",
+        "tipo_actor": "usuario",
+        "vinculaciones": [],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 0
+        },
+        "historial": {
+          "alta": "2025-11-10",
+          "pedidos_entregados": 23,
+          "comercios_distintos": 6,
+          "credito": 1
+        },
+        "contacto": {
+          "telefono": "+5491155551234"
+        },
+        "atestaciones": {
+          "cliente_frecuente": 2
+        },
+        "calculada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Distancia exacta al metro: se redondea a 100 m.",
+      "doc": {
+        "identidad": "lahuerta@vereda.ar",
+        "tipo_actor": "comercio",
+        "vinculaciones": [
+          {
+            "id": "01926b3a-2222-7000-8000-000000000001",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "dominio",
+            "valor": "lahuerta.com.ar",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00"
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000005",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "local",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 4,
+                "peso": 2.6
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000006",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "cuenta_cobro",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 5,
+                "peso": 3.1
+              },
+              "en_contra": {
+                "autores": 0,
+                "peso": 0
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          }
+        ],
+        "vinculados": [
+          {
+            "identidad": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "dueno",
+              "cuit"
+            ]
+          }
+        ],
+        "mismo_nombre_cerca": [
+          {
+            "identidad": "la-huerta-almagro@vereda.ar",
+            "nombre": "La Huerta Almagro",
+            "distancia_m": 612,
+            "alta": "2026-09-18",
+            "pedidos_entregados": 0,
+            "vinculaciones_verificadas": 0
+          }
+        ],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 1
+        },
+        "historial": {
+          "alta": "2024-05-02",
+          "pedidos_entregados": 812
+        },
+        "atestaciones": {
+          "presencia": {
+            "autores": 4,
+            "peso": 2.6
+          }
+        },
+        "calculada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un sello 'verificado_por_vereda': no existe en el protocolo.",
+      "doc": {
+        "identidad": "lahuerta@vereda.ar",
+        "tipo_actor": "comercio",
+        "vinculaciones": [
+          {
+            "id": "01926b3a-2222-7000-8000-000000000001",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "dominio",
+            "valor": "lahuerta.com.ar",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00"
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000005",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "local",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 4,
+                "peso": 2.6
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000006",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "cuenta_cobro",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 5,
+                "peso": 3.1
+              },
+              "en_contra": {
+                "autores": 0,
+                "peso": 0
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          }
+        ],
+        "vinculados": [
+          {
+            "identidad": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "dueno",
+              "cuit"
+            ]
+          }
+        ],
+        "mismo_nombre_cerca": [
+          {
+            "identidad": "la-huerta-almagro@vereda.ar",
+            "nombre": "La Huerta Almagro",
+            "distancia_m": 600,
+            "alta": "2026-09-18",
+            "pedidos_entregados": 0,
+            "vinculaciones_verificadas": 0
+          }
+        ],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 1
+        },
+        "historial": {
+          "alta": "2024-05-02",
+          "pedidos_entregados": 812
+        },
+        "atestaciones": {
+          "presencia": {
+            "autores": 4,
+            "peso": 2.6
+          }
+        },
+        "calculada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "verificado_por_vereda": true
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin firma del nodo: otro nodo no podría guardarla y verificarla.",
+      "doc": {
+        "identidad": "lahuerta@vereda.ar",
+        "tipo_actor": "comercio",
+        "vinculaciones": [
+          {
+            "id": "01926b3a-2222-7000-8000-000000000001",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "dominio",
+            "valor": "lahuerta.com.ar",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00"
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000005",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "local",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 4,
+                "peso": 2.6
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000006",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "cuenta_cobro",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 5,
+                "peso": 3.1
+              },
+              "en_contra": {
+                "autores": 0,
+                "peso": 0
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          }
+        ],
+        "vinculados": [
+          {
+            "identidad": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "dueno",
+              "cuit"
+            ]
+          }
+        ],
+        "mismo_nombre_cerca": [
+          {
+            "identidad": "la-huerta-almagro@vereda.ar",
+            "nombre": "La Huerta Almagro",
+            "distancia_m": 600,
+            "alta": "2026-09-18",
+            "pedidos_entregados": 0,
+            "vinculaciones_verificadas": 0
+          }
+        ],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 1
+        },
+        "historial": {
+          "alta": "2024-05-02",
+          "pedidos_entregados": 812
+        },
+        "atestaciones": {
+          "presencia": {
+            "autores": 4,
+            "peso": 2.6
+          }
+        },
+        "calculada": "2026-09-21T15:04:05-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Criterio de vinculación inventado ('mismo_barrio' no vincula a nadie).",
+      "doc": {
+        "identidad": "lahuerta@vereda.ar",
+        "tipo_actor": "comercio",
+        "vinculaciones": [
+          {
+            "id": "01926b3a-2222-7000-8000-000000000001",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "dominio",
+            "valor": "lahuerta.com.ar",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00"
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000005",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "local",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "verificada_en": "2026-09-21T15:04:05-03:00",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 4,
+                "peso": 2.6
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          },
+          {
+            "id": "01926b3a-2222-7000-8000-000000000006",
+            "identidad": "lahuerta@nodo.rosario.coop",
+            "tipo": "cuenta_cobro",
+            "declarada": "2026-09-21T15:04:05-03:00",
+            "senales": {
+              "estado": "verificada",
+              "comprobada_en": "2026-09-21T15:04:05-03:00",
+              "atestaciones": {
+                "autores": 5,
+                "peso": 3.1
+              },
+              "en_contra": {
+                "autores": 0,
+                "peso": 0
+              }
+            },
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+              "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+              "instante": "2026-09-21T15:04:05-03:00"
+            }
+          }
+        ],
+        "vinculados": [
+          {
+            "identidad": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "mismo_barrio"
+            ]
+          }
+        ],
+        "mismo_nombre_cerca": [
+          {
+            "identidad": "la-huerta-almagro@vereda.ar",
+            "nombre": "La Huerta Almagro",
+            "distancia_m": 600,
+            "alta": "2026-09-18",
+            "pedidos_entregados": 0,
+            "vinculaciones_verificadas": 0
+          }
+        ],
+        "denuncias": {
+          "abiertas": 0,
+          "respaldadas": 0,
+          "contradichas": 0,
+          "sin_respaldo": 1
+        },
+        "historial": {
+          "alta": "2024-05-02",
+          "pedidos_entregados": 812
+        },
+        "atestaciones": {
+          "presencia": {
+            "autores": 4,
+            "peso": 2.6
+          }
+        },
+        "calculada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    }
+  ]
+}

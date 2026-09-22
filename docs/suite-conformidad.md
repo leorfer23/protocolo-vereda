@@ -101,7 +101,11 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
    de interoperabilidad entre nodos que importa, sin que la suite tenga que crear nada.
    Es la aplicación literal de "cualquiera lo verifica" de `docs/claves-y-firmas.md`. La suite saca
    antes los campos que el firmante no escribió (`respuesta`, `senales`, `visible`): un nodo que los
-   metiera en el JCS haría fallar las firmas de sus propias reseñas.
+   metiera en el JCS haría fallar las firmas de sus propias reseñas. Lo mismo, con el mismo
+   código, para lo que prueba identidad (`docs/identidad-y-verificacion.md`): cada vinculación
+   de `/actores/{id}/verificacion` tiene que estar declarada y firmada por ese mismo actor, y
+   cada atestación y denuncia pública, por su autor. Las pruebas que viven afuera (DNS, una
+   página, un perfil) y la firma del nodo sobre el documento no se rehacen en esta fase.
 6. *Negativos sin sesión.* Los 74 casos de `ejemplos/casos/*.json` puestos como cuerpo de
    la operación de escritura correspondiente, sin credenciales: se espera `401`, no `422`
    ni `500` — que el nodo pida autenticación antes que validar el cuerpo.

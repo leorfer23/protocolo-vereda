@@ -1,0 +1,331 @@
+{
+  "$comentario": "Casos para denuncia.json (docs/identidad-y-verificacion.md, punto 5): qué tiene que traer una denuncia para que la evidencia pueda decidir sola.",
+  "esquema": "denuncia.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "El dueño de La Huerta denuncia un perfil que la imita y reclama su dominio. Respaldada: el dominio está verificado del lado del suplantado.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio",
+          "valor": "lahuerta.com.ar"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Un cliente avisa por un tercero y reclama el local, sin 'valor'. Todavía abierta.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "marta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "local"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "abierta",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 0.85
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El denunciado respondió, firmado. La respuesta queda fuera de la firma del denunciante.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio",
+          "valor": "lahuerta.com.ar"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        },
+        "respuesta": {
+          "texto": "Somos otra verdulería, en Yatay 1400. Nunca dijimos ser La Huerta de Yatay 850.",
+          "instante": "2026-09-21T15:04:05-03:00",
+          "firma": {
+            "firmante": "la-huerta-almagro@vereda.ar",
+            "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+            "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Recién enviada: sin señales, que las agrega el nodo.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio",
+          "valor": "lahuerta.com.ar"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin 'reclama': una denuncia sin evidencia no tiene nada que comprobar.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Reclama un dominio sin decir cuál.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Reclama la cuenta de cobro: es privada y no se discute en público.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "cuenta_cobro"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin firma del denunciante: una denuncia anónima no existe.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio",
+          "valor": "lahuerta.com.ar"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Estado 'aceptada': nadie acepta ni rechaza denuncias; el estado sale de la evidencia.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio",
+          "valor": "lahuerta.com.ar"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "aceptada",
+          "calculada": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Respuesta sin firma del denunciado.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio",
+          "valor": "lahuerta.com.ar"
+        },
+        "texto": "Este perfil usa el nombre y las fotos de La Huerta de Yatay 850. Nuestro dominio es lahuerta.com.ar y está verificado en lahuerta@vereda.ar.",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        },
+        "respuesta": {
+          "texto": "No somos nosotros.",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Texto de más de 1000 caracteres.",
+      "doc": {
+        "id": "01926b3a-4444-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "denunciante": "duenio.lahuerta@vereda.ar",
+        "denunciado": "la-huerta-almagro@vereda.ar",
+        "suplantado": "lahuerta@vereda.ar",
+        "reclama": {
+          "tipo": "dominio",
+          "valor": "lahuerta.com.ar"
+        },
+        "texto": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "senales": {
+          "estado": "respaldada",
+          "calculada": "2026-09-21T15:04:05-03:00",
+          "credito_denunciante": 1
+        }
+      }
+    }
+  ]
+}

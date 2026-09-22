@@ -29,6 +29,10 @@ Cada ruta rompe una cosa distinta a propósito:
 - /v1/actores/{identidad}/resenas: una reseña bien formada mas una firma que
   no verifica (no es una firma real -- eso se prueba aparte, contra los
   vectores publicados, en verificar_firma_con_vectores.py).
+- /v1/actores/{identidad}/verificacion: cabeceras y revalidación correctas, pero
+  la única vinculación trae una firma que no verifica (docs/identidad-y-verificacion.md).
+- /v1/actores/{identidad}/denuncias: todo bien, sin denuncias (omite las firmas).
+- /v1/actores/{identidad}/atestaciones: no existe, 404 (la ruta no está implementada).
 
 POST /v1/federacion/entrantes (para el nivel C) SÍ verifica de verdad: RFC
 9421 completo (Content-Digest, base de firma, Ed25519) contra la identidad
@@ -103,6 +107,20 @@ RESENA_MAL_FIRMADA = {
     "autor": f"cliente@{IDENTIDAD}", "destinatario": IDENTIDAD, "rol_autor": "usuario", "puntaje": 5,
     "texto": "Reseña de prueba del nodo falso: la firma de abajo NO es real.",
     "firma": {"firmante": f"cliente@{IDENTIDAD}", "clave_publica": "A" * 43, "valor": "B" * 86, "instante": "2026-01-01T00:00:00-03:00"},
+}
+
+VERIFICACION = {
+    "identidad": IDENTIDAD, "tipo_actor": "comercio",
+    "vinculaciones": [{
+        "id": "01920000-0000-7000-8000-00000000v001", "identidad": IDENTIDAD, "tipo": "dominio",
+        "valor": "verduleria-falsa.conformidad", "declarada": "2026-01-01T00:00:00-03:00",
+        "firma": {"firmante": IDENTIDAD, "clave_publica": "C" * 43, "valor": "D" * 86, "instante": "2026-01-01T00:00:00-03:00"},
+        "senales": {"estado": "verificada"},
+    }],
+    "denuncias": {"abiertas": 0, "respaldadas": 0, "contradichas": 0, "sin_respaldo": 0},
+    "historial": {"alta": "2026-01-01", "pedidos_entregados": 0},
+    "calculada": "2026-01-01T00:00:00-03:00",
+    "firma": {"firmante": "conformidad.falsa", "clave_publica": "C" * 43, "valor": "E" * 86, "instante": "2026-01-01T00:00:00-03:00"},
 }
 
 CLAVES = [{"clave_publica": "C" * 43, "desde": "2026-01-01T00:00:00-03:00", "estado": "activa"}]
@@ -259,6 +277,10 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"codigo": "no_mudado", "mensaje": "no se mudó", "estado_http": 404})
         elif p == f"/v1/actores/{IDENTIDAD}/resenas":
             self._responder_con_cache([RESENA_MAL_FIRMADA], "resenas-v1")
+        elif p == f"/v1/actores/{IDENTIDAD}/verificacion":
+            self._responder_con_cache(VERIFICACION, "verificacion-v1")
+        elif p == f"/v1/actores/{IDENTIDAD}/denuncias":
+            self._responder_con_cache([], "denuncias-v1")
         else:
             m = re.match(r"^/v1/pedidos/([^/]+)$", p)
             if m:

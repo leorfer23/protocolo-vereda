@@ -372,6 +372,10 @@
         "comprometida_desde": {
           "$ref": "#/$defs/instante"
         },
+        "reclamo": {
+          "$ref": "#/$defs/id",
+          "description": "Solo en la clave de un comercio que cambió de dueño por un reclamo resuelto (esquemas/reclamo.json): el reclamo que la instaló. No lleva 'avalada_por': la clave anterior era del dueño anterior. La anterior pasa a 'retirada' en ese instante y sus firmas previas siguen valiendo."
+        },
         "avalada_por": {
           "type": "object",
           "required": [
@@ -484,6 +488,183 @@
           "$ref": "#/$defs/firma",
           "description": "Del actor, con una clave de su historial. El firmante es la identidad anterior."
         }
+      },
+      "additionalProperties": false
+    },
+    "tipo_vinculacion": {
+      "type": "string",
+      "enum": ["dominio", "sitio", "instagram", "whatsapp", "local", "cuenta_cobro"],
+      "description": "Qué se vincula y, por eso, cómo se prueba (docs/identidad-y-verificacion.md, punto 2): 'dominio' por registro DNS TXT, 'sitio' por el texto en una página HTTPS, 'instagram' por el texto en la biografía, 'whatsapp' por desafío al número, 'local' por atestaciones de presencia con el QR impreso, 'cuenta_cobro' por el veredicto de los compradores sobre el titular."
+    },
+    "peso_atestaciones": {
+      "type": "object",
+      "description": "Autores distintos que computan y la suma de su crédito de identidad k (docs/resenas.md). No computan el dueño, las identidades vinculadas ni quien no tiene ningún pedido entregado.",
+      "required": ["autores", "peso"],
+      "properties": {
+        "autores": { "type": "integer", "minimum": 0 },
+        "peso": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "vinculacion": {
+      "type": "object",
+      "description": "Una cuenta o un lugar del mundo que el actor dice que es suyo, con una prueba que cualquiera puede rehacer. La declaración la firma el actor; el estado lo calcula el nodo en 'senales', fuera de la firma. Nadie la otorga: se prueba. El texto a publicar es 'vereda:prueba=' + base64url(SHA-256(JCS de la vinculación sin 'firma' ni 'senales'))[0:16]. Ver docs/identidad-y-verificacion.md.",
+      "required": ["id", "identidad", "tipo", "declarada", "firma"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "identidad": { "$ref": "#/$defs/identidad", "description": "Quién declara. Es el firmante de 'firma'." },
+        "tipo": { "$ref": "#/$defs/tipo_vinculacion" },
+        "valor": { "type": "string", "minLength": 1, "maxLength": 253, "description": "Lo que se vincula, público: 'lahuerta.com.ar', 'https://lahuerta.com.ar/contacto', '@lahuerta', '+5493415551234'. Opcional en 'local' (la ubicación ya está en la ficha). Nunca en 'cuenta_cobro': la cuenta es privada." },
+        "declarada": { "$ref": "#/$defs/instante" },
+        "firma": { "$ref": "#/$defs/firma", "description": "Del actor. Cubre la declaración: todo menos 'firma' y 'senales'." },
+        "senales": {
+          "type": "object",
+          "description": "Lo escribe el nodo al comprobar; queda fuera de la firma. Lo que venga acá al declarar se ignora. Criterios en docs/identidad-y-verificacion.md.",
+          "required": ["estado"],
+          "properties": {
+            "estado": { "type": "string", "enum": ["pendiente", "verificada", "caida", "vencida", "contradicha"], "description": "'contradicha' existe solo en 'cuenta_cobro': los compradores dicen, con más peso, que el titular no coincide." },
+            "verificada_en": { "$ref": "#/$defs/instante", "description": "La primera vez que se verificó." },
+            "comprobada_en": { "$ref": "#/$defs/instante", "description": "La última comprobación, con cualquier resultado." },
+            "atestaciones": { "$ref": "#/$defs/peso_atestaciones", "description": "Solo 'local' (presencias) y 'cuenta_cobro' (compradores que dijeron que el titular coincide), de los últimos 90 días en 'cuenta_cobro'." },
+            "en_contra": { "$ref": "#/$defs/peso_atestaciones", "description": "Solo 'cuenta_cobro': compradores de los últimos 90 días que dijeron que el titular no coincide." },
+            "motivo": { "type": "string", "maxLength": 300, "description": "Por qué está en este estado, en una frase que un agente puede repetir: 'No encontramos el registro TXT en _vereda.lahuerta.com.ar desde el 12/10'." }
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        { "if": { "properties": { "tipo": { "const": "cuenta_cobro" } } }, "then": { "not": { "required": ["valor"] } } },
+        { "if": { "properties": { "tipo": { "enum": ["dominio", "sitio", "instagram", "whatsapp"] } } }, "then": { "required": ["valor"] } },
+        { "if": { "properties": { "tipo": { "const": "dominio" } } }, "then": { "properties": { "valor": { "pattern": "^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}$" } } } },
+        { "if": { "properties": { "tipo": { "const": "sitio" } } }, "then": { "properties": { "valor": { "pattern": "^https://[^\\s]+$" } } } },
+        { "if": { "properties": { "tipo": { "const": "instagram" } } }, "then": { "properties": { "valor": { "pattern": "^@[A-Za-z0-9._]{1,30}$" } } } },
+        { "if": { "properties": { "tipo": { "const": "whatsapp" } } }, "then": { "properties": { "valor": { "pattern": "^\\+[1-9][0-9]{7,14}$" } } } },
+        { "if": { "properties": { "senales": { "properties": { "estado": { "const": "contradicha" } }, "required": ["estado"] } }, "required": ["senales"] }, "then": { "properties": { "tipo": { "const": "cuenta_cobro" } } } }
+      ],
+      "additionalProperties": false
+    },
+    "atestacion": {
+      "type": "object",
+      "description": "Alguien firma algo sobre otro actor: una persona, que estuvo en su local ('presencia', con el QR impreso); un comercio, que una persona es clienta suya ('cliente_frecuente'). Pública y firmada, como una reseña; no se edita ni se borra. Ver docs/identidad-y-verificacion.md.",
+      "required": ["id", "tipo", "autor", "sujeto", "instante", "firma"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "tipo": { "type": "string", "enum": ["presencia", "cliente_frecuente"] },
+        "autor": { "$ref": "#/$defs/identidad" },
+        "sujeto": { "$ref": "#/$defs/identidad", "description": "Sobre quién: el comercio en 'presencia', la persona en 'cliente_frecuente'." },
+        "vinculacion": { "$ref": "#/$defs/id", "description": "Solo 'presencia': la vinculación 'local', o el reclamo por 'local' (esquemas/reclamo.json), cuyo QR se escaneó." },
+        "prueba": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$", "description": "Solo 'presencia': base64url(HMAC-SHA256(secreto del QR, autor + '\\n' + vinculacion)). Prueba que el autor vio el QR sin publicar el secreto." },
+        "instante": { "$ref": "#/$defs/instante" },
+        "firma": { "$ref": "#/$defs/firma", "description": "Del autor. Cubre todo menos 'firma', 'senales' y 'visible'." },
+        "visible": { "type": "boolean", "description": "Lo fija el nodo. En 'cliente_frecuente', falso hasta que la persona acepta; si la rechaza, no se publica nunca. En 'presencia', siempre verdadero." },
+        "senales": {
+          "type": "object",
+          "description": "Lo escribe el nodo al recalcular; queda fuera de la firma.",
+          "required": ["peso"],
+          "properties": {
+            "peso": { "type": "number", "minimum": 0, "maximum": 1, "description": "El crédito de identidad k del autor (docs/resenas.md), o 0 si no computa: dueño o vinculada, o autor sin ningún pedido entregado." },
+            "motivos": { "type": "array", "items": { "type": "string", "enum": ["dueno_o_vinculada", "sin_pedidos_entregados"] } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        { "if": { "properties": { "tipo": { "const": "presencia" } } }, "then": { "required": ["vinculacion", "prueba"] }, "else": { "not": { "anyOf": [ { "required": ["vinculacion"] }, { "required": ["prueba"] } ] } } }
+      ],
+      "additionalProperties": false
+    },
+    "verificacion_de_actor": {
+      "type": "object",
+      "description": "Respuesta de GET /actores/{identidad}/verificacion: todo lo que permite distinguir a un actor de quien se hace pasar por él, firmado por su nodo. Pública y cacheable. Nada de esto lo otorga nadie: son pruebas y hechos que cualquiera puede rehacer (docs/identidad-y-verificacion.md).",
+      "required": ["identidad", "tipo_actor", "vinculaciones", "denuncias", "historial", "calculada", "firma"],
+      "properties": {
+        "identidad": { "$ref": "#/$defs/identidad" },
+        "tipo_actor": { "type": "string", "enum": ["comercio", "repartidor", "usuario"] },
+        "vinculaciones": { "type": "array", "items": { "$ref": "#/$defs/vinculacion" }, "description": "Todas, incluidas las caídas y vencidas, de la más vieja a la más nueva." },
+        "vinculados": {
+          "type": "array",
+          "description": "Solo comercios: otros comercios de este nodo que comparten dueño, CUIT, cuenta de cobro, clave o una vinculación verificada. Se publica el criterio, nunca el valor.",
+          "items": {
+            "type": "object",
+            "required": ["identidad", "por"],
+            "properties": {
+              "identidad": { "$ref": "#/$defs/identidad" },
+              "por": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "enum": ["dueno", "cuit", "cuenta_cobro", "clave", "vinculacion"] } }
+            },
+            "additionalProperties": false
+          }
+        },
+        "mismo_nombre_cerca": {
+          "type": "array",
+          "description": "Solo comercios: otros comercios no vinculados con el mismo nombre normalizado (o a una edición, con 6+ caracteres) a 1.500 m o menos. No es un error ni una sospecha: dos comercios reales pueden llamarse igual. Nunca se bloquea ni se renombra a ninguno; se muestran los dos con sus pruebas.",
+          "items": {
+            "type": "object",
+            "required": ["identidad", "nombre", "distancia_m", "alta", "pedidos_entregados", "vinculaciones_verificadas"],
+            "properties": {
+              "identidad": { "$ref": "#/$defs/identidad" },
+              "nombre": { "type": "string" },
+              "distancia_m": { "type": "integer", "minimum": 0, "multipleOf": 100, "description": "Redondeada a 100 m." },
+              "alta": { "type": "string", "format": "date" },
+              "pedidos_entregados": { "type": "integer", "minimum": 0 },
+              "vinculaciones_verificadas": { "type": "integer", "minimum": 0 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "denuncias": {
+          "type": "object",
+          "description": "Denuncias de suplantación recibidas, por estado. El detalle está en GET /actores/{identidad}/denuncias.",
+          "required": ["abiertas", "respaldadas", "contradichas", "sin_respaldo"],
+          "properties": {
+            "abiertas": { "type": "integer", "minimum": 0 },
+            "respaldadas": { "type": "integer", "minimum": 0 },
+            "contradichas": { "type": "integer", "minimum": 0 },
+            "sin_respaldo": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "historial": {
+          "type": "object",
+          "description": "Agregados, nunca con quién: no dice a qué comercios le compró una persona.",
+          "required": ["alta", "pedidos_entregados"],
+          "properties": {
+            "alta": { "type": "string", "format": "date" },
+            "pedidos_entregados": { "type": "integer", "minimum": 0, "description": "Comercio: los que entregó. Persona: los que recibió. Repartidor: los viajes completados." },
+            "comercios_distintos": { "type": "integer", "minimum": 0, "description": "Persona: a cuántos comercios distintos les compró." },
+            "credito": { "type": "number", "minimum": 0, "maximum": 1, "description": "Persona y repartidor: el crédito de identidad k de docs/resenas.md." }
+          },
+          "additionalProperties": false
+        },
+        "contacto": {
+          "type": "object",
+          "description": "Persona y repartidor: si confirmó un teléfono o un email por desafío. Nunca el valor.",
+          "properties": {
+            "telefono": { "type": "boolean" },
+            "email": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "atestaciones": {
+          "type": "object",
+          "properties": {
+            "presencia": { "$ref": "#/$defs/peso_atestaciones", "description": "Comercio: sobre todas sus vinculaciones 'local' vigentes." },
+            "cliente_frecuente": { "type": "integer", "minimum": 0, "description": "Persona: comercios que la atestiguan como clienta y que ella aceptó publicar." }
+          },
+          "additionalProperties": false
+        },
+        "reclamos": {
+          "type": "object",
+          "description": "Solo comercios: reclamos de propiedad sobre esta ficha (esquemas/reclamo.json). El detalle está en GET /comercios/{id}/reclamos.",
+          "required": ["abiertos", "resueltos"],
+          "properties": {
+            "abiertos": { "type": "integer", "minimum": 0 },
+            "resueltos": { "type": "integer", "minimum": 0 },
+            "ultimo_cambio_de_dueno": { "$ref": "#/$defs/instante", "description": "Cuándo pasó la ficha a otra clave por el último reclamo resuelto. Queda para siempre." }
+          },
+          "additionalProperties": false
+        },
+        "calculada": { "$ref": "#/$defs/instante" },
+        "firma": { "$ref": "#/$defs/firma", "description": "Del nodo del actor (firmante: su dominio), sobre el JCS del documento sin este campo." }
       },
       "additionalProperties": false
     },

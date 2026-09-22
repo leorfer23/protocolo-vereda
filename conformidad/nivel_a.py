@@ -374,7 +374,7 @@ class NivelA:
 
     def _actor(self, comercio):
         if comercio is None:
-            for opid in ("listarClavesDeActor", "verMudanzaDeActor", "listarResenasDeActor"):
+            for opid in ("listarClavesDeActor", "verMudanzaDeActor", "listarResenasDeActor", "verVerificacion", "listarAtestaciones", "listarDenuncias"):
                 self.casos.append(_omitido("esquema", opid, f"{opid} con la identidad de un comercio real", "no se descubrió ningún comercio en este nodo"))
             return
         identidad = comercio.get("identidad")
@@ -384,6 +384,7 @@ class NivelA:
         self._actor_claves(identidad)
         self._actor_mudanza(identidad)
         self._firmas_reales(comercio, identidad)
+        self._identidad_verificable(identidad)
 
     def _actor_claves(self, identidad):
         opid = "listarClavesDeActor"
@@ -416,6 +417,64 @@ class NivelA:
         caso = self._esquema_o_no_json(opid, f"la mudanza de {identidad} cumple comunes.json#/$defs/mudanza", op, r)
         if caso:
             self.casos.append(caso)
+
+    def _lectura_de_actor(self, opid, ruta, identidad, desc_esquema):
+        """GET público de /actores/{identidad}/...: estructura de caché y esquema.
+        Devuelve el cuerpo si es un 200 con JSON, para seguir con las firmas."""
+        op = self._op(ruta)
+        url = self._url(ruta, identidad=identidad)
+        desc = "GET " + ruta.replace("{identidad}", identidad)
+        r = self._get(url)
+        if not r.ok:
+            self.casos.append(_fallo("estructura", opid, desc, r.motivo))
+            return None
+        self.casos.append(self._chequear_estructura(opid, desc, url, r))
+        caso = self._esquema_o_no_json(opid, desc_esquema, op, r)
+        if caso:
+            self.casos.append(caso)
+        return r.cuerpo if r.estado == 200 and r.cuerpo_es_json else None
+
+    def _identidad_verificable(self, identidad):
+        """docs/identidad-y-verificacion.md: nada lo otorga nadie, todo se
+        recomprueba. La suite rehace lo que se puede rehacer sin salir de HTTP:
+        cada declaración, atestación y denuncia está firmada por su autor. Deuda
+        conocida: la firma del nodo sobre el documento entero no se verifica acá,
+        y las pruebas que viven afuera (DNS, una página, un perfil) tampoco:
+        exigirían red hacia terceros."""
+        cache_claves = {}
+        ver = self._lectura_de_actor("verVerificacion", "/actores/{identidad}/verificacion", identidad,
+                                     f"la verificación de {identidad} cumple comunes.json#/$defs/verificacion_de_actor")
+        if isinstance(ver, dict):
+            vinculaciones = ver.get("vinculaciones") or []
+            if not vinculaciones:
+                self.casos.append(_omitido("firmas", "verVerificacion", "verificar la firma de cada vinculación declarada", f"{identidad} no declaró ninguna vinculación"))
+            for v in vinculaciones[:25]:
+                if not isinstance(v, dict):
+                    self.casos.append(_fallo("firmas", "verVerificacion", "cada vinculación es un objeto", f"llegó {str(v)[:60]!r}"))
+                    continue
+                desc = f"firma de la vinculación {v.get('tipo', '?')} {v.get('valor', '')} de {v.get('identidad', '?')}".rstrip()
+                if v.get("identidad") != identidad:
+                    self.casos.append(_fallo("firmas", "verVerificacion", desc, f"la declara {v.get('identidad')!r}, no {identidad}"))
+                    continue
+                ok, motivo = self._verificar_firma(v, cache_claves)
+                self.casos.append(_ok("firmas", "verVerificacion", desc) if ok else _fallo("firmas", "verVerificacion", desc, motivo))
+        for opid, ruta, esquema, que in (
+            ("listarAtestaciones", "/actores/{identidad}/atestaciones", "comunes.json#/$defs/atestacion", "atestación"),
+            ("listarDenuncias", "/actores/{identidad}/denuncias", "denuncia.json", "denuncia"),
+        ):
+            lista = self._lectura_de_actor(opid, ruta, identidad, f"el cuerpo de {ruta} cumple un array de {esquema}")
+            if not isinstance(lista, list):
+                continue
+            if not lista:
+                self.casos.append(_omitido("firmas", opid, f"verificar la firma de cada {que}", f"{identidad} no tiene ninguna publicada"))
+            for obj in lista[:25]:
+                if not isinstance(obj, dict):
+                    self.casos.append(_fallo("firmas", opid, f"cada {que} es un objeto", f"llegó {str(obj)[:60]!r}"))
+                    continue
+                autor = obj.get("autor") or obj.get("denunciante") or "?"
+                ok, motivo = self._verificar_firma(obj, cache_claves)
+                desc = f"firma de la {que} de {autor} sobre {identidad}"
+                self.casos.append(_ok("firmas", opid, desc) if ok else _fallo("firmas", opid, desc, motivo))
 
     # 2. errores con identificadores que no existen -------------------------
     def _errores(self):

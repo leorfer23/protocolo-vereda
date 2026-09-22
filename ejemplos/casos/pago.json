@@ -223,6 +223,79 @@
         "vence": "2026-09-21T15:15:00-03:00",
         "pagador": "no es una identidad"
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Transferencia con lo que dijeron compradores anteriores sobre el titular y la advertencia para mostrar antes de transferir (docs/identidad-y-verificacion.md).",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1250000,
+            "moneda": "ARS"
+          },
+          "referencia": "01926B3A",
+          "comprobacion_titular": {
+            "coincide": 14,
+            "no_coincide": 0
+          },
+          "advertencia": "Antes de transferir, fijate que tu banco muestre a Juan Pérez como titular del alias. Si muestra otro nombre, no transfieras y avisale al comercio por el chat del pedido."
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'comprobacion_titular' con el nombre que vio cada comprador: el nodo guarda solo el veredicto.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1250000,
+            "moneda": "ARS"
+          },
+          "referencia": "01926B3A",
+          "comprobacion_titular": {
+            "coincide": 1,
+            "no_coincide": 1,
+            "vistos": [
+              "Juan Pérez",
+              "Pedro Gómez"
+            ]
+          }
+        }
+      }
     }
   ]
 }
