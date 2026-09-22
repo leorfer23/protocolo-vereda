@@ -1,10 +1,10 @@
 {
-  "$comentario": "Vectores de prueba de firma del Protocolo Vereda. Una implementación conforme tiene que reproducir cada byte de este archivo.",
+  "$comentario": "Vectores de prueba de firma del Protocolo Vereda. Una implementación conforme reproduce byte a byte cada JCS, Content-Digest y base de firma, y verifica cada firma contra la clave publicada. Las firmas no se exigen idénticas: Ed25519 con azar (CryptoKit en iOS) da firmas distintas e igual de válidas.",
   "version_esquema": "1.0",
   "como_reproducir": {
     "1_semilla": "La clave privada de cada actor es Ed25519 a partir de la semilla SHA-256('vereda:vector:<etiqueta>'). Las etiquetas están en 'claves'. Son claves de prueba: nunca se usan en producción.",
     "2_canonicalizar": "Se quita el campo de firma del objeto y se serializa con JCS (RFC 8785). El resultado está en 'jcs_utf8_hex'.",
-    "3_firmar": "Ed25519 (RFC 8032) sobre esos bytes exactos. La firma va en base64url sin relleno.",
+    "3_firmar": "Ed25519 (RFC 8032) sobre esos bytes exactos, en base64url sin relleno. Quien verifica comprueba la firma contra la clave publicada; no compara bytes de firma: una firma con azar es tan válida como la determinista.",
     "4_verificar": "python3 validar.py comprueba cada vector de este archivo."
   },
   "referencias": {

@@ -65,8 +65,9 @@ de azar, es de un solo uso y vence pronto (2 minutos en el nodo de referencia).
 
 `nodo` es el que vino en el desafío: ata la firma a ese nodo, y una firma capturada no sirve
 en otro. `clave_publica` ata el desafío a la clave que lo pidió. La firma va en base64url sin
-relleno, como toda firma del protocolo. Los bytes exactos están en
-`ejemplos/vectores-acceso.json` → `prueba_de_clave`.
+relleno, como toda firma del protocolo. Los bytes exactos del JCS están en
+`ejemplos/vectores-acceso.json` → `prueba_de_clave`; la firma de ese vector se verifica, no
+se reproduce: CryptoKit en iOS firma Ed25519 con azar, y su firma, distinta, vale igual.
 
 **Canjear.** `POST /acceso/sesion` con `{ clave_publica, desafio, firma, nombre? }`. Responde
 `201` con `esquemas/acceso.json#/$defs/sesion`:
@@ -218,9 +219,11 @@ Todo binario va en base64url sin relleno. Para escribirlo:
 1. **Texto claro.** El JCS de `{ "firma": <semilla Ed25519>, "cifrado": <privada X25519> }`
    (`texto_claro_v3`). `cifrado` va solo si la persona tiene clave de chat; si va, afuera va
    `clave_cifrado` con su pública.
-2. **Frase.** La elige la persona, al menos 8 caracteres. Se normaliza a **NFC** y se codifica
-   en UTF-8: un teclado que compone la tilde distinto no puede dejar a nadie afuera de su
-   propio respaldo.
+2. **Frase.** La elige la persona, al menos 8 caracteres. Se normaliza a **NFKD** (como
+   BIP-39) y se codifica en UTF-8. Un teclado de iPhone, uno de Android y uno de
+   computadora pueden producir bytes distintos para la misma `ñ` o la misma tilde
+   (compuesta o descompuesta): normalizada, la frase da siempre los mismos bytes y nadie
+   queda afuera de su propio respaldo. La normalización es parte de v3 desde el principio.
 3. **Llave.** PBKDF2-HMAC-SHA-256 sobre la frase, con 16 bytes de sal al azar y **600000**
    iteraciones, 32 bytes de salida.
 4. **AAD.** El JCS del respaldo entero **sin** `cifrado`. Así nadie puede cambiar
@@ -238,8 +241,9 @@ Para leerlo, al revés, y además:
 - La clave pública que sale de la semilla tiene que ser `clave_publica`, y la X25519, si viene,
   `clave_cifrado`. Si no, el respaldo está corrupto.
 
-`vereda.clave.v2` es el formato anterior del SDK web: el mismo sobre, sin `clave_cifrado`, y
-el texto claro es la semilla Ed25519 cruda de 32 bytes. Se sigue **leyendo**; no se escribe
+`vereda.clave.v2` es el formato anterior del SDK web: el mismo sobre, sin `clave_cifrado`, el
+texto claro es la semilla Ed25519 cruda de 32 bytes y la frase entra al KDF **tal cual**, sin
+normalizar. Se sigue **leyendo**; no se escribe
 más, porque restaurar un v2 en otro dispositivo pierde la clave del chat y con ella los
 mensajes cifrados.
 
