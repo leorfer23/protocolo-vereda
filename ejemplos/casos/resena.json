@@ -1,0 +1,366 @@
+{
+  "$comentario": "Casos de la reseña firmada y sus señales. Criterios en docs/resenas.md.",
+  "esquema": "resena.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Reseña de una vecina que ya compró cuatro veces: pesa pleno, sin marcas.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "texto": "Cuarta vez que pido. Las verduras llegan como si las eligiera yo.",
+        "senales": {
+          "peso": 1
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Reseña marcada por ráfaga: pesa 0,2, se publica igual y trae los tres números del criterio.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "nuevo.0007@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 1,
+        "firma": {
+          "firmante": "nuevo.0007@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "texto": "Pésimo.",
+        "senales": {
+          "peso": 0.2,
+          "motivos": [
+            "en_revision_por_rafaga"
+          ],
+          "rafaga": {
+            "resenas_en_ventana": 20,
+            "ventana_horas": 72,
+            "ritmo_habitual": 1.4,
+            "autores_sin_credito": 0.95
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El dueño se reseña a sí mismo: pesa 0 y queda visible con la marca.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "lahuerta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Reseña del comercio al comprador: el esquema es simétrico.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "lahuerta@vereda.ar",
+        "destinatario": "marta@vereda.ar",
+        "rol_autor": "comercio",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Todavía no es visible: espera la reseña recíproca o el cierre de la ventana de 7 días.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "visible": false,
+        "senales": {
+          "peso": 1
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Respuesta pública del reseñado, firmada, sin límite de tiempo.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "texto": "Tardamos, tenés razón.",
+        "respuesta": {
+          "texto": "Perdón, ese día se nos rompió la moto.",
+          "instante": "2026-09-25T10:00:00-03:00",
+          "firma": {
+            "firmante": "lahuerta@vereda.ar",
+            "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+            "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+            "instante": "2026-09-21T19:00:00-03:00"
+          }
+        },
+        "senales": {
+          "peso": 1
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "No existe un motivo de moderación discrecional: solo ráfaga y dueño o vinculada.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "moderada_por_el_nodo"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El nodo no puede ocultar una reseña bajando su peso fuera del rango publicado.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 1.5
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "No hay campo para esconder una reseña: senales no admite propiedades nuevas.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 1,
+          "oculta": true
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "senales sin peso: la reseña tiene que decir cuánto pesa.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "motivos": [
+            "en_revision_por_rafaga"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Puntaje fuera de 1 a 5.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 0,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin firma no hay reseña: cualquiera podría fabricarla.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin pedido no hay reseña.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "rol_autor fuera del enum.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "nodo",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        }
+      }
+    }
+  ]
+}

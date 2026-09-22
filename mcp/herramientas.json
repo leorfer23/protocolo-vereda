@@ -23,6 +23,11 @@
       "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string" } } }
     },
     {
+      "name": "ver_reputacion",
+      "description": "Por qué un comercio tiene la reputación que tiene: el número, el promedio ponderado, cuántos compradores volvieron, y cuántas reseñas no computaron por ser del dueño o por caer en una ráfaga. La fórmula viene en la respuesta y está publicada en docs/resenas.md. Con mandato, además, el cálculo hecho para quien pregunta: pesan más los vecinos y la gente con comercios en común. Ej: '¿es confiable esta verdulería?', '¿por qué le bajó la puntuación?'. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string" } } }
+    },
+    {
       "name": "carrito_crear",
       "description": "Empieza un carrito a un comercio, o desde una lista de compras (que se resuelve contra comercios). Requiere scope 'armar'.",
       "inputSchema": { "type": "object", "properties": { "comercio_id": { "type": "string" }, "lista_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "'casa', 'trabajo'; usa las direcciones guardadas del usuario" } } }

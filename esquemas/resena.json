@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vereda.ar/esquemas/v1/resena.json",
   "title": "Reseña",
-  "description": "Solo existe si hay un pedido entregado. Una por par autor-destinatario por pedido, dentro de los 7 días de la entrega (el instante en que el pedido pasó a 'entregado'). Pasada la ventana el nodo responde 'fuera_de_ventana_resena'. La ventana no se puede expresar en JSON Schema porque depende del pedido; la hace cumplir el nodo. Firmada, pública, no se edita ni se borra. El reseñado puede responder, sin límite de tiempo.",
+  "description": "Solo existe si hay un pedido entregado. Una por par autor-destinatario por pedido, dentro de los 7 días de la entrega (el instante en que el pedido pasó a 'entregado'). Pasada la ventana el nodo responde 'fuera_de_ventana_resena'. La ventana no se puede expresar en JSON Schema porque depende del pedido; la hace cumplir el nodo. Firmada, pública, no se edita ni se borra. El reseñado puede responder, sin límite de tiempo. Las dos reseñas de un pedido se hacen visibles cuando ambas existen o al cerrarse la ventana de 7 días, lo que pase primero: nadie escribe la suya sabiendo la del otro (docs/resenas.md).",
   "type": "object",
   "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
   "required": ["pedido_id", "autor", "destinatario", "puntaje", "firma"],
@@ -14,20 +14,95 @@
     "puntaje": { "type": "integer", "minimum": 1, "maximum": 5 },
     "texto": { "type": "string", "maxLength": 2000 },
     "respuesta": { "type": "object", "properties": { "texto": { "type": "string", "maxLength": 2000 }, "instante": { "$ref": "comunes.json#/$defs/instante" }, "firma": { "$ref": "comunes.json#/$defs/firma" } } },
+    "visible": { "type": "boolean", "description": "Falso mientras espera la reseña recíproca o el cierre de la ventana de 7 días. Lo fija el nodo." },
+    "senales": {
+      "type": "object",
+      "description": "Lo fija el nodo, nunca el autor ni el reseñado: cuánto pesa esta reseña y por qué. Lo que venga acá se ignora. Criterios en docs/resenas.md.",
+      "required": ["peso"],
+      "properties": {
+        "peso": { "type": "number", "minimum": 0, "maximum": 1, "description": "El factor f de la fórmula: 1 normal, 0,2 en revisión por ráfaga, 0 dueño o identidad vinculada." },
+        "motivos": { "type": "array", "items": { "type": "string", "enum": ["en_revision_por_rafaga", "dueno_o_vinculada"] } },
+        "rafaga": {
+          "type": "object",
+          "description": "Los tres números que dispararon la marca, para que cualquiera rehaga la cuenta.",
+          "properties": {
+            "resenas_en_ventana": { "type": "integer", "minimum": 0 },
+            "ventana_horas": { "type": "integer", "const": 72 },
+            "ritmo_habitual": { "type": "number", "minimum": 0, "description": "Promedio de reseñas por 72 h del destinatario en los últimos 90 días, con piso 1." },
+            "autores_sin_credito": { "type": "number", "minimum": 0, "maximum": 1, "description": "Proporción de autores del grupo con crédito de identidad k < 0,3." }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "firma": { "$ref": "comunes.json#/$defs/firma" }
   },
   "$defs": {
     "reputacion": {
       "type": "object",
-      "description": "Promedio simple de los últimos 12 meses con la cantidad al lado. Sin ponderaciones ocultas.",
+      "description": "Reputación contextual de docs/resenas.md, no un promedio simple: cada reseña pesa w = c · v · r · k · f (cercanía del autor al comercio, afinidad con quien mira, recompra, crédito de identidad, señales anti campaña). La fórmula y sus números son públicos: no hay ponderaciones ocultas. Es el resumen que va en la ficha; el desglose entero está en GET /comercios/{id}/reputacion.",
       "required": ["promedio", "cantidad", "pedidos_entregados"],
       "properties": {
-        "promedio": { "type": "number", "minimum": 0, "maximum": 5 },
+        "reputacion": { "type": "number", "minimum": 0, "maximum": 5, "description": "0,7 · promedio + 0,3 · (1 + 4 · recompra). Es el número que ordena orden=reputacion." },
+        "recompra": { "type": "number", "minimum": 0, "maximum": 1, "description": "Compradores que volvieron, ponderados por crédito de identidad y señales, sobre el total más 2." },
+        "media_red": { "type": "number", "minimum": 0, "maximum": 5, "description": "Promedio ponderado de la red en 12 meses; 4,0 mientras el nodo tenga menos de 100 reseñas." },
+        "promedio": { "type": "number", "minimum": 0, "maximum": 5, "description": "Promedio ponderado, ya con los 3 puntos de media_red." },
         "cantidad": { "type": "integer", "minimum": 0 },
         "pedidos_entregados": { "type": "integer", "minimum": 0 },
         "pedidos_aceptados": { "type": "integer", "minimum": 0 },
         "pedidos_rechazados": { "type": "integer", "minimum": 0 },
         "desde": { "type": "string", "format": "date" }
+      }
+    },
+    "reputacion_contextual": {
+      "type": "object",
+      "description": "Respuesta de GET /comercios/{id}/reputacion: el número, sus partes y qué reseñas no computaron. Con sesión trae además 'para_vos'. Todo se deriva de pedidos y reseñas que ya existen en el nodo: no hay ningún dato nuevo, y la zona habitual es un agregado, nunca la dirección.",
+      "required": ["reputacion", "promedio", "recompra", "cantidad", "media_red", "formula"],
+      "properties": {
+        "reputacion": { "type": "number", "minimum": 0, "maximum": 5 },
+        "promedio": { "type": "number", "minimum": 0, "maximum": 5, "description": "Promedio ponderado, ya con los 3 puntos de media_red." },
+        "recompra": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cantidad": { "type": "integer", "minimum": 0, "description": "Reseñas que computaron (peso mayor a 0)." },
+        "peso_total": { "type": "number", "minimum": 0, "description": "Suma de los pesos w. Con esto y 'promedio' se rehace la cuenta." },
+        "compradores": { "type": "integer", "minimum": 0 },
+        "compradores_que_volvieron": { "type": "integer", "minimum": 0 },
+        "media_red": { "type": "number", "minimum": 0, "maximum": 5 },
+        "desde": { "type": "string", "format": "date" },
+        "formula": { "type": "string", "description": "La fórmula aplicada, en texto, y dónde leerla entera." },
+        "no_computaron": {
+          "type": "object",
+          "description": "Reseñas publicadas y visibles que pesaron 0 o 0,2. No se borra ni se oculta ninguna.",
+          "properties": {
+            "dueno_o_vinculada": { "type": "integer", "minimum": 0 },
+            "en_revision_por_rafaga": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "rafaga": {
+          "type": "object",
+          "description": "Estado de la señal de ráfaga para este comercio, recalculada cada hora.",
+          "required": ["activa"],
+          "properties": {
+            "activa": { "type": "boolean" },
+            "desde": { "$ref": "comunes.json#/$defs/instante" },
+            "resenas_en_ventana": { "type": "integer", "minimum": 0 },
+            "ventana_horas": { "type": "integer", "const": 72 },
+            "ritmo_habitual": { "type": "number", "minimum": 0 },
+            "autores_sin_credito": { "type": "number", "minimum": 0, "maximum": 1 },
+            "lado": { "type": "string", "enum": ["negativo", "positivo"] }
+          }
+        },
+        "para_vos": {
+          "type": "object",
+          "description": "Solo con sesión, y con Cache-Control: private. Es el mismo cálculo con el factor v activo; sin sesión v vale 0,7 para todas las reseñas y se cancela al normalizar.",
+          "required": ["reputacion"],
+          "properties": {
+            "reputacion": { "type": "number", "minimum": 0, "maximum": 5 },
+            "promedio": { "type": "number", "minimum": 0, "maximum": 5 },
+            "resenas_de_tu_zona": { "type": "integer", "minimum": 0, "description": "Reseñas cuyo autor tiene su zona habitual a menos de 1,5 km de la tuya." },
+            "comercios_en_comun": { "type": "integer", "minimum": 0, "description": "Comercios a los que le compraron tanto vos como los autores de estas reseñas." },
+            "rondas_o_grupos_en_comun": { "type": "integer", "minimum": 0 }
+          }
+        }
       }
     }
   }
