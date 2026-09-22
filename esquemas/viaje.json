@@ -5,9 +5,11 @@
   "description": "Un recorrido de un repartidor con una o más paradas: varios pedidos del mismo comercio (consolidada, ronda) o varios pedidos del mismo usuario a distintos comercios de la misma zona. El repartidor lo ve entero y lo acepta como uno.",
   "type": "object",
   "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
-  "required": ["repartidor", "paradas", "estado", "pago_repartidor"],
+  "required": ["paradas", "estado", "pago_repartidor"],
+  "if": { "properties": { "estado": { "const": "ofrecido" } }, "required": ["estado"] },
+  "else": { "required": ["repartidor"] },
   "properties": {
-    "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
+    "repartidor": { "$ref": "comunes.json#/$defs/identidad", "description": "Ausente mientras el viaje es una oferta abierta ('ofrecido') que todavía no tiene dueño. En cualquier otro estado, obligatorio." },
     "origen_tipo": { "type": "string", "enum": ["pedido_simple", "consolidada", "ronda", "multi_comercio", "grupal"] },
     "paradas": {
       "type": "array",
@@ -40,6 +42,7 @@
     },
     "estado": { "type": "string", "enum": ["ofrecido", "aceptado", "en_curso", "completado", "rechazado"] },
     "ofrecido_en": { "$ref": "comunes.json#/$defs/instante" },
+    "vence_oferta": { "$ref": "comunes.json#/$defs/instante", "description": "Solo con estado 'ofrecido': hasta cuándo se puede aceptar. Pasado sin respuesta, la oferta pasa al siguiente repartidor (docs/ranking-y-despacho.md)." },
     "aceptado_en": { "$ref": "comunes.json#/$defs/instante" },
     "ruta": { "type": "array", "items": { "$ref": "comunes.json#/$defs/punto" }, "description": "Polilínea de OSRM." }
   }

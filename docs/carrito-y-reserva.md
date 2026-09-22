@@ -31,6 +31,16 @@ El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de p
 - Al entregar, quien entrega envía `cobrado_en_mano: true`: el pago pasa a `confirmado` y el pedido a `entregado`.
 - Con repartidor, el efectivo lo cobra el repartidor. `reparto` dice cuánto es del comercio y cuánto del envío; cómo se lo rinden entre ellos es asunto de ellos. La red lo muestra y no lo ejecuta, igual que con las devoluciones.
 
+## Transferencia directa
+
+Vereda nunca maneja plata: con `metodo: transferencia` la plata va del comprador directo a la cuenta del comercio, sin PSP en el medio.
+
+- El comercio carga su alias en `PATCH /comercios/{id}`, campo `privado.cuenta_cobro.alias` (y `titular` opcional). Vive en `privado`: nunca sale en la ficha pública ni se federa.
+- Al confirmar el carrito, el cobro nace `pendiente` con su `vence` (`ventana_pago_min` del comercio) y con `instrucciones`: alias, titular, monto y una referencia corta para el concepto. Las instrucciones las ve únicamente el comprador, y solo mientras el pedido está activo.
+- El comprador transfiere por fuera de Vereda y avisa con `POST /pedidos/{id}/transferencia`, con un `comprobante` opcional. Esto no confirma el cobro: el nodo no vio ninguna plata y no dice que sí. Publica `pago.transferencia_declarada`.
+- El comercio confirma cuando ve la plata con `POST /pedidos/{id}/transferencia/confirmar`. Ahí el cobro pasa a `confirmado` y el pedido a `pagado`. Es el único que puede: es el único que ve su cuenta.
+- Si nadie confirma antes del `vence`, se aplica igual que cualquier otro pago pendiente: `vencido`, pedido `cancelado` con `pago_vencido`, se libera lo reservado.
+
 ## Retiro por el usuario
 
 - Con modalidad `retiro` no hay viaje ni repartidor: de `listo` el pedido pasa a `entregado`.

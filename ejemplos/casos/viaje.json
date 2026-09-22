@@ -1,0 +1,135 @@
+{
+  "$comentario": "Casos mínimos para viaje.json, en especial 'repartidor' condicional a 'estado' (docs/ranking-y-despacho.md, fase 3: oferta abierta sin dueño).",
+  "esquema": "viaje.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Oferta abierta 'ofrecido' sin repartidor todavía: nadie la tomó.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            }
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            }
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "'ofrecido' con repartidor: fase 1, se le está ofreciendo a un candidato puntual.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "repartidor": "juan.repartos@vereda.ar",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            }
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            }
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'aceptado' sin repartidor: fuera de una oferta abierta, el viaje tiene dueño.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:30-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            }
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            }
+          }
+        ],
+        "estado": "aceptado",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          }
+        }
+      }
+    }
+  ]
+}

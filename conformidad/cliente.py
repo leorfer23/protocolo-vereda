@@ -32,7 +32,11 @@ def _con_cuerpo(r: requests.Response) -> Respuesta:
             es_json = True
         except ValueError:
             cuerpo = r.text
-    return Respuesta(ok=True, estado=r.status_code, cabeceras=dict(r.headers), cuerpo=cuerpo, cuerpo_es_json=es_json)
+    # r.headers es un CaseInsensitiveDict de requests; dict(r.headers) lo
+    # convertía en un dict común y perdía la insensibilidad, con lo que un
+    # nodo que responde 'Etag' (la grafía que produce Go) fallaba pruebas que
+    # buscan 'ETag'. RFC 9110: los nombres de cabecera no distinguen mayúsculas.
+    return Respuesta(ok=True, estado=r.status_code, cabeceras=r.headers, cuerpo=cuerpo, cuerpo_es_json=es_json)
 
 
 def _pedido(metodo, url, **kw):

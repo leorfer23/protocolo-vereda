@@ -124,6 +124,58 @@
         "estado": "pendiente",
         "vence": "2026-09-21T15:15:00-03:00"
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Transferencia directa pendiente: trae instrucciones para que el comprador sepa a dónde transferir.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "La Huerta SRL",
+          "monto": { "centavos": 1250000, "moneda": "ARS" },
+          "referencia": "01926B3A"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El comprador declaró que transfirió: no confirma el cobro, sigue 'pendiente'.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:05:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "transferencia": {
+          "declarada_en": "2026-09-21T15:05:00-03:00",
+          "comprobante": "12345678"
+        }
+      }
     }
   ]
 }

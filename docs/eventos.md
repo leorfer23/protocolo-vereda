@@ -21,6 +21,7 @@ Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave
 | `pedido.creado`, `pedido.pagado`, `pedido.aceptado`, `pedido.rechazado`, `pedido.preparando`, `pedido.listo`, `pedido.asignado`, `pedido.en_camino`, `pedido.entregado`, `pedido.cancelado` | Transiciones del pedido |
 | `item.confirmado`, `item.sustitucion_propuesta`, `item.sustitucion_respondida`, `item.faltante`, `item.pesado` | Ítem por ítem, en preparación |
 | `pago.pendiente`, `pago.confirmado`, `pago.vencido`, `pago.fallido` | Desde el adaptador de PSP |
+| `pago.transferencia_declarada` | El comprador avisa que ya transfirió (`POST /pedidos/{id}/transferencia`), en transferencia directa sin PSP |
 | `viaje.ofrecido`, `viaje.aceptado`, `viaje.rechazado`, `viaje.parada_completada`, `viaje.completado` | Despacho |
 | `suscripcion.ocurrencia_abierta`, `suscripcion.ocurrencia_generada`, `suscripcion.pausada`, `suscripcion.cancelada`, `suscripcion.precio_cambia` | Suscripciones |
 | `ronda.abierta`, `ronda.cerrada`, `ronda.en_camino`, `ronda.entregada` | Rondas |
