@@ -109,13 +109,15 @@
         "descripcion": { "type": "string", "maxLength": 500 }
       }
     },
+    "vinculaciones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/vinculacion" }, "description": "Cuentas y lugares que el actor probó que son suyos (docs/identidad-y-verificacion.md). Las declara él y las comprueba cualquiera; nadie las otorga. La ficha trae las que no están vencidas; el historial completo está en GET /actores/{identidad}/verificacion. No se edita con PATCH: se declara con POST /actores/{identidad}/vinculaciones." },
     "verificacion": {
       "type": "object",
+      "description": "Chequeos automáticos, no una habilitación: un comercio con todo en false vende igual. Ninguno es un sello de Vereda ni de nadie.",
       "required": ["cuit_verificado", "foto_geolocalizada", "cuenta_cobro_coincide"],
       "properties": {
         "cuit_verificado": { "type": "boolean" },
         "foto_geolocalizada": { "type": "boolean" },
-        "cuenta_cobro_coincide": { "type": "boolean" },
+        "cuenta_cobro_coincide": { "type": "boolean", "description": "La vinculación 'cuenta_cobro' está 'verificada': compradores que transfirieron dicen que el titular del alias coincide (docs/identidad-y-verificacion.md)." },
         "verificado_en": { "$ref": "comunes.json#/$defs/instante" }
       }
     },

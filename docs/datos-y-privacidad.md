@@ -48,5 +48,7 @@ que lo crea: no hay revisión del operador del nodo, ni alta manual, ni sello de
 cola de aprobación en ningún lado. Lo mismo vale para el repartidor: `PUT /repartidor` lo da de alta al instante, sin screening ni datos que cargue un tercero (`docs/repartidores.md`). Los campos de `verificacion` de la ficha son chequeos automáticos y
 verificables (CUIT, foto geolocalizada, cuenta de cobro que coincide), no una habilitación: un
 comercio con los tres en false vende igual, y quien compra ve exactamente qué está verificado y qué
-no. La única reputación es la suma de reseñas firmadas de pedidos entregados, que nadie —tampoco el
+no. Cómo se distingue a un comercio verdadero de uno que se hace pasar por él, sin que nadie
+otorgue nada, está en `docs/identidad-y-verificacion.md`: ahí el contacto confirmado de una persona
+se guarda solo como hash, y la cuenta de cobro se comprueba sin publicarse nunca. La única reputación es la suma de reseñas firmadas de pedidos entregados, que nadie —tampoco el
 operador del nodo— puede editar ni borrar.

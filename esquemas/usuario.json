@@ -16,7 +16,13 @@
     "clave_publica": { "type": "string" },
     "claves": { "$ref": "comunes.json#/$defs/claves", "description": "Historial de claves. 'clave_publica' repite la activa." },
     "custodia_clave": { "type": "string", "enum": ["nodo", "propia"], "default": "nodo", "description": "Quién guarda la clave privada. 'nodo': cifrada por el nodo, exportable." },
-    "privado": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } }
+    "privado": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } },
+    "contacto_confirmado": {
+      "type": "object",
+      "description": "Cuándo confirmó un teléfono o un email por desafío (POST /yo/contacto). El nodo guarda solo un HMAC del valor con una sal suya, nunca el valor; afuera se publica solo que está confirmado (docs/identidad-y-verificacion.md, punto 4). No tiene nada que ver con 'privado'.",
+      "properties": { "telefono": { "$ref": "comunes.json#/$defs/instante" }, "email": { "$ref": "comunes.json#/$defs/instante" } },
+      "additionalProperties": false
+    }
   },
   "$defs": {
     "preferencias": {

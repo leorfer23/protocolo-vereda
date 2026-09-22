@@ -8,6 +8,8 @@ Toda identidad es `actor@nodo`: `marta@vereda.ar`, `lahuerta@nodo.rosario.coop`.
 
 Cada actor tiene un par de claves Ed25519. La clave privada la custodia su nodo, cifrada, salvo que el actor elija custodiarla él (`custodia_clave: propia`). Con ella se firman reseñas, mandatos y las transiciones clave de un pedido (creación, aceptación, entrega). Las claves rotan sin invalidar lo ya firmado: ver `docs/claves-y-firmas.md`.
 
+La identidad dice quién firmó, no quién es en el mundo. Que `lahuerta@vereda.ar` sea la verdulería de Yatay 850 se prueba con vinculaciones que cualquiera recomprueba, y cada nodo responde por las de sus actores en `GET /actores/{identidad}/verificacion`, firmado por él: ver `docs/identidad-y-verificacion.md`, punto 7.
+
 ## Descubrimiento
 
 `GET https://{nodo}/.well-known/vereda.json` devuelve nombre, versiones soportadas, clave pública del nodo, zona geográfica, endpoints (API, MCP, federación) y el link al código fuente. Un nodo descubre a otro por su dominio; no hay registro central.

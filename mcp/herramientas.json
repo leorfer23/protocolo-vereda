@@ -491,6 +491,31 @@
       "name": "mis_ganancias",
       "description": "Cuánto cobró el repartidor por día, semana, mes o total: envíos y propinas confirmados, por efectivo y transferencia, y lo que quedó sin marcar recibido. Ej: '¿cuánto hice esta semana?'. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "properties": {"desde": {"type": "string", "format": "date-time"}, "hasta": {"type": "string", "format": "date-time"}, "granularidad": {"type": "string", "enum": ["dia", "semana", "mes", "total"], "default": "semana"}}}
+    },
+    {
+      "name": "ver_verificacion",
+      "description": "Qué probó un comercio, un repartidor o una persona sobre quién es, y lo que lo distingue de un duplicado: sus vinculaciones (dominio, sitio, Instagram, WhatsApp, local, cuenta de cobro) con su estado, los comercios vinculados por dueño, CUIT o cuenta, los homónimos a menos de 1,5 km con su antigüedad y pedidos, las denuncias por estado y su historial. Nada de esto es un sello: son pruebas que cualquiera puede rehacer (docs/identidad-y-verificacion.md). Ej: '¿esta es la verdadera La Huerta?', '¿por qué hay dos pizzerías iguales?'. No requiere mandato.",
+      "inputSchema": {"type": "object", "required": ["identidad"], "properties": {"identidad": {"type": "string", "description": "actor@nodo"}}}
+    },
+    {
+      "name": "ver_denuncias",
+      "description": "Las denuncias de suplantación contra un actor: quién denuncia y con qué crédito, qué vinculación reclama, la respuesta del denunciado y el estado que salió de la evidencia ('respaldada', 'contradicha', 'abierta', 'sin_respaldo'). Nadie las aprueba ni las borra. Ej: '¿alguien dijo que este perfil es falso?'. No requiere mandato.",
+      "inputSchema": {"type": "object", "required": ["identidad"], "properties": {"identidad": {"type": "string", "description": "actor@nodo"}}}
+    },
+    {
+      "name": "vinculacion_declarar",
+      "description": "Declarar que un dominio, un sitio, un Instagram, un WhatsApp, el local o la cuenta de cobro son del comercio (o del repartidor). Devuelve el texto 'vereda:prueba=…' y dónde publicarlo; en 'local', el contenido del QR a imprimir, que no se vuelve a mostrar. Ej: 'vinculá lahuerta.com.ar', 'quiero el QR para el mostrador'. Requiere scope 'administrar' o 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["identidad", "tipo"], "properties": {"identidad": {"type": "string", "description": "El comercio o el repartidor, actor@nodo."}, "tipo": {"type": "string", "enum": ["dominio", "sitio", "instagram", "whatsapp", "local", "cuenta_cobro"]}, "valor": {"type": "string", "description": "'lahuerta.com.ar', 'https://lahuerta.com.ar/contacto', '@lahuerta', '+5493415551234'. Nada en 'local' ni en 'cuenta_cobro'."}}}
+    },
+    {
+      "name": "vinculacion_comprobar",
+      "description": "Pedirle al nodo que busque la prueba ahora, sin esperar la recomprobación semanal. En 'whatsapp', con el código de 6 dígitos que llegó a ese número. Si no la encuentra, dice qué faltó. Ej: 'ya cargué el TXT, fijate'. Requiere scope 'administrar' o 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["identidad", "vinculacion_id"], "properties": {"identidad": {"type": "string"}, "vinculacion_id": {"type": "string"}, "codigo": {"type": "string", "pattern": "^[0-9]{6}$"}}}
+    },
+    {
+      "name": "denuncia_responder",
+      "description": "El comercio o el repartidor denunciado responde una denuncia de suplantación, una sola vez y en público. Ej: 'contestá que somos otra verdulería, en Yatay 1400'. Requiere scope 'administrar' o 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["identidad", "denuncia_id", "texto"], "properties": {"identidad": {"type": "string"}, "denuncia_id": {"type": "string"}, "texto": {"type": "string", "maxLength": 1000}}}
     }
   ]
 }

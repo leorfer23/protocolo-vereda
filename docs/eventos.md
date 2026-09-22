@@ -31,6 +31,9 @@ Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave
 | `mensaje.nuevo` | Chat |
 | `mandato.otorgado`, `mandato.revocado`, `mandato.requiere_confirmacion`, `mandato.confirmado` | Agentes |
 | `oferta.stock_cambiado`, `oferta.precio_cambiado`, `comercio.abierto`, `comercio.cerrado` | Catálogo (público) |
+| `vinculacion.verificada`, `vinculacion.caida`, `vinculacion.vencida` | Una vinculación cambió de estado al comprobarse (`docs/identidad-y-verificacion.md`). Público |
+| `atestacion.recibida` | Alguien atestiguó sobre el actor. En `cliente_frecuente` es el aviso para que la persona acepte o rechace |
+| `denuncia.recibida`, `denuncia.respondida`, `denuncia.estado_cambiado` | Denuncias de suplantación. Públicos: la denuncia ya lo es |
 | `clave.rotada`, `clave.comprometida` | Claves de un actor o del nodo (público). Quien tenga la clave en caché la vuelve a pedir |
 
 ## Idempotencia

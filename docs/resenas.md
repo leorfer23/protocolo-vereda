@@ -156,8 +156,11 @@ que nunca vuelve a comprar queda marcada para siempre.
 - el autor es dueño de un comercio **vinculado** al reseñado;
 - autor y destinatario son comercios vinculados entre sí.
 
-Dos comercios están **vinculados** si comparten dueño, CUIT verificado, cuenta de cobro o clave
-pública. Son hechos que el nodo ya tiene: no se recolecta ningún dato nuevo.
+Dos comercios están **vinculados** si comparten dueño, CUIT verificado, cuenta de cobro, clave
+pública o una vinculación verificada (el mismo dominio, sitio, Instagram o WhatsApp). Una persona
+queda vinculada a un comercio si confirmó el mismo teléfono o email que su dueño. Son hechos que el
+nodo ya tiene: no se recolecta ningún dato nuevo. El detalle, y qué se publica de cada uno, está en
+`docs/identidad-y-verificacion.md`, punto 3.
 
 Estas reseñas **se publican igual**, marcadas `no_computa: dueno_o_vinculada`. Que un dueño se
 autorreseñe es información útil para quien mira.

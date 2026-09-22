@@ -132,7 +132,21 @@ v_mudanza = vector("mudanza-firmada-por-el-actor",
     "Marta declara que se mudó de nodo. La firma ella, con la clave que ya usaba en el nodo viejo, y el firmante es su identidad anterior. Cualquiera la verifica contra su historial de claves sin preguntarle al nodo viejo: por eso una mudanza no depende de que el nodo viejo coopere.",
     mudanza, "firma", "marta@vereda.ar", TS, "comunes.json#/$defs/mudanza")
 
-# --- 5. Casos JCS sin firma: donde las implementaciones se separan ---
+# --- 5. Vinculación: la prueba que cualquiera rehace sin preguntarle al nodo ---
+vinculacion = {
+    "id": "01926b3a-2222-7000-8000-000000000001",
+    "identidad": "lahuerta@nodo.rosario.coop",
+    "tipo": "dominio",
+    "valor": "lahuerta.com.ar",
+    "declarada": TS,
+    "senales": {"estado": "verificada", "verificada_en": TS, "comprobada_en": TS},
+}
+v_vinculacion = vector("vinculacion-dominio-con-codigo",
+    "La Huerta declara que lahuerta.com.ar es suyo. El texto a publicar en el TXT de _vereda.lahuerta.com.ar sale del SHA-256 del mismo JCS que cubre la firma: los primeros 16 bytes, en base64url. 'senales' la escribió el nodo después y no entra ni en la firma ni en el código (docs/identidad-y-verificacion.md).",
+    vinculacion, "firma", "lahuerta@nodo.rosario.coop", TS, "comunes.json#/$defs/vinculacion")
+v_vinculacion["texto_de_prueba"] = "vereda:prueba=" + b64u(bytes.fromhex(v_vinculacion["jcs_sha256_hex"])[:16])
+
+# --- 6. Casos JCS sin firma: donde las implementaciones se separan ---
 CASOS = [
     ("orden-de-claves", "Las claves se ordenan por sus unidades de código UTF-16, no por alfabeto ni por orden de aparición.",
      {"b": 1, "A": 2, "a": 3, "á": 4, "10": 5, "2": 6}),
@@ -154,7 +168,7 @@ for nombre, desc, obj in CASOS:
                       "jcs_utf8": jcs.decode("utf-8"), "jcs_utf8_hex": jcs.hex(),
                       "jcs_sha256_hex": hashlib.sha256(jcs).hexdigest()})
 
-# --- 6. Request RFC 9421 completo: una entrega entre nodos ---
+# --- 7. Request RFC 9421 completo: una entrega entre nodos ---
 cuerpo = rfc8785.dumps(v_evento["objeto_firmado"])
 digest = base64.b64encode(hashlib.sha256(cuerpo).digest()).decode()
 content_digest = f"sha-256=:{digest}:"
@@ -220,7 +234,7 @@ doc = {
         {"actor": "marta@vereda.ar (clave nueva del vector de rotación)", "etiqueta_semilla": "marta-clave-2",
          "semilla_sha256_de": "vereda:vector:marta-clave-2", "semilla_hex": semilla("marta-clave-2").hex(), "clave_publica": pub_nueva},
     ],
-    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza],
+    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
 }

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/denuncia.json",
+  "title": "Denuncia de suplantación",
+  "description": "Alguien firma que un perfil se hace pasar por otro y dice qué vinculación prueba quién es el verdadero. Pública, pegada al perfil denunciado, sin edición ni borrado. Nadie la acepta ni la rechaza: su estado lo calcula el nodo con la evidencia (docs/identidad-y-verificacion.md, punto 5).",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["denunciante", "denunciado", "suplantado", "reclama", "texto", "firma"],
+  "properties": {
+    "denunciante": { "$ref": "comunes.json#/$defs/identidad", "description": "Quién denuncia. Es el firmante de 'firma'." },
+    "denunciado": { "$ref": "comunes.json#/$defs/identidad", "description": "El perfil que imita. Coincide con {identidad} de la ruta." },
+    "suplantado": { "$ref": "comunes.json#/$defs/identidad", "description": "A quién imita. Puede ser el mismo denunciante o un tercero: un cliente también puede avisar. Nunca el mismo denunciado: el nodo lo rechaza con 422." },
+    "reclama": {
+      "type": "object",
+      "description": "La vinculación que, según el denunciante, es del suplantado y prueba quién es el verdadero. El nodo la busca verificada en uno y otro perfil.",
+      "required": ["tipo"],
+      "properties": {
+        "tipo": { "type": "string", "enum": ["dominio", "sitio", "instagram", "whatsapp", "local"], "description": "'cuenta_cobro' no: es privada y no se puede reclamar en público." },
+        "valor": { "type": "string", "minLength": 1, "maxLength": 253 }
+      },
+      "if": { "properties": { "tipo": { "const": "local" } } },
+      "else": { "required": ["valor"] },
+      "additionalProperties": false
+    },
+    "texto": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Del denunciante. Cubre todo menos 'firma', 'respuesta' y 'senales'." },
+    "respuesta": {
+      "type": "object",
+      "description": "Del denunciado, una sola vez, pública y firmada por él. Queda fuera de la firma del denunciante.",
+      "required": ["texto", "instante", "firma"],
+      "properties": {
+        "texto": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "instante": { "$ref": "comunes.json#/$defs/instante" },
+        "firma": { "$ref": "comunes.json#/$defs/firma" }
+      },
+      "additionalProperties": false
+    },
+    "senales": {
+      "type": "object",
+      "description": "Lo escribe el nodo, recalculado cada hora; queda fuera de la firma. Lo que venga acá al denunciar se ignora.",
+      "required": ["estado", "calculada"],
+      "properties": {
+        "estado": { "type": "string", "enum": ["abierta", "respaldada", "contradicha", "sin_respaldo"], "description": "'respaldada': el suplantado tiene verificada la vinculación reclamada y el denunciado no. 'contradicha': al revés. 'abierta': ninguna de las dos antes de 14 días. 'sin_respaldo': ninguna de las dos pasados 14 días." },
+        "calculada": { "$ref": "comunes.json#/$defs/instante" },
+        "credito_denunciante": { "type": "number", "minimum": 0, "maximum": 1, "description": "El crédito de identidad k del denunciante (docs/resenas.md), para que se vea quién denuncia." }
+      },
+      "additionalProperties": false
+    }
+  }
+}

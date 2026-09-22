@@ -1,0 +1,430 @@
+{
+  "$comentario": "Casos para comunes.json#/$defs/vinculacion: qué 'valor' lleva cada tipo, su forma, y que las señales del nodo no inventen estados (docs/identidad-y-verificacion.md, punto 2).",
+  "esquema": "comunes.json#/$defs/vinculacion",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Dominio verificado: el vector firmado de ejemplos/vectores-firma.json, tal cual.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "dominio",
+        "valor": "lahuerta.com.ar",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Sitio recién declarado, todavía 'pendiente'.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000002",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "sitio",
+        "valor": "https://lahuerta.com.ar/contacto",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "pendiente"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Instagram 'caida': estaba verificada y el código desapareció de la biografía. Sigue en el historial.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000003",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "instagram",
+        "valor": "@lahuerta",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "caida",
+          "verificada_en": "2026-08-01T10:00:00-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00",
+          "motivo": "La biografía de @lahuerta ya no muestra el código desde el 14/09."
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "WhatsApp Business verificado por desafío, en E.164.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000004",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "whatsapp",
+        "valor": "+5493415551234",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Local sin 'valor' (la ubicación ya está en la ficha), verificado por atestaciones de presencia.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000005",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "local",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00",
+          "atestaciones": {
+            "autores": 4,
+            "peso": 2.6
+          }
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Cuenta de cobro sin 'valor', verificada por lo que dijeron los compradores.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000006",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "cuenta_cobro",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "comprobada_en": "2026-09-21T15:04:05-03:00",
+          "atestaciones": {
+            "autores": 5,
+            "peso": 3.1
+          },
+          "en_contra": {
+            "autores": 0,
+            "peso": 0
+          }
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Cuenta de cobro 'contradicha': los compradores dicen, con más peso, que el titular no coincide.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000006",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "cuenta_cobro",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "contradicha",
+          "comprobada_en": "2026-09-21T15:04:05-03:00",
+          "atestaciones": {
+            "autores": 1,
+            "peso": 0.25
+          },
+          "en_contra": {
+            "autores": 3,
+            "peso": 1.9
+          },
+          "motivo": "Tres compradores dijeron que su banco mostraba otro titular."
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Declaración sin señales: así la manda un cliente con custodia propia, antes de que el nodo la compruebe.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000002",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "sitio",
+        "valor": "https://lahuerta.com.ar/contacto",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Cuenta de cobro con 'valor': el alias es privado y no puede aparecer en una vinculación pública.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000006",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "cuenta_cobro",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "comprobada_en": "2026-09-21T15:04:05-03:00",
+          "atestaciones": {
+            "autores": 5,
+            "peso": 3.1
+          },
+          "en_contra": {
+            "autores": 0,
+            "peso": 0
+          }
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "valor": "lahuerta.mp"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Dominio sin 'valor': no hay dónde buscar el registro TXT.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "dominio",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Dominio con esquema y ruta: 'valor' de un dominio es solo el nombre.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "dominio",
+        "valor": "https://lahuerta.com.ar/",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sitio por HTTP: la prueba solo se busca por HTTPS.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000002",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "sitio",
+        "valor": "http://lahuerta.com.ar",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "pendiente"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Instagram sin '@'.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000003",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "instagram",
+        "valor": "lahuerta",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "caida",
+          "verificada_en": "2026-08-01T10:00:00-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00",
+          "motivo": "La biografía de @lahuerta ya no muestra el código desde el 14/09."
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "WhatsApp que no está en E.164.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000004",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "whatsapp",
+        "valor": "0341 555-1234",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'contradicha' en un dominio: ese estado existe solo para la cuenta de cobro.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "dominio",
+        "valor": "lahuerta.com.ar",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "contradicha"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Estado que no existe: no hay 'verificada_por_vereda' ni ningún sello.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "dominio",
+        "valor": "lahuerta.com.ar",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada_por_vereda"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un campo 'verificado' suelto, fuera de 'senales': nadie otorga verificaciones.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "dominio",
+        "valor": "lahuerta.com.ar",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "verificado": true
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin firma del actor: una vinculación sin declaración firmada no prueba nada.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "dominio",
+        "valor": "lahuerta.com.ar",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Tipo que no está en el protocolo.",
+      "doc": {
+        "id": "01926b3a-2222-7000-8000-000000000001",
+        "identidad": "lahuerta@nodo.rosario.coop",
+        "tipo": "facebook",
+        "valor": "lahuerta",
+        "declarada": "2026-09-21T15:04:05-03:00",
+        "senales": {
+          "estado": "verificada",
+          "verificada_en": "2026-09-21T15:04:05-03:00",
+          "comprobada_en": "2026-09-21T15:04:05-03:00"
+        },
+        "firma": {
+          "firmante": "lahuerta@nodo.rosario.coop",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    }
+  ]
+}

@@ -26,6 +26,7 @@
       "required": ["dni_prueba_de_vida", "cuenta_cobro_propia"],
       "properties": { "dni_prueba_de_vida": { "type": "boolean" }, "cuenta_cobro_propia": { "type": "boolean" }, "verificado_en": { "$ref": "comunes.json#/$defs/instante" } }
     },
+    "vinculaciones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/vinculacion" }, "description": "Cuentas y lugares que el actor probó que son suyos (docs/identidad-y-verificacion.md). Las declara él y las comprueba cualquiera; nadie las otorga. La ficha trae las que no están vencidas; el historial completo está en GET /actores/{identidad}/verificacion." },
     "reputacion": { "$ref": "#/$defs/reputacion" },
     "clave_publica": { "type": "string" },
     "claves": { "$ref": "comunes.json#/$defs/claves", "description": "Historial de claves. 'clave_publica' repite la activa." },
@@ -112,6 +113,7 @@
         "cooperativa": { "$ref": "#/$defs/cooperativa" },
         "cobro": { "$ref": "#/$defs/cobro" },
         "verificacion": { "type": "object", "properties": { "dni_prueba_de_vida": { "type": "boolean" }, "cuenta_cobro_propia": { "type": "boolean" } } },
+        "vinculaciones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/vinculacion" } },
         "reputacion": { "$ref": "#/$defs/reputacion" },
         "clave_publica": { "type": "string" },
         "desde": { "type": "string", "format": "date", "description": "Primer viaje completado." }

@@ -1,0 +1,205 @@
+{
+  "$comentario": "Casos para comunes.json#/$defs/atestacion: 'presencia' siempre con la vinculación del QR y su prueba, 'cliente_frecuente' nunca (docs/identidad-y-verificacion.md).",
+  "esquema": "comunes.json#/$defs/atestacion",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Marta escaneó el QR de La Huerta y firmó 'estuve acá'. Pesa su crédito k.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "marta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0.85
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El dueño atestigua su propio local: se publica, pero pesa 0.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "duenio.lahuerta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "La Huerta atestigua que Marta es clienta frecuente; no se publica hasta que ella acepte.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000002",
+        "tipo": "cliente_frecuente",
+        "autor": "lahuerta@vereda.ar",
+        "sujeto": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": false
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Presencia sin 'prueba': nada muestra que el autor vio el QR.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "marta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0.85
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Presencia sin 'vinculacion': no se sabe qué QR se escaneó.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "marta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0.85
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Cliente frecuente con 'prueba' de QR: no corresponde a este tipo.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000002",
+        "tipo": "cliente_frecuente",
+        "autor": "lahuerta@vereda.ar",
+        "sujeto": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": false,
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Prueba que no es un HMAC-SHA256 en base64url (43 caracteres).",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "marta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "abc",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0.85
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Peso mayor que 1: el peso es el crédito k del autor, entre 0 y 1.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "marta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 1.5
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Tipo inventado.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "me_gusta",
+        "autor": "marta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0.85
+        }
+      }
+    }
+  ]
+}

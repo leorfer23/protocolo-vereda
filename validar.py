@@ -124,6 +124,10 @@ def verificar_vectores():
             Ed25519PublicKey.from_public_bytes(desde_b64u(firma["clave_publica"])).verify(desde_b64u(firma["valor"]), jcs)
         except (InvalidSignature, ValueError):
             malos.append(f"{v['nombre']}: la firma no verifica contra su clave pública")
+        # el código de una vinculación sale del mismo JCS que cubre la firma
+        # (docs/identidad-y-verificacion.md): los primeros 16 bytes del SHA-256
+        if "texto_de_prueba" in v and v["texto_de_prueba"] != "vereda:prueba=" + b64u(hashlib.sha256(jcs).digest()[:16]):
+            malos.append(f"{v['nombre']}: 'texto_de_prueba' no sale del SHA-256 del JCS")
         # una firma no puede valer para otros bytes
         try:
             Ed25519PublicKey.from_public_bytes(desde_b64u(firma["clave_publica"])).verify(desde_b64u(firma["valor"]), jcs + b" ")
