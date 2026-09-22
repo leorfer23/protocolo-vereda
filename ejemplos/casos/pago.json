@@ -296,6 +296,243 @@
           }
         }
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Aporte por pedido del comercio al nodo, pendiente, con las instrucciones de la cuenta pública del nodo.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "nodo@vereda.ar",
+        "pagador": "lahuerta@vereda.ar",
+        "concepto": "aporte_nodo",
+        "monto": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-10-21T15:00:00-03:00",
+        "instrucciones": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte",
+          "monto": {
+            "centavos": 20000,
+            "moneda": "ARS"
+          },
+          "referencia": "Aporte pedido 0000b2"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Aporte mensual: va por período, sin pedido.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "destinatario": "nodo@vereda.ar",
+        "pagador": "lahuerta@vereda.ar",
+        "concepto": "aporte_nodo",
+        "monto": {
+          "centavos": 1500000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-10-21T15:00:00-03:00",
+        "instrucciones": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte",
+          "monto": {
+            "centavos": 1500000,
+            "moneda": "ARS"
+          },
+          "referencia": "Aporte 2026-09"
+        },
+        "periodo": "2026-09"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Propina del comprador al nodo, confirmada por el operador.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "nodo@vereda.ar",
+        "concepto": "propina_nodo",
+        "monto": {
+          "centavos": 50000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "confirmado_en": "2026-09-21T16:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El aporte al nodo siempre dice qué comercio lo paga.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "nodo@vereda.ar",
+        "concepto": "aporte_nodo",
+        "monto": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-10-21T15:00:00-03:00",
+        "instrucciones": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte",
+          "monto": {
+            "centavos": 20000,
+            "moneda": "ARS"
+          },
+          "referencia": "Aporte pedido 0000b2"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un aporte va por pedido o por mes, no por los dos.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "nodo@vereda.ar",
+        "pagador": "lahuerta@vereda.ar",
+        "concepto": "aporte_nodo",
+        "monto": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-10-21T15:00:00-03:00",
+        "instrucciones": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte",
+          "monto": {
+            "centavos": 20000,
+            "moneda": "ARS"
+          },
+          "referencia": "Aporte pedido 0000b2"
+        },
+        "periodo": "2026-09"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un aporte sin pedido ni período no dice qué cubre.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "destinatario": "nodo@vereda.ar",
+        "pagador": "lahuerta@vereda.ar",
+        "concepto": "aporte_nodo",
+        "monto": {
+          "centavos": 20000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-10-21T15:00:00-03:00",
+        "instrucciones": {
+          "alias": "nodo.vereda.norte",
+          "titular": "Coop. de Trabajo Vereda Norte",
+          "monto": {
+            "centavos": 20000,
+            "moneda": "ARS"
+          },
+          "referencia": "Aporte pedido 0000b2"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Lo que va al nodo es solo por transferencia: no hay efectivo ni PSP en el medio.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "nodo@vereda.ar",
+        "concepto": "propina_nodo",
+        "monto": {
+          "centavos": 50000,
+          "moneda": "ARS"
+        },
+        "metodo": "efectivo",
+        "estado": "en_mano"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La propina al nodo va a la identidad nodo@ del nodo, no a una persona.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "operador@vereda.ar",
+        "concepto": "propina_nodo",
+        "monto": {
+          "centavos": 50000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "confirmado_en": "2026-09-21T16:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Solo el aporte mensual va sin pedido; cualquier otro cobro dice de qué pedido es.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "destinatario": "nodo@vereda.ar",
+        "concepto": "propina_nodo",
+        "monto": {
+          "centavos": 50000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "confirmado_en": "2026-09-21T16:00:00-03:00",
+        "periodo": "2026-09"
+      }
     }
   ]
 }

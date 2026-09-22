@@ -37,7 +37,7 @@
     { "destinatario": "comercio", "concepto": "Productos", "monto": { "centavos": 1957800, "moneda": "ARS" } },
     { "destinatario": "repartidor", "concepto": "Envío", "monto": { "centavos": 200000, "moneda": "ARS" } },
     { "destinatario": "repartidor", "concepto": "Propina", "monto": { "centavos": 50000, "moneda": "ARS" } },
-    { "destinatario": "red", "concepto": "Vereda", "monto": { "centavos": 0, "moneda": "ARS" } }
+    { "destinatario": "nodo", "concepto": "aporte_nodo", "pagador": "comercio", "monto": { "centavos": 0, "moneda": "ARS" } }
   ],
   "politica_cancelacion_aplicada": "Podés cancelar hasta que empecemos a armar el pedido.",
   "requiere_mayoria_edad": false,

@@ -144,6 +144,7 @@ class NivelA:
     def correr(self) -> List[Caso]:
         self.casos = []
         self._bien_conocido()
+        self._sostenimiento()
         comercios = self._comercios()
         self._buscar()
         rondas = self._rondas()
@@ -175,6 +176,20 @@ class NivelA:
             return
         self.casos.append(self._chequear_estructura(opid, "GET /.well-known/vereda.json", url, r))
         caso = self._esquema_o_no_json(opid, "el cuerpo de /.well-known/vereda.json cumple Nodo", op, r)
+        if caso:
+            self.casos.append(caso)
+
+    def _sostenimiento(self):
+        # docs/sostenimiento.md: lo que el nodo recibe y gasta es público, sin token.
+        opid = "verSostenimiento"
+        op = self._op("/sostenimiento")
+        url = self.base_v1 + "/sostenimiento"
+        r = self._get(url)
+        if not r.ok:
+            self.casos.append(_fallo("estructura", opid, "GET /sostenimiento", r.motivo))
+            return
+        self.casos.append(self._chequear_estructura(opid, "GET /sostenimiento", url, r))
+        caso = self._esquema_o_no_json(opid, "el cuerpo de /sostenimiento cumple esquemas/sostenimiento.json", op, r)
         if caso:
             self.casos.append(caso)
 

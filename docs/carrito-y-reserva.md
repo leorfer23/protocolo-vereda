@@ -30,6 +30,7 @@ El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de p
 - El comercio se defiende de pedidos falsos con `efectivo.pedidos_entregados_minimo` (historial que le exige al usuario), `efectivo.modalidades` (por ejemplo, efectivo solo en retiro) y `efectivo.monto_maximo`. Si el usuario no cumple, confirmar responde `efectivo_no_disponible` y puede elegir otro medio.
 - Al entregar, quien entrega envía `cobrado_en_mano: true`: el pago pasa a `confirmado` y el pedido a `entregado`.
 - Con repartidor, el efectivo lo cobra el repartidor. `reparto` dice cuánto es del comercio y cuánto del envío; cómo se lo rinden entre ellos es asunto de ellos. La red lo muestra y no lo ejecuta, igual que con las devoluciones.
+- Una propina al nodo (`propina_nodo_centavos`) nunca va en efectivo: es una transferencia aparte a la cuenta del nodo, y si no se hace no pasa nada (`docs/sostenimiento.md`).
 
 ## Transferencia directa
 

@@ -44,6 +44,21 @@ paths:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "#/components/schemas/Nodo" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
 
+  /sostenimiento:
+    get:
+      operationId: verSostenimiento
+      tags: [descubrimiento]
+      summary: "Cómo se sostiene este nodo: cuenta, aporte sugerido, propinas, y lo que recibió y gastó por mes"
+      description: |
+        Público, sin token, y el mismo bloque que 'sostenimiento' en /.well-known/vereda.json. Sin
+        comisión y sin plata en el medio: el comercio elige si aporta y cuánto, el comprador puede
+        dejar una propina, y el nodo publica en qué se gasta (docs/sostenimiento.md).
+      security: []
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/sostenimiento.json" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+
   /comercios:
     get:
       operationId: buscarComercios
@@ -256,6 +271,48 @@ paths:
       responses:
         "200": { description: Paquete firmado, content: { application/json: { schema: { $ref: "#/components/schemas/ExportacionComercio" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
+  /comercios/{id}/aporte:
+    get:
+      operationId: verAporteComercio
+      tags: [mi-comercio]
+      summary: "Lo que el comercio eligió aportar al nodo, lo que el nodo sugiere, y sus aportes pendientes y recibidos"
+      description: |
+        Solo el dueño. El aporte es voluntario y no cambia nada: ni ranking, ni acceso, ni
+        visibilidad (docs/sostenimiento.md). Los pagos son los 'aporte_nodo' de este comercio,
+        con las instrucciones para transferir a la cuenta del nodo.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/AporteComercio" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+    put:
+      operationId: configurarAporte
+      tags: [mi-comercio]
+      summary: "Elegir cómo aportar al nodo: ninguno, por pedido entregado o mensual, y cuánto"
+      description: |
+        Queda público en la ficha, en 'aporte_nodo'. Nadie lo aprueba. Pasar a 'ninguno' corta
+        los aportes que vengan; los ya generados quedan como estaban y vencen solos sin
+        consecuencia. Con 'por_pedido', el monto se congela en el reparto de cada pedido nuevo.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/comercio.json#/properties/aporte_nodo" } } } }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/AporteComercio" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/aporte/transferencia:
+    post:
+      operationId: declararTransferenciaAporte
+      tags: [mi-comercio]
+      summary: "El comercio declara que transfirió un aporte al nodo. No lo confirma: lo confirma el operador del nodo al verlo en su cuenta"
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [pago_id], properties: { pago_id: { $ref: "esquemas/comunes.json#/$defs/id" }, comprobante: { type: string, maxLength: 500 } } } } } }
+      responses:
+        "200": { description: El pago con la transferencia declarada, content: { application/json: { schema: { $ref: "esquemas/pago.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
 
   /comercios/{id}/reclamos:
     get:
@@ -385,13 +442,13 @@ paths:
       summary: Crea el pedido, reserva stock y cupos hasta que venza el cobro, y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
       security: [ { sesion: [] }, { mandato: [pedir] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, notas: { type: string }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "El repartidor de confianza que nombra el comprador (docs/repartidores.md). Si el comercio tiene 'usuario' en envios.asignacion se le ofrece en ese turno; si no, queda como propuesta que el comercio acepta o no. Lo contrata el comprador: el envío se le paga a él." }, monto_envio_acordado_centavos: { type: integer, minimum: 0, description: "Solo con 'repartidor': lo que el comprador y el repartidor arreglaron entre ellos por el envío. Ausente: rige 'tarifa_envio', la pública. El repartidor lo ve en viaje.pago_repartidor antes de aceptar (docs/repartidores.md)." }, metodo_envio: { type: string, enum: [efectivo, transferencia], description: "Cómo se paga el envío cuando va directo al repartidor. El despacho solo lo ofrece a repartidores que aceptan ese medio. Ausente: efectivo si el pedido es en efectivo, si no transferencia." }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, propina_nodo_centavos: { type: integer, minimum: 0, description: "Propina opcional del comprador al nodo (docs/sostenimiento.md). Solo si el nodo publica 'acepta_propinas_de_usuarios'; si no, 422 propina_nodo_no_aceptada. Se paga siempre por transferencia a la cuenta del nodo, aparte del pedido, aunque el pedido sea en efectivo; si no se paga, no pasa nada." }, notas: { type: string }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "El repartidor de confianza que nombra el comprador (docs/repartidores.md). Si el comercio tiene 'usuario' en envios.asignacion se le ofrece en ese turno; si no, queda como propuesta que el comercio acepta o no. Lo contrata el comprador: el envío se le paga a él." }, monto_envio_acordado_centavos: { type: integer, minimum: 0, description: "Solo con 'repartidor': lo que el comprador y el repartidor arreglaron entre ellos por el envío. Ausente: rige 'tarifa_envio', la pública. El repartidor lo ve en viaje.pago_repartidor antes de aceptar (docs/repartidores.md)." }, metodo_envio: { type: string, enum: [efectivo, transferencia], description: "Cómo se paga el envío cuando va directo al repartidor. El despacho solo lo ofrece a repartidores que aceptan ese medio. Ausente: efectivo si el pedido es en efectivo, si no transferencia." }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
       responses:
         "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado). No se crea el pedido; el carrito queda no_disponible.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "410": { $ref: "#/components/responses/CarritoVencido" }
-        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /pedidos/{id}:
     get: { operationId: verPedido, tags: [pedidos], summary: "Estado, ítems, ETA, ubicación del repartidor", security: [ { sesion: [] }, { mandato: [leer] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
@@ -417,10 +474,10 @@ paths:
     post:
       operationId: agregarPropina
       tags: [pedidos]
-      summary: Agregar propina después de la entrega, al repartidor o al comercio
+      summary: Agregar propina después de la entrega, al repartidor, al comercio o al nodo
       security: [ { sesion: [] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, required: [destinatario, centavos], properties: { destinatario: { type: string, enum: [repartidor, comercio] }, centavos: { type: integer } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, required: [destinatario, centavos], properties: { destinatario: { type: string, enum: [repartidor, comercio, nodo], description: "'nodo': solo si el nodo acepta propinas, por transferencia a su cuenta (docs/sostenimiento.md)." }, centavos: { type: integer } } } } } }
       responses: { "201": { description: Cobro generado, content: { application/json: { schema: { $ref: "esquemas/pago.json" } } } } }
   /pedidos/{id}/aceptar:
     post: { operationId: aceptarPedido, tags: [pedidos], summary: "Comercio: aceptar", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
@@ -481,7 +538,7 @@ paths:
       description: "Lo usa el comprador, y también el comercio cuando es el pagador del envío (docs/repartidores.md). Con 'concepto' se dice cuál de los pagos del pedido."
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." }, comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." }, titular_coincide: { type: boolean, description: "Si el titular que le mostró su banco al transferir coincide con 'pago.instrucciones.titular'. El nodo guarda solo este veredicto, y cuenta para la vinculación 'cuenta_cobro' del destinatario (docs/identidad-y-verificacion.md). Ausente: la persona no dijo." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor, propina_nodo], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md); 'propina_nodo', al nodo (docs/sostenimiento.md)." }, comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." }, titular_coincide: { type: boolean, description: "Si el titular que le mostró su banco al transferir coincide con 'pago.instrucciones.titular'. El nodo guarda solo este veredicto, y cuenta para la vinculación 'cuenta_cobro' del destinatario (docs/identidad-y-verificacion.md). Ausente: la persona no dijo." } } } } } }
       responses:
         "200": { description: Pedido con la transferencia declarada, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "409": { $ref: "#/components/responses/Error" }
@@ -943,8 +1000,16 @@ components:
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
         codigo_fuente: { type: string, format: uri }
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
+        sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
     Carrito: { $ref: "esquemas/carrito.json" }
+    AporteComercio:
+      type: object
+      required: [aporte_nodo, pagos]
+      properties:
+        aporte_nodo: { $ref: "esquemas/comercio.json#/properties/aporte_nodo" }
+        sugerido: { type: object, description: "Lo que sugiere el nodo, copiado de 'sostenimiento'. Ausente si no sugiere nada.", properties: { por_pedido: { $ref: "esquemas/comunes.json#/$defs/monto" }, mensual: { $ref: "esquemas/comunes.json#/$defs/monto" } } }
+        pagos: { type: array, description: "Los 'aporte_nodo' de este comercio, el más reciente primero: pendientes con sus instrucciones, confirmados y vencidos.", items: { $ref: "esquemas/pago.json" } }
     ReclamoAbierto:
       type: object
       required: [reclamo]
