@@ -1,6 +1,6 @@
 {
   "$comentario": "Herramientas del servidor MCP de un nodo Vereda. Es la primera interfaz que se publica. Cada herramienta mapea a endpoints de openapi.yaml y lleva descripción en español con ejemplos, para que cualquier asistente la use sin leer la spec.",
-  "servidor": { "nombre": "vereda", "version": "1.0", "url": "https://{nodo}/mcp", "autenticacion": "OAuth 2.1 con mandato (esquemas/mandato.json). Las herramientas públicas no requieren token." },
+  "servidor": { "nombre": "vereda", "version": "1.0", "url": "https://{nodo}/mcp", "autenticacion": "OAuth 2.1 con mandato (esquemas/mandato.json). Las herramientas públicas no requieren token. No hay herramienta de acceso: un agente no entra por /acceso, actúa con el mandato que la persona le otorga desde su sesión (docs/acceso.md)." },
   "herramientas": [
     {
       "name": "buscar_comercios",

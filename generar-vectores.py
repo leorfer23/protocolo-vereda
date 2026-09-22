@@ -241,3 +241,77 @@ doc = {
 ruta = os.path.join(BASE, "ejemplos", "vectores-firma.json")
 open(ruta, "w").write(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
 print(f"escrito {ruta}: {len(doc['vectores'])} vectores firmados, {len(casos_jcs)} casos JCS, 1 request RFC 9421")
+
+# --- Acceso y respaldo de la clave (docs/acceso.md) ---
+import unicodedata
+from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+
+k_marta, pub_marta = clave("marta")
+desafio = b64u(hashlib.sha256(b"vereda:vector:desafio").digest())
+prueba = {"clave_publica": pub_marta, "desafio": desafio, "nodo": "vereda.ar"}
+jcs_prueba = rfc8785.dumps(prueba)
+firma_prueba = b64u(k_marta.sign(jcs_prueba))
+
+crudo_marta = k_marta.public_key().public_bytes(sz.Encoding.Raw, sz.PublicFormat.Raw)
+local = base64.b32encode(hashlib.sha256(crudo_marta).digest()[:10]).decode().rstrip("=").lower()
+
+ITERACIONES = 600_000
+# La frase viene a propósito en NFD ('n' + tilde combinante): quien lee la
+# normaliza a NFC antes de derivar, así un teclado que compone distinto no
+# deja a nadie afuera de su propio respaldo.
+FRASE = unicodedata.normalize("NFD", "ñandú en la vereda de enfrente")
+FRASE_MALA = "ñandu en la vereda de enfrente"
+x_marta = semilla("marta-cifrado")
+x_pub = b64u(X25519PrivateKey.from_private_bytes(x_marta).public_key().public_bytes(sz.Encoding.Raw, sz.PublicFormat.Raw))
+
+def llave_de(frase, sal, iteraciones):
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=sal, iterations=iteraciones)
+    return kdf.derive(unicodedata.normalize("NFC", frase).encode())
+
+def respaldo(formato, texto_claro, sal, nonce, extra):
+    cabecera = {"formato": formato, "clave_publica": pub_marta, **extra, "identidad": "marta@vereda.ar", "creada": TS,
+                "kdf": {"nombre": "PBKDF2", "hash": "SHA-256", "iteraciones": ITERACIONES, "sal": b64u(sal)}}
+    aad = rfc8785.dumps(cabecera)
+    llave = llave_de(FRASE, sal, ITERACIONES)
+    texto = AESGCM(llave).encrypt(nonce, texto_claro, aad)
+    return {
+        "frase": FRASE,
+        "frase_nfc_utf8_hex": unicodedata.normalize("NFC", FRASE).encode().hex(),
+        "frase_incorrecta": FRASE_MALA,
+        "llave_hex": llave.hex(),
+        "aad_jcs_utf8_hex": aad.hex(),
+        "texto_claro_hex": texto_claro.hex(),
+        "respaldo": {**cabecera, "cifrado": {"nombre": "AES-GCM", "nonce": b64u(nonce), "texto": b64u(texto)}},
+    }
+
+texto_v3 = rfc8785.dumps({"firma": b64u(semilla("marta")), "cifrado": b64u(x_marta)})
+acceso = {
+    "$comentario": "Vectores de acceso y respaldo del Protocolo Vereda (docs/acceso.md). Una app o un nodo conforme reproduce cada byte. Regenerar: python3 generar-vectores.py.",
+    "version_esquema": "1.0",
+    "clave": {"actor": "marta@vereda.ar", "semilla_sha256_de": "vereda:vector:marta", "clave_publica": pub_marta,
+              "cifrado_sha256_de": "vereda:vector:marta-cifrado", "clave_cifrado": x_pub},
+    "prueba_de_clave": {
+        "descripcion": "Lo que firma el dispositivo para canjear un desafío en POST /acceso/sesion.",
+        "desafio": {"desafio": desafio, "vence": "2026-09-21T18:06:05Z", "nodo": "vereda.ar"},
+        "objeto": prueba,
+        "jcs_utf8_hex": jcs_prueba.hex(),
+        "pedido_sesion": {"clave_publica": pub_marta, "desafio": desafio, "firma": firma_prueba, "nombre": "Marta"},
+    },
+    "identidad_derivada": {
+        "descripcion": "Recomendada, no obligatoria: la identidad la acuña el nodo. base32 sin relleno, en minúscula, de los primeros 10 bytes del SHA-256 de la clave pública cruda, arroba el dominio del nodo.",
+        "clave_publica": pub_marta,
+        "identidad": f"{local}@vereda.ar",
+    },
+    "respaldos": [
+        {"nombre": "respaldo-v3", "descripcion": "Formato actual: semilla Ed25519 y clave X25519 del chat. El texto claro es el JCS de {firma, cifrado}.",
+         **respaldo("vereda.clave.v3", texto_v3, semilla("respaldo-sal-v3")[:16], semilla("respaldo-nonce-v3")[:12], {"clave_cifrado": x_pub})},
+        {"nombre": "respaldo-v2", "descripcion": "Formato anterior, solo lectura: el texto claro es la semilla Ed25519 cruda, sin clave de chat.",
+         **respaldo("vereda.clave.v2", semilla("marta"), semilla("respaldo-sal-v2")[:16], semilla("respaldo-nonce-v2")[:12], {})},
+    ],
+}
+ruta = os.path.join(BASE, "ejemplos", "vectores-acceso.json")
+open(ruta, "w").write(json.dumps(acceso, indent=2, ensure_ascii=False) + "\n")
+print(f"escrito {ruta}: 1 prueba de clave, 1 identidad derivada, {len(acceso['respaldos'])} respaldos")

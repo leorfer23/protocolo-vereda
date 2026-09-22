@@ -1,0 +1,93 @@
+{
+  "$comentario": "Vectores de acceso y respaldo del Protocolo Vereda (docs/acceso.md). Una app o un nodo conforme reproduce cada byte. Regenerar: python3 generar-vectores.py.",
+  "version_esquema": "1.0",
+  "clave": {
+    "actor": "marta@vereda.ar",
+    "semilla_sha256_de": "vereda:vector:marta",
+    "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+    "cifrado_sha256_de": "vereda:vector:marta-cifrado",
+    "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8"
+  },
+  "prueba_de_clave": {
+    "descripcion": "Lo que firma el dispositivo para canjear un desafío en POST /acceso/sesion.",
+    "desafio": {
+      "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+      "vence": "2026-09-21T18:06:05Z",
+      "nodo": "vereda.ar"
+    },
+    "objeto": {
+      "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+      "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+      "nodo": "vereda.ar"
+    },
+    "jcs_utf8_hex": "7b22636c6176655f7075626c696361223a223741534a4f634d45393247456c69722d64546d7270696267477665366a76356f444d63344f637a63763049222c226465736166696f223a225f6f684d4b596e526672747758613178615743445f556a6741445f30735578384434555763702d66784763222c226e6f646f223a227665726564612e6172227d",
+    "pedido_sesion": {
+      "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+      "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+      "firma": "QiGOcGdMec2T7sTb1lq7SJFcScAx9WlniXEv_qgWNEbX8OllWDVNPheimoWvrgN6D1APEj8rqVxdyn-lOHuOCg",
+      "nombre": "Marta"
+    }
+  },
+  "identidad_derivada": {
+    "descripcion": "Recomendada, no obligatoria: la identidad la acuña el nodo. base32 sin relleno, en minúscula, de los primeros 10 bytes del SHA-256 de la clave pública cruda, arroba el dominio del nodo.",
+    "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+    "identidad": "doxq2sh26aimc5zl@vereda.ar"
+  },
+  "respaldos": [
+    {
+      "nombre": "respaldo-v3",
+      "descripcion": "Formato actual: semilla Ed25519 y clave X25519 del chat. El texto claro es el JCS de {firma, cifrado}.",
+      "frase": "ñandú en la vereda de enfrente",
+      "frase_nfc_utf8_hex": "c3b1616e64c3ba20656e206c612076657265646120646520656e6672656e7465",
+      "frase_incorrecta": "ñandu en la vereda de enfrente",
+      "llave_hex": "5572cdf3f20fc0b75652636b1a7762c37cf210e0f4d7c28cef3016686054dff6",
+      "aad_jcs_utf8_hex": "7b22636c6176655f6369667261646f223a225267366b57746d7a4f59427a7a566e6e436758376b4b553778645f44747851304b665868436e305f416838222c22636c6176655f7075626c696361223a223741534a4f634d45393247456c69722d64546d7270696267477665366a76356f444d63344f637a63763049222c22637265616461223a22323032362d30392d32315431353a30343a30352d30333a3030222c22666f726d61746f223a227665726564612e636c6176652e7633222c226964656e7469646164223a226d61727461407665726564612e6172222c226b6466223a7b2268617368223a225348412d323536222c22697465726163696f6e6573223a3630303030302c226e6f6d627265223a2250424b444632222c2273616c223a2278425f3271685f763332684832653545327938386e51227d7d",
+      "texto_claro_hex": "7b226369667261646f223a22326c63427255776a514f43564b4843414b54686566474f645947587772374c55454b7853494b514f353351222c226669726d61223a22334f4f4e7756696938455f6668595a493577526b646a4d31543846726c4c6d6a4b6850654f636b4e6a5859227d",
+      "respaldo": {
+        "formato": "vereda.clave.v3",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "QuzB92a5ApmmKrub",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        }
+      }
+    },
+    {
+      "nombre": "respaldo-v2",
+      "descripcion": "Formato anterior, solo lectura: el texto claro es la semilla Ed25519 cruda, sin clave de chat.",
+      "frase": "ñandú en la vereda de enfrente",
+      "frase_nfc_utf8_hex": "c3b1616e64c3ba20656e206c612076657265646120646520656e6672656e7465",
+      "frase_incorrecta": "ñandu en la vereda de enfrente",
+      "llave_hex": "215432b77f4f6e9c9876261ad12c179a1c451c697fc960e0bdf7a946ca003abf",
+      "aad_jcs_utf8_hex": "7b22636c6176655f7075626c696361223a223741534a4f634d45393247456c69722d64546d7270696267477665366a76356f444d63344f637a63763049222c22637265616461223a22323032362d30392d32315431353a30343a30352d30333a3030222c22666f726d61746f223a227665726564612e636c6176652e7632222c226964656e7469646164223a226d61727461407665726564612e6172222c226b6466223a7b2268617368223a225348412d323536222c22697465726163696f6e6573223a3630303030302c226e6f6d627265223a2250424b444632222c2273616c223a225545346e694d2d354d70715f69636d73316b4d474341227d7d",
+      "texto_claro_hex": "dce38dc158a2f04fdf858648e704647633354fc16b94b9a32a13de39c90d8d76",
+      "respaldo": {
+        "formato": "vereda.clave.v2",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "UE4niM-5Mpq_icms1kMGCA"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "rEH8QqGN-EAxD64V",
+          "texto": "RAuI6bdWuE1Gp1Fj04NoS9punnfyRM58AnT-em_5z9INKJKDAWVE0vvNVDTDYszN"
+        }
+      }
+    }
+  ]
+}

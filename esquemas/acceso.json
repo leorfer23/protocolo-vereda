@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/acceso.json",
+  "title": "Acceso",
+  "description": "Cómo una persona entra a un nodo y cómo se lleva su clave a otro dispositivo (docs/acceso.md). Con custodia propia, entrar es firmar un desafío con la clave Ed25519 que la persona generó en su dispositivo: no hay contraseña ni nadie que apruebe el alta. Con custodia del nodo, el nodo puede ofrecer además un código o enlace por email, WhatsApp o SMS.",
+  "$defs": {
+    "clave_ed25519": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "description": "32 bytes en base64url sin relleno, como toda clave del protocolo."
+    },
+    "capacidades": {
+      "type": "object",
+      "description": "Lo que el nodo ofrece para entrar. Va en 'acceso' de /.well-known/vereda.json. Un nodo que no lo publica no promete ninguna de las dos formas.",
+      "required": ["custodia_propia"],
+      "properties": {
+        "custodia_propia": {
+          "type": "boolean",
+          "description": "true: sirve POST /acceso/desafio y POST /acceso/sesion, y da de alta a cualquier clave nueva sin pedir nada más. Es la forma que usan las apps nativas y la recomendada."
+        },
+        "alternativo": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/canal" },
+          "description": "Canales por los que el nodo manda un código o enlace de acceso (POST /acceso/codigo). Solo para cuentas con custodia del nodo. Vacío o ausente: el nodo no ofrece acceso alternativo."
+        }
+      },
+      "additionalProperties": false
+    },
+    "canal": {
+      "type": "string",
+      "enum": ["email", "whatsapp", "sms"]
+    },
+    "pedido_desafio": {
+      "type": "object",
+      "required": ["clave_publica"],
+      "properties": {
+        "clave_publica": { "$ref": "#/$defs/clave_ed25519" }
+      },
+      "additionalProperties": false
+    },
+    "desafio": {
+      "type": "object",
+      "required": ["desafio", "vence", "nodo"],
+      "properties": {
+        "desafio": { "type": "string", "minLength": 16, "description": "Opaco, de un solo uso. Al menos 128 bits de azar." },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "nodo": { "type": "string", "description": "El dominio del nodo. Va dentro de lo que se firma: una firma hecha para un nodo no sirve en otro." }
+      }
+    },
+    "prueba_de_clave": {
+      "type": "object",
+      "description": "Lo que el dispositivo firma para canjear el desafío: el JCS (RFC 8785) de este objeto, con Ed25519, en base64url sin relleno. Vector en ejemplos/vectores-acceso.json.",
+      "required": ["clave_publica", "desafio", "nodo"],
+      "properties": {
+        "clave_publica": { "$ref": "#/$defs/clave_ed25519" },
+        "desafio": { "type": "string" },
+        "nodo": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "pedido_sesion": {
+      "type": "object",
+      "required": ["clave_publica", "desafio", "firma"],
+      "properties": {
+        "clave_publica": { "$ref": "#/$defs/clave_ed25519" },
+        "desafio": { "type": "string", "minLength": 1 },
+        "firma": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$", "description": "Ed25519 sobre el JCS de prueba_de_clave, base64url sin relleno." },
+        "nombre": { "type": "string", "maxLength": 80, "description": "El nombre que se muestra. Solo se usa si la clave es nueva en este nodo; volver a entrar no lo pisa." }
+      },
+      "additionalProperties": false
+    },
+    "sesion": {
+      "type": "object",
+      "required": ["token", "vence", "identidad", "nuevo", "usuario"],
+      "properties": {
+        "token": { "type": "string", "minLength": 16, "description": "Va en 'Authorization: Bearer' en todo /v1. Opaco." },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+        "nuevo": { "type": "boolean", "description": "true la primera vez que esta clave (o este contacto) entra a este nodo: el usuario se creó recién." },
+        "usuario": { "$ref": "usuario.json" }
+      }
+    },
+    "renovacion": {
+      "type": "object",
+      "required": ["token", "vence"],
+      "properties": {
+        "token": { "type": "string", "minLength": 16 },
+        "vence": { "$ref": "comunes.json#/$defs/instante" }
+      }
+    },
+    "pedido_codigo": {
+      "type": "object",
+      "required": ["canal", "valor"],
+      "properties": {
+        "canal": { "$ref": "#/$defs/canal" },
+        "valor": { "type": "string", "minLength": 3, "maxLength": 254, "description": "El email o el teléfono en E.164." }
+      },
+      "additionalProperties": false
+    },
+    "canje_codigo": {
+      "type": "object",
+      "required": ["canal", "valor", "codigo"],
+      "properties": {
+        "canal": { "$ref": "#/$defs/canal" },
+        "valor": { "type": "string", "minLength": 3, "maxLength": 254 },
+        "codigo": { "type": "string", "minLength": 6, "maxLength": 128, "description": "Los 6 dígitos que llegaron por mensaje, o el código largo que trae el enlace." },
+        "nombre": { "type": "string", "maxLength": 80 }
+      },
+      "additionalProperties": false
+    },
+    "respaldo": {
+      "description": "El respaldo de la clave cifrado con una frase: el único formato en que la clave privada sale de un dispositivo. Es el formato de intercambio entre apps y nodos (docs/acceso.md). Se escribe siempre v3; v2 se sigue leyendo.",
+      "oneOf": [
+        { "$ref": "#/$defs/respaldo_v3" },
+        { "$ref": "#/$defs/respaldo_v2" }
+      ]
+    },
+    "respaldo_v3": {
+      "type": "object",
+      "required": ["formato", "clave_publica", "creada", "kdf", "cifrado"],
+      "properties": {
+        "formato": { "const": "vereda.clave.v3" },
+        "clave_publica": { "$ref": "#/$defs/clave_ed25519", "description": "En claro: dice de quién es el respaldo sin abrirlo." },
+        "clave_cifrado": { "$ref": "#/$defs/clave_ed25519", "description": "La X25519 pública del chat, en claro. Presente si y solo si el texto cifrado trae 'cifrado'." },
+        "identidad": { "$ref": "comunes.json#/$defs/identidad", "description": "Si el nodo ya la había acuñado cuando se hizo el respaldo." },
+        "creada": { "$ref": "comunes.json#/$defs/instante" },
+        "kdf": { "$ref": "#/$defs/kdf" },
+        "cifrado": { "$ref": "#/$defs/sobre" }
+      },
+      "additionalProperties": false
+    },
+    "respaldo_v2": {
+      "type": "object",
+      "description": "Solo lectura. El texto claro es la semilla Ed25519 cruda (32 bytes), sin clave de chat.",
+      "required": ["formato", "clave_publica", "creada", "kdf", "cifrado"],
+      "properties": {
+        "formato": { "const": "vereda.clave.v2" },
+        "clave_publica": { "$ref": "#/$defs/clave_ed25519" },
+        "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+        "creada": { "$ref": "comunes.json#/$defs/instante" },
+        "kdf": { "$ref": "#/$defs/kdf" },
+        "cifrado": { "$ref": "#/$defs/sobre" }
+      },
+      "additionalProperties": false
+    },
+    "kdf": {
+      "type": "object",
+      "required": ["nombre", "hash", "iteraciones", "sal"],
+      "properties": {
+        "nombre": { "const": "PBKDF2" },
+        "hash": { "const": "SHA-256" },
+        "iteraciones": { "type": "integer", "minimum": 100000, "description": "Quien escribe usa 600000. Quien lee acepta cualquier valor desde 100000 y rechaza uno menor." },
+        "sal": { "type": "string", "pattern": "^[A-Za-z0-9_-]{22}$", "description": "16 bytes de azar, base64url sin relleno." }
+      },
+      "additionalProperties": false
+    },
+    "sobre": {
+      "type": "object",
+      "required": ["nombre", "nonce", "texto"],
+      "properties": {
+        "nombre": { "const": "AES-GCM" },
+        "nonce": { "type": "string", "pattern": "^[A-Za-z0-9_-]{16}$", "description": "12 bytes de azar, base64url sin relleno." },
+        "texto": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$", "description": "Texto cifrado seguido de la etiqueta de 16 bytes (como lo devuelve WebCrypto), base64url sin relleno." }
+      },
+      "additionalProperties": false
+    },
+    "texto_claro_v3": {
+      "type": "object",
+      "description": "Lo que va adentro del sobre de un respaldo v3, serializado con JCS.",
+      "required": ["firma"],
+      "properties": {
+        "firma": { "$ref": "#/$defs/clave_ed25519", "description": "La semilla Ed25519 de 32 bytes (RFC 8032)." },
+        "cifrado": { "$ref": "#/$defs/clave_ed25519", "description": "La clave privada X25519 de 32 bytes (RFC 7748) del chat." }
+      },
+      "additionalProperties": false
+    }
+  }
+}
