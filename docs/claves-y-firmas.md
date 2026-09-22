@@ -6,7 +6,9 @@ No hay autoridad certificante, registro central ni sellado de tiempo externo. Co
 
 ## Vectores de prueba
 
-`ejemplos/vectores-firma.json` tiene los bytes exactos: el objeto, su canonicalización JCS en hexadecimal, la clave, la firma y un request RFC 9421 completo. Una implementación conforme reproduce cada byte.
+`ejemplos/vectores-firma.json` tiene los bytes exactos: el objeto, su canonicalización JCS en hexadecimal, la clave, la firma y un request RFC 9421 completo. Una implementación conforme reproduce byte a byte el JCS, el `Content-Digest` y la base de firma, y **verifica** cada firma contra la clave publicada.
+
+Las firmas no se reproducen. Ed25519 admite firmar con azar: CryptoKit en iOS lo hace, y dos firmas del mismo mensaje con la misma clave salen distintas y las dos válidas. Un cliente puede producir firmas no deterministas; quien verifica nunca compara bytes de firma, comprueba la firma. Los vectores las traen deterministas (RFC 8032) solo porque así se generan.
 
 Las claves de prueba se derivan de una semilla publicada, `SHA-256("vereda:vector:<etiqueta>")`, así que cualquiera llega a la misma clave privada sin que se la pasemos. Son claves de prueba y no se usan en producción.
 

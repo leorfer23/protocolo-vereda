@@ -176,7 +176,7 @@ malos, total = verificar_vectores()
 fallos += len(malos)
 for m in malos:
     print(f"✗ {m}")
-print(f"{total - len(malos)}/{total} vectores de firma reproducidos exactamente")
+print(f"{total - len(malos)}/{total} vectores de firma: JCS reproducido byte a byte y firma verificada")
 
 # --- Vectores de acceso y respaldo (docs/acceso.md): se rehace todo desde la frase y las semillas ---
 def verificar_acceso():
@@ -226,11 +226,15 @@ def verificar_acceso():
         if errs:
             malos.append(f"{r['nombre']}: no cumple acceso.json#/$defs/respaldo: {errs[0].message[:80]}")
             continue
-        nfc = unicodedata.normalize("NFC", r["frase"]).encode()
-        if nfc.hex() != r["frase_nfc_utf8_hex"]:
-            malos.append(f"{r['nombre']}: la frase en NFC no da 'frase_nfc_utf8_hex'")
-        derivar = lambda f: PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=desde_b64u(doc["kdf"]["sal"]), iterations=doc["kdf"]["iteraciones"]).derive(unicodedata.normalize("NFC", f).encode())
+        # v3 normaliza la frase a NFKD (como BIP-39); v2 la usaba tal cual.
+        forma = "NFKD" if doc["formato"] == "vereda.clave.v3" else None
+        a_bytes = lambda f: (unicodedata.normalize(forma, f) if forma else f).encode()
+        if r["normalizacion"] != (forma or "ninguna") or a_bytes(r["frase"]).hex() != r["frase_kdf_utf8_hex"]:
+            malos.append(f"{r['nombre']}: la frase normalizada no da 'frase_kdf_utf8_hex'")
+        derivar = lambda f: PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=desde_b64u(doc["kdf"]["sal"]), iterations=doc["kdf"]["iteraciones"]).derive(a_bytes(f))
         llave = derivar(r["frase"])
+        if "frase_otra_forma" in r and (r["frase_otra_forma"] == r["frase"] or derivar(r["frase_otra_forma"]) != llave):
+            malos.append(f"{r['nombre']}: la misma frase escrita en otra forma Unicode no da la misma llave")
         if llave.hex() != r["llave_hex"]:
             malos.append(f"{r['nombre']}: PBKDF2 no reproduce 'llave_hex'")
         aad = rfc8785.dumps({k: v for k, v in doc.items() if k != "cifrado"})
@@ -271,6 +275,6 @@ malos, total = verificar_acceso()
 fallos += len(malos)
 for m in malos:
     print(f"✗ {m}")
-print(f"{total - len(malos)}/{total} vectores de acceso y respaldo reproducidos exactamente")
+print(f"{total - len(malos)}/{total} vectores de acceso y respaldo: bytes reproducidos y firmas verificadas")
 
 sys.exit(1 if fallos else 0)

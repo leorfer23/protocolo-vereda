@@ -150,7 +150,7 @@
       "properties": {
         "nombre": { "const": "PBKDF2" },
         "hash": { "const": "SHA-256" },
-        "iteraciones": { "type": "integer", "minimum": 100000, "description": "Quien escribe usa 600000. Quien lee acepta cualquier valor desde 100000 y rechaza uno menor." },
+        "iteraciones": { "type": "integer", "minimum": 100000, "description": "Quien escribe usa 600000. Quien lee acepta cualquier valor desde 100000 y rechaza uno menor. La frase entra a PBKDF2 normalizada a NFKD y en UTF-8 en v3, y tal cual en v2." },
         "sal": { "type": "string", "pattern": "^[A-Za-z0-9_-]{22}$", "description": "16 bytes de azar, base64url sin relleno." }
       },
       "additionalProperties": false

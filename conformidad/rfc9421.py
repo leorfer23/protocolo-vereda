@@ -1,7 +1,8 @@
 """Firma HTTP RFC 9421: el único mecanismo de firma entre nodos (docs/
 federacion.md, docs/claves-y-firmas.md), sin variantes ni fallback a
-draft-cavage. Reproduce byte a byte la mecánica de `ejemplos/vectores-
-firma.json#/rfc9421` -- ver conformidad/pruebas/verificar_rfc9421_con_vectores.py.
+draft-cavage. Reproduce byte a byte la base de firma de `ejemplos/vectores-
+firma.json#/rfc9421`, y su firma verifica contra la clave publicada -- ver
+conformidad/pruebas/verificar_rfc9421_con_vectores.py.
 """
 import base64
 import hashlib

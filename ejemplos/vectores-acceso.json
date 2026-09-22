@@ -1,5 +1,5 @@
 {
-  "$comentario": "Vectores de acceso y respaldo del Protocolo Vereda (docs/acceso.md). Una app o un nodo conforme reproduce cada byte. Regenerar: python3 generar-vectores.py.",
+  "$comentario": "Vectores de acceso y respaldo del Protocolo Vereda (docs/acceso.md). Una app o un nodo conforme reproduce byte a byte el JCS, la identidad derivada, la llave PBKDF2 y el texto claro, y verifica la firma contra la clave publicada: Ed25519 puede firmar con azar (CryptoKit lo hace) y una firma distinta pero válida es conforme. Regenerar: python3 generar-vectores.py.",
   "version_esquema": "1.0",
   "clave": {
     "actor": "marta@vereda.ar",
@@ -37,10 +37,12 @@
     {
       "nombre": "respaldo-v3",
       "descripcion": "Formato actual: semilla Ed25519 y clave X25519 del chat. El texto claro es el JCS de {firma, cifrado}.",
-      "frase": "ñandú en la vereda de enfrente",
-      "frase_nfc_utf8_hex": "c3b1616e64c3ba20656e206c612076657265646120646520656e6672656e7465",
-      "frase_incorrecta": "ñandu en la vereda de enfrente",
-      "llave_hex": "5572cdf3f20fc0b75652636b1a7762c37cf210e0f4d7c28cef3016686054dff6",
+      "frase": "Ñandú, pingüino y café en la vereda",
+      "frase_otra_forma": "Ñandú, pingüino y café en la vereda",
+      "normalizacion": "NFKD",
+      "frase_kdf_utf8_hex": "4ecc83616e6475cc812c2070696e6775cc88696e6f20792063616665cc8120656e206c6120766572656461",
+      "frase_incorrecta": "Nandu, pinguino y cafe en la vereda",
+      "llave_hex": "20b4f54175369de40e30f04785204e9f580ae87a24e092cccdaad361794f45bd",
       "aad_jcs_utf8_hex": "7b22636c6176655f6369667261646f223a225267366b57746d7a4f59427a7a566e6e436758376b4b553778645f44747851304b665868436e305f416838222c22636c6176655f7075626c696361223a223741534a4f634d45393247456c69722d64546d7270696267477665366a76356f444d63344f637a63763049222c22637265616461223a22323032362d30392d32315431353a30343a30352d30333a3030222c22666f726d61746f223a227665726564612e636c6176652e7633222c226964656e7469646164223a226d61727461407665726564612e6172222c226b6466223a7b2268617368223a225348412d323536222c22697465726163696f6e6573223a3630303030302c226e6f6d627265223a2250424b444632222c2273616c223a2278425f3271685f763332684832653545327938386e51227d7d",
       "texto_claro_hex": "7b226369667261646f223a22326c63427255776a514f43564b4843414b54686566474f645947587772374c55454b7853494b514f353351222c226669726d61223a22334f4f4e7756696938455f6668595a493577526b646a4d31543846726c4c6d6a4b6850654f636b4e6a5859227d",
       "respaldo": {
@@ -58,17 +60,18 @@
         "cifrado": {
           "nombre": "AES-GCM",
           "nonce": "QuzB92a5ApmmKrub",
-          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+          "texto": "fohoQwzq55xT13Ho447ACizJoU4o5HLSBEsJs2nZTDUefXxbFrZY0TEAcHC5C1DVayQ_XVxM0dbdZpd71C-tRXIJaQoIyNjDvUucByK2FkFHlHHjcZJZAbOkfMZXxzGywcLT7WrAA3Q5SS0CtlzG_PKE3tgL6Rgd4gwBTNr_3A"
         }
       }
     },
     {
       "nombre": "respaldo-v2",
       "descripcion": "Formato anterior, solo lectura: el texto claro es la semilla Ed25519 cruda, sin clave de chat.",
-      "frase": "ñandú en la vereda de enfrente",
-      "frase_nfc_utf8_hex": "c3b1616e64c3ba20656e206c612076657265646120646520656e6672656e7465",
-      "frase_incorrecta": "ñandu en la vereda de enfrente",
-      "llave_hex": "215432b77f4f6e9c9876261ad12c179a1c451c697fc960e0bdf7a946ca003abf",
+      "frase": "la vereda de enfrente",
+      "normalizacion": "ninguna",
+      "frase_kdf_utf8_hex": "6c612076657265646120646520656e6672656e7465",
+      "frase_incorrecta": "Nandu, pinguino y cafe en la vereda",
+      "llave_hex": "bb2c8117591635bfc1cd96a0934751a4c51540347b2aec00fd14e8afb0219592",
       "aad_jcs_utf8_hex": "7b22636c6176655f7075626c696361223a223741534a4f634d45393247456c69722d64546d7270696267477665366a76356f444d63344f637a63763049222c22637265616461223a22323032362d30392d32315431353a30343a30352d30333a3030222c22666f726d61746f223a227665726564612e636c6176652e7632222c226964656e7469646164223a226d61727461407665726564612e6172222c226b6466223a7b2268617368223a225348412d323536222c22697465726163696f6e6573223a3630303030302c226e6f6d627265223a2250424b444632222c2273616c223a225545346e694d2d354d70715f69636d73316b4d474341227d7d",
       "texto_claro_hex": "dce38dc158a2f04fdf858648e704647633354fc16b94b9a32a13de39c90d8d76",
       "respaldo": {
@@ -85,7 +88,7 @@
         "cifrado": {
           "nombre": "AES-GCM",
           "nonce": "rEH8QqGN-EAxD64V",
-          "texto": "RAuI6bdWuE1Gp1Fj04NoS9punnfyRM58AnT-em_5z9INKJKDAWVE0vvNVDTDYszN"
+          "texto": "VXYJv6Zn90Bfid6_wyr1n0qo9hZJ3niVJvIeB2-Mbbbc_6rWuhrw49UBJWlDvcl-"
         }
       }
     }

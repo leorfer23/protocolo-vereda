@@ -210,12 +210,12 @@ rfc9421 = {
 }
 
 doc = {
-    "$comentario": "Vectores de prueba de firma del Protocolo Vereda. Una implementación conforme tiene que reproducir cada byte de este archivo.",
+    "$comentario": "Vectores de prueba de firma del Protocolo Vereda. Una implementación conforme reproduce byte a byte cada JCS, Content-Digest y base de firma, y verifica cada firma contra la clave publicada. Las firmas no se exigen idénticas: Ed25519 con azar (CryptoKit en iOS) da firmas distintas e igual de válidas.",
     "version_esquema": "1.0",
     "como_reproducir": {
         "1_semilla": "La clave privada de cada actor es Ed25519 a partir de la semilla SHA-256('vereda:vector:<etiqueta>'). Las etiquetas están en 'claves'. Son claves de prueba: nunca se usan en producción.",
         "2_canonicalizar": "Se quita el campo de firma del objeto y se serializa con JCS (RFC 8785). El resultado está en 'jcs_utf8_hex'.",
-        "3_firmar": "Ed25519 (RFC 8032) sobre esos bytes exactos. La firma va en base64url sin relleno.",
+        "3_firmar": "Ed25519 (RFC 8032) sobre esos bytes exactos, en base64url sin relleno. Quien verifica comprueba la firma contra la clave publicada; no compara bytes de firma: una firma con azar es tan válida como la determinista.",
         "4_verificar": "python3 validar.py comprueba cada vector de este archivo.",
     },
     "referencias": {
@@ -259,27 +259,40 @@ crudo_marta = k_marta.public_key().public_bytes(sz.Encoding.Raw, sz.PublicFormat
 local = base64.b32encode(hashlib.sha256(crudo_marta).digest()[:10]).decode().rstrip("=").lower()
 
 ITERACIONES = 600_000
-# La frase viene a propósito en NFD ('n' + tilde combinante): quien lee la
-# normaliza a NFC antes de derivar, así un teclado que compone distinto no
-# deja a nadie afuera de su propio respaldo.
-FRASE = unicodedata.normalize("NFD", "ñandú en la vereda de enfrente")
-FRASE_MALA = "ñandu en la vereda de enfrente"
+# v3: la frase se normaliza a NFKD antes de derivar (como BIP-39), así un
+# teclado que compone la ñ o la tilde distinto no deja a nadie afuera de su
+# propio respaldo. El vector trae la misma frase en las dos formas en que la
+# producen los teclados: compuesta (NFC) y descompuesta (NFD).
+FRASE = unicodedata.normalize("NFC", "Ñandú, pingüino y café en la vereda")
+FRASE_OTRA_FORMA = unicodedata.normalize("NFD", FRASE)
+FRASE_MALA = "Nandu, pinguino y cafe en la vereda"
+# v2 derivaba de la frase tal cual, sin normalizar: su vector usa una frase
+# sin acentos para que no haya ambigüedad.
+FRASE_V2 = "la vereda de enfrente"
+NORMALIZACION = {"vereda.clave.v3": "NFKD", "vereda.clave.v2": None}
 x_marta = semilla("marta-cifrado")
 x_pub = b64u(X25519PrivateKey.from_private_bytes(x_marta).public_key().public_bytes(sz.Encoding.Raw, sz.PublicFormat.Raw))
 
-def llave_de(frase, sal, iteraciones):
+def bytes_de_frase(formato, frase):
+    forma = NORMALIZACION[formato]
+    return (unicodedata.normalize(forma, frase) if forma else frase).encode()
+
+def llave_de(formato, frase, sal, iteraciones):
     kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=sal, iterations=iteraciones)
-    return kdf.derive(unicodedata.normalize("NFC", frase).encode())
+    return kdf.derive(bytes_de_frase(formato, frase))
 
 def respaldo(formato, texto_claro, sal, nonce, extra):
     cabecera = {"formato": formato, "clave_publica": pub_marta, **extra, "identidad": "marta@vereda.ar", "creada": TS,
                 "kdf": {"nombre": "PBKDF2", "hash": "SHA-256", "iteraciones": ITERACIONES, "sal": b64u(sal)}}
     aad = rfc8785.dumps(cabecera)
-    llave = llave_de(FRASE, sal, ITERACIONES)
+    frase = FRASE if formato == "vereda.clave.v3" else FRASE_V2
+    llave = llave_de(formato, frase, sal, ITERACIONES)
     texto = AESGCM(llave).encrypt(nonce, texto_claro, aad)
     return {
-        "frase": FRASE,
-        "frase_nfc_utf8_hex": unicodedata.normalize("NFC", FRASE).encode().hex(),
+        "frase": frase,
+        **({"frase_otra_forma": FRASE_OTRA_FORMA} if formato == "vereda.clave.v3" else {}),
+        "normalizacion": NORMALIZACION[formato] or "ninguna",
+        "frase_kdf_utf8_hex": bytes_de_frase(formato, frase).hex(),
         "frase_incorrecta": FRASE_MALA,
         "llave_hex": llave.hex(),
         "aad_jcs_utf8_hex": aad.hex(),
@@ -289,7 +302,7 @@ def respaldo(formato, texto_claro, sal, nonce, extra):
 
 texto_v3 = rfc8785.dumps({"firma": b64u(semilla("marta")), "cifrado": b64u(x_marta)})
 acceso = {
-    "$comentario": "Vectores de acceso y respaldo del Protocolo Vereda (docs/acceso.md). Una app o un nodo conforme reproduce cada byte. Regenerar: python3 generar-vectores.py.",
+    "$comentario": "Vectores de acceso y respaldo del Protocolo Vereda (docs/acceso.md). Una app o un nodo conforme reproduce byte a byte el JCS, la identidad derivada, la llave PBKDF2 y el texto claro, y verifica la firma contra la clave publicada: Ed25519 puede firmar con azar (CryptoKit lo hace) y una firma distinta pero válida es conforme. Regenerar: python3 generar-vectores.py.",
     "version_esquema": "1.0",
     "clave": {"actor": "marta@vereda.ar", "semilla_sha256_de": "vereda:vector:marta", "clave_publica": pub_marta,
               "cifrado_sha256_de": "vereda:vector:marta-cifrado", "clave_cifrado": x_pub},
