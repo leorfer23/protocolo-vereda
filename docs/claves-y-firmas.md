@@ -69,6 +69,7 @@ Rotar nunca se puede hacer por mandato. Un agente no toca claves.
 `POST /yo/claves/comprometida`, con la clave y desde cuándo. La puede declarar el actor, o el nodo si la custodiaba.
 
 - La clave pasa a `comprometida` y se rota. La nueva no lleva aval: una clave filtrada no puede avalar nada. Responde solo el nodo.
+- Con custodia propia, la persona genera la clave nueva y manda su entrada en `clave`, sin `avalada_por`; el nodo no puede generarla por ella (sería pasarle la custodia sin que la pida) y responde 422 si falta. Con custodia del nodo, la genera el nodo si no viene. Desde ese momento, la nueva es la única que abre sesión (`docs/acceso.md`).
 - Se revocan todos los mandatos activos del actor. La persona los vuelve a otorgar con la clave nueva.
 - Una clave `retirada` puede pasar a `comprometida` si la filtración se descubre después.
 - El nodo emite `clave.comprometida`.

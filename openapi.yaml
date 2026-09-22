@@ -1040,7 +1040,7 @@ paths:
       tags: [yo]
       summary: Declarar comprometida una clave mía desde un instante, y rotar. Nunca por mandato
       security: [ { sesion: [] } ]
-      requestBody: { content: { application/json: { schema: { type: object, required: [clave_publica, comprometida_desde], properties: { clave_publica: { type: string }, comprometida_desde: { $ref: "esquemas/comunes.json#/$defs/instante" }, clave: { $ref: "esquemas/comunes.json#/$defs/clave" } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, required: [clave_publica, comprometida_desde], properties: { clave_publica: { type: string }, comprometida_desde: { $ref: "esquemas/comunes.json#/$defs/instante" }, clave: { $ref: "esquemas/comunes.json#/$defs/clave", description: "La entrada que la reemplaza, sin aval. Obligatoria con custodia propia; con custodia del nodo, si falta la genera el nodo." } } } } } }
       responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "422": { $ref: "#/components/responses/Error" } }
   /yo/atestaciones/{id}/consentimiento:
     post:
