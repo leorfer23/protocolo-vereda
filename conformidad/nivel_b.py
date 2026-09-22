@@ -207,7 +207,26 @@ class NivelB:
     # 2. reseña: dentro de ventana se acepta una vez; la segunda, no --------
     def _resena(self, pedido_id):
         cat = "resena"
-        cuerpo = {"pedido_id": pedido_id, "autor": "cliente-de-prueba@nodo-falso.test", "destinatario": "super-barrio-b@nodo-falso.test", "puntaje": 5, "texto": "Prueba de conformidad."}
+
+        r_yo = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=self._cabecera(), timeout=self.timeout)
+        autor = (r_yo.cuerpo or {}).get("identidad") if r_yo.ok and r_yo.cuerpo_es_json else None
+        desc_autor = "GET /yo da la identidad de la sesión para reseñar como autor (nunca en nombre de otro)"
+        if not r_yo.ok or r_yo.estado != 200 or not autor:
+            self.casos.append(_fallo(cat, "crearResena", desc_autor, r_yo.motivo or f"estado {r_yo.estado}"))
+            self.casos.append(_omitido(cat, "crearResena", "reseñar un pedido recién entregado", "no se pudo obtener la identidad del autor con GET /yo"))
+            return
+        self.casos.append(_ok(cat, "crearResena", desc_autor))
+
+        r_pedido = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pedido_id}", headers=self._cabecera(), timeout=self.timeout)
+        destinatario = (r_pedido.cuerpo or {}).get("comercio") if r_pedido.ok and r_pedido.cuerpo_es_json else None
+        desc_dest = "GET /pedidos/{id} da el comercio del pedido para reseñar como destinatario"
+        if not r_pedido.ok or r_pedido.estado != 200 or not destinatario:
+            self.casos.append(_fallo(cat, "crearResena", desc_dest, r_pedido.motivo or f"estado {r_pedido.estado}"))
+            self.casos.append(_omitido(cat, "crearResena", "reseñar un pedido recién entregado", "no se pudo obtener el comercio del pedido con GET /pedidos/{id}"))
+            return
+        self.casos.append(_ok(cat, "crearResena", desc_dest))
+
+        cuerpo = {"pedido_id": pedido_id, "autor": autor, "destinatario": destinatario, "puntaje": 5, "texto": "Prueba de conformidad."}
         r1 = cliente.solicitud("POST", f"{self.base_v1}/resenas", headers=self._cabecera(), json_body=cuerpo, timeout=self.timeout)
         desc1 = "reseñar un pedido recién entregado responde 201"
         if not r1.ok or r1.estado != 201:
@@ -279,7 +298,27 @@ class NivelB:
     def _revocacion_mandato(self):
         cat = "mandato"
         opid = "revocarMandato"
-        r_rev = cliente.solicitud("POST", f"{self.base_v1}/mandatos/{self.mandato}/revocar", headers=self._cabecera(), timeout=self.timeout)
+
+        # revocarMandato toma el id del mandato, no el token del bearer:
+        # openapi.yaml no da otra forma de mapear uno al otro (no hay un
+        # 'crear mandato' en esta corrida que devuelva el id en el cuerpo,
+        # el mandato ya viene dado por --mandato), así que se resuelve
+        # listando "mis mandatos" con la sesión y tomando el único activo.
+        r_list = cliente.solicitud("GET", f"{self.base_v1}/mandatos", headers=self._cabecera(), timeout=self.timeout)
+        desc_list = "GET /mandatos (con sesión) lista el mandato de prueba, para revocarlo por su id"
+        if not r_list.ok or r_list.estado != 200 or not r_list.cuerpo_es_json:
+            self.casos.append(_fallo(cat, "listarMandatos", desc_list, r_list.motivo or f"estado {r_list.estado}"))
+            self.casos.append(_omitido(cat, opid, "un mandato revocado deja de servir de inmediato", "no se pudo listar /mandatos para obtener el id"))
+            return
+        activos = [m for m in r_list.cuerpo if isinstance(m, dict) and m.get("estado") == "activo"]
+        if len(activos) != 1:
+            self.casos.append(_fallo(cat, "listarMandatos", desc_list, f"esperaba un único mandato activo para identificar el de prueba sin ambigüedad, hay {len(activos)}"))
+            self.casos.append(_omitido(cat, opid, "un mandato revocado deja de servir de inmediato", "listarMandatos no identificó unívocamente el mandato de prueba"))
+            return
+        self.casos.append(_ok(cat, "listarMandatos", desc_list))
+        mandato_id = activos[0].get("id")
+
+        r_rev = cliente.solicitud("POST", f"{self.base_v1}/mandatos/{mandato_id}/revocar", headers=self._cabecera(), timeout=self.timeout)
         desc_rev = "revocar el mandato (con sesión) responde 200"
         if not r_rev.ok or r_rev.estado != 200:
             self.casos.append(_fallo(cat, opid, desc_rev, r_rev.motivo or f"estado {r_rev.estado}"))

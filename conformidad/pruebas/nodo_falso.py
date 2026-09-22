@@ -57,6 +57,11 @@ repartidor), funciona de punta a punta salvo cuatro roturas puntuales:
   el que más le importa a Leo).
 - una reseña repetida para el mismo par pedido/autor/destinatario no
   responde 409: se acepta de nuevo (defecto nº4).
+
+GET /v1/yo y GET /v1/mandatos no plantan ningún defecto: existen para que la
+suite arme la reseña con la identidad real de la sesión y el comercio del
+pedido (no hardcodeadas) y resuelva el id del mandato de prueba (MANDATO_ID,
+distinto de su token MANDATO_VALIDO) antes de revocarlo.
 """
 import base64
 import hashlib
@@ -131,7 +136,9 @@ def _parsear_signature_input(valor):
 # --- nivel B: sesión y mandato de prueba fijos, nunca generados solos -----
 SESION_VALIDA = "sesion-de-prueba"
 MANDATO_VALIDO = "mandato-de-prueba"
+MANDATO_ID = "01920000-0000-7000-8000-0000000000fa"  # id del mandato, distinto del token del bearer
 MANDATO_SCOPES = ["armar", "pedir_semanal:5000"]
+USUARIO_ID = "01920000-0000-7000-8000-0000000000fe"
 USUARIO_IDENTIDAD = "cliente-de-prueba@nodo-falso.test"
 COMERCIO_B_IDENTIDAD = "super-barrio-b@nodo-falso.test"
 
@@ -176,6 +183,27 @@ def _tope_de(scopes):
     return None
 
 
+def _perfil_publico(identidad):
+    return {
+        "id": USUARIO_ID, "nodo": "127.0.0.1", "creado": "2026-01-01T00:00:00-03:00",
+        "actualizado": "2026-01-01T00:00:00-03:00", "version_esquema": "1.0",
+        "identidad": identidad, "nombre": "Cliente de prueba",
+        "reputacion": {"promedio": 5, "cantidad": 0, "pedidos_entregados": 0},
+    }
+
+
+def _mandato_publico():
+    return {
+        "id": MANDATO_ID, "nodo": "127.0.0.1", "creado": "2026-01-01T00:00:00-03:00",
+        "actualizado": "2026-01-01T00:00:00-03:00", "version_esquema": "1.0",
+        "otorgante": USUARIO_IDENTIDAD,
+        "agente": {"id": "agente-de-prueba", "nombre": "Agente de prueba"},
+        "scopes": MANDATO_SCOPES,
+        "estado": "revocado" if MANDATO_ID in _mandatos_revocados else "activo",
+        "firma": {"firmante": USUARIO_IDENTIDAD, "clave_publica": "D" * 43, "valor": "E" * 86, "instante": "2026-01-01T00:00:00-03:00"},
+    }
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         sys.stderr.write("nodo-falso: " + (fmt % args) + "\n")
@@ -194,7 +222,18 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         p = self.path
-        if p == "/.well-known/vereda.json":
+        actor = self._actor()
+        if p == "/v1/yo":
+            if actor is None:
+                self._json(401, ERROR_NO_AUTENTICADO)
+            else:
+                self._json(200, _perfil_publico(actor["identidad"]))
+        elif p == "/v1/mandatos":
+            if actor is None or actor["tipo"] != "sesion":
+                self._json(401, ERROR_NO_AUTENTICADO)
+            else:
+                self._json(200, [_mandato_publico()])
+        elif p == "/.well-known/vereda.json":
             self._enviar(200, "<html>esto no es JSON</html>", content_type="text/html")
         elif p.startswith("/v1/comercios?") or p == "/v1/comercios":
             self._json(200, [COMERCIO_ROTO], {"ETag": '"comercios-v1"', "Cache-Control": "public, max-age=60"})
@@ -241,7 +280,7 @@ class Handler(BaseHTTPRequestHandler):
         token = auth[len("Bearer "):]
         if token == SESION_VALIDA:
             return {"tipo": "sesion", "identidad": USUARIO_IDENTIDAD}
-        if token == MANDATO_VALIDO and token not in _mandatos_revocados:
+        if token == MANDATO_VALIDO and MANDATO_ID not in _mandatos_revocados:
             return {"tipo": "mandato", "token": token, "scopes": MANDATO_SCOPES, "identidad": USUARIO_IDENTIDAD}
         return None
 
