@@ -25,6 +25,26 @@
     "link_pago": { "type": "string", "format": "uri" },
     "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados." },
     "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
-    "idempotency_key": { "type": "string" }
+    "idempotency_key": { "type": "string" },
+    "instrucciones": {
+      "type": "object",
+      "description": "A dónde transferir, solo con metodo 'transferencia'. Las ve únicamente el comprador, y solo mientras el pedido está activo: no salen en la copia del comercio ni en el pedido ya cerrado.",
+      "required": ["alias", "monto", "referencia"],
+      "properties": {
+        "alias": { "type": "string" },
+        "titular": { "type": "string" },
+        "monto": { "$ref": "comunes.json#/$defs/monto" },
+        "referencia": { "type": "string", "description": "Texto corto para el concepto de la transferencia, así el comercio sabe qué pedido le pagaron." }
+      }
+    },
+    "transferencia": {
+      "type": "object",
+      "description": "El comprador declarando que ya transfirió, con POST /pedidos/{id}/transferencia. No confirma el cobro: el nodo no vio ninguna plata y no lo va a decir.",
+      "required": ["declarada_en"],
+      "properties": {
+        "declarada_en": { "$ref": "comunes.json#/$defs/instante" },
+        "comprobante": { "type": "string", "maxLength": 500, "description": "Número de operación o una nota corta. El nodo no guarda archivos." }
+      }
+    }
   }
 }

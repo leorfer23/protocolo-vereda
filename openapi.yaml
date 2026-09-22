@@ -301,7 +301,7 @@ paths:
       summary: Agregar un ítem. Responde válido, incompleto (qué falta) o no disponible.
       security: [ { sesion: [] }, { mandato: [armar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { $ref: "esquemas/pedido.json#/$defs/item" } } } }
+      requestBody: { content: { application/json: { schema: { $ref: "esquemas/carrito.json#/$defs/item_entrada" } } } }
       responses:
         "200": { description: Estado del carrito, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }
         "410": { $ref: "#/components/responses/CarritoVencido" }
@@ -403,6 +403,26 @@ paths:
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si el pago está en_mano. Lo pasa a confirmado." } } } } } }
       responses: { "200": { description: OK } }
+  /pedidos/{id}/transferencia:
+    post:
+      operationId: declararTransferencia
+      tags: [pedidos]
+      summary: "Comprador: declara que ya transfirió. No confirma el cobro (docs/carrito-y-reserva.md, transferencia directa)"
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." } } } } } }
+      responses:
+        "200": { description: Pedido con la transferencia declarada, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+  /pedidos/{id}/transferencia/confirmar:
+    post:
+      operationId: confirmarTransferencia
+      tags: [pedidos]
+      summary: "Comercio: confirma que vio la plata en su cuenta. Es lo único que pasa el cobro a confirmado y el pedido a pagado"
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: Pedido pagado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
 
   /listas:
     get: { operationId: listarListas, tags: [listas], summary: Mis listas, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/lista.json" } } } } } } }
@@ -613,6 +633,7 @@ components:
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
         codigo_fuente: { type: string, format: uri }
+        tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
     Carrito: { $ref: "esquemas/carrito.json" }
     SaldoPuntos:
       type: object

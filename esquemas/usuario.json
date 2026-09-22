@@ -29,6 +29,7 @@
         "comercios_favoritos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } },
         "modalidad_preferida": { "type": "string", "enum": ["inmediata", "franja", "consolidada", "retiro", "la_mas_barata", "la_mas_rapida"] },
         "no_recibir": { "type": "array", "items": { "$ref": "comunes.json#/$defs/franja_horaria" }, "description": "Horarios en que no quiere entregas." },
+        "agrupar_envios": { "type": "boolean", "description": "Consentimiento para que el despacho agrupe este pedido con otros en un mismo viaje (docs/ranking-y-despacho.md, fase 2). Ausente: el nodo lo deriva de 'modalidad_preferida' ('la_mas_rapida' no se agrupa, el resto sí). En cualquier caso el algoritmo nunca agrupa si rompe el ETA ya prometido." },
         "tope_por_pedido": { "$ref": "comunes.json#/$defs/monto" },
         "propina_habitual_pct": { "type": "number", "minimum": 0, "maximum": 100 },
         "idioma": { "type": "string", "default": "es-AR" },

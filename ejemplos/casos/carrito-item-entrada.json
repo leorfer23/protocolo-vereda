@@ -1,0 +1,45 @@
+{
+  "$comentario": "Casos para carrito.json#/$defs/item_entrada, el cuerpo de POST /carritos/{id}/items. No confundir con pedido.json#/$defs/item: ese lo completa el nodo (nombre, precio, estado) y no lo manda el cliente.",
+  "esquema": "carrito.json#/$defs/item_entrada",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Mínimo: oferta y cantidad.",
+      "doc": {
+        "oferta_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "cantidad": { "valor": 2, "unidad": "unidad" }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Con variante y opciones de un grupo.",
+      "doc": {
+        "oferta_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "variante_id": "grande",
+        "cantidad": { "valor": 1, "unidad": "unidad" },
+        "opciones": [
+          { "grupo_id": "salsa", "opcion_id": "picante" }
+        ],
+        "preferencia_sustitucion": "similar_ok"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin 'cantidad': el nodo no puede reservar lo que no se dice cuánto es.",
+      "doc": {
+        "oferta_id": "01926b3a-9999-7000-8000-0000000000d1"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El cliente no manda 'nombre' ni 'precio_unitario' ni 'estado': eso lo asigna el nodo desde la oferta.",
+      "doc": {
+        "oferta_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "cantidad": { "valor": 1, "unidad": "unidad" },
+        "nombre": "Fugazzeta",
+        "precio_unitario": { "centavos": 500000, "moneda": "ARS" },
+        "estado": "confirmado"
+      }
+    }
+  ]
+}

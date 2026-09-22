@@ -115,7 +115,7 @@
       "description": "Solo visible al nodo y al propio comercio. Nunca se federa.",
       "properties": {
         "cuit": { "type": "string", "pattern": "^[0-9]{2}-[0-9]{8}-[0-9]$" },
-        "cuenta_cobro": { "type": "object", "properties": { "psp": { "type": "string" }, "referencia": { "type": "string", "description": "Referencia opaca del PSP, nunca un CBU/CVU en claro." } } },
+        "cuenta_cobro": { "type": "object", "description": "Dónde cobra el comercio. Nunca sale en la ficha pública ni se federa.", "properties": { "psp": { "type": "string" }, "referencia": { "type": "string", "description": "Referencia opaca del PSP, nunca un CBU/CVU en claro." }, "alias": { "type": "string", "description": "Alias de transferencia directa, sin PSP en el medio: a dónde le dice el nodo al comprador que transfiera. Solo lo ve el comprador de un pedido activo de este comercio, en pago.json#/properties/instrucciones." }, "titular": { "type": "string", "description": "A nombre de quién está el alias." } } },
         "contacto": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } }
       }
     }

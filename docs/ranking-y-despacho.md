@@ -50,4 +50,4 @@ El desvío se mide sobre la misma ruta OSRM con la que se calculó el ETA, compa
 
 Garantías: el repartidor ve monto, distancia y peso antes de aceptar; rechazar no penaliza; un solo viaje activo por repartidor en fase 1; congelados con prioridad y máximo 20 min en camino; el ETA es el real (preparación + ruta OSRM).
 
-La tarifa de envío la fija la cooperativa de repartidores y es pública por tramo de distancia. La red la publica y la aplica.
+La tarifa de envío la fija la cooperativa de repartidores y es pública por tramo de distancia. La red la publica en `tarifa_envio` de `/.well-known/vereda.json` (schema `Nodo` en `openapi.yaml`) y la aplica.
