@@ -2,7 +2,7 @@
 
 Principio: no somos dueños de nada, y eso es verificable.
 
-- **Mínimos.** Dirección exacta, teléfono y nombre completo viven en tablas separadas con acceso restringido y se borran o anonimizan a los 90 días de entregado el pedido. El resto del historial es anónimo.
+- **Mínimos.** Dirección exacta, teléfono y nombre completo viven en tablas separadas con acceso restringido. Se borran o anonimizan a los 90 días de entregado el pedido: ese es el **default** del protocolo y el que rige si el comercio no dice otra cosa. Cada comercio puede fijar otro plazo en `datos.retencion_dias` de su ficha, y queda siempre visible ahí. El resto del historial es anónimo.
 - **Visibilidad.** Nombre y dirección del usuario los ven solo el comercio y el repartidor del pedido activo. Ubicación del repartidor, solo las partes mientras está en camino. CUIT completo, DNI y cuentas de cobro nunca son públicos ni se federan.
 - **Chat.** Cifrado de punta a punta (X25519 + XChaCha20) entre las partes cuando todas tienen clave; el nodo guarda el payload cifrado. Los mensajes que entran por agente de voz se cifran al ingresar.
 - **Exportación y borrado.** `GET /yo/exportar` entrega todo firmado; `POST /yo/borrar` elimina datos personales en 30 días. Las reseñas firmadas quedan como emitidas por un autor anonimizado, porque son parte de la reputación del reseñado.
@@ -10,3 +10,43 @@ Principio: no somos dueños de nada, y eso es verificable.
 - **Sin trackers.** Los clientes de referencia no incluyen SDK de terceros ni analítica externa.
 - **Ley 25.326 (Argentina).** El operador de cada nodo registra su base de datos ante la autoridad de aplicación, publica su política de privacidad y designa un responsable. La spec no reemplaza asesoramiento legal; cada operador es responsable de su nodo.
 - **Lo público es público.** Comercios, catálogos, precios, modalidades y reseñas son legibles por cualquiera sin token, incluidas las plataformas que Vereda reemplaza. Es una consecuencia deliberada de ser abiertos.
+
+## Los datos del comercio son del comercio
+
+El otro lado del mostrador tiene el mismo derecho que la persona: lo que el comercio produce
+operando —su ficha, su catálogo, sus promociones, su stock, sus pedidos, las reseñas que recibió y
+sus métricas— es suyo y se lo lleva entero.
+
+- **Exportación total.** `GET /comercios/{id}/exportar` entrega todo eso en un documento firmado por
+  el nodo, verificable en cualquier otro. Es para mudarse de nodo, tener respaldo, o alimentar el
+  sistema propio del comercio. No hay nada que el nodo se guarde para sí.
+- **Política pública en la ficha.** El bloque `datos` de `esquemas/comercio.json` es parte de la
+  ficha pública: cuántos días retiene los datos personales de un pedido (`retencion_dias`) y si
+  guarda una lista de clientes más allá del pedido activo (`lista_de_clientes`). Cualquiera lo lee
+  antes de comprar, sin token. Un comercio que retiene un año no está escondido: está declarado.
+- **Un default promovido, no obligado.** El protocolo estandariza y recomienda la minimización —90
+  días, sin lista de clientes—, y el nodo marca con `datos.estandar` a quien coincide. Ese sello es
+  lo que muestran las apps. El sello no se declara a mano: si la política no es la del default, el
+  esquema rechaza el `estandar: true`. Quien elige otra política opera igual, con los mismos
+  derechos y el mismo ranking; la diferencia la ve el usuario y decide él.
+- **Consentimiento para la lista de clientes.** Si el comercio declara `lista_de_clientes: true`, el
+  nodo no le entrega nombre ni contacto más allá del pedido activo hasta que la persona acepte:
+  `acepta_lista_de_clientes` al confirmar el carrito, una vez por comercio, y se puede decir que no
+  sin perder el pedido.
+- **Métricas sin identidad.** `GET /comercios/{id}/metricas` devuelve agregados —visitas a la ficha,
+  apariciones en búsqueda, pedidos, conversión, ticket promedio— y nunca quién. No existe la
+  operación que diga qué persona miró la ficha, y un nodo que no puede agregar sin identificar no
+  publica la métrica.
+- **Responsabilidad de lo que sale.** Lo que el comercio hace con esos datos fuera del nodo es suyo,
+  incluida la responsabilidad legal (Ley 25.326): exportar no transfiere la obligación al nodo, y el
+  nodo no puede hacerla cumplir afuera.
+
+## Sin gatekeeper
+
+Nadie habilita comercios ni usuarios. `POST /comercios` lo crea activo al instante para la sesión
+que lo crea: no hay revisión del operador del nodo, ni alta manual, ni sello de autoridad, ni una
+cola de aprobación en ningún lado. Los campos de `verificacion` de la ficha son chequeos automáticos y
+verificables (CUIT, foto geolocalizada, cuenta de cobro que coincide), no una habilitación: un
+comercio con los tres en false vende igual, y quien compra ve exactamente qué está verificado y qué
+no. La única reputación es la suma de reseñas firmadas de pedidos entregados, que nadie —tampoco el
+operador del nodo— puede editar ni borrar.

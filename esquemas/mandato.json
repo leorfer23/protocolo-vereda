@@ -20,8 +20,8 @@
     "scopes": {
       "type": "array",
       "minItems": 1,
-      "items": { "type": "string", "pattern": "^(leer|armar|hablar|suscribir|pedir:[0-9]+|pedir_diario:[0-9]+|pedir_semanal:[0-9]+|pedir_mensual:[0-9]+|comercios:[a-z0-9._@,-]+)$" },
-      "description": "leer, armar, hablar, suscribir, pedir:<centavos por pedido>, pedir_diario, pedir_semanal y pedir_mensual:<centavos por período>, comercios:<lista de identidades>. Los topes los elige la persona y puede combinar varios: valen todos a la vez. Cada tope por período suma los totales, ya descontados, de los pedidos creados con este mandato en ese período, sin contar los cancelados. El día arranca a las 00:00, la semana el lunes y el mes el día 1, en 'zona_horaria'. El nodo lo aplica de forma atómica: dos pedidos simultáneos no pueden pasar juntos el tope."
+      "items": { "type": "string", "pattern": "^(leer|armar|hablar|suscribir|administrar|pedir:[0-9]+|pedir_diario:[0-9]+|pedir_semanal:[0-9]+|pedir_mensual:[0-9]+|comercios:[a-z0-9._@,-]+)$" },
+      "description": "leer, armar, hablar, suscribir, administrar (solo para el agente de un comercio: su ficha, catálogo, promociones, stock, pedidos, métricas y exportación; nunca sirve para comprar), pedir:<centavos por pedido>, pedir_diario, pedir_semanal y pedir_mensual:<centavos por período>, comercios:<lista de identidades>. Los topes los elige la persona y puede combinar varios: valen todos a la vez. Cada tope por período suma los totales, ya descontados, de los pedidos creados con este mandato en ese período, sin contar los cancelados. El día arranca a las 00:00, la semana el lunes y el mes el día 1, en 'zona_horaria'. El nodo lo aplica de forma atómica: dos pedidos simultáneos no pueden pasar juntos el tope."
     },
     "zona_horaria": { "type": "string", "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+)+)$", "default": "America/Argentina/Buenos_Aires", "description": "Zona IANA en la que corren los períodos de los topes: se reinician a las 00:00 de esta zona. La declara la persona al firmar el mandato; no es la del nodo, porque el tope protege a la persona y un nodo puede estar en cualquier huso." },
     "confirmar_siempre": {

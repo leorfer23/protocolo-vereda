@@ -1861,6 +1861,1391 @@
           }
         ]
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Política de datos por default, con el sello estándar que calcula el nodo.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": true,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "datos": {
+          "retencion_dias": 90,
+          "lista_de_clientes": false,
+          "estandar": true
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Política propia: guarda lista de clientes y retiene un año. Es legítima y queda pública, sin sello.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": true,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "datos": {
+          "retencion_dias": 365,
+          "lista_de_clientes": true,
+          "estandar": false
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Sin bloque 'datos': rige el default y el comercio es estándar.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": true,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Dice ser estándar pero retiene 365 días: el sello no se declara a mano.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": true,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "datos": {
+          "retencion_dias": 365,
+          "lista_de_clientes": false,
+          "estandar": true
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Dice ser estándar pero guarda lista de clientes.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": true,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "datos": {
+          "retencion_dias": 90,
+          "lista_de_clientes": true,
+          "estandar": true
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Retención de 0 días: el mínimo del esquema es 1.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": true,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "datos": {
+          "retencion_dias": 0
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Campo inventado dentro de 'datos'.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": true,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "datos": {
+          "retencion_dias": 90,
+          "vende_los_datos": true
+        }
+      }
     }
   ]
 }
