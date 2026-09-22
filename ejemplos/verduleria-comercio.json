@@ -1,5 +1,5 @@
 {
-  "$comentario": "Comercio con cuatro modalidades: franja, consolidada con descuento, ronda al barrio cerrado y retiro. Política de cancelación propia.",
+  "$comentario": "Comercio con cuatro modalidades: franja, consolidada con descuento, ronda al barrio cerrado y retiro. Política de cancelación propia y política de datos estándar.",
   "id": "01926b3a-0000-7000-8000-000000000002", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
   "identidad": "lahuerta@vereda.ar",
   "nombre": "Verdulería La Huerta",
@@ -21,6 +21,7 @@
     { "id": "retiro", "tipo": "retiro", "nombre": "Pasá a buscar", "precio_envio": { "modo": "gratis" }, "franjas": [ { "dias": ["lu","ma","mi","ju","vi","sa"], "desde": "08:00", "hasta": "20:00" } ] }
   ],
   "politica_cancelacion": { "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.", "hasta_estado": "aceptado", "cobra_preparado": false, "plazo_devolucion_horas": 24 },
+  "datos": { "retencion_dias": 90, "lista_de_clientes": false, "estandar": true },
   "medios_cobro": ["qr_interoperable", "transferencia", "efectivo"],
   "acepta_propinas": true,
   "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",

@@ -13,6 +13,7 @@ import base64
 import glob
 import json
 import os
+import re
 from dataclasses import dataclass, field
 from typing import List, Optional
 from urllib.parse import quote, urlparse
@@ -509,7 +510,10 @@ class NivelA:
                 self.casos.append(_omitido("negativos", esquema, f"casos de {nombre} sin sesión", f"ninguna operación de openapi.yaml toma '{esquema}' completo como cuerpo de request"))
                 continue
             ruta, metodo, op = objetivo
-            opid, url = op["operationId"], self.base_v1 + ruta
+            # las rutas con {parametro} se mandan con un id inexistente: sin sesión, el
+            # nodo tiene que responder 401 antes de mirar si ese id existe.
+            opid = op["operationId"]
+            url = self.base_v1 + re.sub(r"\{[^}]+\}", "no-existe", ruta)
             for caso in suite["casos"]:
                 desc = f"{metodo.upper()} {ruta} sin sesión, cuerpo {caso['espera']} de {nombre} ({caso['porque'][:70]})"
                 r = cliente.solicitud(metodo, url, json_body=caso["doc"], timeout=self.timeout)

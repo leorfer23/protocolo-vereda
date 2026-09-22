@@ -15,6 +15,8 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 - **Supermercado de verdad.** Listas persistentes con ítems genéricos que se resuelven contra comercios, catálogo maestro por EAN, pesables con monto final, sustituciones con preferencia declarada, franjas con cupo.
 - **Promociones que cualquiera puede calcular.** 2x1, 3x2, segunda unidad al 70 %, precio por cantidad, escalera por total de compra, envío bonificado, descuento por efectivo o por retiro, y puntos por volver al mismo comercio. Son públicas, se calculan con un algoritmo público y no compran posición en el ranking.
 - **Agentes primero.** Mandatos firmados con topes de gasto, carrito que se valida paso a paso y dice qué falta en español, preferencias que viven en la red y no en el agente, agentes de comercio que negocian con agentes de usuario. Servidor MCP como primera interfaz.
+- **El comercio se administra solo.** Se da de alta y queda activo al instante: nadie habilita a nadie, no hay revisión ni sello de autoridad. Desde la misma API publica y edita su ficha, su catálogo y sus promociones, trabaja sus pedidos, mira sus métricas agregadas y se lleva todo firmado cuando quiere.
+- **Los datos del comercio son del comercio.** Cada comercio fija en su ficha pública cuántos días retiene los datos de un pedido y si guarda lista de clientes (con consentimiento de la persona). El protocolo promueve un default —90 días, sin lista— y le pone el sello `estandar` a quien lo cumple; no obliga a nadie, y el usuario elige sabiendo. Ver `docs/datos-y-privacidad.md`.
 - **Reputación firmada y portable.** Reseñas solo sobre pedidos entregados, firmadas con la clave del autor, sin edición ni borrado. Te la llevás a otro nodo.
 - **Dinero directo.** La red genera la referencia de cobro y confirma. Nunca custodia, nunca reembolsa, nunca retiene.
 - **Algoritmos públicos.** Ranking y despacho están en `docs/ranking-y-despacho.md`. Nadie puede pagar para aparecer primero.
@@ -25,8 +27,8 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | Carpeta | Contenido |
 | --- | --- |
 | `esquemas/` | 22 esquemas JSON (draft 2020-12): comercio, oferta, promoción, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
-| `openapi.yaml` | La API abierta, 64 rutas. Apps y agentes usan las mismas |
-| `mcp/herramientas.json` | Las 24 herramientas del servidor MCP, con descripciones para asistentes |
+| `openapi.yaml` | La API abierta, 69 rutas. Apps y agentes usan las mismas |
+| `mcp/herramientas.json` | Las 36 herramientas del servidor MCP —24 del lado del usuario y 12 del lado del comercio—, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio, y `vectores-firma.json` con los vectores de prueba de firma |
 | `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad, diseño de la suite de conformidad (fase 1) |
 | `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1 y reproduce los vectores de firma |

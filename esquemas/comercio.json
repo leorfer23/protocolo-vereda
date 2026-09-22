@@ -91,6 +91,23 @@
       }
     },
     "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
+    "datos": {
+      "type": "object",
+      "description": "Política de datos de este comercio, pública en su ficha. Los datos de su operación son del comercio: el protocolo estandariza y promueve un default, no lo impone. Ausente: rige el default recomendado (90 días de retención, sin lista de clientes), que es el estándar.",
+      "properties": {
+        "retencion_dias": { "type": "integer", "minimum": 1, "default": 90, "description": "Días que el comercio conserva los datos personales de un pedido entregado (nombre, dirección, teléfono) antes de borrarlos o anonimizarlos. El default recomendado es 90; el comercio puede fijar otro y queda a la vista acá." },
+        "lista_de_clientes": { "type": "boolean", "default": false, "description": "Si es true, el comercio guarda nombre y contacto de quien le pidió más allá del pedido activo, para volver a contactarlo. Solo con consentimiento: se pide al confirmar el carrito ('acepta_lista_de_clientes') y sin él el nodo no entrega esos datos. Si es false, el comercio ve nombre y contacto solo mientras el pedido está activo." },
+        "estandar": { "type": "boolean", "description": "Derivado, lo calcula el nodo: true cuando la política coincide con el default recomendado (90 días y sin lista de clientes). Es el sello que muestran las apps. Un comercio que no coincide no tiene menos derechos: se muestra tal cual es y el usuario elige informado." }
+      },
+      "allOf": [
+        {
+          "description": "El sello no se declara a mano: si dice estándar, la política tiene que ser la del default.",
+          "if": { "required": ["estandar"], "properties": { "estandar": { "const": true } } },
+          "then": { "properties": { "retencion_dias": { "const": 90 }, "lista_de_clientes": { "const": false } } }
+        }
+      ],
+      "additionalProperties": false
+    },
     "clave_publica": { "type": "string", "description": "Ed25519, base64url. La clave activa." },
     "claves": { "$ref": "comunes.json#/$defs/claves", "description": "Historial de claves. 'clave_publica' repite la activa." },
     "privado": {
@@ -101,6 +118,47 @@
         "cuenta_cobro": { "type": "object", "properties": { "psp": { "type": "string" }, "referencia": { "type": "string", "description": "Referencia opaca del PSP, nunca un CBU/CVU en claro." } } },
         "contacto": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } }
       }
+    }
+  },
+  "$defs": {
+    "metricas": {
+      "title": "Métricas de un comercio",
+      "description": "Agregados de la actividad del comercio en un período, para su propio tablero. Nunca dicen quién: no llevan identidad, id de usuario, dirección ni nada con lo que se pueda reconstruir a una persona. Un nodo que no puede agregar sin identificar, no publica la métrica.",
+      "type": "object",
+      "required": ["desde", "hasta", "granularidad", "periodos"],
+      "properties": {
+        "desde": { "$ref": "comunes.json#/$defs/instante" },
+        "hasta": { "$ref": "comunes.json#/$defs/instante" },
+        "granularidad": { "type": "string", "enum": ["dia", "semana", "mes", "total"], "description": "Tamaño de cada elemento de 'periodos'. 'total': un solo período con todo el rango." },
+        "periodos": { "type": "array", "items": { "$ref": "#/$defs/metricas_periodo" } }
+      },
+      "additionalProperties": false
+    },
+    "metricas_periodo": {
+      "type": "object",
+      "description": "Un período. Los conteos son de eventos, no de personas: la misma persona que entra tres veces suma tres visitas y el nodo no guarda cuál era.",
+      "required": ["desde", "hasta", "visitas_ficha", "apariciones_busqueda", "pedidos"],
+      "properties": {
+        "desde": { "$ref": "comunes.json#/$defs/instante" },
+        "hasta": { "$ref": "comunes.json#/$defs/instante" },
+        "visitas_ficha": { "type": "integer", "minimum": 0, "description": "Lecturas de la ficha del comercio en el período." },
+        "apariciones_busqueda": { "type": "integer", "minimum": 0, "description": "Veces que el comercio o una oferta suya salió en un resultado de búsqueda." },
+        "pedidos": {
+          "type": "object",
+          "required": ["creados", "entregados"],
+          "properties": {
+            "creados": { "type": "integer", "minimum": 0 },
+            "aceptados": { "type": "integer", "minimum": 0 },
+            "rechazados": { "type": "integer", "minimum": 0 },
+            "cancelados": { "type": "integer", "minimum": 0 },
+            "entregados": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "conversion_pct": { "type": "number", "minimum": 0, "maximum": 100, "description": "Pedidos creados sobre visitas a la ficha, en porcentaje. Ausente si no hubo visitas." },
+        "ticket_promedio": { "$ref": "comunes.json#/$defs/monto", "description": "Promedio del total de los pedidos entregados en el período. Ausente si no hubo entregas." }
+      },
+      "additionalProperties": false
     }
   }
 }

@@ -121,6 +121,296 @@
       "name": "mis_puntos",
       "description": "Saldos de puntos de la persona, uno por comercio. Los puntos valen solo en el comercio que los dio. Antes de canjear preguntale a la persona: puede preferir juntarlos. Requiere 'leer'.",
       "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "comercio_editar",
+      "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, notas para agentes y política de datos. Ej: 'cerramos los lunes', 'subí el envío a $2.000 hasta 5 km', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id",
+          "cambios"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "cambios": {
+            "type": "object",
+            "description": "Solo los campos que cambian, con la forma de esquemas/comercio.json."
+          }
+        }
+      }
+    },
+    {
+      "name": "oferta_crear",
+      "description": "Publica una oferta nueva en el catálogo: producto, pesable, preparado, compuesto, servicio o recurrente, con su precio, grupos de opciones, variantes y disponibilidad. Ej: 'agregá milanesa de pollo a $8.500 con guarnición a elección'. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id",
+          "oferta"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "oferta": {
+            "type": "object",
+            "description": "Una oferta completa, con la forma de esquemas/oferta.json."
+          }
+        }
+      }
+    },
+    {
+      "name": "oferta_editar",
+      "description": "Cambia una oferta ya publicada: precio, opciones, variantes, atributos o disponibilidad. Ej: 'la muzzarella pasa a $12.000', 'marcá sin stock la palta'. Para tocar muchas a la vez conviene stock_actualizar. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id",
+          "oferta_id",
+          "cambios"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "oferta_id": {
+            "type": "string"
+          },
+          "cambios": {
+            "type": "object",
+            "description": "Solo los campos que cambian, con la forma de esquemas/oferta.json."
+          }
+        }
+      }
+    },
+    {
+      "name": "promocion_editar",
+      "description": "Cambia una promoción del comercio: vigencia, tramos, tope o pausarla. Ej: 'extendé el 2x1 hasta el domingo', 'pausá el descuento por efectivo'. Los pedidos ya creados no cambian: sus precios están congelados. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id",
+          "promocion_id",
+          "cambios"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "promocion_id": {
+            "type": "string"
+          },
+          "cambios": {
+            "type": "object",
+            "description": "Solo los campos que cambian, con la forma de esquemas/promocion.json."
+          }
+        }
+      }
+    },
+    {
+      "name": "stock_actualizar",
+      "description": "Actualiza stock, disponibilidad y precio de muchas ofertas de una vez. Es la vía para el sistema del comercio o el supermercado que sincroniza su catálogo. Ej: 'quedaron 3 cajones de tomate y subió a $4.200 el kilo'. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id",
+          "items"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "oferta_id"
+              ],
+              "properties": {
+                "oferta_id": {
+                  "type": "string"
+                },
+                "variante_id": {
+                  "type": "string"
+                },
+                "stock": {
+                  "type": "number"
+                },
+                "disponible": {
+                  "type": "boolean"
+                },
+                "precio_centavos": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "pedidos_del_comercio",
+      "description": "Los pedidos que le entraron al comercio, del más nuevo al más viejo, filtrando por estado y por fecha. Es la bandeja de trabajo: 'qué tengo pendiente de aceptar', 'los de hoy que ya están listos'. Trae 'cursor_siguiente' si hay más páginas. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Estados de esquemas/pedido.json. Ausente: todos."
+          },
+          "desde": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasta": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "limite": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50
+          },
+          "cursor": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "pedido_aceptar",
+      "description": "El comercio acepta un pedido pagado o con pago en mano. Si pasa el plazo de aceptación sin respuesta, el pedido se cancela solo y cuenta como rechazado en la reputación: aceptar o rechazar rápido es lo que conviene. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "pedido_id"
+        ],
+        "properties": {
+          "pedido_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "pedido_rechazar",
+      "description": "El comercio rechaza un pedido antes de aceptarlo, y se libera lo reservado. Preguntale siempre a la persona del comercio antes de rechazar: queda en la reputación pública. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "pedido_id"
+        ],
+        "properties": {
+          "pedido_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "pedido_listo",
+      "description": "Marca el pedido listo para que lo retiren. Exige que todos los ítems estén resueltos (confirmado, sustituido, faltante o pesado). Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "pedido_id"
+        ],
+        "properties": {
+          "pedido_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "pedido_entregar",
+      "description": "Marca el pedido entregado y firma la entrega. En modalidad retiro hay que pasar el código que trae el usuario; si el pago es en efectivo, marcar que se cobró en mano; si hay alcohol, que se verificó la mayoría de edad. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "pedido_id"
+        ],
+        "properties": {
+          "pedido_id": {
+            "type": "string"
+          },
+          "codigo_retiro": {
+            "type": "string"
+          },
+          "cobrado_en_mano": {
+            "type": "boolean"
+          },
+          "mayoria_edad_verificada": {
+            "type": "boolean"
+          },
+          "foto": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    {
+      "name": "metricas_del_comercio",
+      "description": "Cómo le fue al comercio en un período: visitas a la ficha, apariciones en búsqueda, pedidos creados y entregados, conversión y ticket promedio, por día, semana, mes o total. Son agregados: nunca dicen quién visitó ni quién compró, y no hay forma de pedirlo. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "desde": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasta": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "granularidad": {
+            "type": "string",
+            "enum": [
+              "dia",
+              "semana",
+              "mes",
+              "total"
+            ],
+            "default": "dia"
+          }
+        }
+      }
+    },
+    {
+      "name": "exportar_comercio",
+      "description": "Se lleva todo lo del comercio en un documento firmado por el nodo: ficha, catálogo, promociones, stock, pedidos, reseñas recibidas y métricas. Sirve para mudarse a otro nodo, tener respaldo o cargarlo en el sistema propio. Lo que se haga con esos datos afuera es responsabilidad del comercio. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          }
+        }
+      }
     }
   ]
 }

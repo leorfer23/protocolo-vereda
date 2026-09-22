@@ -15,6 +15,7 @@ servers:
 tags:
   - { name: descubrimiento, description: "Nodo, versiones y federación" }
   - { name: comercios, description: Público }
+  - { name: mi-comercio, description: "Lado comercio: su ficha, catálogo, promociones, pedidos, métricas y exportación. Nadie habilita un comercio: se crea y opera" }
   - { name: ofertas, description: Público }
   - { name: carrito, description: Armado paso a paso; valida y dice qué falta }
   - { name: pedidos }
@@ -60,8 +61,36 @@ paths:
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/comercio.json" } } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
+    post:
+      operationId: crearComercio
+      tags: [mi-comercio]
+      summary: Dar de alta un comercio. Queda activo al instante, sin aprobación de nadie
+      description: |
+        No hay gatekeeper: ni el operador del nodo ni ninguna autoridad habilita comercios. El dueño
+        es la sesión que lo crea. El nodo fija `identidad`, `id`, `verificacion` y `reputacion`: lo
+        que venga en esos campos se ignora. `verificacion` arranca toda en false y se completa sola
+        cuando el comercio verifica CUIT, foto geolocalizada y cuenta de cobro; no es una
+        habilitación y no hace falta para vender. La reputación se construye solo con reseñas
+        firmadas de pedidos entregados.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
+      responses:
+        "201": { description: Creado y activo, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
+        "422": { $ref: "#/components/responses/Error" }
   /comercios/{id}:
     get: { operationId: verComercio, tags: [comercios], summary: Un comercio, security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
+    patch:
+      operationId: editarComercio
+      tags: [mi-comercio]
+      summary: "Editar la ficha: horarios, modalidades, políticas, medios de cobro, política de datos"
+      description: Solo el dueño. Los campos que no vienen quedan como están; el nodo valida el documento resultante contra esquemas/comercio.json. `identidad`, `verificacion` y `reputacion` no se editan.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/comercio.json." } } } }
+      responses:
+        "200": { description: Actualizado, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
   /comercios/{id}/ofertas:
     get:
       operationId: listarOfertas
@@ -72,6 +101,31 @@ paths:
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/oferta.json" } } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
+    post:
+      operationId: crearOferta
+      tags: [mi-comercio]
+      summary: Publicar una oferta del catálogo
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/oferta.json" } } } }
+      responses:
+        "201": { description: Publicada, content: { application/json: { schema: { $ref: "esquemas/oferta.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/ofertas/{oferta}:
+    patch:
+      operationId: editarOferta
+      tags: [mi-comercio]
+      summary: "Editar una oferta: precio, opciones, variantes, disponibilidad, atributos"
+      description: Solo el dueño. Los campos que no vienen quedan como están; el nodo valida el documento resultante contra esquemas/oferta.json. Para cambiar solo stock y precio de muchas a la vez está PUT /comercios/{id}/stock.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: oferta, in: path, required: true, schema: { type: string } } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/oferta.json." } } } }
+      responses:
+        "200": { description: Actualizada, content: { application/json: { schema: { $ref: "esquemas/oferta.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
   /comercios/{id}/promociones:
     get:
       operationId: listarPromociones
@@ -82,15 +136,97 @@ paths:
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/promocion.json" } } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
+    post:
+      operationId: crearPromocion
+      tags: [mi-comercio]
+      summary: Crear una promoción. Se calcula con el algoritmo público de docs/promociones.md
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/promocion.json" } } } }
+      responses:
+        "201": { description: Creada, content: { application/json: { schema: { $ref: "esquemas/promocion.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/promociones/{promocion}:
+    patch:
+      operationId: editarPromocion
+      tags: [mi-comercio]
+      summary: "Editar una promoción: vigencia, tramos, tope, activarla o pausarla"
+      description: "Solo el dueño. Los campos que no vienen quedan como están; el nodo valida el documento resultante contra esquemas/promocion.json. Una promoción que ya se aplicó a un pedido no cambia ese pedido: los precios se congelan al crearlo."
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: promocion, in: path, required: true, schema: { type: string } } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/promocion.json." } } } }
+      responses:
+        "200": { description: Actualizada, content: { application/json: { schema: { $ref: "esquemas/promocion.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
   /comercios/{id}/stock:
     put:
       operationId: actualizarStock
       tags: [ofertas]
       summary: Actualización de stock en lote (supermercados con sistema)
-      security: [ { sesion: [] } ]
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: array, items: { type: object, required: [oferta_id], properties: { oferta_id: { type: string }, variante_id: { type: string }, stock: { type: number }, disponible: { type: boolean }, precio_centavos: { type: integer } } } } } } }
-      responses: { "204": { description: Aplicado } }
+      responses: { "204": { description: Aplicado }, "403": { $ref: "#/components/responses/NoEsElDueno" } }
+
+  /comercios/{id}/pedidos:
+    get:
+      operationId: listarPedidosDelComercio
+      tags: [mi-comercio]
+      summary: Los pedidos del comercio, del más nuevo al más viejo
+      description: |
+        Solo el dueño. Es la bandeja de trabajo: se filtra por estado y por fecha de creación.
+        Paginado por cursor opaco: se pide con `limite` y, si hay más, la respuesta trae
+        `cursor_siguiente` para la página que sigue. El cursor no es un número de página y no se
+        construye a mano; un cursor vencido o ajeno responde 422.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+        - { name: estado, in: query, schema: { type: array, items: { type: string } }, style: form, explode: false, description: "Uno o varios estados de esquemas/pedido.json (pagado,aceptado). Ausente: todos." }
+        - { name: desde, in: query, schema: { type: string, format: date-time }, description: "Creados desde este instante, inclusive" }
+        - { name: hasta, in: query, schema: { type: string, format: date-time }, description: "Creados hasta este instante, exclusive" }
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+        - { name: cursor, in: query, schema: { type: string }, description: El `cursor_siguiente` de la página anterior }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/PaginaDePedidos" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/metricas:
+    get:
+      operationId: metricasDelComercio
+      tags: [mi-comercio]
+      summary: "Agregados del comercio por período: visitas, apariciones en búsqueda, pedidos, conversión y ticket promedio"
+      description: |
+        Solo el dueño. Son conteos de eventos, nunca de personas: no traen identidad, id de usuario
+        ni dirección, y no hay forma de pedir quién visitó la ficha. Un nodo que no puede agregar
+        sin identificar no publica la métrica.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+        - { name: desde, in: query, schema: { type: string, format: date-time } }
+        - { name: hasta, in: query, schema: { type: string, format: date-time } }
+        - { name: granularidad, in: query, schema: { type: string, enum: [dia, semana, mes, total], default: dia } }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comercio.json#/$defs/metricas" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/exportar:
+    get:
+      operationId: exportarComercio
+      tags: [mi-comercio]
+      summary: "Todo lo del comercio, firmado: ficha, catálogo, promociones, stock, pedidos, reseñas recibidas y métricas"
+      description: |
+        Solo el dueño. Mismo espíritu que GET /yo/exportar: los datos de su operación son del
+        comercio y se los lleva enteros, para mudarse de nodo, tener respaldo o usarlos en su propio
+        sistema. Va firmado con la clave del nodo, así el destino lo verifica. Lo que el comercio
+        hace con esos datos fuera del nodo es su responsabilidad, incluida la legal (Ley 25.326).
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: Paquete firmado, content: { application/json: { schema: { $ref: "#/components/schemas/ExportacionComercio" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
 
   /catalogo/{ean}:
     get:
@@ -177,7 +313,7 @@ paths:
       summary: Crea el pedido, reserva stock y cupos hasta que venza el cobro, y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
       security: [ { sesion: [] }, { mandato: [pedir] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, notas: { type: string } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, notas: { type: string }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
       responses:
         "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
@@ -214,20 +350,20 @@ paths:
       requestBody: { content: { application/json: { schema: { type: object, required: [destinatario, centavos], properties: { destinatario: { type: string, enum: [repartidor, comercio] }, centavos: { type: integer } } } } } }
       responses: { "201": { description: Cobro generado, content: { application/json: { schema: { $ref: "esquemas/pago.json" } } } } }
   /pedidos/{id}/aceptar:
-    post: { operationId: aceptarPedido, tags: [pedidos], summary: "Comercio: aceptar", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post: { operationId: aceptarPedido, tags: [pedidos], summary: "Comercio: aceptar", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
   /pedidos/{id}/rechazar:
-    post: { operationId: rechazarPedido, tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post: { operationId: rechazarPedido, tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
   /pedidos/{id}/items/{item}:
     patch:
       operationId: resolverItemPedido
       tags: [pedidos]
       summary: "Comercio: marcar ítem confirmado, sustituido (propone), faltante o pesado"
-      security: [ { sesion: [] } ]
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [estado], properties: { estado: { type: string, enum: [confirmado, sustituido, faltante, pesado] }, sustituto: { type: object }, cantidad_entregada: { $ref: "esquemas/comunes.json#/$defs/cantidad" } } } } } }
       responses: { "200": { description: OK } }
   /pedidos/{id}/listo:
-    post: { operationId: marcarPedidoListo, tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { $ref: "#/components/responses/Error" } } }
+    post: { operationId: marcarPedidoListo, tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { $ref: "#/components/responses/Error" } } }
   /pedidos/{id}/retirar:
     post: { operationId: retirarPedido, tags: [pedidos], summary: "Repartidor: retiró del comercio", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
   /pedidos/{id}/entregar:
@@ -235,7 +371,7 @@ paths:
       operationId: entregarPedido
       tags: [pedidos]
       summary: "Repartidor, o comercio en modalidad retiro: entregado. Firma la entrega. En retiro exige el código del usuario; con efectivo marca el cobro en mano; con alcohol, mayoría de edad verificada."
-      security: [ { sesion: [] } ]
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si el pago está en_mano. Lo pasa a confirmado." } } } } } }
       responses: { "200": { description: OK } }
@@ -423,6 +559,7 @@ components:
     Error: { description: Error, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     Reintentar: { description: "Ahora no. El emisor reintenta, respetando Retry-After si viene.", headers: { Retry-After: { schema: { type: integer }, description: Segundos } } }
     CarritoVencido: { description: "El carrito venció (24 h sin cambios). Código carrito_vencido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    NoEsElDueno: { description: "No es el dueño del comercio (código no_es_el_dueno), o el mandato no trae el scope 'administrar'.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinCambios: { description: Sin cambios desde el ETag enviado, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } } }
   securitySchemes:
     sesion: { type: http, scheme: bearer, description: Token de sesión (login sin contraseña por WhatsApp o email) }
@@ -433,7 +570,7 @@ components:
         authorizationCode:
           authorizationUrl: https://vereda.ar/oauth/autorizar
           tokenUrl: https://vereda.ar/oauth/token
-          scopes: { leer: Leer, armar: Armar carritos y listas, hablar: Responder en pedidos activos, suscribir: Suscripciones, pedir: "Confirmar pedidos hasta el tope del mandato" }
+          scopes: { leer: Leer, armar: Armar carritos y listas, hablar: Responder en pedidos activos, suscribir: Suscripciones, pedir: "Confirmar pedidos hasta el tope del mandato", administrar: "Administrar un comercio propio: ficha, catálogo, promociones, stock, pedidos, métricas y exportación. Nunca sirve para comprar" }
     nodo: { type: http, scheme: bearer, description: Firma HTTP entre nodos (RFC 9421) con la clave del nodo emisor }
   schemas:
     Nodo:
@@ -458,6 +595,26 @@ components:
         proximo_vencimiento: { type: object, properties: { puntos: { type: integer }, fecha: { type: string, format: date } } }
         actualizado: { $ref: "esquemas/comunes.json#/$defs/instante" }
         firma: { $ref: "esquemas/comunes.json#/$defs/firma", description: "Del comercio. El usuario guarda la última: es su comprobante si el comercio cambia de nodo o desconoce el saldo." }
+    PaginaDePedidos:
+      type: object
+      required: [pedidos]
+      properties:
+        pedidos: { type: array, items: { $ref: "esquemas/pedido.json" } }
+        cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
+    ExportacionComercio:
+      type: object
+      description: "Todo lo del comercio en un solo documento firmado por el nodo. Los pedidos van con los datos personales que el comercio todavía conserva según su propia política ('datos.retencion_dias'); lo ya vencido sale anonimizado."
+      required: [comercio, exportado, firma]
+      properties:
+        comercio: { $ref: "esquemas/comercio.json" }
+        ofertas: { type: array, items: { $ref: "esquemas/oferta.json" } }
+        promociones: { type: array, items: { $ref: "esquemas/promocion.json" } }
+        stock: { type: array, items: { type: object, properties: { oferta_id: { type: string }, variante_id: { type: string }, stock: { type: number }, disponible: { type: boolean }, precio_centavos: { type: integer } } } }
+        pedidos: { type: array, items: { $ref: "esquemas/pedido.json" } }
+        resenas: { type: array, items: { $ref: "esquemas/resena.json" }, description: "Las recibidas. Van firmadas por su autor: valen igual en otro nodo." }
+        metricas: { $ref: "esquemas/comercio.json#/$defs/metricas" }
+        exportado: { $ref: "esquemas/comunes.json#/$defs/instante" }
+        firma: { $ref: "esquemas/comunes.json#/$defs/firma", description: "Del nodo, sobre el JCS del documento sin este campo (docs/claves-y-firmas.md)." }
     Resolucion:
       type: object
       properties:
