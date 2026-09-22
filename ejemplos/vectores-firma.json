@@ -100,6 +100,64 @@
       }
     },
     {
+      "nombre": "resena-respondida-y-marcada",
+      "descripcion": "La misma reseña con 'respuesta', 'senales' y 'visible'. El JCS es idéntico al del vector anterior: quien verifica saca los campos que no escribió el firmante antes de canonicalizar.",
+      "esquema": "resena.json",
+      "objeto_sin_firma": {
+        "id": "01926b3a-1111-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000000a",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "texto": "Tomates impecables y llegó antes de la franja. Ñandú, açaí, 5 ★."
+      },
+      "jcs_utf8_hex": "7b2261637475616c697a61646f223a22323032362d30392d32315431353a30343a30352d30333a3030222c226175746f72223a226d61727461407665726564612e6172222c2263726561646f223a22323032362d30392d32315431353a30343a30352d30333a3030222c2264657374696e61746172696f223a226c61687565727461406e6f646f2e726f736172696f2e636f6f70222c226964223a2230313932366233612d313131312d373030302d383030302d303030303030303030303031222c226e6f646f223a227665726564612e6172222c2270656469646f5f6964223a2230313932366233612d303030302d373030302d383030302d303030303030303030303061222c2270756e74616a65223a352c22726f6c5f6175746f72223a227573756172696f222c22746578746f223a22546f6d6174657320696d70656361626c65732079206c6c6567c3b320616e746573206465206c61206672616e6a612e20c391616e64c3ba2c2061c3a761c3ad2c203520e298852e222c2276657273696f6e5f65737175656d61223a22312e30227d",
+      "jcs_sha256_hex": "00bff3767541cb12a599410d70d06f3ad321a300f8940f907fc56f371f7ae6b2",
+      "jcs_bytes": 404,
+      "campo_firma": "firma",
+      "objeto_firmado": {
+        "id": "01926b3a-1111-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:04:05-03:00",
+        "actualizado": "2026-09-21T15:04:05-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000000a",
+        "autor": "marta@vereda.ar",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "texto": "Tomates impecables y llegó antes de la franja. Ñandú, açaí, 5 ★.",
+        "visible": true,
+        "senales": {
+          "peso": 0.2,
+          "motivos": [
+            "en_revision_por_rafaga"
+          ],
+          "rafaga": {
+            "resenas_en_ventana": 20,
+            "ventana_horas": 72,
+            "ritmo_habitual": 1.4,
+            "autores_sin_credito": 0.95
+          }
+        },
+        "respuesta": {
+          "texto": "Gracias Marta, nos alegra.",
+          "instante": "2026-09-25T10:00:00-03:00"
+        },
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "Ews32kCoDiC-wDNBWr7KyVKk8JmMyoo_TsEo3tH6s2UDWb01KEJbCEPgyINtB1nxy27hslA23Jpng_d7v_EIBw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
       "nombre": "entrada-de-clave-avalada",
       "descripcion": "Rotación de clave: la clave anterior firma el JCS de la entrada nueva sin 'avalada_por'. Esto es lo que permite verificar el historial sin confiar en el nodo.",
       "esquema": "comunes.json#/$defs/clave",

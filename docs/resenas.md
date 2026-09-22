@@ -162,6 +162,14 @@ pública. Son hechos que el nodo ya tiene: no se recolecta ningún dato nuevo.
 Estas reseñas **se publican igual**, marcadas `no_computa: dueno_o_vinculada`. Que un dueño se
 autorreseñe es información útil para quien mira.
 
+### Marcar no rompe la firma
+
+`senales` y `visible` los escribe el nodo, no el autor, así que quedan fuera del JCS que cubre la
+firma —igual que `respuesta`, que la escribe el reseñado (`docs/claves-y-firmas.md`). Una reseña
+marcada por ráfaga sigue verificando byte por byte contra la clave de quien la escribió, en este nodo
+y en cualquier otro. `ejemplos/vectores-firma.json` trae el par de vectores que lo prueba: la misma
+reseña, antes y después de que la respondieran y la marcaran, con el mismo JCS.
+
 ### Lo que no existe
 
 - **No se borra ni se oculta.** Ni el comercio, ni el nodo, ni el operador. La única acción del

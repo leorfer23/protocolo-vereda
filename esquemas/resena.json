@@ -35,7 +35,7 @@
       },
       "additionalProperties": false
     },
-    "firma": { "$ref": "comunes.json#/$defs/firma" }
+    "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Cubre el JCS de la reseña sin 'firma', 'respuesta', 'senales' ni 'visible': los tres últimos los escribe el reseñado o el nodo después, y si entraran, responder o marcar una reseña invalidaría la firma de quien la escribió." }
   },
   "$defs": {
     "reputacion": {

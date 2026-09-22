@@ -83,6 +83,11 @@ except Exception as e:
 b64u = lambda b: base64.urlsafe_b64encode(b).rstrip(b"=").decode()
 desde_b64u = lambda s: base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
 
+# Lo que el firmante no escribió y por eso queda fuera del JCS
+# (docs/claves-y-firmas.md): 'respuesta' la agrega el reseñado, 'senales' y
+# 'visible' las escribe el nodo al recalcular.
+FUERA_DE_LA_FIRMA = ("firma", "firma_nodo", "respuesta", "senales", "visible")
+
 def verificar_vectores():
     malos = []
     V = json.load(open(os.path.join(EJ, "vectores-firma.json")))
@@ -110,8 +115,9 @@ def verificar_vectores():
         if errs:
             malos.append(f"{v['nombre']}: el objeto firmado no cumple {v['esquema']}: {errs[0].message[:80]}")
         firma = v["objeto_firmado"][v["campo_firma"]]
-        # el objeto firmado, menos su firma, tiene que ser exactamente el objeto sin firma
-        if {k: x for k, x in v["objeto_firmado"].items() if k != v["campo_firma"]} != v["objeto_sin_firma"]:
+        # el objeto firmado, menos lo que su autor no escribió, tiene que ser
+        # exactamente el objeto sin firma (docs/claves-y-firmas.md)
+        if {k: x for k, x in v["objeto_firmado"].items() if k != v["campo_firma"] and k not in FUERA_DE_LA_FIRMA} != v["objeto_sin_firma"]:
             malos.append(f"{v['nombre']}: el objeto firmado no coincide con el objeto sin firma")
         try:
             Ed25519PublicKey.from_public_bytes(desde_b64u(firma["clave_publica"])).verify(desde_b64u(firma["valor"]), jcs)

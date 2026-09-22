@@ -99,7 +99,9 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
    verifica de punta a punta: JCS del objeto sin `firma`, contra la clave publicada en
    `/actores/{firmante}/claves` — que puede vivir en **otro nodo**, exactamente la prueba
    de interoperabilidad entre nodos que importa, sin que la suite tenga que crear nada.
-   Es la aplicación literal de "cualquiera lo verifica" de `docs/claves-y-firmas.md`.
+   Es la aplicación literal de "cualquiera lo verifica" de `docs/claves-y-firmas.md`. La suite saca
+   antes los campos que el firmante no escribió (`respuesta`, `senales`, `visible`): un nodo que los
+   metiera en el JCS haría fallar las firmas de sus propias reseñas.
 6. *Negativos sin sesión.* Los 74 casos de `ejemplos/casos/*.json` puestos como cuerpo de
    la operación de escritura correspondiente, sin credenciales: se espera `401`, no `422`
    ni `500` — que el nodo pida autenticación antes que validar el cuerpo.
