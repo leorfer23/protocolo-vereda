@@ -51,6 +51,13 @@ class Caso:
     evidencia: dict = field(default_factory=dict)
 
 
+# Campos que el firmante no escribió y que por eso quedan fuera del JCS
+# (docs/claves-y-firmas.md): 'respuesta' la escribe el reseñado después, y
+# 'senales' y 'visible' las escribe el nodo al recalcular. Si entraran, responder
+# o marcar una reseña invalidaría la firma de quien la escribió.
+_CAMPOS_FUERA_DE_LA_FIRMA = {"respuesta", "senales", "visible"}
+
+
 def _ok(cat, opid, desc, evidencia=None) -> Caso:
     return Caso(cat, opid, desc, "ok", evidencia=evidencia or {})
 
@@ -499,7 +506,7 @@ class NivelA:
             clave_publica, valor, firmante, instante = firma["clave_publica"], firma["valor"], firma["firmante"], firma["instante"]
         except KeyError as e:
             return False, f"a la firma le falta el campo {e}"
-        sin_firma = {k: v for k, v in obj.items() if k != campo_firma}
+        sin_firma = {k: v for k, v in obj.items() if k not in _CAMPOS_FUERA_DE_LA_FIRMA and k != campo_firma}
         try:
             jcs = rfc8785.dumps(sin_firma)
         except (TypeError, ValueError) as e:

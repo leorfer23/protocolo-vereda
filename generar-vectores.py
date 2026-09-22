@@ -23,10 +23,15 @@ ACTORES = {
     "nodo.rosario.coop": "nodo-rosario",
 }
 
+# Lo que el firmante no escribió queda fuera del JCS (docs/claves-y-firmas.md):
+# 'respuesta' la agrega el reseñado, 'senales' y 'visible' las escribe el nodo.
+FUERA_DE_LA_FIRMA = ("firma", "firma_nodo", "respuesta", "senales", "visible")
+
 def firmar(objeto, firmante, instante):
-    """Firma JCS+Ed25519 sobre el objeto sin 'firma'. Devuelve el vector completo."""
+    """Firma JCS+Ed25519 sobre el objeto sin los campos que no escribió su autor.
+    Devuelve el vector completo."""
     k, pub = clave(ACTORES[firmante])
-    sin_firma = {c: v for c, v in objeto.items() if c not in ("firma", "firma_nodo")}
+    sin_firma = {c: v for c, v in objeto.items() if c not in FUERA_DE_LA_FIRMA}
     jcs = rfc8785.dumps(sin_firma)
     firma = {"firmante": firmante, "clave_publica": pub, "valor": b64u(k.sign(jcs)), "instante": instante}
     return jcs, firma
@@ -37,7 +42,7 @@ def vector(nombre, descripcion, objeto, campo, firmante, instante, esquema):
         "nombre": nombre,
         "descripcion": descripcion,
         "esquema": esquema,
-        "objeto_sin_firma": {c: v for c, v in objeto.items() if c != campo},
+        "objeto_sin_firma": {c: v for c, v in objeto.items() if c != campo and c not in FUERA_DE_LA_FIRMA},
         "jcs_utf8_hex": jcs.hex(),
         "jcs_sha256_hex": hashlib.sha256(jcs).hexdigest(),
         "jcs_bytes": len(jcs),
@@ -61,6 +66,26 @@ resena = {
 v_resena = vector("resena-firmada",
     "Reseña firmada por su autora. El texto lleva acentos, ñ, cedilla y un símbolo fuera del BMP a propósito: es donde más difieren las implementaciones de JCS.",
     resena, "firma", "marta@vereda.ar", TS, "resena.json")
+
+# La misma reseña después de que el reseñado respondió y el nodo la marcó: los
+# tres campos nuevos no los escribió la autora, así que la firma es byte por byte
+# la misma y sigue verificando. Es la prueba de que responder o marcar una reseña
+# no puede romper lo único que el protocolo promete de ella.
+resena_marcada = {
+    **resena,
+    "visible": True,
+    "senales": {
+        "peso": 0.2,
+        "motivos": ["en_revision_por_rafaga"],
+        "rafaga": {"resenas_en_ventana": 20, "ventana_horas": 72, "ritmo_habitual": 1.4, "autores_sin_credito": 0.95},
+    },
+    "respuesta": {"texto": "Gracias Marta, nos alegra.", "instante": "2026-09-25T10:00:00-03:00"},
+}
+v_resena_marcada = vector("resena-respondida-y-marcada",
+    "La misma reseña con 'respuesta', 'senales' y 'visible'. El JCS es idéntico al del vector anterior: quien verifica saca los campos que no escribió el firmante antes de canonicalizar.",
+    resena_marcada, "firma", "marta@vereda.ar", TS, "resena.json")
+assert v_resena_marcada["jcs_sha256_hex"] == v_resena["jcs_sha256_hex"], \
+    "responder o marcar una reseña cambió los bytes que cubre la firma"
 
 # --- 2. Entrada de clave avalada: la cadena de rotación ---
 k_vieja, pub_vieja = clave("marta-clave-1")
@@ -195,7 +220,7 @@ doc = {
         {"actor": "marta@vereda.ar (clave nueva del vector de rotación)", "etiqueta_semilla": "marta-clave-2",
          "semilla_sha256_de": "vereda:vector:marta-clave-2", "semilla_hex": semilla("marta-clave-2").hex(), "clave_publica": pub_nueva},
     ],
-    "vectores": [v_resena, v_clave, v_evento, v_mudanza],
+    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
 }

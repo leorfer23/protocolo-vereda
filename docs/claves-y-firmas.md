@@ -28,10 +28,25 @@ Es público: `GET /actores/{identidad}/claves` en el nodo del actor, y `claves` 
 
 ## Verificar una firma
 
-1. La firma verifica con `firma.clave_publica` sobre el JCS del objeto sin `firma`. Si no: `firma_invalida`.
+1. La firma verifica con `firma.clave_publica` sobre el JCS del objeto **sin los campos que no escribió el firmante**. Si no: `firma_invalida`.
 2. Esa clave está en el historial de `firma.firmante`. Si no está en la copia en caché, se vuelve a pedir el historial una vez. Si sigue sin estar: `clave_desconocida`.
 3. `firma.instante` cae entre `desde` y `hasta` de esa clave.
 4. Si la clave está `comprometida`, la firma vale solo si el objeto ya estaba registrado por la otra parte antes de `comprometida_desde`. Si no: `clave_comprometida`.
+
+### Los campos que no escribió el firmante
+
+Una firma cubre lo que su autor escribió, y nada más. Son cuatro campos, en todo el protocolo:
+
+| Campo | Quién lo escribe | Por qué no puede entrar en la firma |
+| --- | --- | --- |
+| `firma` | el autor, al final | es el resultado: no puede cubrirse a sí mismo |
+| `respuesta` | **el reseñado**, después | si entrara, responder una reseña invalidaría la firma de quien la escribió |
+| `senales` | **el nodo**, al recalcular | el peso de una reseña es una función del estado actual (`docs/resenas.md`): cambia solo, y el autor no lo firmó |
+| `visible` | **el nodo** | la revelación simultánea la decide el nodo, no el autor |
+
+Quien verifica los saca los cuatro antes de canonicalizar. Cada uno lleva su propia firma si le corresponde: `respuesta.firma` es del reseñado y se verifica igual, sobre la respuesta sin su `firma`.
+
+La regla es la que hace posible que una reseña se marque, se responda y se revele sin que se rompa lo único que el protocolo promete de ella: que la escribió quien dice, y que nadie la tocó.
 
 El paso 4 existe porque `instante` lo escribe quien firma: el que robó una clave puede poner cualquier fecha. Lo que no puede falsificar es que el nodo de la otra parte ya tenía guardado el objeto.
 

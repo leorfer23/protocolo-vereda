@@ -253,7 +253,7 @@
     },
     "firma": {
       "type": "object",
-      "description": "Firma Ed25519 sobre la representación canónica (JCS, RFC 8785) del objeto sin el campo firma. Vale si verifica con 'clave_publica', esa clave está en el historial de 'firmante' e 'instante' cae dentro de su validez. Ver docs/claves-y-firmas.md.",
+      "description": "Firma Ed25519 sobre la representación canónica (JCS, RFC 8785) del objeto sin los campos que no escribió el firmante: 'firma' siempre, y además 'respuesta', 'senales' y 'visible' donde existan. Vale si verifica con 'clave_publica', esa clave está en el historial de 'firmante' e 'instante' cae dentro de su validez. Ver docs/claves-y-firmas.md.",
       "required": [
         "firmante",
         "clave_publica",
