@@ -70,12 +70,11 @@ dónde. La evidencia es siempre el historial firmado del pedido; ahora también 
 | `comercio` | Nadie: lo lleva el comercio | El comercio | Hasta la entrega al comprador | `comercio` |
 | `propio` | El comercio | El comercio | Hasta la entrega al comprador | `comercio` |
 | `pool` | El comercio, al elegir el pool | El comercio | Hasta la entrega al comprador | `comercio` |
-| `usuario` | El comprador | La relación entre el comprador y su repartidor | Hasta entregarle el pedido en mano al repartidor (`firmas.retiro`) | `usuario_y_repartidor` |
+| `usuario` | El comprador | La relación entre el comprador y su repartidor | Hasta entregarle el pedido en mano al repartidor (`firmas.retiro`) | `usuario` |
 
-> **Decisión a confirmar por Leo.** La fila `usuario` es un supuesto del Lead: si el comprador eligió
-> a su repartidor, el comercio cumple entregándoselo en mano, y lo que pase en el camino es entre el
-> comprador y el repartidor que él contrató. Si Leo decide otra cosa, cambia esta fila y el enum de
-> `responsable_entrega`; nada más.
+**Decisión de Leo (2026-09-22).** Si el comprador eligió a su repartidor, la responsabilidad es del
+comprador: tiene que elegir a alguien de confianza, el comercio cumple entregándoselo en mano, y lo
+que pase en el camino es entre el comprador y el repartidor que él contrató.
 
 En todos los modos rige lo mismo que en federación: la fuente de verdad del pedido es el nodo del
 comercio, cada operador responde por los actores que hospeda, y el desacuerdo se refleja en la
@@ -89,7 +88,7 @@ El repartidor cobra directo, como el comercio. La tarifa por tramo es pública (
 
 | Situación | Paga | Cómo | Cómo queda en `pago.json` |
 | --- | --- | --- | --- |
-| `usuario` | El comprador, siempre: lo contrató él | Efectivo en mano al entregar, o transferencia al alias del repartidor | `concepto: envio`, `destinatario`: el repartidor, sin `pagador` |
+| `usuario` | El comprador, siempre: lo contrató él | Efectivo en mano al entregar, o transferencia al alias del repartidor | `concepto: envio`, `destinatario`: el repartidor, sin `pagador` (ausente = paga el comprador) |
 | `propio` o `pool` con `cobro_envio: al_repartidor` (default) | El comprador, por cuenta del comercio | Igual que arriba | Igual que arriba |
 | `propio` o `pool` con `cobro_envio: al_comercio` | El comercio | El comprador le paga el envío al comercio con los productos; el comercio le paga al repartidor en efectivo al retirar o por transferencia | `concepto: envio`, `destinatario`: el repartidor, `pagador`: el comercio |
 | Envío bonificado por promoción (`docs/promociones.md`) | El comercio, la parte bonificada | Efectivo al retirar o transferencia | Un pago `envio` con `pagador`: el comercio por esa parte |
@@ -99,6 +98,13 @@ El repartidor cobra directo, como el comercio. La tarifa por tramo es pública (
 El medio lo elige quien paga dentro de lo que el repartidor acepta (`cobro.metodos` de su perfil, que
 es público). El comprador lo dice al confirmar con `metodo_envio`; el despacho del pool solo ofrece el
 viaje a repartidores que aceptan ese medio.
+
+**En modo `usuario` el monto también se arregla entre ellos.** El comprador lo dice al confirmar el
+carrito, `monto_envio_acordado_centavos` (`POST /carritos/{id}/confirmar`, herramienta
+`carrito_confirmar`): opcional, y si falta rige `tarifa_envio`, la pública. El repartidor lo ve en
+`viaje.pago_repartidor` antes de aceptar, igual que la tarifa pública en cualquier otro modo, y decide
+si le sirve. Lo que se cobra y lo que queda en `pago.json` (`concepto: envio`) es ese monto, acordado
+o público, nunca otro.
 
 - **Efectivo.** El pago nace `en_mano` cuando el repartidor acepta el viaje. Quien lo cobra lo marca:
   al entregar, `cobrado_en_mano` en `POST /pedidos/{id}/entregar`; si paga el comercio al retirar,
@@ -189,7 +195,8 @@ comercio es dato del repartidor. Un propio sigue pudiendo tomar viajes del pool 
 - La persona guarda los suyos en `preferencias.repartidores_de_confianza` (`esquemas/usuario.json`),
   privados como el resto de sus preferencias; su agente los lee con `mis_preferencias`.
 - Al confirmar el carrito nombra uno en `repartidor` (`POST /carritos/{id}/confirmar`, herramienta
-  `carrito_confirmar`) y elige `metodo_envio`.
+  `carrito_confirmar`), elige `metodo_envio` y, si ya arregló el precio con él,
+  `monto_envio_acordado_centavos` (punto d; sin ese campo rige la tarifa pública).
 - **Consentimiento del repartidor**, en dos niveles: `acepta_elegido_por_usuario` en su perfil (si es
   false, nombrarlo responde 422 `repartidor_no_acepta` y el carrito no se confirma) y, siempre, aceptar o rechazar ese viaje
   en particular.

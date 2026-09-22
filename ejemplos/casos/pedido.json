@@ -498,8 +498,8 @@
       }
     },
     {
-      "espera": "invalido",
-      "porque": "Pedido de retiro sin código: no habría prueba de entrega.",
+      "espera": "valido",
+      "porque": "Pedido de retiro visto por el comercio o el repartidor: sin código, porque codigo_retiro lo ve únicamente el usuario.",
       "doc": {
         "id": "01926b3a-7777-7000-8000-000000000001",
         "nodo": "vereda.ar",
