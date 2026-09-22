@@ -15,6 +15,7 @@
   "properties": {
     "pedido_id": { "$ref": "comunes.json#/$defs/id" },
     "destinatario": { "$ref": "comunes.json#/$defs/identidad" },
+    "pagador": { "$ref": "comunes.json#/$defs/identidad", "description": "Quién paga. Ausente: el comprador del pedido. El comercio, cuando le paga el envío al repartidor (cobro_envio 'al_comercio', o la parte de un envío bonificado por promoción). Ver docs/repartidores.md." },
     "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor", "propina_comercio", "punto_entrega", "periodo_suscripcion", "devolucion"] },
     "monto": { "$ref": "comunes.json#/$defs/monto" },
     "metodo": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] },
@@ -23,12 +24,12 @@
     "psp_referencia": { "type": "string", "description": "Id opaco del cobro en el PSP." },
     "qr": { "type": "string", "description": "Payload del QR interoperable, si aplica." },
     "link_pago": { "type": "string", "format": "uri" },
-    "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados." },
+    "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados. Un pago al repartidor ('envio', 'propina_repartidor') vence 24 h después de la entrega y nunca cancela el pedido: queda 'vencido' como constancia de que no se marcó recibido (docs/repartidores.md)." },
     "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
     "idempotency_key": { "type": "string" },
     "instrucciones": {
       "type": "object",
-      "description": "A dónde transferir, solo con metodo 'transferencia'. Las ve únicamente el comprador, y solo mientras el pedido está activo: no salen en la copia del comercio ni en el pedido ya cerrado.",
+      "description": "A dónde transferir, solo con metodo 'transferencia'. Las ve únicamente quien paga, y solo mientras el pedido está activo: no salen en la copia de las otras partes ni en el pedido ya cerrado. Con destinatario repartidor, el alias es el de su 'privado.cobro'.",
       "required": ["alias", "monto", "referencia"],
       "properties": {
         "alias": { "type": "string" },

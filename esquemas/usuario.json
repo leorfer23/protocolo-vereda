@@ -27,6 +27,7 @@
         "restricciones": { "type": "array", "items": { "type": "string" }, "description": "'sin_tacc', 'vegetariano', 'sin_mani'. Coinciden con atributos de oferta." },
         "sustitucion_default": { "type": "string", "enum": ["similar_ok", "misma_marca", "preguntar", "quitar"], "default": "preguntar" },
         "comercios_favoritos": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" } },
+        "repartidores_de_confianza": { "type": "array", "uniqueItems": true, "maxItems": 20, "items": { "$ref": "comunes.json#/$defs/identidad" }, "description": "Repartidores que la persona quiere nombrar al confirmar un carrito, en orden de preferencia. Es privado, como el resto de las preferencias. Nombrar a uno no lo obliga: cada viaje lo acepta o lo rechaza él (docs/repartidores.md)." },
         "modalidad_preferida": { "type": "string", "enum": ["inmediata", "franja", "consolidada", "retiro", "la_mas_barata", "la_mas_rapida"] },
         "no_recibir": { "type": "array", "items": { "$ref": "comunes.json#/$defs/franja_horaria" }, "description": "Horarios en que no quiere entregas." },
         "agrupar_envios": { "type": "boolean", "description": "Consentimiento para que el despacho agrupe este pedido con otros en un mismo viaje (docs/ranking-y-despacho.md, fase 2). Ausente: el nodo lo deriva de 'modalidad_preferida' ('la_mas_rapida' no se agrupa, el resto sí). En cualquier caso el algoritmo nunca agrupa si rompe el ETA ya prometido." },

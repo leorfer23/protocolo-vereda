@@ -40,6 +40,7 @@ Vereda nunca maneja plata: con `metodo: transferencia` la plata va del comprador
 - El comprador transfiere por fuera de Vereda y avisa con `POST /pedidos/{id}/transferencia`, con un `comprobante` opcional. Esto no confirma el cobro: el nodo no vio ninguna plata y no dice que sí. Publica `pago.transferencia_declarada`.
 - El comercio confirma cuando ve la plata con `POST /pedidos/{id}/transferencia/confirmar`. Ahí el cobro pasa a `confirmado` y el pedido a `pagado`. Es el único que puede: es el único que ve su cuenta.
 - Si nadie confirma antes del `vence`, se aplica igual que cualquier otro pago pendiente: `vencido`, pedido `cancelado` con `pago_vencido`, se libera lo reservado.
+- El envío al repartidor usa los mismos dos pasos con `concepto: envio`: avisa quien pagó y confirma el repartidor, que es quien ve su cuenta. Quién le paga, cuándo vence y por qué no cancela el pedido está en `docs/repartidores.md`.
 
 ## Retiro por el usuario
 

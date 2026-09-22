@@ -1,0 +1,204 @@
+{
+  "$comentario": "Casos para repartidor.json#/$defs/declaracion, el cuerpo de PUT /repartidor (alta autoservicio, docs/repartidores.md).",
+  "esquema": "repartidor.json#/$defs/declaracion",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Alta mínima: nombre, vehículo, zona por radio, cobra solo en efectivo.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "zona": {
+          "centro": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "radio_km": 4
+        },
+        "cobro": {
+          "metodos": [
+            "efectivo"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Zona como polígono cerrado.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "zona": [
+          {
+            "lat": -32.94,
+            "lng": -60.66
+          },
+          {
+            "lat": -32.94,
+            "lng": -60.63
+          },
+          {
+            "lat": -32.96,
+            "lng": -60.63
+          },
+          {
+            "lat": -32.94,
+            "lng": -60.66
+          }
+        ],
+        "cobro": {
+          "metodos": [
+            "efectivo"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Cobra por transferencia con su alias privado, cooperativa en texto y propio de un comercio.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "zona": {
+          "centro": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "radio_km": 4
+        },
+        "cobro": {
+          "metodos": [
+            "efectivo",
+            "transferencia"
+          ]
+        },
+        "privado": {
+          "cobro": {
+            "alias": "juan.bici.ros"
+          }
+        },
+        "cooperativa": "coop@vereda.ar",
+        "propio_de": [
+          "la-huerta@vereda.ar"
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Acepta transferencia pero no declaró alias: nadie sabría a dónde pagarle.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "zona": {
+          "centro": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "radio_km": 4
+        },
+        "cobro": {
+          "metodos": [
+            "transferencia"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin zona de trabajo: el despacho no sabría qué ofrecerle.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "cobro": {
+          "metodos": [
+            "efectivo"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Radio cero.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "zona": {
+          "centro": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "radio_km": 0
+        },
+        "cobro": {
+          "metodos": [
+            "efectivo"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La reputación no se declara: la calcula el nodo.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "zona": {
+          "centro": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "radio_km": 4
+        },
+        "cobro": {
+          "metodos": [
+            "efectivo"
+          ]
+        },
+        "reputacion": {
+          "promedio": 5,
+          "cantidad": 0,
+          "viajes_completados": 0,
+          "viajes_soltados": 0
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin medios de cobro.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "bici",
+        "zona": {
+          "centro": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "radio_km": 4
+        },
+        "cobro": {
+          "metodos": []
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Vehículo fuera del vocabulario.",
+      "doc": {
+        "nombre": "Juan",
+        "vehiculo": "monopatin",
+        "zona": {
+          "centro": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "radio_km": 4
+        },
+        "cobro": {
+          "metodos": [
+            "efectivo"
+          ]
+        }
+      }
+    }
+  ]
+}

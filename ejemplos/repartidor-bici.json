@@ -1,0 +1,51 @@
+{
+  "$comentario": "Un repartidor en bici que se dio de alta solo, cobra en efectivo o al alias, reparte en un radio de 4 km y es propio de la verdulería del barrio. Ver docs/repartidores.md.",
+  "id": "01926b3a-7777-7000-8000-0000000000a1",
+  "nodo": "vereda.ar",
+  "creado": "2026-09-01T10:00:00-03:00",
+  "actualizado": "2026-09-22T09:00:00-03:00",
+  "version_esquema": "1.0",
+  "identidad": "juan.repartos@vereda.ar",
+  "nombre": "Juan",
+  "cooperativa": "Cooperativa de Repartidores de Rosario",
+  "vehiculo": "bici",
+  "caja_termica": true,
+  "capacidad_kg": 15,
+  "zona": {
+    "centro": {
+      "lat": -32.95,
+      "lng": -60.65
+    },
+    "radio_km": 4
+  },
+  "cobro": {
+    "metodos": [
+      "efectivo",
+      "transferencia"
+    ]
+  },
+  "propio_de": [
+    "la-huerta@vereda.ar"
+  ],
+  "acepta_elegido_por_usuario": true,
+  "disponible": true,
+  "verificacion": {
+    "dni_prueba_de_vida": false,
+    "cuenta_cobro_propia": true
+  },
+  "reputacion": {
+    "promedio": 4.4,
+    "cantidad": 37,
+    "media_red": 4.0,
+    "viajes_completados": 212,
+    "viajes_soltados": 2,
+    "soltados_con_pedido_retirado": 0,
+    "desde": "2026-06-03"
+  },
+  "privado": {
+    "cobro": {
+      "alias": "juan.bici.ros",
+      "titular": "Juan Pérez"
+    }
+  }
+}

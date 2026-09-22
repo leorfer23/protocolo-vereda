@@ -3,7 +3,7 @@
 Principio: no somos dueños de nada, y eso es verificable.
 
 - **Mínimos.** Dirección exacta, teléfono y nombre completo viven en tablas separadas con acceso restringido. Se borran o anonimizan a los 90 días de entregado el pedido: ese es el **default** del protocolo y el que rige si el comercio no dice otra cosa. Cada comercio puede fijar otro plazo en `datos.retencion_dias` de su ficha, y queda siempre visible ahí. El resto del historial es anónimo.
-- **Visibilidad.** Nombre y dirección del usuario los ven solo el comercio y el repartidor del pedido activo. Ubicación del repartidor, solo las partes mientras está en camino. CUIT completo, DNI y cuentas de cobro nunca son públicos ni se federan.
+- **Visibilidad.** Nombre y dirección del usuario los ven solo el comercio y el repartidor del pedido activo. Ubicación del repartidor, solo las partes mientras está en camino. CUIT completo, DNI y cuentas de cobro nunca son públicos ni se federan. El alias del repartidor lo ve solo quien le debe un pago de un viaje activo; la lista de repartidores propios de un comercio y los repartidores de confianza de una persona no se publican.
 - **Chat.** Cifrado de punta a punta (X25519 + XChaCha20) entre las partes cuando todas tienen clave; el nodo guarda el payload cifrado. Los mensajes que entran por agente de voz se cifran al ingresar.
 - **Exportación y borrado.** `GET /yo/exportar` entrega todo firmado; `POST /yo/borrar` elimina datos personales en 30 días. Las reseñas firmadas quedan como emitidas por un autor anonimizado, porque son parte de la reputación del reseñado.
 - **Auditoría.** Cada lectura de datos personales por un operador del nodo queda registrada y es consultable por la persona.
@@ -43,9 +43,9 @@ sus métricas— es suyo y se lo lleva entero.
 
 ## Sin gatekeeper
 
-Nadie habilita comercios ni usuarios. `POST /comercios` lo crea activo al instante para la sesión
+Nadie habilita comercios, repartidores ni usuarios. `POST /comercios` lo crea activo al instante para la sesión
 que lo crea: no hay revisión del operador del nodo, ni alta manual, ni sello de autoridad, ni una
-cola de aprobación en ningún lado. Los campos de `verificacion` de la ficha son chequeos automáticos y
+cola de aprobación en ningún lado. Lo mismo vale para el repartidor: `PUT /repartidor` lo da de alta al instante, sin screening ni datos que cargue un tercero (`docs/repartidores.md`). Los campos de `verificacion` de la ficha son chequeos automáticos y
 verificables (CUIT, foto geolocalizada, cuenta de cobro que coincide), no una habilitación: un
 comercio con los tres en false vende igual, y quien compra ve exactamente qué está verificado y qué
 no. La única reputación es la suma de reseñas firmadas de pedidos entregados, que nadie —tampoco el

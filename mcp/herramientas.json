@@ -55,7 +55,7 @@
     {
       "name": "carrito_confirmar",
       "description": "Crea el pedido y devuelve el QR o link de pago para que la persona pague directo al comercio. Recién acá se reservan stock y cupos, y solo hasta que vence el cobro ('vence' en el pago): si no se paga a tiempo el pedido se cancela con 'pago_vencido' y podés confirmar el carrito otra vez. Si algo se agotó mientras se armaba, responde 'oferta_no_disponible' o 'cupo_agotado' y no crea nada. Si supera el mandato o es un comercio nuevo, devuelve 'requiere_confirmacion' con un código: pedile a la persona que lo apruebe. Requiere 'pedir'.",
-      "inputSchema": { "type": "object", "required": ["carrito_id", "idempotency_key"], "properties": { "carrito_id": { "type": "string" }, "idempotency_key": { "type": "string" }, "propina_repartidor_centavos": { "type": "integer" }, "propina_comercio_centavos": { "type": "integer" }, "notas": { "type": "string" } } }
+      "inputSchema": { "type": "object", "required": ["carrito_id", "idempotency_key"], "properties": { "carrito_id": { "type": "string" }, "idempotency_key": { "type": "string" }, "propina_repartidor_centavos": { "type": "integer" }, "propina_comercio_centavos": { "type": "integer" }, "notas": { "type": "string" }, "repartidor": { "type": "string", "description": "Opcional: un repartidor de confianza de la persona (sus 'repartidores_de_confianza' en mis_preferencias). Lo contrata ella y le paga el envío directo; el comercio lo toma si tiene 'usuario' en su orden de asignación, si no lo decide pedido por pedido." }, "metodo_envio": { "type": "string", "enum": ["efectivo", "transferencia"], "description": "Cómo se le paga el envío al repartidor cuando va directo a él." } } }
     },
     {
       "name": "estado_pedido",
@@ -109,7 +109,7 @@
     },
     {
       "name": "mis_preferencias",
-      "description": "Perfil declarativo de la persona: direcciones, restricciones alimentarias, política de sustituciones, comercios favoritos, tope, horarios en que no recibe, notas. Leelo al empezar. Requiere 'leer'.",
+      "description": "Perfil declarativo de la persona: direcciones, restricciones alimentarias, política de sustituciones, comercios favoritos, repartidores de confianza, tope, horarios en que no recibe, notas. Leelo al empezar. Requiere 'leer'.",
       "inputSchema": { "type": "object", "properties": {} }
     },
     {
@@ -129,7 +129,7 @@
     },
     {
       "name": "comercio_editar",
-      "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, notas para agentes y política de datos. Ej: 'cerramos los lunes', 'subí el envío a $2.000 hasta 5 km', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Requiere scope 'administrar'.",
+      "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. Ej: 'cerramos los lunes', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Requiere scope 'administrar'.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -416,6 +416,81 @@
           }
         }
       }
+    },
+    {
+      "name": "ver_repartidor",
+      "description": "Perfil público de un repartidor: nombre, vehículo, cooperativa, si cobra en efectivo o transferencia, qué tiene verificado y su reputación (promedio ponderado, viajes completados y viajes que soltó después de aceptarlos). Ej: '¿quién es el que me trae el pedido?'. No requiere mandato.",
+      "inputSchema": {"type": "object", "required": ["identidad"], "properties": {"identidad": {"type": "string", "description": "actor@nodo"}}}
+    },
+    {
+      "name": "pedido_asignar",
+      "description": "El comercio decide quién lleva este pedido: él mismo ('comercio'), uno de sus repartidores propios, el pool público, o el repartidor que propuso el comprador ('usuario'). Pisa el orden de asignación de la ficha solo para este pedido. Usala cuando llega 'pedido.sin_repartidor' o cuando el comprador propuso un repartidor y el comercio no tiene 'usuario' en su orden. Requiere scope 'administrar'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "modo"], "properties": {"pedido_id": {"type": "string"}, "modo": {"type": "string", "enum": ["comercio", "propio", "usuario", "pool"]}, "repartidor": {"type": "string", "description": "Con modo 'propio': ofrecerlo solo a este."}}}
+    },
+    {
+      "name": "mi_repartidor",
+      "description": "El perfil de repartidor entero, con lo privado: zona, medios de cobro y alias, vínculos con comercios, disponibilidad y reputación. Leelo antes de editar con repartidor_perfil. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+      "name": "repartidor_perfil",
+      "description": "Alta o edición del repartidor: nombre, vehículo, caja térmica, capacidad, zona de trabajo (polígono o centro y radio en km), cooperativa, medios de cobro y alias, de qué comercios acepta ser propio y si acepta que un comprador lo nombre. Nadie lo aprueba: reparte al instante. Reemplaza la declaración entera, así que leé el perfil antes y mandá todo. Ej: 'me doy de alta en bici, 4 km alrededor de casa, cobro en efectivo'. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["nombre", "vehiculo", "zona", "cobro"], "properties": {"nombre": {"type": "string"}, "vehiculo": {"type": "string", "enum": ["a_pie", "bici", "moto", "auto", "utilitario"]}, "caja_termica": {"type": "boolean"}, "capacidad_kg": {"type": "number"}, "zona": {"type": "object", "description": "{centro:{lat,lng}, radio_km} o un polígono (array de puntos cerrado)."}, "cooperativa": {"type": "string"}, "cobro": {"type": "object", "properties": {"metodos": {"type": "array", "items": {"type": "string", "enum": ["efectivo", "transferencia"]}}}}, "propio_de": {"type": "array", "items": {"type": "string"}}, "acepta_elegido_por_usuario": {"type": "boolean"}, "privado": {"type": "object", "description": "{cobro:{alias, titular}}: obligatorio si cobra por transferencia. Nunca se publica."}}}
+    },
+    {
+      "name": "repartidor_disponibilidad",
+      "description": "Pone al repartidor disponible o no para recibir ofertas. Ej: 'arranco a repartir', 'corto por hoy'. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["disponible"], "properties": {"disponible": {"type": "boolean"}}}
+    },
+    {
+      "name": "repartidor_ubicacion",
+      "description": "Reporta la ubicación del repartidor. Solo mientras tiene un viaje activo, cada 5 s; la ven únicamente las partes del pedido. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["lat", "lng"], "properties": {"lat": {"type": "number"}, "lng": {"type": "number"}}}
+    },
+    {
+      "name": "viajes_ofrecidos",
+      "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, cómo se cobra el envío y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+      "name": "viaje_aceptar",
+      "description": "Acepta un viaje ofrecido. Si otro lo tomó antes responde 409. Preguntale a la persona antes de aceptar. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["viaje_id"], "properties": {"viaje_id": {"type": "string"}}}
+    },
+    {
+      "name": "viaje_rechazar",
+      "description": "Pasa un viaje ofrecido. Rechazar no penaliza ni queda registrado en la reputación. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["viaje_id"], "properties": {"viaje_id": {"type": "string"}}}
+    },
+    {
+      "name": "viaje_soltar",
+      "description": "Deja un viaje que ya había aceptado; vuelve a asignarse. A diferencia de rechazar, cuenta en la reputación pública, y más si ya tenía la mercadería. Confirmalo siempre con la persona. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["viaje_id"], "properties": {"viaje_id": {"type": "string"}, "motivo": {"type": "string"}}}
+    },
+    {
+      "name": "viaje_retirar",
+      "description": "Marca que el repartidor retiró un pedido del comercio y firma el traspaso. Si el comercio le pagó el envío en efectivo al retirar, marcá cobrado_en_mano. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "cobrado_en_mano": {"type": "boolean"}}}
+    },
+    {
+      "name": "viaje_entregar",
+      "description": "Marca entregado un pedido del viaje y firma la entrega. Si hay pagos en efectivo (productos, envío o propina), marcá cobrado_en_mano; si hay alcohol, que se verificó la mayoría de edad. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "cobrado_en_mano": {"type": "boolean"}, "mayoria_edad_verificada": {"type": "boolean"}, "foto": {"type": "string", "format": "uri"}}}
+    },
+    {
+      "name": "cobro_confirmar",
+      "description": "El repartidor confirma que recibió la transferencia del envío o de la propina en su cuenta ('recibido'). Solo él puede: es el único que ve su cuenta. Preguntale a la persona si la vio antes de confirmar. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "concepto"], "properties": {"pedido_id": {"type": "string"}, "concepto": {"type": "string", "enum": ["envio", "propina_repartidor"]}}}
+    },
+    {
+      "name": "mis_viajes",
+      "description": "Historial de viajes del repartidor, del más nuevo al más viejo: estado, monto, distancia, paradas y fecha. Filtra por estado y fechas; paginado con cursor. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "properties": {"estado": {"type": "array", "items": {"type": "string", "enum": ["aceptado", "en_curso", "completado", "soltado"]}}, "desde": {"type": "string", "format": "date-time"}, "hasta": {"type": "string", "format": "date-time"}, "limite": {"type": "integer", "minimum": 1, "maximum": 200}, "cursor": {"type": "string"}}}
+    },
+    {
+      "name": "mis_ganancias",
+      "description": "Cuánto cobró el repartidor por día, semana, mes o total: envíos y propinas confirmados, por efectivo y transferencia, y lo que quedó sin marcar recibido. Ej: '¿cuánto hice esta semana?'. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "properties": {"desde": {"type": "string", "format": "date-time"}, "hasta": {"type": "string", "format": "date-time"}, "granularidad": {"type": "string", "enum": ["dia", "semana", "mes", "total"], "default": "semana"}}}
     }
   ]
 }

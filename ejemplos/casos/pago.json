@@ -147,7 +147,10 @@
         "instrucciones": {
           "alias": "lahuerta.mp",
           "titular": "La Huerta SRL",
-          "monto": { "centavos": 1250000, "moneda": "ARS" },
+          "monto": {
+            "centavos": 1250000,
+            "moneda": "ARS"
+          },
           "referencia": "01926B3A"
         }
       }
@@ -175,6 +178,50 @@
           "declarada_en": "2026-09-21T15:05:00-03:00",
           "comprobante": "12345678"
         }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Envío que el comercio le paga al repartidor ('pagador' comercio, cobro_envio 'al_comercio').",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "juan.repartos@vereda.ar",
+        "concepto": "envio",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "qr_interoperable",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "pagador": "la-huerta@vereda.ar"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'pagador' tiene que ser una identidad actor@nodo.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "envio",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "qr_interoperable",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "pagador": "no es una identidad"
       }
     }
   ]

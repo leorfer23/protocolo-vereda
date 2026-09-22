@@ -59,6 +59,35 @@
         "si_falta_un_pago": { "type": "string", "enum": ["sigue", "cancela"], "default": "sigue", "description": "'sigue': el que no pagó sale y el pedido continúa con los demás. 'cancela': si falta un pago se cancela todo (un catering que no cierra con menos gente)." }
       }
     },
+    "envios": {
+      "type": "object",
+      "description": "Cómo consigue repartidor este comercio para sus pedidos con entrega, y a quién le pagan el envío. Público: quien compra lo lee antes de pedir. Todo es opcional; sin este bloque rige el default: solo pool, avisar si nadie acepta, envío pagado directo al repartidor. Diseño en docs/repartidores.md.",
+      "properties": {
+        "asignacion": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["propios", "usuario", "pool"] },
+          "default": ["pool"],
+          "description": "Modos en el orden en que se prueban. 'propios': los repartidores vinculados al comercio. 'usuario': el repartidor que nombró el comprador al confirmar el carrito. 'pool': el despacho público de docs/ranking-y-despacho.md. Si un modo no consigue repartidor en su espera, se pasa al siguiente. Sin 'usuario' en la lista, el repartidor que nombre el comprador es solo una propuesta: el comercio la acepta o no, pedido por pedido, con POST /pedidos/{id}/asignar."
+        },
+        "espera_propios_min": { "type": "integer", "minimum": 1, "maximum": 60, "default": 5, "description": "Minutos que la oferta queda abierta a todos los propios disponibles a la vez; la toma el primero que acepta." },
+        "espera_usuario_min": { "type": "integer", "minimum": 1, "maximum": 60, "default": 10, "description": "Minutos que se espera al repartidor que nombró el comprador." },
+        "plazo_asignacion_min": { "type": "integer", "minimum": 5, "maximum": 240, "default": 30, "description": "Minutos desde que el pedido está 'listo', sumando todos los modos, antes de aplicar 'si_nadie_acepta'." },
+        "si_nadie_acepta": {
+          "type": "string",
+          "enum": ["avisar", "retiro", "cancelar"],
+          "default": "avisar",
+          "description": "'avisar': evento pedido.sin_repartidor y el pedido espera la decisión del comercio (POST /pedidos/{id}/asignar). 'retiro': el pedido pasa a retiro sin cobrar envío (evento pedido.pasa_a_retiro). 'cancelar': se cancela con motivo_codigo 'sin_repartidor'; lo cobrado lo devuelve el comercio, como toda devolución."
+        },
+        "cobro_envio": {
+          "type": "string",
+          "enum": ["al_repartidor", "al_comercio"],
+          "default": "al_repartidor",
+          "description": "Con repartidor propio o del pool. 'al_repartidor': el comprador le paga el envío directo al repartidor, en efectivo o al alias del repartidor. 'al_comercio': el comprador le paga el envío al comercio junto con los productos, y el comercio le paga al repartidor. Con repartidor elegido por el comprador siempre es 'al_repartidor': lo contrató él."
+        }
+      }
+    },
     "medios_cobro": {
       "type": "array",
       "items": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] }
@@ -116,7 +145,8 @@
       "properties": {
         "cuit": { "type": "string", "pattern": "^[0-9]{2}-[0-9]{8}-[0-9]$" },
         "cuenta_cobro": { "type": "object", "description": "Dónde cobra el comercio. Nunca sale en la ficha pública ni se federa.", "properties": { "psp": { "type": "string" }, "referencia": { "type": "string", "description": "Referencia opaca del PSP, nunca un CBU/CVU en claro." }, "alias": { "type": "string", "description": "Alias de transferencia directa, sin PSP en el medio: a dónde le dice el nodo al comprador que transfiera. Solo lo ve el comprador de un pedido activo de este comercio, en pago.json#/properties/instrucciones." }, "titular": { "type": "string", "description": "A nombre de quién está el alias." } } },
-        "contacto": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } }
+        "contacto": { "type": "object", "properties": { "telefono": { "type": "string" }, "email": { "type": "string", "format": "email" } } },
+        "repartidores_propios": { "type": "array", "uniqueItems": true, "maxItems": 200, "items": { "$ref": "comunes.json#/$defs/identidad" }, "description": "Su mitad del vínculo con repartidores propios. Uno es propio mientras figura acá y tiene al comercio en su 'propio_de' (esquemas/repartidor.json). Cualquiera de los dos lo corta. No sale en la ficha: la identidad de quien reparte para un comercio es del repartidor." }
       }
     }
   },
