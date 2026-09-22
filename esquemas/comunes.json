@@ -372,6 +372,10 @@
         "comprometida_desde": {
           "$ref": "#/$defs/instante"
         },
+        "reclamo": {
+          "$ref": "#/$defs/id",
+          "description": "Solo en la clave de un comercio que cambió de dueño por un reclamo resuelto (esquemas/reclamo.json): el reclamo que la instaló. No lleva 'avalada_por': la clave anterior era del dueño anterior. La anterior pasa a 'retirada' en ese instante y sus firmas previas siguen valiendo."
+        },
         "avalada_por": {
           "type": "object",
           "required": [
@@ -548,7 +552,7 @@
         "tipo": { "type": "string", "enum": ["presencia", "cliente_frecuente"] },
         "autor": { "$ref": "#/$defs/identidad" },
         "sujeto": { "$ref": "#/$defs/identidad", "description": "Sobre quién: el comercio en 'presencia', la persona en 'cliente_frecuente'." },
-        "vinculacion": { "$ref": "#/$defs/id", "description": "Solo 'presencia': la vinculación 'local' cuyo QR se escaneó." },
+        "vinculacion": { "$ref": "#/$defs/id", "description": "Solo 'presencia': la vinculación 'local', o el reclamo por 'local' (esquemas/reclamo.json), cuyo QR se escaneó." },
         "prueba": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$", "description": "Solo 'presencia': base64url(HMAC-SHA256(secreto del QR, autor + '\\n' + vinculacion)). Prueba que el autor vio el QR sin publicar el secreto." },
         "instante": { "$ref": "#/$defs/instante" },
         "firma": { "$ref": "#/$defs/firma", "description": "Del autor. Cubre todo menos 'firma', 'senales' y 'visible'." },
@@ -592,7 +596,7 @@
         },
         "mismo_nombre_cerca": {
           "type": "array",
-          "description": "Solo comercios: otros comercios no vinculados con el mismo nombre normalizado (o a una edición, con 6+ caracteres) a 1.500 m o menos.",
+          "description": "Solo comercios: otros comercios no vinculados con el mismo nombre normalizado (o a una edición, con 6+ caracteres) a 1.500 m o menos. No es un error ni una sospecha: dos comercios reales pueden llamarse igual. Nunca se bloquea ni se renombra a ninguno; se muestran los dos con sus pruebas.",
           "items": {
             "type": "object",
             "required": ["identidad", "nombre", "distancia_m", "alta", "pedidos_entregados", "vinculaciones_verificadas"],
@@ -645,6 +649,17 @@
           "properties": {
             "presencia": { "$ref": "#/$defs/peso_atestaciones", "description": "Comercio: sobre todas sus vinculaciones 'local' vigentes." },
             "cliente_frecuente": { "type": "integer", "minimum": 0, "description": "Persona: comercios que la atestiguan como clienta y que ella aceptó publicar." }
+          },
+          "additionalProperties": false
+        },
+        "reclamos": {
+          "type": "object",
+          "description": "Solo comercios: reclamos de propiedad sobre esta ficha (esquemas/reclamo.json). El detalle está en GET /comercios/{id}/reclamos.",
+          "required": ["abiertos", "resueltos"],
+          "properties": {
+            "abiertos": { "type": "integer", "minimum": 0 },
+            "resueltos": { "type": "integer", "minimum": 0 },
+            "ultimo_cambio_de_dueno": { "$ref": "#/$defs/instante", "description": "Cuándo pasó la ficha a otra clave por el último reclamo resuelto. Queda para siempre." }
           },
           "additionalProperties": false
         },

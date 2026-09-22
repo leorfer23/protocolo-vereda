@@ -13,6 +13,12 @@ herramienta MCP (`mcp/herramientas.json`); ninguna parte depende de una pantalla
 
 ## 1. Principios
 
+- **Sin verificadores, en ningún paso.** El protocolo no tiene humanos ni agentes que revisen,
+  aprueben, arbitren o decidan nada sobre la identidad de nadie: ni el operador del nodo, ni un
+  equipo de Vereda, ni un agente de IA. Cada estado de este documento sale de una prueba automática
+  que el nodo comprueba solo y que cualquiera puede rehacer. Lo que no se puede resolver con
+  evidencia automática queda a la vista como **sin prueba** y pesa cero.
+
 - **La clave es la identidad.** `actor@nodo` y su historial de claves (`docs/claves-y-firmas.md`).
   Nadie puede firmar por otro: ni un impostor, ni el operador de otro nodo. Lo que alguien firmó, lo
   firmó él.
@@ -89,6 +95,9 @@ hacer que el nodo pida URLs internas.
 | `caida` | Estaba verificada y dos comprobaciones seguidas no encontraron la prueba. Vuelve a `verificada` sola si la prueba reaparece |
 | `vencida` | Siguió `pendiente` 7 días, o un `whatsapp` pasó 180 días sin renovar el desafío |
 | `contradicha` | Solo `cuenta_cobro`: los compradores dicen, con más peso, que el titular no coincide |
+
+Solo `verificada` cuenta. `pendiente`, `caida` y `vencida` se muestran como **sin prueba** y pesan
+cero en todo lo demás: no vinculan, no sirven para reclamar y no respaldan una denuncia.
 
 Nada se borra: una vinculación caída o vencida sigue en el historial de
 `GET /actores/{identidad}/verificacion`, con sus fechas. La ficha muestra las que no están vencidas.
@@ -184,9 +193,12 @@ Dos comercios tienen **el mismo nombre cerca** si:
 2. sus ubicaciones están a 1.500 m o menos, la escala de barrio de `docs/resenas.md`; y
 3. no están vinculados (esos ya se muestran arriba).
 
-Cada uno aparece en `verificacion.mismo_nombre_cerca` del otro, con lo que alcanza para distinguirlos
-sin preguntarle a nadie: antigüedad (`alta`), pedidos entregados, vinculaciones verificadas y
-distancia redondeada a 100 m.
+**Un homónimo nunca es un error.** Dos "Verdulería de Marta" pueden ser dos verdulerías reales, y
+las dos tienen derecho a llamarse así. Ninguna se bloquea, ninguna se renombra y ninguna pierde
+posición. Cada una aparece en `verificacion.mismo_nombre_cerca` de la otra, con lo que alcanza para
+distinguirlas sin preguntarle a nadie: antigüedad (`alta`), pedidos entregados, vinculaciones
+verificadas y distancia redondeada a 100 m. Con eso la app puede avisar "hay otro comercio con el
+mismo nombre a 300 m" y mostrar los dos.
 
 ### La evidencia decide
 
@@ -256,7 +268,51 @@ Una sola denuncia por par denunciante–denunciado (409 `denuncia_repetida`). No
 reputación ni despacho, por la misma razón que en el punto 3: una denuncia que bajara a alguien sería
 el arma más barata del sistema.
 
-## 6. Qué recibe la app
+## 6. Reclamar una ficha
+
+Como el "reclamá este negocio" de Google, pero sin nadie del otro lado. Sirve cuando alguien creó una
+ficha de mi comercio —un empleado que se fue, un vecino con buena intención, un impostor— y la quiero
+a mi nombre.
+
+1. **Reclamo.** `POST /comercios/{id}/reclamos` (`esquemas/reclamo.json`), con sesión y firmado por
+   el reclamante, nunca por mandato. Dice con qué va a probar:
+   - `local`: un QR propio del reclamo, que el nodo devuelve una sola vez, para imprimir en la
+     ubicación de la ficha. Los clientes que lo escanean firman presencia, igual que en el punto 2.
+   - `dominio`, `sitio`, `instagram` o `whatsapp`: **solo una vinculación que la ficha ya declara y
+     que el dueño actual no tiene verificada**. Si no, 422 `prueba_no_admitida`. Sin esta regla,
+     cualquiera se quedaría con cualquier ficha probando un dominio propio que nada tiene que ver.
+   - `cuenta_cobro`, no: la cuenta es privada y su titular solo lo ve quien le transfiere, así que no
+     hay nada que el reclamante pueda publicar.
+2. **Prueba.** El texto es el mismo del punto 2 —`vereda:prueba=` más el código derivado del
+   reclamo firmado—, así que prueba que el dominio o el Instagram es **del reclamante**. En
+   `whatsapp`, el desafío al número. En `local`, hacen falta **5 o más autores distintos que computan
+   y peso ≥ 3,0**, más que para una vinculación propia porque se trata de sacarle la ficha a alguien.
+3. **Resolución, sola.** El nodo comprueba cada día, y cuando el reclamante lo pide
+   (`comprobarReclamo`). El estado va en `senales`:
+
+| `senales.estado` | Cuándo |
+| --- | --- |
+| `abierto` | Todavía sin prueba, dentro de los 30 días |
+| `resuelto` | El reclamante probó y el dueño actual no tiene verificada esa misma vinculación (en `local`: ninguna `local` verificada) |
+| `contradicho` | El dueño actual tiene verificada esa misma vinculación: la ficha ya está probada por quien la tiene |
+| `vencido` | Pasaron 30 días sin prueba. Vence solo, sin que nadie lo cierre |
+
+4. **Cambio de dueño.** Al resolverse, la ficha pasa a la clave del reclamante, en el acto:
+   - la clave del comercio pasa a `retirada` y la nueva entra al historial con `reclamo` (el id del
+     reclamo que la instaló), sin aval de la anterior (`docs/claves-y-firmas.md`);
+   - se revocan los mandatos y las sesiones de administración del dueño anterior;
+   - todo lo firmado antes sigue valiendo: pedidos, reseñas, respuestas. La reputación es del
+     comercio, no de quien lo administraba;
+   - la ficha queda marcada para siempre: `verificacion.reclamos.ultimo_cambio_de_dueno`, el reclamo
+     resuelto en `GET /comercios/{id}/reclamos` y el evento `reclamo.resuelto`.
+5. **Defensa, también automática.** El dueño actual recibe `reclamo.recibido`. Para defenderse no le
+   escribe a nadie: verifica la vinculación reclamada, o su local, y el reclamo queda `contradicho`.
+   Si pierde la ficha y era suya, reclama de vuelta con las mismas reglas.
+
+Un reclamo abierto por reclamante y ficha (409 `reclamo_abierto`). Mientras está abierto no cambia
+nada de la ficha: se ve en `verificacion.reclamos.abiertos` y nada más.
+
+## 7. Qué recibe la app
 
 El contrato de datos. Cómo se ve lo decide Leo; lo que sigue es qué datos tiene la app para mostrar y
 en qué momento, sin pedir nada extra.
@@ -268,11 +324,13 @@ en qué momento, sin pedir nada extra.
 | `GET /actores/{identidad}/denuncias` | Cada denuncia, con su respuesta y su estado | Leer las dos versiones y la evidencia |
 | `pago.instrucciones` | `titular`, `comprobacion_titular`, `advertencia` | Advertir **antes** de transferir. La `advertencia` se muestra tal cual |
 | `declararTransferencia` | `titular_coincide` | Recoger el veredicto del comprador |
+| `verificacion.mismo_nombre_cerca` | Nombre, distancia, antigüedad, pedidos, pruebas | Avisar "hay otro con el mismo nombre a 300 m" y mostrar los dos |
+| `GET /comercios/{id}/reclamos` | Reclamos con su prueba y su estado | Ver si la ficha cambió de dueño, cuándo y con qué prueba |
 
 Ante una denuncia, la app muestra la verificación de los dos perfiles —denunciado y suplantado— lado
 a lado: los datos son las dos respuestas de `GET /actores/{identidad}/verificacion`.
 
-## 7. Entre nodos
+## 8. Entre nodos
 
 - **Cada nodo responde por las vinculaciones de sus actores**, como responde por sus claves
   (`docs/federacion.md`). `GET /actores/{identidad}/verificacion` va firmado por el nodo (`firma`, con
@@ -304,9 +362,13 @@ a lado: los datos son las dos respuestas de `GET /actores/{identidad}/verificaci
 | `GET /actores/{identidad}/denuncias` | Público, con caché | Denuncias contra el actor |
 | `POST /actores/{identidad}/denuncias` | Sesión, nunca mandato | Denunciar |
 | `POST /actores/{identidad}/denuncias/{id}/respuesta` | El denunciado (sesión, o mandato `administrar` / `repartir`) | Responder una vez |
+| `GET /comercios/{id}/reclamos` | Público, con caché | Reclamos de propiedad sobre la ficha |
+| `POST /comercios/{id}/reclamos` | Sesión, nunca mandato | Reclamar la ficha. Devuelve el texto a publicar o el QR |
+| `POST /comercios/{id}/reclamos/{reclamo}/comprobar` | El reclamante, con sesión | Comprobar ahora; se resuelve en el acto si prueba |
 
 Cambios en lo que ya existía: `vinculaciones` en `comercio.json` y `repartidor.json`,
 `contacto_confirmado` en `usuario.json`, `comprobacion_titular` y `advertencia` en
 `pago.instrucciones`, `titular_coincide` en `declararTransferencia`, `vinculaciones` en
-`/.well-known/vereda.json`, y los eventos `vinculacion.*`, `atestacion.recibida` y `denuncia.*`
+`/.well-known/vereda.json`, `reclamo` en la entrada de clave, y los eventos `vinculacion.*`,
+`atestacion.recibida`, `denuncia.*` y `reclamo.*`
 (`docs/eventos.md`).

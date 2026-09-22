@@ -257,6 +257,49 @@ paths:
         "200": { description: Paquete firmado, content: { application/json: { schema: { $ref: "#/components/schemas/ExportacionComercio" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
 
+  /comercios/{id}/reclamos:
+    get:
+      operationId: listarReclamos
+      tags: [identidad]
+      summary: "Reclamos de propiedad sobre una ficha: quién reclama, con qué prueba y en qué quedó"
+      security: []
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/reclamo.json" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+    post:
+      operationId: reclamarComercio
+      tags: [identidad]
+      summary: "Reclamar una ficha existente como propia. Se resuelve solo cuando el reclamante prueba lo que el dueño actual no probó; si no, vence solo a los 30 días"
+      description: |
+        Sin revisor, humano o agente (`docs/identidad-y-verificacion.md`, punto 6). La prueba es un
+        QR propio del reclamo en la ubicación de la ficha (`local`), o una vinculación que la ficha ya
+        declara y que el dueño actual no tiene verificada; cualquier otra: 422 `prueba_no_admitida`.
+        Un reclamo abierto por reclamante y ficha: 409 `reclamo_abierto`. Nunca por mandato: cambia
+        de manos un comercio.
+
+        Si se resuelve, la ficha pasa a la clave del reclamante: la clave anterior queda `retirada`,
+        la nueva lleva `reclamo` en el historial, se revocan los mandatos del dueño anterior y todo
+        lo firmado antes sigue valiendo.
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/reclamo.json" } } } }
+      responses:
+        "201": { description: Abierto, content: { application/json: { schema: { $ref: "#/components/schemas/ReclamoAbierto" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/reclamos/{reclamo}/comprobar:
+    post:
+      operationId: comprobarReclamo
+      tags: [identidad]
+      summary: "El reclamante pide comprobar su prueba ahora. En 'whatsapp', con el código del desafío. Si prueba, se resuelve en el acto"
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: reclamo, in: path, required: true, schema: { type: string } } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { codigo: { type: string, pattern: "^[0-9]{6}$" } } } } } }
+      responses:
+        "200": { description: "Comprobado. Sin prueba no es un error: 'senales.motivo' dice qué faltó", content: { application/json: { schema: { $ref: "esquemas/reclamo.json" } } } }
+        "403": { description: No es el reclamante, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "404": { $ref: "#/components/responses/Error" }
   /catalogo/{ean}:
     get:
       operationId: verProductoDeCatalogo
@@ -902,6 +945,14 @@ components:
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
     Carrito: { $ref: "esquemas/carrito.json" }
+    ReclamoAbierto:
+      type: object
+      required: [reclamo]
+      properties:
+        reclamo: { $ref: "esquemas/reclamo.json" }
+        publicar: { type: string, pattern: "^vereda:prueba=[A-Za-z0-9_-]{22}$", description: "El texto a publicar en la vinculación reclamada. Ausente en 'local' y 'whatsapp'." }
+        donde: { type: string }
+        qr: { type: string, description: "Solo 'local': el QR del reclamo para imprimir en la ubicación de la ficha. Se muestra esta única vez." }
     VinculacionDeclarada:
       type: object
       required: [vinculacion]

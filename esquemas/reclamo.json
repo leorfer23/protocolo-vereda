@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/reclamo.json",
+  "title": "Reclamo de propiedad de un comercio",
+  "description": "Alguien dice que una ficha existente es de su comercio y lo prueba con una vinculación que el dueño actual no tiene verificada. Se resuelve solo, por la prueba, o vence solo: no hay revisor humano ni agente en ningún paso (docs/identidad-y-verificacion.md, punto 6). Público y firmado por el reclamante.",
+  "type": "object",
+  "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
+  "required": ["comercio", "reclamante", "prueba", "firma"],
+  "properties": {
+    "comercio": { "$ref": "comunes.json#/$defs/identidad", "description": "La ficha reclamada." },
+    "reclamante": { "$ref": "comunes.json#/$defs/identidad", "description": "Quién reclama. Es el firmante de 'firma' y, si el reclamo se resuelve, el dueño nuevo." },
+    "prueba": {
+      "type": "object",
+      "description": "Con qué va a probar. 'local': un QR propio del reclamo, impreso en la ubicación de la ficha. Cualquier otro tipo: una vinculación que la ficha ya declara y que el dueño actual no tiene verificada; si no, 422 prueba_no_admitida. El texto a publicar es 'vereda:prueba=' + base64url(SHA-256(JCS del reclamo sin 'firma' ni 'senales'))[0:16].",
+      "required": ["tipo"],
+      "properties": {
+        "tipo": { "type": "string", "enum": ["dominio", "sitio", "instagram", "whatsapp", "local"], "description": "'cuenta_cobro' no: la cuenta es privada y su titular solo lo comprueba quien le transfiere, así que no hay nada que el reclamante pueda publicar." },
+        "valor": { "type": "string", "minLength": 1, "maxLength": 253 }
+      },
+      "if": { "properties": { "tipo": { "const": "local" } } },
+      "then": { "not": { "required": ["valor"] } },
+      "else": { "required": ["valor"] },
+      "additionalProperties": false
+    },
+    "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Del reclamante. Cubre todo menos 'firma' y 'senales'." },
+    "senales": {
+      "type": "object",
+      "description": "Lo escribe el nodo al comprobar; queda fuera de la firma.",
+      "required": ["estado", "vence"],
+      "properties": {
+        "estado": { "type": "string", "enum": ["abierto", "resuelto", "contradicho", "vencido"], "description": "'resuelto': el reclamante probó y la ficha pasó a su clave. 'contradicho': el dueño actual tiene verificada esa misma vinculación. 'vencido': pasó 'vence' sin prueba. Ninguno lo decide una persona." },
+        "vence": { "$ref": "comunes.json#/$defs/instante", "description": "30 días después de creado." },
+        "comprobado_en": { "$ref": "comunes.json#/$defs/instante" },
+        "resuelto_en": { "$ref": "comunes.json#/$defs/instante" },
+        "atestaciones": { "$ref": "comunes.json#/$defs/peso_atestaciones", "description": "Solo 'local': presencias con el QR del reclamo." },
+        "motivo": { "type": "string", "maxLength": 300 }
+      },
+      "allOf": [
+        { "if": { "properties": { "estado": { "const": "resuelto" } } }, "then": { "required": ["resuelto_en"] } }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

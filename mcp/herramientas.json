@@ -494,7 +494,7 @@
     },
     {
       "name": "ver_verificacion",
-      "description": "Qué probó un comercio, un repartidor o una persona sobre quién es, y lo que lo distingue de un duplicado: sus vinculaciones (dominio, sitio, Instagram, WhatsApp, local, cuenta de cobro) con su estado, los comercios vinculados por dueño, CUIT o cuenta, los homónimos a menos de 1,5 km con su antigüedad y pedidos, las denuncias por estado y su historial. Nada de esto es un sello: son pruebas que cualquiera puede rehacer (docs/identidad-y-verificacion.md). Ej: '¿esta es la verdadera La Huerta?', '¿por qué hay dos pizzerías iguales?'. No requiere mandato.",
+      "description": "Qué probó un comercio, un repartidor o una persona sobre quién es, y lo que lo distingue de un duplicado: sus vinculaciones (dominio, sitio, Instagram, WhatsApp, local, cuenta de cobro) con su estado, los comercios vinculados por dueño, CUIT o cuenta, los homónimos a menos de 1,5 km con su antigüedad y pedidos, las denuncias por estado, los reclamos de propiedad (y si la ficha cambió de dueño) y su historial. Nada de esto es un sello: son pruebas que cualquiera puede rehacer (docs/identidad-y-verificacion.md). Ej: '¿esta es la verdadera La Huerta?', '¿por qué hay dos pizzerías iguales?'. No requiere mandato.",
       "inputSchema": {"type": "object", "required": ["identidad"], "properties": {"identidad": {"type": "string", "description": "actor@nodo"}}}
     },
     {

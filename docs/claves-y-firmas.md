@@ -86,6 +86,10 @@ Si un destinatario no publica `clave_cifrado`, el chat de ese contexto va sin ci
 - Un pedido firmado con una clave `retirada` se acepta si su `created` es anterior a `hasta`: estaba en vuelo durante la rotación.
 - Si se compromete la clave de un nodo que custodia claves de actores, esas claves también están comprometidas. El nodo declara la suya y rota todas las que custodia.
 
+## Reclamo de un comercio
+
+Cuando un reclamo de propiedad se resuelve (`docs/identidad-y-verificacion.md`, punto 6), la clave del comercio pasa a `retirada` y la nueva entra sin `avalada_por` —la anterior era del dueño anterior— y con `reclamo`, el id del reclamo firmado que la instaló. Quien verifica el historial sigue la cadena por ahí: el reclamo es público, firmado por el reclamante, y dice con qué prueba se resolvió. Las firmas de la clave retirada anteriores a `hasta` siguen valiendo.
+
 ## Agentes
 
 Un mandato nombra la clave del agente. Si el agente cambia de clave, hace falta un mandato nuevo.
