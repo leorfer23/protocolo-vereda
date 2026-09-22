@@ -79,10 +79,10 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 
 **Nivel A — anónimo, de solo lectura.**
 
-1. *Estructura.* Las 12 lecturas públicas responden al método declarado, devuelven `ETag`
+1. *Estructura.* Las 13 lecturas públicas responden al método declarado, devuelven `ETag`
    y `Cache-Control` en `200`, y `304` sin cuerpo al repetir con `If-None-Match`.
 2. *Esquema en vivo.* Toda respuesta `200` de una ruta pública (`/comercios`,
-   `/comercios/{id}`, `.../ofertas`, `.../promociones`, `/catalogo/{ean}`, `/buscar`,
+   `/comercios/{id}`, `.../ofertas`, `.../promociones`, `.../reputacion`, `/catalogo/{ean}`, `/buscar`,
    `/rondas`, `/rondas/{id}`, `/.well-known/vereda.json`, `/actores/{id}/claves`,
    `/actores/{id}/mudanza`, `/actores/{id}/resenas`) valida contra el esquema que
    `openapi.yaml` referencia. Sin fixtures propios: valida lo que el nodo realmente tenga
@@ -90,12 +90,17 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 3. *Errores.* Una ruta con parámetro que no existe (`ean` inventado, `id` inventado)
    devuelve el `estado_http` declarado con cuerpo `esquemas/error.json`, y `codigo` dentro
    del vocabulario de `error.json#/properties/codigo/examples`.
-4. *Firmas reales, sin fixtures.* Cada reseña pública de `/actores/{id}/resenas` se
+4. *Fórmula de reputación.* `GET /comercios/{id}/reputacion` no se valida solo contra el
+   esquema: la suite rehace la cuenta con las partes que el propio nodo publica
+   (`0,7 · promedio + 0,3 · (1 + 4 · recompra)`, `docs/resenas.md`) y falla si el número no
+   cierra, o si el desglose no dice qué fórmula aplicó. Un nodo que devuelve 5,0 con un
+   promedio de 3,2 no cumple el protocolo aunque el esquema valide.
+5. *Firmas reales, sin fixtures.* Cada reseña pública de `/actores/{id}/resenas` se
    verifica de punta a punta: JCS del objeto sin `firma`, contra la clave publicada en
    `/actores/{firmante}/claves` — que puede vivir en **otro nodo**, exactamente la prueba
    de interoperabilidad entre nodos que importa, sin que la suite tenga que crear nada.
    Es la aplicación literal de "cualquiera lo verifica" de `docs/claves-y-firmas.md`.
-5. *Negativos sin sesión.* Los 67 casos de `ejemplos/casos/*.json` puestos como cuerpo de
+6. *Negativos sin sesión.* Los 74 casos de `ejemplos/casos/*.json` puestos como cuerpo de
    la operación de escritura correspondiente, sin credenciales: se espera `401`, no `422`
    ni `500` — que el nodo pida autenticación antes que validar el cuerpo.
 

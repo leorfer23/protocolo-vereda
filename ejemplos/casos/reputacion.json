@@ -1,0 +1,238 @@
+{
+  "$comentario": "Casos del desglose de GET /comercios/{id}/reputacion. Los números salen de docs/resenas.md.",
+  "esquema": "resena.json#/$defs/reputacion_contextual",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Desglose global, sin sesión: cinco vecinos recurrentes, sin campaña.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El mismo comercio bajo una campaña de 20 identidades nuevas: las reseñas se cuentan, no se esconden.",
+      "doc": {
+        "reputacion": 4.17,
+        "promedio": 4.46,
+        "recompra": 0.62,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)",
+        "no_computaron": {
+          "dueno_o_vinculada": 0,
+          "en_revision_por_rafaga": 20
+        },
+        "rafaga": {
+          "activa": true,
+          "desde": "2026-09-19T21:00:00-03:00",
+          "resenas_en_ventana": 20,
+          "ventana_horas": 72,
+          "ritmo_habitual": 1.4,
+          "autores_sin_credito": 0.95,
+          "lado": "negativo"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Con sesión: el mismo cálculo con el factor v activo.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)",
+        "para_vos": {
+          "reputacion": 4.21,
+          "promedio": 4.36,
+          "resenas_de_tu_zona": 4,
+          "comercios_en_comun": 4,
+          "rondas_o_grupos_en_comun": 2
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Comercio nuevo sin reseñas: arranca en la media de la red, no en 5.",
+      "doc": {
+        "reputacion": 3.1,
+        "promedio": 4.0,
+        "recompra": 0.0,
+        "cantidad": 0,
+        "peso_total": 0.0,
+        "compradores": 0,
+        "compradores_que_volvieron": 0,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Campaña de elogios: la señal de ráfaga es simétrica.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)",
+        "rafaga": {
+          "activa": true,
+          "resenas_en_ventana": 12,
+          "ventana_horas": 72,
+          "ritmo_habitual": 1.0,
+          "autores_sin_credito": 0.83,
+          "lado": "positivo"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin fórmula no es público: el desglose tiene que decir qué cuenta hizo.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La ventana de ráfaga es 72 h, fija y publicada: no la elige el nodo.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)",
+        "rafaga": {
+          "activa": true,
+          "ventana_horas": 24,
+          "resenas_en_ventana": 20,
+          "ritmo_habitual": 1.4,
+          "autores_sin_credito": 0.95
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Reputación fuera de la escala 0 a 5.",
+      "doc": {
+        "reputacion": 7.2,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "recompra es una proporción, no un conteo.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 12,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin recompra no se puede rehacer la cuenta.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La ráfaga tiene que decir si está activa.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)",
+        "rafaga": {
+          "resenas_en_ventana": 20
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El lado de la ráfaga es negativo o positivo, no un texto libre.",
+      "doc": {
+        "reputacion": 4.31,
+        "promedio": 4.5,
+        "recompra": 0.71,
+        "cantidad": 5,
+        "peso_total": 2.975,
+        "compradores": 5,
+        "compradores_que_volvieron": 5,
+        "media_red": 4.0,
+        "desde": "2025-09-21",
+        "formula": "0,7 · promedio + 0,3 · (1 + 4 · recompra); cada reseña pesa w = c · v · r · k · f (docs/resenas.md)",
+        "rafaga": {
+          "activa": true,
+          "lado": "sospechoso"
+        }
+      }
+    }
+  ]
+}

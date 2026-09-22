@@ -142,6 +142,7 @@ class NivelA:
         rondas = self._rondas()
         comercio = comercios[0] if comercios else None
         self._detalle_comercio(comercio)
+        self._reputacion_comercio(comercio)
         ofertas = self._ofertas_comercio(comercio)
         self._promociones_comercio(comercio)
         self._catalogo(ofertas)
@@ -262,6 +263,47 @@ class NivelA:
         caso = self._esquema_o_no_json(opid, "el cuerpo de /comercios/{id} cumple esquemas/comercio.json", op, r)
         if caso:
             self.casos.append(caso)
+
+    def _reputacion_comercio(self, comercio):
+        """No alcanza con que el nodo devuelva un número: la reputación es una
+        fórmula publicada (docs/resenas.md) y el desglose trae sus partes, así
+        que se rehace la cuenta acá. Un nodo que devuelve 5,0 con un promedio de
+        3,2 y recompra 0 no cumple el protocolo aunque el esquema valide."""
+        opid = "verReputacion"
+        if comercio is None:
+            self.casos.append(_omitido("esquema", opid, "GET /comercios/{id}/reputacion", "no se descubrió ningún comercio en /comercios"))
+            return
+        cid = comercio.get("id")
+        if not cid:
+            self.casos.append(_fallo("esquema", opid, "GET /comercios/{id}/reputacion", "el comercio descubierto no trae 'id'"))
+            return
+        op = self._op("/comercios/{id}/reputacion")
+        url = self._url("/comercios/{id}/reputacion", id=cid)
+        r = self._get(url)
+        if not r.ok:
+            self.casos.append(_fallo("estructura", opid, "GET /comercios/{id}/reputacion", r.motivo))
+            return
+        self.casos.append(self._chequear_estructura(opid, "GET /comercios/{id}/reputacion", url, r))
+        caso = self._esquema_o_no_json(opid, "el cuerpo de /comercios/{id}/reputacion cumple resena.json#/$defs/reputacion_contextual", op, r)
+        if caso:
+            self.casos.append(caso)
+        desc = "la reputación publicada es 0,7 · promedio + 0,3 · (1 + 4 · recompra)"
+        if r.estado != 200 or not r.cuerpo_es_json or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo("esquema", opid, desc, f"estado {r.estado} no es 200 con un objeto JSON"))
+            return
+        partes = {k: r.cuerpo.get(k) for k in ("reputacion", "promedio", "recompra")}
+        if any(not isinstance(v, (int, float)) or isinstance(v, bool) for v in partes.values()):
+            self.casos.append(_fallo("esquema", opid, desc, f"faltan o no son números las partes del desglose: {partes}"))
+            return
+        esperado = 0.7 * partes["promedio"] + 0.3 * (1 + 4 * partes["recompra"])
+        if abs(esperado - partes["reputacion"]) > 0.02:
+            self.casos.append(_fallo("esquema", opid, desc, f"con promedio {partes['promedio']} y recompra {partes['recompra']} la fórmula da {esperado:.3f}, el nodo publica {partes['reputacion']}"))
+        else:
+            self.casos.append(_ok("esquema", opid, desc, {"reputacion": partes["reputacion"], "promedio": partes["promedio"], "recompra": partes["recompra"]}))
+        if not r.cuerpo.get("formula"):
+            self.casos.append(_fallo("esquema", opid, "el desglose dice qué fórmula aplicó", "'formula' vacío o ausente: la reputación tiene que ser auditable sin leer la spec"))
+        else:
+            self.casos.append(_ok("esquema", opid, "el desglose dice qué fórmula aplicó"))
 
     def _ofertas_comercio(self, comercio):
         opid = "listarOfertas"

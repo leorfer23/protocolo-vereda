@@ -51,7 +51,7 @@ Cambiar esto con nodos corriendo es caro. Orden sugerido:
 6. `POST /federacion/entrantes`: política de reintentos e idempotencia, y negociación de versión entre nodos (`version_no_soportada` existe como error, sin flujo).
 7. `pedir_diario`: zona horaria y corte del día.
 8. Vectores de prueba de firma en `ejemplos/`: objeto, bytes canónicos, clave, firma y un request RFC 9421 completo. RFC 9421 como único mecanismo, versionado, sin variantes.
-9. Menores: ventana de 7 días de reseña en `resena.json` (hoy solo en el README); `orden=reputacion` en `/comercios` pero no en `/buscar` ni en MCP; "misma dirección" sin definir en despacho fase 2; replicación y conflictos del catálogo maestro; intercambio de claves X25519 del chat; mudanza cuando el nodo viejo no coopera; de quién es la responsabilidad en una disputa entre nodos.
+9. Menores: "misma dirección" sin definir en despacho fase 2; replicación y conflictos del catálogo maestro; intercambio de claves X25519 del chat; mudanza cuando el nodo viejo no coopera; de quién es la responsabilidad en una disputa entre nodos.
 
 ## Fase 1: suite de conformidad
 

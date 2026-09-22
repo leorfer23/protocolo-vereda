@@ -91,6 +91,34 @@ paths:
         "200": { description: Actualizado, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/reputacion:
+    get:
+      operationId: verReputacion
+      tags: [resenas]
+      summary: "Reputación contextual del comercio, con el desglose de cómo se calculó"
+      description: |
+        La fórmula entera está en `docs/resenas.md` y los números de esta respuesta alcanzan para
+        rehacerla a mano. Cada reseña pesa `w = c · v · r · k · f`: cercanía de la zona habitual del
+        autor al comercio, afinidad con quien mira, cuántas veces ese autor volvió a comprarle,
+        antigüedad y diversidad de su identidad, y las señales anti campaña.
+
+        Sin sesión devuelve el desglose global y se cachea para todos. Con sesión agrega `para_vos`
+        —el mismo cálculo con el factor `v` activo— y responde `Cache-Control: private`. No son dos
+        algoritmos: sin sesión `v` vale 0,7 para todas las reseñas y se cancela al normalizar.
+
+        Va aparte de `verComercio` para no ensuciar el caché de la ficha, que es pública y la
+        operación más pedida del nodo. `esquemas/comercio.json` sigue trayendo el número y la
+        cantidad en `reputacion` para que un listado no tenga que pedir N desgloses.
+
+        Las reseñas que no computan —del dueño, de identidades vinculadas, o marcadas por ráfaga—
+        siguen publicadas y visibles en `listarResenasDeActor` con su marca. Acá se cuentan, no se
+        esconden.
+      security: [ {}, { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/resena.json#/$defs/reputacion_contextual" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { description: No hay comercio con ese id }
   /comercios/{id}/ofertas:
     get:
       operationId: listarOfertas

@@ -17,9 +17,9 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 - **Agentes primero.** Mandatos firmados con topes de gasto, carrito que se valida paso a paso y dice qué falta en español, preferencias que viven en la red y no en el agente, agentes de comercio que negocian con agentes de usuario. Servidor MCP como primera interfaz.
 - **El comercio se administra solo.** Se da de alta y queda activo al instante: nadie habilita a nadie, no hay revisión ni sello de autoridad. Desde la misma API publica y edita su ficha, su catálogo y sus promociones, trabaja sus pedidos, mira sus métricas agregadas y se lleva todo firmado cuando quiere.
 - **Los datos del comercio son del comercio.** Cada comercio fija en su ficha pública cuántos días retiene los datos de un pedido y si guarda lista de clientes (con consentimiento de la persona). El protocolo promueve un default —90 días, sin lista— y le pone el sello `estandar` a quien lo cumple; no obliga a nadie, y el usuario elige sabiendo. Ver `docs/datos-y-privacidad.md`.
-- **Reputación firmada y portable.** Reseñas solo sobre pedidos entregados, firmadas con la clave del autor, sin edición ni borrado. Te la llevás a otro nodo.
+- **Reputación contextual, firmada y portable.** Reseñas solo sobre pedidos entregados, firmadas con la clave del autor, sin edición ni borrado, y te las llevás a otro nodo. La reputación que ves se calcula para vos con una fórmula publicada: pesa más el vecino que volvió a comprar que la identidad creada ayer del otro lado de la ciudad, y las campañas se marcan con un criterio determinista que cualquiera puede rehacer. Ver `docs/resenas.md`.
 - **Dinero directo.** La red genera la referencia de cobro y confirma. Nunca custodia, nunca reembolsa, nunca retiene.
-- **Algoritmos públicos.** Ranking y despacho están en `docs/ranking-y-despacho.md`. Nadie puede pagar para aparecer primero.
+- **Algoritmos públicos.** Ranking y despacho están en `docs/ranking-y-despacho.md`, el peso de cada reseña en `docs/resenas.md`. Nadie puede pagar para aparecer primero ni para subir su reputación.
 - **Federación desde el día uno.** Identidad `actor@nodo`, pedidos firmados entre nodos, sin registro central.
 
 ## Qué hay acá
@@ -27,10 +27,10 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | Carpeta | Contenido |
 | --- | --- |
 | `esquemas/` | 22 esquemas JSON (draft 2020-12): comercio, oferta, promoción, modalidad, carrito, pedido, pago, repartidor, usuario, reseña, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, evento, error, comunes |
-| `openapi.yaml` | La API abierta, 69 rutas. Apps y agentes usan las mismas |
-| `mcp/herramientas.json` | Las 36 herramientas del servidor MCP —24 del lado del usuario y 12 del lado del comercio—, con descripciones para asistentes |
+| `openapi.yaml` | La API abierta, 70 rutas. Apps y agentes usan las mismas |
+| `mcp/herramientas.json` | Las 37 herramientas del servidor MCP —25 del lado del usuario y 12 del lado del comercio—, con descripciones para asistentes |
 | `ejemplos/` | Una pizzería, una verdulería con cuatro modalidades, un catering a cotizar, viandas semanales, un supermercado con EAN, un pedido con pesables y sustituciones, un mandato, una ronda al barrio cerrado, un pedido grupal de edificio, y `vectores-firma.json` con los vectores de prueba de firma |
-| `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, carrito y reserva, promociones, datos y privacidad, diseño de la suite de conformidad (fase 1) |
+| `docs/` | Federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, reseñas y reputación contextual, carrito y reserva, promociones, datos y privacidad, diseño de la suite de conformidad (fase 1) |
 | `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1 y reproduce los vectores de firma |
 | `generar-vectores.py` | Regenera `ejemplos/vectores-firma.json`. Determinista: dos corridas dan el mismo archivo |
 | `conformidad/` | Suite de conformidad, fase 1 (`docs/suite-conformidad.md`). Corre por HTTP contra la URL de cualquier nodo: nivel A (anónimo), B (autenticado, `--sesion`/`--mandato`) y C (federación) — `python3 -m conformidad https://un-nodo.ar --nivel a,b,c` |
