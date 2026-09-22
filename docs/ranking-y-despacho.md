@@ -38,16 +38,30 @@ Consecuencias para el orden:
 
 ## Despacho
 
+Esto es el modo `pool`: el que usa un comercio cuando no tiene repartidores propios ni toma el que
+eligió el comprador, o cuando esos no aceptaron. Cada comercio elige en su ficha (`envios.asignacion`)
+qué modos usa y en qué orden —`propios`, `usuario`, `pool`— y qué pasa si nadie acepta; el diseño
+entero, con quién responde ante el comprador y quién le paga al repartidor, está en
+`docs/repartidores.md`. Sin bloque `envios`, el comercio usa solo este despacho.
+
 Objetivo: minimizar tiempo muerto del repartidor y cumplir el ETA prometido. No es objetivo maximizar entregas por hora.
 
 | Fase | Regla |
 | --- | --- |
-| 1 | Ofrecer al repartidor disponible más cercano al comercio; 30 s para aceptar; si no, al siguiente |
+| 1 | Ofrecer al repartidor disponible más cercano al comercio, entre los elegibles; 30 s para aceptar; si no, al siguiente |
 | 2 | Agrupar hasta 2 pedidos de comercios a menos de 500 m entre sí, con destinos a menos de 1 km entre sí y sin que el desvío agregue más de 10 minutos al ETA ya prometido del primer pedido, con consentimiento del usuario |
 | 3 | Lotes cada 60 s con restricciones de frío, peso y vehículo; rondas y consolidadas como un viaje de varias paradas |
 
+**Elegible** para un viaje del pool es el repartidor disponible cuya zona de trabajo declarada
+(`repartidor.zona`: polígono o centro y radio) contiene **todas** las paradas del viaje, con caja
+térmica si el viaje la requiere, capacidad para su peso y que acepta el medio con que se paga el envío
+(`repartidor.cobro.metodos`). Nadie recibe ofertas del pool fuera de su zona. La zona y las
+restricciones las declara el repartidor en `PUT /repartidor`; no las revisa nadie.
+
 El desvío se mide sobre la misma ruta OSRM con la que se calculó el ETA, comparando la ruta agrupada contra la del primer pedido solo. Si agrupar rompe el ETA prometido, no se agrupa.
 
-Garantías: el repartidor ve monto, distancia y peso antes de aceptar; rechazar no penaliza; un solo viaje activo por repartidor en fase 1; congelados con prioridad y máximo 20 min en camino; el ETA es el real (preparación + ruta OSRM).
+Garantías: el repartidor ve monto, distancia, peso y cómo se le paga antes de aceptar; rechazar no penaliza; soltar un viaje ya aceptado sí se ve en su reputación; un solo viaje activo por repartidor en fase 1; congelados con prioridad y máximo 20 min en camino; el ETA es el real (preparación + ruta OSRM).
 
-La tarifa de envío la fija la cooperativa de repartidores y es pública por tramo de distancia. La red la publica en `tarifa_envio` de `/.well-known/vereda.json` (schema `Nodo` en `openapi.yaml`) y la aplica.
+La tarifa de envío la fija la cooperativa de repartidores y es pública por tramo de distancia. La red la publica en `tarifa_envio` de `/.well-known/vereda.json` (schema `Nodo` en `openapi.yaml`) y la aplica. El envío se le paga directo al repartidor, en efectivo o a su alias, por quien lo contrató (`docs/repartidores.md`): la red no lo cobra ni lo retiene.
+
+La reputación del repartidor no entra en este algoritmo.

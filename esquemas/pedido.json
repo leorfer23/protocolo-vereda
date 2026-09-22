@@ -12,6 +12,17 @@
     "usuario": { "$ref": "comunes.json#/$defs/identidad" },
     "comercio": { "$ref": "comunes.json#/$defs/identidad" },
     "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
+    "asignacion": {
+      "type": "object",
+      "description": "Cómo se consiguió el repartidor de este pedido y quién responde por la entrega ante el comprador (docs/repartidores.md). Lo escribe el nodo.",
+      "properties": {
+        "modo": { "type": "string", "enum": ["comercio", "propio", "usuario", "pool"], "description": "'comercio': lo lleva el propio comercio, sin repartidor aparte." },
+        "propuesto_por_usuario": { "$ref": "comunes.json#/$defs/identidad", "description": "El repartidor que nombró el comprador al confirmar, lo haya tomado o no." },
+        "responsable_entrega": { "type": "string", "enum": ["comercio", "usuario_y_repartidor"], "description": "'usuario_y_repartidor' solo con modo 'usuario': el comercio responde hasta entregarle en mano al repartidor que eligió el comprador (firma 'retiro'); de ahí en adelante es la relación entre ellos." },
+        "cobro_envio": { "type": "string", "enum": ["al_repartidor", "al_comercio"] },
+        "asignado_en": { "$ref": "comunes.json#/$defs/instante" }
+      }
+    },
     "via": {
       "type": "object",
       "description": "Quién armó el pedido.",
@@ -51,7 +62,7 @@
           "instante": { "$ref": "comunes.json#/$defs/instante" },
           "actor": { "$ref": "comunes.json#/$defs/identidad" },
           "motivo": { "type": "string" },
-          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado", "nodo_no_disponible"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
+          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado", "nodo_no_disponible", "sin_repartidor"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
         }
       }
     },
@@ -99,6 +110,7 @@
       "properties": {
         "creacion": { "$ref": "comunes.json#/$defs/firma" },
         "aceptacion": { "$ref": "comunes.json#/$defs/firma" },
+        "retiro": { "$ref": "comunes.json#/$defs/firma", "description": "Del repartidor, al retirar del comercio. Es el traspaso: con repartidor elegido por el comprador, marca hasta dónde responde el comercio." },
         "entrega": { "$ref": "comunes.json#/$defs/firma" }
       }
     }

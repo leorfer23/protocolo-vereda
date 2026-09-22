@@ -2,35 +2,163 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vereda.ar/esquemas/v1/repartidor.json",
   "title": "Repartidor",
-  "description": "Quien lleva. Socio de la red, organizado en cooperativa. Público: nombre, vehículo, reputación. Ubicación en vivo solo a las partes de un pedido activo.",
+  "description": "Quien lleva. Cualquier identidad se declara repartidor sola, con PUT /repartidor, y reparte al instante: nadie la aprueba, no hay screening ni datos que cargue un tercero. Público: nombre, vehículo, cooperativa, reputación (GET /repartidores/{identidad}). Ubicación en vivo solo a las partes de un pedido activo. Diseño completo en docs/repartidores.md.",
   "type": "object",
   "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
   "required": ["identidad", "nombre", "vehiculo", "verificacion", "reputacion", "disponible"],
   "properties": {
     "identidad": { "$ref": "comunes.json#/$defs/identidad" },
-    "nombre": { "type": "string" },
-    "cooperativa": { "$ref": "comunes.json#/$defs/identidad", "description": "Si cobra a través de su cooperativa." },
-    "vehiculo": { "type": "string", "enum": ["a_pie", "bici", "moto", "auto", "utilitario"] },
+    "nombre": { "type": "string", "maxLength": 120 },
+    "cooperativa": { "$ref": "#/$defs/cooperativa" },
+    "vehiculo": { "$ref": "#/$defs/vehiculo" },
     "caja_termica": { "type": "boolean", "default": false },
     "capacidad_kg": { "type": "number", "minimum": 0 },
-    "zona": { "$ref": "comunes.json#/$defs/poligono" },
+    "zona": { "$ref": "#/$defs/zona_trabajo" },
+    "cobro": { "$ref": "#/$defs/cobro" },
+    "propio_de": { "$ref": "#/$defs/propio_de" },
+    "acepta_elegido_por_usuario": { "$ref": "#/$defs/acepta_elegido_por_usuario" },
     "disponible": { "type": "boolean" },
     "ubicacion": { "$ref": "comunes.json#/$defs/punto" },
     "ubicacion_actualizada": { "$ref": "comunes.json#/$defs/instante" },
     "verificacion": {
       "type": "object",
+      "description": "Chequeos automáticos y verificables, no una habilitación: un repartidor con todo en false reparte igual, y quien le entrega un pedido ve exactamente qué está verificado y qué no.",
       "required": ["dni_prueba_de_vida", "cuenta_cobro_propia"],
       "properties": { "dni_prueba_de_vida": { "type": "boolean" }, "cuenta_cobro_propia": { "type": "boolean" }, "verificado_en": { "$ref": "comunes.json#/$defs/instante" } }
     },
-    "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
+    "reputacion": { "$ref": "#/$defs/reputacion" },
     "clave_publica": { "type": "string" },
     "claves": { "$ref": "comunes.json#/$defs/claves", "description": "Historial de claves. 'clave_publica' repite la activa." },
+    "privado": { "$ref": "#/$defs/privado" }
+  },
+  "$defs": {
+    "vehiculo": { "type": "string", "enum": ["a_pie", "bici", "moto", "auto", "utilitario"] },
+    "cooperativa": { "type": "string", "maxLength": 120, "description": "Opcional y declarada por el repartidor: la identidad actor@nodo de su cooperativa o su nombre en texto. No habilita nada ni cambia cómo se le paga." },
+    "zona_trabajo": {
+      "description": "Dónde acepta viajes. El despacho del pool solo le ofrece viajes con todas sus paradas adentro (docs/ranking-y-despacho.md). Un polígono, o un centro y un radio.",
+      "oneOf": [
+        { "$ref": "comunes.json#/$defs/poligono" },
+        {
+          "type": "object",
+          "required": ["centro", "radio_km"],
+          "additionalProperties": false,
+          "properties": {
+            "centro": { "$ref": "comunes.json#/$defs/punto" },
+            "radio_km": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 }
+          }
+        }
+      ]
+    },
+    "cobro": {
+      "type": "object",
+      "description": "Cómo le pagan el envío y las propinas: directo a él, sin nadie en el medio. Público: quien lo contrata sabe antes si le puede pagar en efectivo. El alias vive en 'privado'.",
+      "required": ["metodos"],
+      "properties": {
+        "metodos": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "enum": ["efectivo", "transferencia"] } }
+      }
+    },
+    "propio_de": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 50,
+      "items": { "$ref": "comunes.json#/$defs/identidad" },
+      "description": "Comercios de los que acepta ser repartidor propio. Es su mitad del vínculo: es propio de un comercio solo mientras figura acá y en 'privado.repartidores_propios' del comercio. Cualquiera de los dos lo corta sacando al otro de su lista."
+    },
+    "acepta_elegido_por_usuario": { "type": "boolean", "default": true, "description": "Si un comprador lo puede nombrar al confirmar un carrito. Aun así, cada viaje lo acepta o lo rechaza él." },
     "privado": {
       "type": "object",
+      "description": "Solo lo ven el nodo y el propio repartidor. Nunca se federa.",
       "properties": {
+        "cobro": {
+          "type": "object",
+          "required": ["alias"],
+          "description": "Alias de transferencia directa. Lo ve únicamente quien le debe un pago de un viaje activo, en pago.json#/properties/instrucciones; nunca sale en el perfil público.",
+          "properties": { "alias": { "type": "string", "minLength": 6, "maxLength": 40 }, "titular": { "type": "string" } }
+        },
         "dni": { "type": "string" },
-        "cuenta_cobro": { "type": "object", "properties": { "psp": { "type": "string" }, "referencia": { "type": "string" } } },
         "telefono": { "type": "string" }
+      }
+    },
+    "declaracion": {
+      "type": "object",
+      "description": "Cuerpo de PUT /repartidor: lo que el repartidor declara de sí mismo. Reemplaza la declaración anterior entera. Identidad, reputación, verificación y disponibilidad no se declaran: las pone el nodo o tienen su propia operación.",
+      "required": ["nombre", "vehiculo", "zona", "cobro"],
+      "additionalProperties": false,
+      "properties": {
+        "nombre": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "vehiculo": { "$ref": "#/$defs/vehiculo" },
+        "caja_termica": { "type": "boolean", "default": false },
+        "capacidad_kg": { "type": "number", "minimum": 0 },
+        "zona": { "$ref": "#/$defs/zona_trabajo" },
+        "cooperativa": { "$ref": "#/$defs/cooperativa" },
+        "cobro": { "$ref": "#/$defs/cobro" },
+        "propio_de": { "$ref": "#/$defs/propio_de" },
+        "acepta_elegido_por_usuario": { "$ref": "#/$defs/acepta_elegido_por_usuario" },
+        "privado": { "$ref": "#/$defs/privado" }
+      },
+      "if": { "properties": { "cobro": { "properties": { "metodos": { "contains": { "const": "transferencia" } } } } } },
+      "then": { "required": ["privado"], "properties": { "privado": { "required": ["cobro"] } } }
+    },
+    "publico": {
+      "type": "object",
+      "description": "Respuesta de GET /repartidores/{identidad}: lo mínimo para decidir si confiarle un pedido. Sin ubicación, sin zona, sin disponibilidad, sin alias.",
+      "required": ["identidad", "nombre", "vehiculo", "reputacion"],
+      "additionalProperties": false,
+      "properties": {
+        "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+        "nombre": { "type": "string" },
+        "vehiculo": { "$ref": "#/$defs/vehiculo" },
+        "caja_termica": { "type": "boolean" },
+        "cooperativa": { "$ref": "#/$defs/cooperativa" },
+        "cobro": { "$ref": "#/$defs/cobro" },
+        "verificacion": { "type": "object", "properties": { "dni_prueba_de_vida": { "type": "boolean" }, "cuenta_cobro_propia": { "type": "boolean" } } },
+        "reputacion": { "$ref": "#/$defs/reputacion" },
+        "clave_publica": { "type": "string" },
+        "desde": { "type": "string", "format": "date", "description": "Primer viaje completado." }
+      }
+    },
+    "reputacion": {
+      "type": "object",
+      "description": "Reputación del repartidor (docs/repartidores.md): promedio ponderado de las reseñas que recibió, con la fórmula de docs/resenas.md y los factores ajustados a un repartidor. Rechazar una oferta no cuenta en ningún lado; soltar un viaje ya aceptado sí, y se ve.",
+      "required": ["promedio", "cantidad", "viajes_completados", "viajes_soltados"],
+      "properties": {
+        "promedio": { "type": "number", "minimum": 0, "maximum": 5, "description": "Promedio ponderado, ya con los 3 puntos de media_red." },
+        "cantidad": { "type": "integer", "minimum": 0 },
+        "media_red": { "type": "number", "minimum": 0, "maximum": 5, "description": "Promedio ponderado de las reseñas a repartidores del nodo en 12 meses; 4,0 con menos de 100." },
+        "viajes_completados": { "type": "integer", "minimum": 0 },
+        "viajes_soltados": { "type": "integer", "minimum": 0, "description": "Viajes que aceptó y después soltó, antes de retirar." },
+        "soltados_con_pedido_retirado": { "type": "integer", "minimum": 0, "description": "Viajes que soltó con la mercadería ya en la mano. Es lo más grave que puede pasar en un viaje y se muestra aparte." },
+        "desde": { "type": "string", "format": "date" }
+      }
+    },
+    "ganancias": {
+      "type": "object",
+      "description": "Respuesta de GET /repartidor/ganancias. Se deriva de los viajes y de los pagos cuyo destinatario es el repartidor: el nodo no guarda nada nuevo para calcularlo. Solo cuenta como cobrado lo que está 'confirmado'; lo demás va aparte, porque el nodo nunca vio esa plata.",
+      "required": ["granularidad", "periodos", "total"],
+      "properties": {
+        "granularidad": { "type": "string", "enum": ["dia", "semana", "mes", "total"] },
+        "desde": { "$ref": "comunes.json#/$defs/instante" },
+        "hasta": { "$ref": "comunes.json#/$defs/instante" },
+        "periodos": { "type": "array", "items": { "$ref": "#/$defs/ganancias_periodo" } },
+        "total": { "$ref": "#/$defs/ganancias_periodo" }
+      }
+    },
+    "ganancias_periodo": {
+      "type": "object",
+      "required": ["viajes", "envios", "propinas", "sin_confirmar"],
+      "properties": {
+        "desde": { "$ref": "comunes.json#/$defs/instante" },
+        "hasta": { "$ref": "comunes.json#/$defs/instante" },
+        "viajes": { "type": "integer", "minimum": 0, "description": "Viajes completados." },
+        "pedidos": { "type": "integer", "minimum": 0 },
+        "distancia_km": { "type": "number", "minimum": 0 },
+        "envios": { "$ref": "comunes.json#/$defs/monto", "description": "Pagos 'envio' confirmados." },
+        "propinas": { "$ref": "comunes.json#/$defs/monto", "description": "Pagos 'propina_repartidor' confirmados." },
+        "por_metodo": {
+          "type": "object",
+          "properties": { "efectivo": { "$ref": "comunes.json#/$defs/monto" }, "transferencia": { "$ref": "comunes.json#/$defs/monto" } }
+        },
+        "sin_confirmar": { "$ref": "comunes.json#/$defs/monto", "description": "Pagos al repartidor 'pendiente' o 'vencido' de viajes del período: lo que el nodo sabe que se le debía y él no marcó como recibido." }
       }
     }
   }

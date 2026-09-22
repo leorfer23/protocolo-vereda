@@ -40,7 +40,10 @@
         "por_pedido": { "type": "array", "items": { "type": "object", "required": ["pedido_id", "monto"], "properties": { "pedido_id": { "$ref": "comunes.json#/$defs/id" }, "monto": { "$ref": "comunes.json#/$defs/monto" } } } }
       }
     },
-    "estado": { "type": "string", "enum": ["ofrecido", "aceptado", "en_curso", "completado", "rechazado"] },
+    "estado": { "type": "string", "enum": ["ofrecido", "aceptado", "en_curso", "completado", "rechazado", "soltado"], "description": "'rechazado': el repartidor pasó la oferta, y no cuenta en ningún lado. 'soltado': la había aceptado y la dejó (POST /viajes/{id}/soltar); cuenta en su reputación y el viaje vuelve a asignarse." },
+    "modo": { "type": "string", "enum": ["propio", "usuario", "pool"], "description": "Por qué modo de asignación del comercio le llegó la oferta (docs/repartidores.md)." },
+    "soltado_en": { "$ref": "comunes.json#/$defs/instante" },
+    "motivo_soltado": { "type": "string", "maxLength": 300 },
     "ofrecido_en": { "$ref": "comunes.json#/$defs/instante" },
     "vence_oferta": { "$ref": "comunes.json#/$defs/instante", "description": "Solo con estado 'ofrecido': hasta cuándo se puede aceptar. Pasado sin respuesta, la oferta pasa al siguiente repartidor (docs/ranking-y-despacho.md)." },
     "aceptado_en": { "$ref": "comunes.json#/$defs/instante" },

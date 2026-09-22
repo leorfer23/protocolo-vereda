@@ -198,6 +198,13 @@ repartidor reseña al comprador. Cómo pesan:
   respuesta a la del comprador. Mientras tanto la reseña ya está firmada y guardada: nadie puede
   retirarla al ver la otra.
 
+## Reseñas al repartidor y del repartidor
+
+Comprador y comercio reseñan al repartidor de un pedido entregado, y el repartidor a los dos. Los
+pesos cambian porque un repartidor no tiene cercanía que proteger ni lo elige nadie por afinidad:
+`c = 1`, `v` se cancela y no hay término de recompra. El detalle, y qué se muestra en su lugar
+(viajes completados y soltados), está en `docs/repartidores.md`, punto e.
+
 ## Superficie de API
 
 Una sola operación nueva: `GET /comercios/{id}/reputacion`.

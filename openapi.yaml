@@ -24,7 +24,7 @@ tags:
   - { name: rondas }
   - { name: grupos }
   - { name: cotizaciones }
-  - { name: viajes, description: Lado repartidor }
+  - { name: viajes, description: "Lado repartidor: alta sin aprobación, viajes, cobro del envío, historial y ganancias (docs/repartidores.md)" }
   - { name: mensajes }
   - { name: resenas }
   - { name: mandatos, description: Agentes }
@@ -341,12 +341,13 @@ paths:
       summary: Crea el pedido, reserva stock y cupos hasta que venza el cobro, y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
       security: [ { sesion: [] }, { mandato: [pedir] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, notas: { type: string }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, notas: { type: string }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "El repartidor de confianza que nombra el comprador (docs/repartidores.md). Si el comercio tiene 'usuario' en envios.asignacion se le ofrece en ese turno; si no, queda como propuesta que el comercio acepta o no. Lo contrata el comprador: el envío se le paga a él." }, metodo_envio: { type: string, enum: [efectivo, transferencia], description: "Cómo se paga el envío cuando va directo al repartidor. El despacho solo lo ofrece a repartidores que aceptan ese medio. Ausente: efectivo si el pedido es en efectivo, si no transferencia." }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
       responses:
         "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado). No se crea el pedido; el carrito queda no_disponible.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "410": { $ref: "#/components/responses/CarritoVencido" }
+        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /pedidos/{id}:
     get: { operationId: verPedido, tags: [pedidos], summary: "Estado, ítems, ETA, ubicación del repartidor", security: [ { sesion: [] }, { mandato: [leer] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
@@ -392,25 +393,51 @@ paths:
       responses: { "200": { description: OK } }
   /pedidos/{id}/listo:
     post: { operationId: marcarPedidoListo, tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { $ref: "#/components/responses/Error" } } }
+  /pedidos/{id}/asignar:
+    post:
+      operationId: asignarRepartidor
+      tags: [pedidos]
+      summary: "Comercio: decidir, para este pedido, quién lo lleva: él mismo, un propio, el pool o el repartidor que propuso el comprador"
+      description: |
+        Pisa `envios.asignacion` solo para este pedido. Sirve para aceptar la propuesta del
+        comprador cuando el comercio no tiene `usuario` en su orden, para relanzar tras
+        `pedido.sin_repartidor`, o para llevarlo él (`modo: comercio`, sin viaje: entrega el
+        comercio con `entregar`). Mientras el pedido no esté `en_camino`.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [modo], properties: { modo: { type: string, enum: [comercio, propio, usuario, pool] }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "Con modo 'propio': a cuál de los propios se le ofrece solo a él. Ausente: a todos." } } } } } }
+      responses: { "200": { description: Pedido con su asignación, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "403": { $ref: "#/components/responses/NoEsElDueno" }, "409": { $ref: "#/components/responses/Error" } }
   /pedidos/{id}/retirar:
-    post: { operationId: retirarPedido, tags: [pedidos], summary: "Repartidor: retiró del comercio", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post:
+      operationId: retirarPedido
+      tags: [pedidos]
+      summary: "Repartidor: retiró del comercio. Firma el traspaso (firmas.retiro)"
+      description: |
+        Con repartidor elegido por el comprador, esta firma es hasta dónde responde el comercio
+        (docs/repartidores.md). Si el comercio le paga el envío en efectivo al retirar
+        (`cobro_envio: al_comercio` o envío bonificado), el repartidor lo marca acá.
+      security: [ { sesion: [] }, { mandato: [repartir] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { cobrado_en_mano: { type: boolean, description: "El pago de envío en efectivo cuyo pagador es el comercio pasa a confirmado." } } } } } }
+      responses: { "200": { description: OK } }
   /pedidos/{id}/entregar:
     post:
       operationId: entregarPedido
       tags: [pedidos]
       summary: "Repartidor, o comercio en modalidad retiro: entregado. Firma la entrega. En retiro exige el código del usuario; con efectivo marca el cobro en mano; con alcohol, mayoría de edad verificada."
-      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si el pago está en_mano. Lo pasa a confirmado." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." } } } } } }
       responses: { "200": { description: OK } }
   /pedidos/{id}/transferencia:
     post:
       operationId: declararTransferencia
       tags: [pedidos]
-      summary: "Comprador: declara que ya transfirió. No confirma el cobro (docs/carrito-y-reserva.md, transferencia directa)"
-      security: [ { sesion: [] } ]
+      summary: "Quien paga: declara que ya transfirió. No confirma el cobro (docs/carrito-y-reserva.md, transferencia directa)"
+      description: "Lo usa el comprador, y también el comercio cuando es el pagador del envío (docs/repartidores.md). Con 'concepto' se dice cuál de los pagos del pedido."
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." }, comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." } } } } } }
       responses:
         "200": { description: Pedido con la transferencia declarada, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "409": { $ref: "#/components/responses/Error" }
@@ -418,11 +445,17 @@ paths:
     post:
       operationId: confirmarTransferencia
       tags: [pedidos]
-      summary: "Comercio: confirma que vio la plata en su cuenta. Es lo único que pasa el cobro a confirmado y el pedido a pagado"
-      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      summary: "El destinatario del pago confirma que vio la plata en su cuenta ('recibido'). Es lo único que pasa ese cobro a confirmado"
+      description: |
+        Solo el destinatario del pago que dice `concepto`: el comercio para `productos` (y el
+        pedido pasa a pagado), el repartidor para `envio` y `propina_repartidor`. Cualquier otro
+        recibe 403 no_es_el_destinatario. Es el único que puede: es el único que ve su cuenta.
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." } } } } } }
       responses:
-        "200": { description: Pedido pagado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "403": { $ref: "#/components/responses/Error" }
+        "200": { description: Pedido con el cobro confirmado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
 
   /listas:
     get: { operationId: listarListas, tags: [listas], summary: Mis listas, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/lista.json" } } } } } } }
@@ -470,15 +503,87 @@ paths:
     post: { operationId: aceptarCotizacion, tags: [cotizaciones], summary: Aceptar el presupuesto; crea el pedido con precio fijo, security: [ { sesion: [] }, { mandato: [pedir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: Pedido creado } } }
 
   /viajes/ofrecidos:
-    get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso y paradas", security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
+    get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso, paradas y cómo se cobra el envío. Del pool, solo los que caen enteros en mi zona y respetan mi vehículo, caja térmica, capacidad y medios de cobro", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
   /viajes/{id}/aceptar:
-    post: { operationId: aceptarViaje, tags: [viajes], summary: "Repartidor: aceptar. Rechazar no penaliza.", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { description: Ya asignado } } }
+    post: { operationId: aceptarViaje, tags: [viajes], summary: "Repartidor: aceptar. Rechazar no penaliza.", security: [ { sesion: [] }, { mandato: [repartir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { description: Ya asignado } } }
   /viajes/{id}/rechazar:
-    post: { operationId: rechazarViaje, tags: [viajes], summary: "Repartidor: pasar", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post: { operationId: rechazarViaje, tags: [viajes], summary: "Repartidor: pasar. No cuenta en ningún lado", security: [ { sesion: [] }, { mandato: [repartir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+  /viajes/{id}/soltar:
+    post:
+      operationId: soltarViaje
+      tags: [viajes]
+      summary: "Repartidor: dejar un viaje ya aceptado. Vuelve a asignarse y cuenta en mi reputación (docs/repartidores.md)"
+      description: |
+        Rechazar una oferta no cuenta; soltar un viaje aceptado sí, y se ve en el perfil público
+        (`viajes_soltados`, y aparte `soltados_con_pedido_retirado` si ya tenía la mercadería).
+        Con mercadería en la mano, el repartidor sigue siendo quien la tiene hasta que otro la
+        retira de él o la devuelve al comercio: soltar no la hace desaparecer del historial.
+      security: [ { sesion: [] }, { mandato: [repartir] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { motivo: { type: string, maxLength: 300 } } } } } }
+      responses: { "200": { description: Soltado, content: { application/json: { schema: { $ref: "esquemas/viaje.json" } } } }, "409": { $ref: "#/components/responses/Error" } }
+  /repartidor:
+    get: { operationId: verMiRepartidor, tags: [viajes], summary: "Mi perfil de repartidor entero, con lo privado", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/repartidor.json" } } } }, "404": { description: "Esta identidad todavía no se declaró repartidor" } } }
+    put:
+      operationId: declararRepartidor
+      tags: [viajes]
+      summary: "Alta y edición del repartidor: vehículo, restricciones, zona, cobro, cooperativa. Sin aprobación: reparte al instante"
+      description: |
+        Cualquier identidad con sesión se declara repartidor. No hay revisión, ni screening, ni
+        datos que cargue un tercero: el nodo lo crea al instante, con `verificacion` en false y
+        `disponible: false`. Reemplaza la declaración entera; lo que no se manda se borra.
+      security: [ { sesion: [] }, { mandato: [repartir] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/repartidor.json#/$defs/declaracion" } } } }
+      responses: { "200": { description: Perfil actualizado, content: { application/json: { schema: { $ref: "esquemas/repartidor.json" } } } }, "201": { description: Alta, content: { application/json: { schema: { $ref: "esquemas/repartidor.json" } } } }, "422": { $ref: "#/components/responses/Error" } }
   /repartidor/disponibilidad:
-    put: { operationId: fijarDisponibilidad, tags: [viajes], summary: Disponible o no, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { type: object, properties: { disponible: { type: boolean } } } } } }, responses: { "204": { description: OK } } }
+    put: { operationId: fijarDisponibilidad, tags: [viajes], summary: Disponible o no, security: [ { sesion: [] }, { mandato: [repartir] } ], requestBody: { content: { application/json: { schema: { type: object, properties: { disponible: { type: boolean } } } } } }, responses: { "204": { description: OK } } }
   /repartidor/ubicacion:
-    put: { operationId: reportarUbicacion, tags: [viajes], summary: Ubicación cada 5 s mientras hay viaje activo, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/punto" } } } }, responses: { "204": { description: OK } } }
+    put: { operationId: reportarUbicacion, tags: [viajes], summary: Ubicación cada 5 s mientras hay viaje activo, security: [ { sesion: [] }, { mandato: [repartir] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/punto" } } } }, responses: { "204": { description: OK } } }
+  /repartidor/viajes:
+    get:
+      operationId: listarMisViajes
+      tags: [viajes]
+      summary: "Mis viajes, del más nuevo al más viejo: estado, monto, distancia, paradas y fecha"
+      description: |
+        Paginado por cursor opaco, igual que la bandeja del comercio: `limite` y, si hay más,
+        `cursor_siguiente`. Un cursor vencido o ajeno responde 422. Incluye los soltados; no
+        incluye las ofertas rechazadas, que no dejan rastro.
+      security: [ { sesion: [] }, { mandato: [repartir] } ]
+      parameters:
+        - { name: estado, in: query, schema: { type: array, items: { type: string, enum: [aceptado, en_curso, completado, soltado] } }, style: form, explode: false, description: "Uno o varios. Ausente: todos." }
+        - { name: desde, in: query, schema: { type: string, format: date-time }, description: "Aceptados desde este instante, inclusive" }
+        - { name: hasta, in: query, schema: { type: string, format: date-time }, description: "Aceptados hasta este instante, exclusive" }
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+        - { name: cursor, in: query, schema: { type: string }, description: El `cursor_siguiente` de la página anterior }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/PaginaDeViajes" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /repartidor/ganancias:
+    get:
+      operationId: verMisGanancias
+      tags: [viajes]
+      summary: "Lo que cobré por período: envíos y propinas confirmados, por medio, y lo que quedó sin marcar recibido"
+      description: |
+        Agregados de los pagos cuyo destinatario soy yo. El nodo no guarda nada nuevo para esto y
+        solo cuenta como cobrado lo que está `confirmado`: la plata nunca pasó por el nodo.
+      security: [ { sesion: [] }, { mandato: [repartir] } ]
+      parameters:
+        - { name: desde, in: query, schema: { type: string, format: date-time } }
+        - { name: hasta, in: query, schema: { type: string, format: date-time } }
+        - { name: granularidad, in: query, schema: { type: string, enum: [dia, semana, mes, total], default: semana } }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/repartidor.json#/$defs/ganancias" } } } }
+  /repartidores/{identidad}:
+    get:
+      operationId: verRepartidor
+      tags: [viajes]
+      summary: "Perfil público de un repartidor: nombre, vehículo, cooperativa, medios de cobro, verificaciones y reputación"
+      security: []
+      parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/repartidor.json#/$defs/publico" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { $ref: "#/components/responses/Error" }
 
   /mensajes:
     post:
@@ -618,7 +723,7 @@ components:
         authorizationCode:
           authorizationUrl: https://vereda.ar/oauth/autorizar
           tokenUrl: https://vereda.ar/oauth/token
-          scopes: { leer: Leer, armar: Armar carritos y listas, hablar: Responder en pedidos activos, suscribir: Suscripciones, pedir: "Confirmar pedidos hasta el tope del mandato", administrar: "Administrar un comercio propio: ficha, catálogo, promociones, stock, pedidos, métricas y exportación. Nunca sirve para comprar" }
+          scopes: { leer: Leer, armar: Armar carritos y listas, hablar: Responder en pedidos activos, suscribir: Suscripciones, pedir: "Confirmar pedidos hasta el tope del mandato", repartir: "Repartir en nombre de un repartidor: perfil, disponibilidad, ubicación, viajes, retiro, entrega, cobro del envío, historial y ganancias. Nunca sirve para comprar ni para administrar un comercio", administrar: "Administrar un comercio propio: ficha, catálogo, promociones, stock, pedidos, métricas y exportación. Nunca sirve para comprar" }
     nodo: { type: http, scheme: bearer, description: Firma HTTP entre nodos (RFC 9421) con la clave del nodo emisor }
   schemas:
     Nodo:
@@ -649,6 +754,12 @@ components:
       required: [pedidos]
       properties:
         pedidos: { type: array, items: { $ref: "esquemas/pedido.json" } }
+        cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
+    PaginaDeViajes:
+      type: object
+      required: [viajes]
+      properties:
+        viajes: { type: array, items: { $ref: "esquemas/viaje.json" } }
         cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
     ExportacionComercio:
       type: object
