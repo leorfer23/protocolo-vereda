@@ -1,0 +1,74 @@
+{
+  "$comentario": "Casos del canje de un desafío firmado por una sesión (POST /acceso/sesion, docs/acceso.md).",
+  "esquema": "acceso.json#/$defs/pedido_sesion",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "El pedido del vector de prueba, con nombre.",
+      "doc": {
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+        "firma": "QiGOcGdMec2T7sTb1lq7SJFcScAx9WlniXEv_qgWNEbX8OllWDVNPheimoWvrgN6D1APEj8rqVxdyn-lOHuOCg",
+        "nombre": "Marta"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Sin nombre: una persona que vuelve no lo manda.",
+      "doc": {
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+        "firma": "QiGOcGdMec2T7sTb1lq7SJFcScAx9WlniXEv_qgWNEbX8OllWDVNPheimoWvrgN6D1APEj8rqVxdyn-lOHuOCg"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin firma no hay prueba de que tenga la clave.",
+      "doc": {
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+        "nombre": "Marta"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin desafío la firma se podría reusar.",
+      "doc": {
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "firma": "QiGOcGdMec2T7sTb1lq7SJFcScAx9WlniXEv_qgWNEbX8OllWDVNPheimoWvrgN6D1APEj8rqVxdyn-lOHuOCg",
+        "nombre": "Marta"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La clave en base64 estándar con relleno, no base64url.",
+      "doc": {
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0=",
+        "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+        "firma": "QiGOcGdMec2T7sTb1lq7SJFcScAx9WlniXEv_qgWNEbX8OllWDVNPheimoWvrgN6D1APEj8rqVxdyn-lOHuOCg",
+        "nombre": "Marta"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una firma que no mide 64 bytes.",
+      "doc": {
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+        "firma": "QiGOcGdMec2T7sTb1lq7SJFcScAx9WlniXEv_qgWNEbX8OllWDVNPheimoWvrgN6D1APEj8rqVxdyn-l",
+        "nombre": "Marta"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un campo que el protocolo no conoce, como una contraseña.",
+      "doc": {
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "desafio": "_ohMKYnRfrtwXa1xaWCD_UjgAD_0sUx8D4UWcp-fxGc",
+        "firma": "QiGOcGdMec2T7sTb1lq7SJFcScAx9WlniXEv_qgWNEbX8OllWDVNPheimoWvrgN6D1APEj8rqVxdyn-lOHuOCg",
+        "nombre": "Marta",
+        "contrasena": "1234"
+      }
+    }
+  ]
+}

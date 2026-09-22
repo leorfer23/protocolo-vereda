@@ -3,7 +3,7 @@ import argparse
 import json
 import sys
 
-from . import nivel_a, nivel_b, nivel_c, reporte
+from . import acceso, nivel_a, nivel_b, nivel_c, reporte
 
 NIVELES_DISPONIBLES = {"a", "b", "c"}
 
@@ -26,7 +26,7 @@ def main(argv=None):
             "no golpear un nodo de producción sin que quien corre la suite lo pida explícito."
         ),
     )
-    p.add_argument("--sesion", help="nivel B -- token de sesión de un actor de prueba. Nunca se genera solo: siempre por acá.")
+    p.add_argument("--sesion", help="nivel B -- token de sesión de un actor de prueba. Sin esto, solo si el nodo declara acceso.custodia_propia: la suite abre una por /acceso.")
     p.add_argument("--mandato", help="nivel B -- token de mandato de un actor de prueba. Sin esto, el nivel B corre igual pero omite tope/rotarClave/revocación.")
     args = p.parse_args(argv)
 
@@ -35,8 +35,8 @@ def main(argv=None):
     if desconocidos:
         print(f"todavía no existe el nivel {desconocidos[0]!r}; disponibles: {sorted(NIVELES_DISPONIBLES)} (ver docs/suite-conformidad.md)", file=sys.stderr)
         return 2
-    if "b" in niveles and not args.sesion:
-        print("el nivel B necesita --sesion (nunca se autobootstrapea); ver docs/suite-conformidad.md", file=sys.stderr)
+    if "b" in niveles and not args.sesion and acceso.capacidades(args.url, args.timeout).get("custodia_propia") is not True:
+        print("el nivel B necesita --sesion: el nodo no publica acceso.custodia_propia en /.well-known/vereda.json, así que no hay cómo abrir una; ver docs/suite-conformidad.md", file=sys.stderr)
         return 2
 
     resultados = {}

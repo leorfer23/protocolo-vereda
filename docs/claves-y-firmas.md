@@ -14,6 +14,8 @@ Las claves de prueba se derivan de una semilla publicada, `SHA-256("vereda:vecto
 
 Para regenerarlos, `python3 generar-vectores.py`. Es determinista: dos corridas dan el mismo archivo.
 
+Cómo entra una persona con su clave, qué clave abre sesión y cómo se respalda la clave privada con una frase está en `docs/acceso.md`.
+
 ## Historial
 
 Un actor no tiene una clave: tiene un historial (`claves`), de la más vieja a la más nueva. Nunca se borra una entrada y hay exactamente una `activa`. `clave_publica` repite la activa para quien solo necesita esa.

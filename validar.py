@@ -70,8 +70,9 @@ try:
         print(f"✗ operaciones sin operationId: {', '.join(sin_id)}")
     else:
         print("✓ todas las operaciones tienen operationId")
-    sin_cache = [p for p, item in api["paths"].items() for m, o in item.items() if m in METODOS and o.get("security") == []
-                 and not (m == "get" and "304" in o["responses"] and {"ETag", "Cache-Control"} <= set(o["responses"]["200"].get("headers", {})))]
+    # Una escritura pública (pedir un desafío de /acceso) no se cachea: la regla es para las lecturas.
+    sin_cache = [p for p, item in api["paths"].items() for m, o in item.items() if m == "get" and o.get("security") == []
+                 and not ("304" in o["responses"] and {"ETag", "Cache-Control"} <= set(o["responses"]["200"].get("headers", {})))]
     if sin_cache:
         fallos += 1
         print(f"✗ rutas públicas sin ETag, Cache-Control y 304: {', '.join(sin_cache)}")
@@ -176,5 +177,100 @@ fallos += len(malos)
 for m in malos:
     print(f"✗ {m}")
 print(f"{total - len(malos)}/{total} vectores de firma reproducidos exactamente")
+
+# --- Vectores de acceso y respaldo (docs/acceso.md): se rehace todo desde la frase y las semillas ---
+def verificar_acceso():
+    import unicodedata
+    from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.exceptions import InvalidTag
+
+    malos = []
+    A = json.load(open(os.path.join(EJ, "vectores-acceso.json")))
+    esquema = lambda d: Draft202012Validator({"$ref": "https://vereda.ar/esquemas/v1/acceso.json#/$defs/" + d}, registry=registry)
+    publica_ed = lambda s: b64u(Ed25519PrivateKey.from_private_bytes(s).public_key().public_bytes(sz.Encoding.Raw, sz.PublicFormat.Raw))
+    publica_x = lambda s: b64u(X25519PrivateKey.from_private_bytes(s).public_key().public_bytes(sz.Encoding.Raw, sz.PublicFormat.Raw))
+
+    c = A["clave"]
+    semilla = hashlib.sha256(c["semilla_sha256_de"].encode()).digest()
+    if publica_ed(semilla) != c["clave_publica"]:
+        malos.append("acceso: la clave pública no se deriva de su semilla")
+    if publica_x(hashlib.sha256(c["cifrado_sha256_de"].encode()).digest()) != c["clave_cifrado"]:
+        malos.append("acceso: la clave de cifrado no se deriva de su semilla")
+
+    p = A["prueba_de_clave"]
+    jcs = rfc8785.dumps(p["objeto"])
+    if jcs.hex() != p["jcs_utf8_hex"]:
+        malos.append("prueba de clave: el JCS no reproduce 'jcs_utf8_hex'")
+    if p["objeto"] != {"clave_publica": c["clave_publica"], "desafio": p["desafio"]["desafio"], "nodo": p["desafio"]["nodo"]}:
+        malos.append("prueba de clave: el objeto firmado no sale del desafío y la clave")
+    for defn, doc in (("desafio", p["desafio"]), ("prueba_de_clave", p["objeto"]), ("pedido_sesion", p["pedido_sesion"])):
+        errs = list(esquema(defn).iter_errors(doc))
+        if errs:
+            malos.append(f"prueba de clave: {defn} no cumple acceso.json: {errs[0].message[:80]}")
+    try:
+        Ed25519PublicKey.from_public_bytes(desde_b64u(c["clave_publica"])).verify(desde_b64u(p["pedido_sesion"]["firma"]), jcs)
+    except (InvalidSignature, ValueError):
+        malos.append("prueba de clave: la firma no verifica")
+
+    i = A["identidad_derivada"]
+    local = base64.b32encode(hashlib.sha256(desde_b64u(i["clave_publica"])).digest()[:10]).decode().rstrip("=").lower()
+    if i["identidad"] != local + "@vereda.ar":
+        malos.append("identidad derivada: no sale del SHA-256 de la clave")
+
+    for r in A["respaldos"]:
+        doc = r["respaldo"]
+        errs = list(esquema("respaldo").iter_errors(doc))
+        if errs:
+            malos.append(f"{r['nombre']}: no cumple acceso.json#/$defs/respaldo: {errs[0].message[:80]}")
+            continue
+        nfc = unicodedata.normalize("NFC", r["frase"]).encode()
+        if nfc.hex() != r["frase_nfc_utf8_hex"]:
+            malos.append(f"{r['nombre']}: la frase en NFC no da 'frase_nfc_utf8_hex'")
+        derivar = lambda f: PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=desde_b64u(doc["kdf"]["sal"]), iterations=doc["kdf"]["iteraciones"]).derive(unicodedata.normalize("NFC", f).encode())
+        llave = derivar(r["frase"])
+        if llave.hex() != r["llave_hex"]:
+            malos.append(f"{r['nombre']}: PBKDF2 no reproduce 'llave_hex'")
+        aad = rfc8785.dumps({k: v for k, v in doc.items() if k != "cifrado"})
+        if aad.hex() != r["aad_jcs_utf8_hex"]:
+            malos.append(f"{r['nombre']}: el AAD no es el JCS del respaldo sin 'cifrado'")
+        nonce, texto = desde_b64u(doc["cifrado"]["nonce"]), desde_b64u(doc["cifrado"]["texto"])
+        try:
+            claro = AESGCM(llave).decrypt(nonce, texto, aad)
+        except InvalidTag:
+            malos.append(f"{r['nombre']}: no se abre con su frase")
+            continue
+        if claro.hex() != r["texto_claro_hex"]:
+            malos.append(f"{r['nombre']}: el texto claro no coincide")
+        try:
+            AESGCM(derivar(r["frase_incorrecta"])).decrypt(nonce, texto, aad)
+            malos.append(f"{r['nombre']}: se abre con la frase incorrecta")
+        except InvalidTag:
+            pass
+        try:
+            AESGCM(llave).decrypt(nonce, texto, aad + b" ")
+            malos.append(f"{r['nombre']}: se abre con la cabecera alterada")
+        except InvalidTag:
+            pass
+        if doc["formato"] == "vereda.clave.v3":
+            adentro = json.loads(claro)
+            if rfc8785.dumps(adentro) != claro or list(esquema("texto_claro_v3").iter_errors(adentro)):
+                malos.append(f"{r['nombre']}: el texto claro no es el JCS de texto_claro_v3")
+                continue
+            if publica_ed(desde_b64u(adentro["firma"])) != doc["clave_publica"]:
+                malos.append(f"{r['nombre']}: la semilla de adentro no da la clave pública de afuera")
+            if ("cifrado" in adentro) != ("clave_cifrado" in doc) or ("cifrado" in adentro and publica_x(desde_b64u(adentro["cifrado"])) != doc["clave_cifrado"]):
+                malos.append(f"{r['nombre']}: la clave X25519 de adentro no da 'clave_cifrado'")
+        elif publica_ed(claro) != doc["clave_publica"]:
+            malos.append(f"{r['nombre']}: la semilla de adentro no da la clave pública de afuera")
+    return malos, 3 + len(A["respaldos"])
+
+malos, total = verificar_acceso()
+fallos += len(malos)
+for m in malos:
+    print(f"✗ {m}")
+print(f"{total - len(malos)}/{total} vectores de acceso y respaldo reproducidos exactamente")
 
 sys.exit(1 if fallos else 0)

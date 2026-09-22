@@ -39,10 +39,13 @@ Un nodo puede someterse solo al nivel A. El reporte lo dice así, nunca como "0 
 C: un nivel no corrido es "no corrido", no es "fallado". Nadie debería tener que dar de
 alta una cuenta de prueba solo para que un desconocido en Internet le corra la suite.
 
-No hay `POST /login` ni nada parecido en `openapi.yaml`: el login es "sin contraseña por
-WhatsApp o email" (`openapi.yaml` → `info.description`), fuera del HTTP público y decisión
-de cada nodo. Por diseño, el nivel B no puede autobootstrapearse una cuenta: siempre
-recibe la sesión o el mandato de prueba como parámetro, nunca los genera.
+El acceso está en `openapi.yaml` (`/acceso`, `docs/acceso.md`), pero solo el de custodia
+propia es obligatorio, y solo para el nodo que lo declara (`acceso.custodia_propia` en
+`/.well-known/vereda.json`). Contra ese nodo, el nivel B prueba el acceso con claves que
+genera en el momento —cada una da de alta un usuario de prueba, que es lo que el nodo
+promete— y, si no se le pasó `--sesion`, se abre la suya por ahí y corre el resto. Contra un
+nodo que no lo declara, el nivel B sigue necesitando `--sesion`: el acceso alternativo por
+mensaje no se puede automatizar sin una casilla, y la suite no la tiene.
 
 ## Cómo se generan los casos (no se escriben a mano)
 

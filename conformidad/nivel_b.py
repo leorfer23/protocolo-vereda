@@ -1,8 +1,9 @@
 """Nivel B: autenticado. Ver docs/suite-conformidad.md.
 
-Nunca se autobootstrapea nada: sesión y mandato entran siempre por
-parámetro, provistos por quien corre la suite contra su propio entorno de
-prueba. Sin `--sesion` este nivel no corre. Sin `--mandato` corre igual
+Contra un nodo que publica `acceso.custodia_propia: true`, primero prueba el
+acceso (conformidad/acceso.py) y, si no se pasó `--sesion`, sigue con la sesión
+que abrió ahí. Contra cualquier otro, sesión y mandato entran siempre por
+parámetro y sin `--sesion` este nivel no corre. Sin `--mandato` corre igual
 (ciclo de carrito con sesión), pero omite -- no falla -- todo lo que
 necesita un mandato: el tope por período, la revocación, y la prueba que
 más importa acá, que `POST /yo/claves/rotar` rechace un token de mandato.
@@ -17,7 +18,7 @@ from typing import List, Optional
 
 from jsonschema import Draft202012Validator
 
-from . import cliente
+from . import acceso, cliente
 from . import openapi_info as oi
 from .nivel_a import Caso, _fallo, _ok, _omitido
 from .oraculo import cargar as cargar_esquemas
@@ -67,6 +68,16 @@ class NivelB:
     # -- corrida ------------------------------------------------------------
     def correr(self) -> List[Caso]:
         self.casos = []
+        capacidades = acceso.capacidades(self.origen, self.timeout)
+        if capacidades.get("custodia_propia") is True:
+            prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout, alternativo=capacidades.get("alternativo") or [])
+            self.casos.extend(prueba.correr())
+            self.sesion = self.sesion or prueba.token
+        else:
+            self.casos.append(_omitido("acceso", "abrirSesion", "acceso por clave propia (docs/acceso.md)", "el nodo no publica acceso.custodia_propia: true en /.well-known/vereda.json"))
+        if not self.sesion:
+            self.casos.append(_omitido("ciclo", "crearCarrito", "el resto del nivel B", "no se pasó --sesion y no se pudo abrir una por /acceso"))
+            return self.casos
         pedido_id = self._ciclo_carrito_a_entregado()
         if pedido_id:
             self._resena(pedido_id)

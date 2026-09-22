@@ -8,12 +8,20 @@ info:
     abiertas) va sin token. Todo lo que actúa en nombre de alguien lleva un token de sesión
     o un mandato de agente (OAuth 2.1). Los errores siguen esquemas/error.json y traen una
     frase en español que un agente puede repetirle a la persona.
+
+    La sesión se consigue en /acceso, en la raíz del dominio y fuera de /v1 (docs/acceso.md).
+    Con custodia propia —la forma de las apps nativas— se entra firmando un desafío con la
+    clave Ed25519 del dispositivo: sin contraseña, sin alta que alguien apruebe. Con custodia
+    del nodo, el nodo puede ofrecer además un código o enlace por email, WhatsApp o SMS. Qué
+    ofrece cada nodo lo dice `acceso` en /.well-known/vereda.json. Un agente no entra por
+    /acceso: actúa con un mandato.
   license: { name: CC0-1.0, url: https://creativecommons.org/publicdomain/zero/1.0/ }
 servers:
   - url: https://{nodo}/v1
     variables: { nodo: { default: vereda.ar } }
 tags:
   - { name: descubrimiento, description: "Nodo, versiones y federación" }
+  - { name: acceso, description: "Entrar a un nodo: desafío firmado con la clave propia, o código por mensaje si el nodo custodia la clave (docs/acceso.md). Fuera de /v1" }
   - { name: comercios, description: Público }
   - { name: mi-comercio, description: "Lado comercio: su ficha, catálogo, promociones, pedidos, métricas y exportación. Nadie habilita un comercio: se crea y opera" }
   - { name: ofertas, description: Público }
@@ -43,6 +51,96 @@ paths:
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "#/components/schemas/Nodo" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
+
+  /acceso/desafio:
+    servers: [ { url: "https://{nodo}", description: "En la raíz del dominio, fuera de /v1: es cómo se consigue la credencial de /v1, no parte de una versión de la API (docs/acceso.md).", variables: { nodo: { default: vereda.ar } } } ]
+    post:
+      operationId: pedirDesafio
+      tags: [acceso]
+      summary: "Custodia propia: pedir un desafío para una clave Ed25519. Responde igual para una clave conocida que para una nueva"
+      description: |
+        Primer paso de entrar con la clave del dispositivo (docs/acceso.md). El desafío es de un solo
+        uso y vence a los pocos minutos (2 en el nodo de referencia). Lo sirve todo nodo que publica
+        `acceso.custodia_propia: true` en /.well-known/vereda.json. Nunca por mandato: un agente no
+        entra, recibe un mandato.
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/pedido_desafio" } } } }
+      responses:
+        "201": { description: Desafío emitido, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/desafio" } } } }
+        "422": { description: "La clave pública no es Ed25519 en base64url (cuerpo_invalido)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { $ref: "#/components/responses/Reintentar" }
+  /acceso/sesion:
+    servers: [ { url: "https://{nodo}", variables: { nodo: { default: vereda.ar } } } ]
+    post:
+      operationId: abrirSesion
+      tags: [acceso]
+      summary: "Custodia propia: canjear el desafío firmado por un token de sesión. Si la clave es nueva, el usuario se crea en el acto"
+      description: |
+        Se firma el JCS de `{clave_publica, desafio, nodo}` (`esquemas/acceso.json#/$defs/prueba_de_clave`).
+        Solo abre sesión la clave `activa` del historial del actor: una `retirada` responde
+        `clave_rotada` y una `comprometida`, `clave_comprometida`. El resto de los rechazos
+        (desafío inexistente, ya usado, vencido o emitido para otra clave) responde `no_autenticado`
+        sin decir cuál fue. Una firma que no verifica no gasta el desafío; una que verifica lo
+        gasta antes de emitir el token, de forma atómica.
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/pedido_sesion" } } } }
+      responses:
+        "201": { description: Sesión abierta, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/sesion" } } } }
+        "401": { description: "no_autenticado, firma_invalida, clave_rotada o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "Falta el desafío o la firma, o la clave no es Ed25519 (cuerpo_invalido)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { $ref: "#/components/responses/Reintentar" }
+    delete:
+      operationId: cerrarSesion
+      tags: [acceso]
+      summary: Cerrar la sesión con la que se llama. La clave queda en el dispositivo
+      security: [ { sesion: [] } ]
+      responses:
+        "204": { description: Cerrada; el token deja de valer en el acto }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "Un token de mandato: renovar y cerrar son de la persona", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /acceso/renovar:
+    servers: [ { url: "https://{nodo}", variables: { nodo: { default: vereda.ar } } } ]
+    post:
+      operationId: renovarSesion
+      tags: [acceso]
+      summary: Cambiar el token por uno nuevo sin volver a firmar. El viejo deja de valer en el mismo momento
+      security: [ { sesion: [] } ]
+      responses:
+        "200": { description: Renovada, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/renovacion" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "Un token de mandato: renovar y cerrar son de la persona", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /acceso/codigo:
+    servers: [ { url: "https://{nodo}", variables: { nodo: { default: vereda.ar } } } ]
+    post:
+      operationId: pedirCodigoDeAcceso
+      tags: [acceso]
+      summary: "Opcional, custodia del nodo: mandar un código o enlace de acceso por email, WhatsApp o SMS"
+      description: |
+        Solo si el nodo lista el canal en `acceso.alternativo` de /.well-known/vereda.json; si no, 501
+        `no_implementado`. El proveedor que manda el mensaje lo elige cada nodo. Responde 202 exista
+        o no una cuenta con ese contacto: la ruta no sirve para averiguar quién tiene cuenta. El
+        código vence a los 10 minutos y admite cinco intentos.
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/pedido_codigo" } } } }
+      responses:
+        "202": { description: "Enviado (o no había nada que enviar: la respuesta es la misma)" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Reintentar" }
+        "501": { description: "Este nodo no ofrece acceso alternativo por ese canal (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /acceso/codigo/canje:
+    servers: [ { url: "https://{nodo}", variables: { nodo: { default: vereda.ar } } } ]
+    post:
+      operationId: canjearCodigoDeAcceso
+      tags: [acceso]
+      summary: "Opcional, custodia del nodo: canjear el código (o el del enlace) por una sesión. Si el contacto es nuevo, el usuario se crea con custodia del nodo"
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/canje_codigo" } } } }
+      responses:
+        "201": { description: Sesión abierta, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/sesion" } } } }
+        "401": { description: "Código vencido, gastado o incorrecto (no_autenticado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Reintentar" }
+        "501": { description: "Este nodo no ofrece acceso alternativo (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /sostenimiento:
     get:
@@ -1031,7 +1129,7 @@ components:
     NoEsElDueno: { description: "No es el dueño del comercio (código no_es_el_dueno), o el mandato no trae el scope 'administrar'.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinCambios: { description: Sin cambios desde el ETag enviado, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } } }
   securitySchemes:
-    sesion: { type: http, scheme: bearer, description: Token de sesión (login sin contraseña por WhatsApp o email) }
+    sesion: { type: http, scheme: bearer, description: "Token de sesión. Se obtiene en /acceso: firmando un desafío con la clave propia, o con un código por mensaje si el nodo custodia la clave (docs/acceso.md)" }
     mandato:
       type: oauth2
       description: Agentes. Los scopes son los de esquemas/mandato.json.
@@ -1054,6 +1152,7 @@ components:
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
         codigo_fuente: { type: string, format: uri }
+        acceso: { $ref: "esquemas/acceso.json#/$defs/capacidades", description: "Cómo se entra a este nodo (docs/acceso.md). Una app que habla con cualquier nodo mira esto antes de ofrecer la entrada." }
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
         sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }

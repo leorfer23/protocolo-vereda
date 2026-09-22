@@ -1,0 +1,202 @@
+{
+  "$comentario": "Casos del respaldo de la clave cifrado con frase (docs/acceso.md). El formato de intercambio entre apps y nodos.",
+  "esquema": "acceso.json#/$defs/respaldo",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Respaldo v3 del vector, con la clave del chat.",
+      "doc": {
+        "formato": "vereda.clave.v3",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "QuzB92a5ApmmKrub",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Respaldo v3 sin clave del chat: la persona nunca usó chat cifrado.",
+      "doc": {
+        "formato": "vereda.clave.v3",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "QuzB92a5ApmmKrub",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Respaldo v2 del SDK web anterior: se sigue leyendo.",
+      "doc": {
+        "formato": "vereda.clave.v2",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "UE4niM-5Mpq_icms1kMGCA"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "rEH8QqGN-EAxD64V",
+          "texto": "RAuI6bdWuE1Gp1Fj04NoS9punnfyRM58AnT-em_5z9INKJKDAWVE0vvNVDTDYszN"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un v2 no trae clave del chat: si la trae, es un v3 mal rotulado.",
+      "doc": {
+        "formato": "vereda.clave.v2",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "UE4niM-5Mpq_icms1kMGCA"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "rEH8QqGN-EAxD64V",
+          "texto": "RAuI6bdWuE1Gp1Fj04NoS9punnfyRM58AnT-em_5z9INKJKDAWVE0vvNVDTDYszN"
+        },
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Formato desconocido: se rechaza, no se adivina.",
+      "doc": {
+        "formato": "vereda.clave.v9",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "QuzB92a5ApmmKrub",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Menos de 100000 vueltas de PBKDF2 hacen barata una frase corta.",
+      "doc": {
+        "formato": "vereda.clave.v3",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 1000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "QuzB92a5ApmmKrub",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Otro KDF (scrypt) todavía no es parte del formato.",
+      "doc": {
+        "formato": "vereda.clave.v3",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "scrypt",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "QuzB92a5ApmmKrub",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un nonce de 16 bytes: AES-GCM del formato usa 12.",
+      "doc": {
+        "formato": "vereda.clave.v3",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "AAAAAAAAAAAAAAAAAAAAAA",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La semilla en claro dentro del archivo: eso no es un respaldo.",
+      "doc": {
+        "formato": "vereda.clave.v3",
+        "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+        "clave_cifrado": "Rg6kWtmzOYBzzVnnCgX7kKU7xd_DtxQ0KfXhCn0_Ah8",
+        "identidad": "marta@vereda.ar",
+        "creada": "2026-09-21T15:04:05-03:00",
+        "kdf": {
+          "nombre": "PBKDF2",
+          "hash": "SHA-256",
+          "iteraciones": 600000,
+          "sal": "xB_2qh_v32hH2e5E2y88nQ"
+        },
+        "cifrado": {
+          "nombre": "AES-GCM",
+          "nonce": "QuzB92a5ApmmKrub",
+          "texto": "yBsc4BEcAfxJ0IPubH3zMPkv5c0Mf1FCaBF6N_-WljJ_Q81Kmt6FZ-_uP3_LTLZPiAcL6qUxm8ge4pap0LQ1wT542mIhDsBpio7LeHyZe46b3MD9PbxP4b_IrmFxN2Za_GKxzzZfPtO0QJctgY7zLRcg_3dRsh7Vaw3tEAr_7A"
+        },
+        "semilla": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    }
+  ]
+}
