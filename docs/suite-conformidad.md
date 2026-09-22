@@ -82,7 +82,7 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 1. *Estructura.* Las 13 lecturas públicas responden al método declarado, devuelven `ETag`
    y `Cache-Control` en `200`, y `304` sin cuerpo al repetir con `If-None-Match`.
 2. *Esquema en vivo.* Toda respuesta `200` de una ruta pública (`/comercios`,
-   `/comercios/{id}`, `.../ofertas`, `.../promociones`, `.../reputacion`, `/catalogo/{ean}`, `/buscar`,
+   `/comercios/{id}`, `.../ofertas`, `.../promociones`, `.../reputacion`, `/ofertas/{id}`, `/catalogo/{ean}`, `/buscar`,
    `/rondas`, `/rondas/{id}`, `/.well-known/vereda.json`, `/actores/{id}/claves`,
    `/actores/{id}/mudanza`, `/actores/{id}/resenas`) valida contra el esquema que
    `openapi.yaml` referencia. Sin fixtures propios: valida lo que el nodo realmente tenga
@@ -119,6 +119,11 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Ventanas de tiempo (`carrito_vencido` a las 24 h, `plazo_aceptacion_min` en efectivo) se
   prueban con el reloj del nodo si expone uno de prueba corto, o quedan documentadas como
   prueba de larga duración opcional — no bloquean el resto del nivel B.
+- Direcciones guardadas: `PUT /yo/direcciones` reemplaza la lista y la devuelve, `GET /yo` la
+  muestra, etiquetas repetidas o una dirección sin punto dan `422`, y un token de mandato no
+  la escribe nunca. Al final se restauran las que la sesión de prueba tenía.
+- Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
+  que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella
   (`fuera_de_ventana_resena`), una por par.
 - Mandato: tope por período (`pedir:<centavos>`, atómico bajo dos pedidos simultáneos),

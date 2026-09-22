@@ -1,0 +1,245 @@
+{
+  "$comentario": "Casos para la lista de direcciones guardadas de PUT /yo/direcciones (usuario.json#/$defs/direcciones). Que las etiquetas no se repitan no lo puede decir JSON Schema: lo controla el nodo con 422.",
+  "esquema": "usuario.json#/$defs/direcciones",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Casa y trabajo, cada una con su texto, su punto y su etiqueta.",
+      "doc": [
+        {
+          "texto": "Av. Rivadavia 4520 3° B, entre Yatay y Lambaré",
+          "punto": {
+            "lat": -34.6158,
+            "lng": -58.4333
+          },
+          "piso_depto": "3° B",
+          "referencia": "timbre 3B",
+          "etiqueta": "casa"
+        },
+        {
+          "texto": "Florida 520, CABA",
+          "punto": {
+            "lat": -34.6011,
+            "lng": -58.3752
+          },
+          "etiqueta": "trabajo"
+        }
+      ]
+    },
+    {
+      "espera": "valido",
+      "porque": "Lista vacía: borra todas las direcciones guardadas.",
+      "doc": []
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una dirección sin punto: el texto manda, pero el punto hace falta para rutear.",
+      "doc": [
+        {
+          "texto": "Pellegrini 800, Rosario",
+          "etiqueta": "casa"
+        }
+      ]
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un campo que direccion no tiene (additionalProperties false).",
+      "doc": [
+        {
+          "texto": "Pellegrini 800, Rosario",
+          "punto": {
+            "lat": -32.95,
+            "lng": -60.65
+          },
+          "telefono": "341 555 0000"
+        }
+      ]
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un objeto en vez de la lista: se reemplaza la lista entera.",
+      "doc": {
+        "texto": "Pellegrini 800, Rosario",
+        "punto": {
+          "lat": -32.95,
+          "lng": -60.65
+        },
+        "etiqueta": "casa"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Más de 20 direcciones.",
+      "doc": [
+        {
+          "texto": "Calle 0",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d0"
+        },
+        {
+          "texto": "Calle 1",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d1"
+        },
+        {
+          "texto": "Calle 2",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d2"
+        },
+        {
+          "texto": "Calle 3",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d3"
+        },
+        {
+          "texto": "Calle 4",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d4"
+        },
+        {
+          "texto": "Calle 5",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d5"
+        },
+        {
+          "texto": "Calle 6",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d6"
+        },
+        {
+          "texto": "Calle 7",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d7"
+        },
+        {
+          "texto": "Calle 8",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d8"
+        },
+        {
+          "texto": "Calle 9",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d9"
+        },
+        {
+          "texto": "Calle 10",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d10"
+        },
+        {
+          "texto": "Calle 11",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d11"
+        },
+        {
+          "texto": "Calle 12",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d12"
+        },
+        {
+          "texto": "Calle 13",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d13"
+        },
+        {
+          "texto": "Calle 14",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d14"
+        },
+        {
+          "texto": "Calle 15",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d15"
+        },
+        {
+          "texto": "Calle 16",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d16"
+        },
+        {
+          "texto": "Calle 17",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d17"
+        },
+        {
+          "texto": "Calle 18",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d18"
+        },
+        {
+          "texto": "Calle 19",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d19"
+        },
+        {
+          "texto": "Calle 20",
+          "punto": {
+            "lat": -34.6,
+            "lng": -58.4
+          },
+          "etiqueta": "d20"
+        }
+      ]
+    }
+  ]
+}

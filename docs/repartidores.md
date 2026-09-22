@@ -219,6 +219,7 @@ herramienta por operación, en `mcp/herramientas.json`:
 | `repartidor_disponibilidad` | `PUT /repartidor/disponibilidad` (`fijarDisponibilidad`) |
 | `repartidor_ubicacion` | `PUT /repartidor/ubicacion` (`reportarUbicacion`) |
 | `viajes_ofrecidos` | `GET /viajes/ofrecidos` (`listarViajesOfrecidos`) |
+| `viaje_ver` | `GET /viajes/{id}` (`verViaje`) |
 | `viaje_aceptar` | `POST /viajes/{id}/aceptar` (`aceptarViaje`) |
 | `viaje_rechazar` | `POST /viajes/{id}/rechazar` (`rechazarViaje`) |
 | `viaje_soltar` | `POST /viajes/{id}/soltar` (`soltarViaje`) |
@@ -236,6 +237,11 @@ e incluye los soltados; las ofertas rechazadas no dejan rastro. `GET /repartidor
 (`repartidor.json#/$defs/ganancias`) agrega por día, semana, mes o total los pagos cuyo destinatario
 es el repartidor: solo cuenta como cobrado lo `confirmado`, separa efectivo de transferencia y muestra
 aparte lo que quedó sin marcar recibido. El nodo no guarda nada nuevo para calcularlo.
+
+**Releer un viaje.** `GET /viajes/{id}` devuelve el viaje entero, con todas sus paradas, a su
+repartidor, al repartidor a quien se le está ofreciendo y al comercio de cualquier pedido del viaje.
+El comprador no lo lee: sigue su pedido con `GET /pedidos/{id}`, y un viaje puede llevar las
+direcciones de otros compradores. A cualquier otro, 404, como si no existiera.
 
 ## j. Qué es configurable y qué no
 

@@ -34,6 +34,7 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LAT_DEFECTO = -34.6037
 LNG_DEFECTO = -58.3816
 
+ID_INEXISTENTE = "01920000-0000-7000-8000-00000000dead"  # un UUIDv7 bien formado que no debería existir en ningún nodo
 EAN_INEXISTENTE = "0000000000000"  # cumple el patrón de 8-14 dígitos; no debería existir en ningún catálogo
 
 
@@ -152,6 +153,7 @@ class NivelA:
         self._detalle_comercio(comercio)
         self._reputacion_comercio(comercio)
         ofertas = self._ofertas_comercio(comercio)
+        self._detalle_oferta(ofertas)
         self._promociones_comercio(comercio)
         self._catalogo(ofertas)
         self._detalle_ronda(rondas)
@@ -348,6 +350,28 @@ class NivelA:
             self.casos.append(caso)
         return r.cuerpo if isinstance(r.cuerpo, list) else []
 
+    def _detalle_oferta(self, ofertas):
+        opid = "verOferta"
+        oid = next((o.get("id") for o in (ofertas or []) if isinstance(o, dict) and o.get("id")), None)
+        if not oid:
+            self.casos.append(_omitido("esquema", opid, "GET /ofertas/{id}", "ninguna oferta descubierta en /comercios/{id}/ofertas para encadenar"))
+            return
+        op = self._op("/ofertas/{id}")
+        url = self._url("/ofertas/{id}", id=oid)
+        r = self._get(url)
+        if not r.ok:
+            self.casos.append(_fallo("estructura", opid, "GET /ofertas/{id}", r.motivo))
+            return
+        self.casos.append(self._chequear_estructura(opid, "GET /ofertas/{id}", url, r))
+        caso = self._esquema_o_no_json(opid, "el cuerpo de /ofertas/{id} cumple esquemas/oferta.json", op, r)
+        if caso:
+            self.casos.append(caso)
+        desc = "GET /ofertas/{id} devuelve la oferta pedida, la misma que lista su comercio"
+        if r.estado == 200 and r.cuerpo_es_json and isinstance(r.cuerpo, dict) and r.cuerpo.get("id") == oid:
+            self.casos.append(_ok("esquema", opid, desc))
+        else:
+            self.casos.append(_fallo("esquema", opid, desc, f"pedí {oid}, llegó estado {r.estado} con id {(r.cuerpo or {}).get('id') if r.cuerpo_es_json and isinstance(r.cuerpo, dict) else '(sin id)'}"))
+
     def _promociones_comercio(self, comercio):
         opid = "listarPromociones"
         if comercio is None:
@@ -498,6 +522,7 @@ class NivelA:
         objetivos = [
             ("verProductoDeCatalogo", self._url("/catalogo/{ean}", ean=EAN_INEXISTENTE), "404"),
             ("listarClavesDeActor", self._url("/actores/{identidad}/claves", identidad=identidad_inexistente), "404"),
+            ("verOferta", self._url("/ofertas/{id}", id=ID_INEXISTENTE), "404"),
         ]
         for opid, url, estado_esperado in objetivos:
             op = self._encontrar_op(opid)

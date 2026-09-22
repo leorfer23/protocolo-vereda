@@ -70,6 +70,8 @@ class NivelB:
         pedido_id = self._ciclo_carrito_a_entregado()
         if pedido_id:
             self._resena(pedido_id)
+        self._direcciones()
+        self._viaje_ajeno()
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
@@ -203,6 +205,87 @@ class NivelB:
             return pedido_id
         self.casos.append(_ok(cat, "entregarPedido", "entregar con el código correcto responde 200"))
         return pedido_id
+
+    # direcciones guardadas: reemplaza la lista entera, valida, y nunca por mandato --
+    def _direcciones(self):
+        cat, opid = "direcciones", "guardarDirecciones"
+        url = f"{self.base_v1}/yo/direcciones"
+        r_yo = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=self._cabecera(), timeout=self.timeout)
+        if not r_yo.ok or r_yo.estado != 200 or not isinstance(r_yo.cuerpo, dict):
+            self.casos.append(_omitido(cat, opid, "PUT /yo/direcciones", "no se pudo leer GET /yo para guardar y después restaurar las direcciones de la sesión de prueba"))
+            return
+        originales = r_yo.cuerpo.get("direcciones") or []
+
+        nuevas = [
+            {"texto": "Av. Rivadavia 4520 3° B, entre Yatay y Lambaré", "punto": {"lat": -34.6158, "lng": -58.4333}, "etiqueta": "casa"},
+            {"texto": "Florida 520, CABA", "punto": {"lat": -34.6011, "lng": -58.3752}, "etiqueta": "trabajo"},
+        ]
+        desc = "PUT /yo/direcciones con sesión reemplaza la lista y la devuelve"
+        r = cliente.solicitud("PUT", url, headers=self._cabecera(), json_body=nuevas, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        caso = self._chequear_esquema(opid, "la respuesta cumple usuario.json#/$defs/direcciones", "/yo/direcciones", "put", r.cuerpo)
+        if caso:
+            self.casos.append(caso)
+        etiquetas = [d.get("etiqueta") for d in r.cuerpo] if isinstance(r.cuerpo, list) else None
+        if etiquetas == ["casa", "trabajo"]:
+            self.casos.append(_ok(cat, opid, desc))
+        else:
+            self.casos.append(_fallo(cat, opid, desc, f"esperaba las etiquetas ['casa', 'trabajo'] en ese orden, llegó {etiquetas}"))
+
+        desc = "GET /yo muestra las direcciones recién guardadas"
+        r_ver = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=self._cabecera(), timeout=self.timeout)
+        leidas = [d.get("etiqueta") for d in ((r_ver.cuerpo or {}).get("direcciones") or [])] if r_ver.ok and isinstance(r_ver.cuerpo, dict) else None
+        if leidas == ["casa", "trabajo"]:
+            self.casos.append(_ok(cat, "verPerfil", desc))
+        else:
+            self.casos.append(_fallo(cat, "verPerfil", desc, f"GET /yo trae las etiquetas {leidas}"))
+
+        rechazos = [
+            ("dos direcciones con la misma etiqueta responde 422", [nuevas[0], {**nuevas[1], "etiqueta": "casa"}]),
+            ("una dirección sin punto responde 422", [{"texto": "Pellegrini 800, Rosario", "etiqueta": "casa"}]),
+            ("un objeto en vez de la lista responde 422", nuevas[0]),
+        ]
+        for desc, cuerpo in rechazos:
+            r = cliente.solicitud("PUT", url, headers=self._cabecera(), json_body=cuerpo, timeout=self.timeout)
+            if not r.ok:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo))
+            elif r.estado != 422:
+                self.casos.append(_fallo(cat, opid, desc, f"esperaba 422, llegó {r.estado}"))
+            else:
+                caso = self._chequear_esquema(opid, desc + " con esquemas/error.json", "/yo/direcciones", "put", r.cuerpo, "422")
+                self.casos.append(caso or _ok(cat, opid, desc))
+
+        if self.mandato:
+            desc = "PUT /yo/direcciones con un token de mandato se rechaza: solo la persona las escribe"
+            r = cliente.solicitud("PUT", url, headers=self._cabecera(mandato=True), json_body=[], timeout=self.timeout)
+            if not r.ok:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo))
+            elif r.estado in (401, 403):
+                self.casos.append(_ok(cat, opid, desc))
+            else:
+                self.casos.append(_fallo(cat, opid, desc, f"esperaba 403, llegó {r.estado}"))
+        else:
+            self.casos.append(_omitido(cat, opid, "PUT /yo/direcciones rechaza un token de mandato", "no se pasó --mandato"))
+
+        r = cliente.solicitud("PUT", url, headers=self._cabecera(), json_body=originales, timeout=self.timeout)
+        desc = "restaurar las direcciones que la sesión de prueba tenía antes"
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+
+    # un viaje que no es de uno no se lee, ni se sabe si existe -------------
+    def _viaje_ajeno(self):
+        opid = "verViaje"
+        desc = "GET /viajes/{id} de un viaje que no existe (o no es de uno) responde 404 con esquemas/error.json"
+        r = cliente.solicitud("GET", f"{self.base_v1}/viajes/01920000-0000-7000-8000-00000000dead", headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok:
+            self.casos.append(_fallo("viajes", opid, desc, r.motivo))
+        elif r.estado != 404:
+            self.casos.append(_fallo("viajes", opid, desc, f"esperaba 404, llegó {r.estado}"))
+        else:
+            caso = self._chequear_esquema(opid, desc, "/viajes/{id}", "get", r.cuerpo, "404")
+            self.casos.append(caso or _ok("viajes", opid, desc))
 
     # 2. reseña: dentro de ventana se acepta una vez; la segunda, no --------
     def _resena(self, pedido_id):
