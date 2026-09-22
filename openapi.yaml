@@ -170,6 +170,22 @@ paths:
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "404": { $ref: "#/components/responses/Error" }
         "422": { $ref: "#/components/responses/Error" }
+  /ofertas/{id}:
+    get:
+      operationId: verOferta
+      tags: [ofertas]
+      summary: "Una oferta sola, por su id: precio, opciones, variantes, disponibilidad y modalidades"
+      description: |
+        Lo que tiene a mano una app o un agente después de una búsqueda es el `oferta_id`, no el
+        comercio: esta lectura no lo pide. Devuelve la oferta tal como está ahora, también si está
+        pausada o sin stock (`disponibilidad` lo dice), igual que `listarOfertas`. Solo las ofertas
+        de comercios de este nodo; una de otro nodo se lee en el nodo de su comercio.
+      security: []
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/oferta.json" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { $ref: "#/components/responses/Error" }
   /comercios/{id}/promociones:
     get:
       operationId: listarPromociones
@@ -605,6 +621,30 @@ paths:
 
   /viajes/ofrecidos:
     get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso, paradas y cómo se cobra el envío. Del pool, solo los que caen enteros en mi zona y respetan mi vehículo, caja térmica, capacidad y medios de cobro", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
+  /viajes/{id}:
+    get:
+      operationId: verViaje
+      tags: [viajes]
+      summary: "Un viaje entero: paradas, ETA, peso, monto y cómo se cobra el envío"
+      description: |
+        Para releer un viaje después de aceptarlo sin haberlo guardado. Es el mismo documento que
+        `listarViajesOfrecidos` y `listarMisViajes`, con todas sus paradas.
+
+        Lo ven solo quienes tienen algo que ver con el viaje:
+        - su repartidor, en cualquier estado (aceptado, en curso, completado o soltado por él);
+        - el repartidor a quien se le está ofreciendo, mientras la oferta sigue en pie y no la rechazó;
+        - el dueño de un comercio con algún pedido en el viaje.
+
+        El comprador no: sigue su pedido con `GET /pedidos/{id}` (estado, ETA, ubicación del
+        repartidor), y un viaje puede llevar direcciones de otros compradores
+        (`docs/datos-y-privacidad.md`). Con mandato, 'repartir' lo lee solo como repartidor y
+        'administrar' solo como comercio. A cualquier otro el nodo responde 404, igual que si el
+        viaje no existiera.
+      security: [ { sesion: [] }, { mandato: [repartir] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/viaje.json" } } } }
+        "404": { $ref: "#/components/responses/Error" }
   /viajes/{id}/aceptar:
     post: { operationId: aceptarViaje, tags: [viajes], summary: "Repartidor: aceptar. Rechazar no penaliza.", security: [ { sesion: [] }, { mandato: [repartir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { description: Ya asignado } } }
   /viajes/{id}/rechazar:
@@ -871,6 +911,21 @@ paths:
     get: { operationId: verPerfil, tags: [yo], summary: Mi perfil y preferencias, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/usuario.json" } } } } } }
   /yo/preferencias:
     put: { operationId: guardarPreferencias, tags: [yo], summary: Preferencias declarativas que cualquier agente autorizado lee, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/preferencias" } } } }, responses: { "204": { description: OK } } }
+  /yo/direcciones:
+    put:
+      operationId: guardarDirecciones
+      tags: [yo]
+      summary: "Mis direcciones guardadas ('casa', 'trabajo'). Reemplaza la lista entera y la devuelve"
+      description: |
+        Lo que no se manda se borra; una lista vacía las borra todas. Las etiquetas no se repiten
+        (422 si se repiten): son lo que usan `preferencias.direccion_habitual` y
+        `direccion_etiqueta` al crear un carrito. Solo por sesión: la dirección exacta la ven el
+        comercio y el repartidor de un pedido activo, no un agente (`docs/datos-y-privacidad.md`).
+      security: [ { sesion: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/direcciones" } } } }
+      responses:
+        "200": { description: Guardadas, content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/direcciones" } } } }
+        "422": { $ref: "#/components/responses/Error" }
   /yo/puntos:
     get: { operationId: listarMisPuntos, tags: [yo], summary: "Mis saldos de puntos, uno por comercio, cada uno firmado por su comercio", security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/SaldoPuntos" } } } } } } }
   /yo/claves/rotar:

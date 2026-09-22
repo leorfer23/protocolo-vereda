@@ -9,7 +9,7 @@
   "properties": {
     "identidad": { "$ref": "comunes.json#/$defs/identidad" },
     "nombre": { "type": "string" },
-    "direcciones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/direccion" } },
+    "direcciones": { "$ref": "#/$defs/direcciones" },
     "preferencias": { "$ref": "#/$defs/preferencias" },
     "mi_vereda": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" }, "description": "Comercios a los que ya le compró. Su historial." },
     "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
@@ -25,6 +25,12 @@
     }
   },
   "$defs": {
+    "direcciones": {
+      "type": "array",
+      "maxItems": 20,
+      "items": { "$ref": "comunes.json#/$defs/direccion" },
+      "description": "Las direcciones guardadas de la persona, en su orden. Las etiquetas no se repiten: 'direccion_habitual' y 'direccion_etiqueta' las nombran por ahí. Se escriben enteras con PUT /yo/direcciones."
+    },
     "preferencias": {
       "type": "object",
       "description": "Perfil declarativo que vive en la red, no en el agente. Cambiar de asistente no obliga a explicar todo de nuevo.",

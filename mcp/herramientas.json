@@ -14,7 +14,7 @@
     },
     {
       "name": "ver_oferta",
-      "description": "Detalle completo de una oferta: precio, opciones (con mínimos y máximos), variantes, disponibilidad, modalidades. Leer antes de armar un carrito para saber qué hay que elegir. No requiere mandato.",
+      "description": "Detalle completo de una oferta por su id (GET /ofertas/{id}): precio, opciones (con mínimos y máximos), variantes, disponibilidad, modalidades. Leer antes de armar un carrito para saber qué hay que elegir. No requiere mandato.",
       "inputSchema": { "type": "object", "required": ["oferta_id"], "properties": { "oferta_id": { "type": "string" } } }
     },
     {
@@ -492,6 +492,11 @@
       "name": "viajes_ofrecidos",
       "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, cómo se cobra el envío y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+      "name": "viaje_ver",
+      "description": "Un viaje entero por su id (GET /viajes/{id}): paradas en orden con dirección y ETA, peso, bultos, monto y cómo se cobra el envío. Para releer un viaje ya aceptado. Lo lee el repartidor del viaje con scope 'repartir', o el comercio de algún pedido del viaje con scope 'administrar'.",
+      "inputSchema": {"type": "object", "required": ["viaje_id"], "properties": {"viaje_id": {"type": "string"}}}
     },
     {
       "name": "viaje_aceptar",
