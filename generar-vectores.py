@@ -146,6 +146,17 @@ v_vinculacion = vector("vinculacion-dominio-con-codigo",
     vinculacion, "firma", "lahuerta@nodo.rosario.coop", TS, "comunes.json#/$defs/vinculacion")
 v_vinculacion["texto_de_prueba"] = "vereda:prueba=" + b64u(bytes.fromhex(v_vinculacion["jcs_sha256_hex"])[:16])
 
+# --- 5b. Traspaso: la firma del repartidor al entregar ---
+traspaso = {
+    "accion": "entrega",
+    "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+    "repartidor": "marta@vereda.ar",
+    "instante": TS,
+}
+v_traspaso = vector("traspaso-entrega",
+    "Marta, repartidora, entrega el pedido y firma con la clave de su teléfono. Manda solo 'firma' en POST /pedidos/{id}/entregar; el nodo rearma este objeto con la acción de la ruta, el id del pedido, la identidad de la sesión y firma.instante, y lo verifica. Lo guarda en pedido.firmas.entrega (docs/repartidores.md, punto j).",
+    traspaso, "firma", "marta@vereda.ar", TS, "pedido.json#/$defs/traspaso")
+
 # --- 6. Casos JCS sin firma: donde las implementaciones se separan ---
 CASOS = [
     ("orden-de-claves", "Las claves se ordenan por sus unidades de código UTF-16, no por alfabeto ni por orden de aparición.",
@@ -234,7 +245,7 @@ doc = {
         {"actor": "marta@vereda.ar (clave nueva del vector de rotación)", "etiqueta_semilla": "marta-clave-2",
          "semilla_sha256_de": "vereda:vector:marta-clave-2", "semilla_hex": semilla("marta-clave-2").hex(), "clave_publica": pub_nueva},
     ],
-    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion],
+    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
 }

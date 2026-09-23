@@ -666,19 +666,34 @@ paths:
         Con repartidor elegido por el comprador, esta firma es hasta dónde responde el comercio
         (docs/repartidores.md). Si el comercio le paga el envío en efectivo al retirar
         (`cobro_envio: al_comercio` o envío bonificado), el repartidor lo marca acá.
+
+        La firma es la del repartidor sobre `pedido.json#/$defs/traspaso` con `accion: retiro`
+        (docs/repartidores.md, punto j). Con la clave en el teléfono la manda en `firma`; si el
+        nodo custodia la clave y no viene, firma el nodo. Con sesión y custodia propia, sin
+        `firma` responde 422 `firma_requerida` y el pedido no se mueve.
       security: [ { sesion: [] }, { mandato: [repartir] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { cobrado_en_mano: { type: boolean, description: "El pago de envío en efectivo cuyo pagador es el comercio pasa a confirmado." } } } } } }
-      responses: { "200": { description: OK } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { cobrado_en_mano: { type: boolean, description: "El pago de envío en efectivo cuyo pagador es el comercio pasa a confirmado." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
+      responses:
+        "200": { description: "Pedido retirado, con firmas.retiro", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "422": { description: "firma_requerida, firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /pedidos/{id}/entregar:
     post:
       operationId: entregarPedido
       tags: [pedidos]
       summary: "Repartidor, o comercio en modalidad retiro: entregado. Firma la entrega. En retiro exige el código del usuario; con efectivo marca el cobro en mano; con alcohol, mayoría de edad verificada."
+      description: |
+        Con repartidor, la firma de la entrega es la suya sobre `pedido.json#/$defs/traspaso` con
+        `accion: entrega`, con las mismas reglas que `retirarPedido`: la manda en `firma` si la
+        clave vive en el teléfono, la pone el nodo si la custodia, y con sesión y custodia propia
+        sin `firma` responde 422 `firma_requerida` sin entregar. En modalidad retiro entrega el
+        comercio y la prueba es el código del comprador.
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." } } } } } }
-      responses: { "200": { description: OK } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
+      responses:
+        "200": { description: "Pedido entregado, con firmas.entrega", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "422": { description: "codigo_retiro_invalido, cobro_en_mano_sin_confirmar, mayoria_edad_no_verificada, firma_requerida, firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /pedidos/{id}/transferencia:
     post:
       operationId: declararTransferencia
@@ -753,7 +768,7 @@ paths:
     post: { operationId: aceptarCotizacion, tags: [cotizaciones], summary: Aceptar el presupuesto; crea el pedido con precio fijo, security: [ { sesion: [] }, { mandato: [pedir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: Pedido creado } } }
 
   /viajes/ofrecidos:
-    get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso, paradas y cómo se cobra el envío. Del pool, solo los que caen enteros en mi zona y respetan mi vehículo, caja térmica, capacidad y medios de cobro", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
+    get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso, paradas y, por pedido, quién me paga, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros). Del pool, solo los que caen enteros en mi zona y respetan mi vehículo, caja térmica, capacidad y medios de cobro", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
   /viajes/{id}:
     get:
       operationId: verViaje
@@ -1217,6 +1232,16 @@ components:
         sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
     Carrito: { $ref: "esquemas/carrito.json" }
+    FirmaTraspaso:
+      description: |
+        La firma del repartidor al retirar o entregar, cuando la clave vive en su teléfono: Ed25519
+        sobre el JCS (RFC 8785) de `pedido.json#/$defs/traspaso`, `{accion, pedido_id, repartidor,
+        instante}`, con `repartidor` = `firmante` e `instante` = el de la firma. El nodo rearma el
+        traspaso con la acción de la ruta, el id del pedido y la identidad de la sesión, y corre los
+        pasos de docs/claves-y-firmas.md contra el historial del repartidor. `firmante` distinto de
+        quien actúa, o `instante` a más de 5 minutos del reloj del nodo: 422 `firma_invalida`.
+        Vector: `ejemplos/vectores-firma.json` → `traspaso-entrega`.
+      allOf: [ { $ref: "esquemas/comunes.json#/$defs/firma" } ]
     AporteComercio:
       type: object
       required: [aporte_nodo, pagos]

@@ -27,7 +27,7 @@ from jsonschema import Draft202012Validator
 
 from . import acceso, cliente
 from . import openapi_info as oi
-from .nivel_a import Caso, _fallo, _ok, _omitido
+from .nivel_a import Caso, NivelA, _fallo, _ok, _omitido
 from .oraculo import cargar as cargar_esquemas
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +39,7 @@ class NivelB:
         self.base_v1 = self.origen + "/v1"
         self.sesion = sesion
         self.mandato = mandato
+        self.clave = None
         self.timeout = timeout
         self.api = oi.cargar(BASE)
         self.esquemas, self.registry = cargar_esquemas(BASE)
@@ -79,7 +80,8 @@ class NivelB:
         if capacidades.get("custodia_propia") is True:
             prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout, alternativo=capacidades.get("alternativo") or [])
             self.casos.extend(prueba.correr())
-            self.sesion = self.sesion or prueba.token
+            if not self.sesion and prueba.token:
+                self.sesion, self.clave = prueba.token, prueba.clave
         else:
             self.casos.append(_omitido("acceso", "abrirSesion", "acceso por clave propia (docs/acceso.md)", "el nodo no publica acceso.custodia_propia: true en /.well-known/vereda.json"))
         if not self.sesion:
@@ -754,12 +756,12 @@ class NivelB:
                 time.sleep(1)
         if not viaje or not viaje.get("id"):
             return omitir(f"el despacho no le ofreció el viaje del pedido a la repartidora de prueba en {espera_s:.0f} s")
+        self._oferta_dice_quien_paga(viaje, pid)
         r = cliente.solicitud("POST", f"{self.base_v1}/viajes/{viaje['id']}/aceptar", headers=self._cabecera(), json_body={}, timeout=self.timeout)
         if not r.ok or r.estado != 200:
             return omitir(f"aceptar el viaje respondió {r.motivo or r.estado}")
-        r = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pid}/retirar", headers=self._cabecera(), json_body={}, timeout=self.timeout)
-        if not r.ok or r.estado != 200:
-            return omitir(f"retirar el pedido respondió {r.motivo or r.estado}")
+        if not self._traspaso_firmado(pid, "retiro", {}):
+            return omitir("no se pudo retirar el pedido")
 
         en_camino = {"lat": round(punto["lat"] - 0.001, 6), "lng": round(punto["lng"] + 0.001, 6)}
         r = cliente.solicitud("PUT", f"{self.base_v1}/repartidor/ubicacion", headers=self._cabecera(), json_body=en_camino, timeout=self.timeout)
@@ -790,16 +792,95 @@ class NivelB:
                 self.casos.append(caso)
             self.casos.append(_ok(cat, opid, desc))
 
-        r = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pid}/entregar", headers=self._cabecera(), json_body={"cobrado_en_mano": True}, timeout=self.timeout)
         desc_fin = "entregado el pedido, GET /pedidos/{id} ya no trae ubicacion_repartidor"
-        if not r.ok or r.estado != 200:
-            self.casos.append(_omitido(cat, opid, desc_fin, f"entregar respondió {r.motivo or r.estado}"))
+        if not self._traspaso_firmado(pid, "entrega", {"cobrado_en_mano": True}):
+            self.casos.append(_omitido(cat, opid, desc_fin, "no se pudo entregar el pedido"))
             return
         r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pid}", headers=self._cabecera(), timeout=self.timeout)
         if r.ok and isinstance(r.cuerpo, dict) and "ubicacion_repartidor" not in r.cuerpo:
             self.casos.append(_ok(cat, opid, desc_fin))
         else:
             self.casos.append(_fallo(cat, opid, desc_fin, r.motivo or f"estado {r.estado}, ubicacion_repartidor={(r.cuerpo or {}).get('ubicacion_repartidor') if isinstance(r.cuerpo, dict) else '?'}"))
+
+    # la oferta dice quién le paga al repartidor, cuánto y cómo ------------
+    # docs/repartidores.md, punto d: antes de aceptar, por pedido, 'cobros'
+    # con pagador, medio y monto; los de concepto 'envio' suman el envío.
+    def _oferta_dice_quien_paga(self, viaje, pid):
+        cat, opid = "oferta", "listarViajesOfrecidos"
+        caso = self._chequear_esquema(opid, "el viaje ofrecido cumple esquemas/viaje.json", "/viajes/ofrecidos", "get", [viaje])
+        if caso:
+            self.casos.append(caso)
+        desc = "la oferta dice, por pedido, quién le paga el envío al repartidor, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros)"
+        pp = next((x for x in (viaje.get("pago_repartidor") or {}).get("por_pedido") or [] if x.get("pedido_id") == pid), None)
+        if not pp:
+            self.casos.append(_fallo(cat, opid, desc, "pago_repartidor.por_pedido no trae el pedido del viaje"))
+            return
+        cobros = pp.get("cobros")
+        if not isinstance(cobros, list):
+            self.casos.append(_fallo(cat, opid, desc, "el pedido no trae 'cobros'"))
+            return
+        envio = sum(((c.get("monto") or {}).get("centavos") or 0) for c in cobros if c.get("concepto") == "envio")
+        monto = (pp.get("monto") or {}).get("centavos") or 0
+        if envio != monto:
+            self.casos.append(_fallo(cat, opid, desc, f"los cobros de envío suman {envio} centavos y el envío del pedido es {monto}"))
+            return
+        self.casos.append(_ok(cat, opid, desc))
+
+    # retirar y entregar firmados por el repartidor --------------------------
+    # docs/repartidores.md, punto j: con una firma que no verifica, 422 y el
+    # pedido no se mueve; con la clave de la suite (custodia propia) firma la
+    # suite, y si no, la pone el nodo que la custodia. Lo guardado en
+    # firmas.retiro / firmas.entrega verifica sobre el traspaso rearmado.
+    def _traspaso_firmado(self, pid, accion, cuerpo) -> bool:
+        cat = "firma_repartidor"
+        opid = "retirarPedido" if accion == "retiro" else "entregarPedido"
+        ruta = f"{self.base_v1}/pedidos/{pid}/" + ("retirar" if accion == "retiro" else "entregar")
+        r = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=self._cabecera(), timeout=self.timeout)
+        yo = (r.cuerpo or {}).get("identidad") if r.ok and isinstance(r.cuerpo, dict) else None
+        if not yo:
+            self.casos.append(_omitido(cat, opid, f"{accion} firmado por el repartidor", "GET /yo no dijo la identidad de la sesión"))
+            return False
+
+        def traspaso(instante):
+            return {"accion": accion, "pedido_id": pid, "repartidor": yo, "instante": instante}
+
+        ahora = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        falsa = acceso.Clave()
+        mala = {"firmante": yo, "clave_publica": falsa.publica, "valor": falsa.firmar({"otra": "cosa"}), "instante": ahora}
+        desc = f"{opid} con una firma que no verifica responde 422 firma_invalida y no mueve el pedido"
+        r = cliente.solicitud("POST", ruta, headers=self._cabecera(), json_body={**cuerpo, "firma": mala}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+        if r.ok and r.estado == 422 and codigo == "firma_invalida":
+            self.casos.append(_ok(cat, opid, desc))
+        else:
+            self.casos.append(_fallo(cat, opid, desc, f"llegó {r.estado} {codigo or r.motivo}"))
+            if r.ok and r.estado == 200:
+                return False
+
+        firma = None
+        if self.clave:
+            firma = {"firmante": yo, "clave_publica": self.clave.publica, "valor": self.clave.firmar(traspaso(ahora)), "instante": ahora}
+        r = cliente.solicitud("POST", ruta, headers=self._cabecera(), json_body={**cuerpo, **({"firma": firma} if firma else {})}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+        if r.ok and r.estado == 422 and codigo == "firma_requerida":
+            self.casos.append(_omitido(cat, opid, f"{accion} firmado por el repartidor", "la sesión de prueba es de custodia propia y la suite no tiene su clave: pasá la sesión por /acceso"))
+            return False
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, f"{opid} {'con la firma del repartidor' if firma else 'sin firma, con la clave custodiada por el nodo'} responde 200", r.motivo or f"llegó {r.estado} {codigo or ''}"))
+            return False
+
+        desc = f"firmas.{accion} es la del repartidor y verifica sobre el traspaso {{accion, pedido_id, repartidor, instante}} contra su historial de claves"
+        r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pid}", headers=self._cabecera(), timeout=self.timeout)
+        guardada = (((r.cuerpo or {}).get("firmas") or {}).get(accion)) if r.ok and isinstance(r.cuerpo, dict) else None
+        if not isinstance(guardada, dict):
+            self.casos.append(_fallo(cat, opid, desc, f"GET /pedidos/{{id}} no trae firmas.{accion}"))
+            return True
+        if guardada.get("firmante") != yo:
+            self.casos.append(_fallo(cat, opid, desc, f"firmada por {guardada.get('firmante')!r}, no por el repartidor {yo!r}"))
+            return True
+        ok, motivo = NivelA(self.origen, timeout=self.timeout)._verificar_firma({**traspaso(guardada.get("instante")), "firma": guardada}, {})
+        self.casos.append(_ok(cat, opid, desc) if ok else _fallo(cat, opid, desc, motivo))
+        return True
 
     # 2. reseña: dentro de ventana se acepta una vez; la segunda, no --------
     def _resena(self, pedido_id):

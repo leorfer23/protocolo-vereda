@@ -32,7 +32,7 @@ Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave
 | `item.confirmado`, `item.sustitucion_propuesta`, `item.sustitucion_respondida`, `item.faltante`, `item.pesado` | Ítem por ítem, en preparación |
 | `pago.pendiente`, `pago.confirmado`, `pago.vencido`, `pago.fallido` | Desde el adaptador de PSP |
 | `pago.transferencia_declarada` | El comprador avisa que ya transfirió (`POST /pedidos/{id}/transferencia`), en transferencia directa sin PSP |
-| `viaje.ofrecido`, `viaje.aceptado`, `viaje.rechazado`, `viaje.soltado`, `viaje.parada_completada`, `viaje.completado` | Despacho. `viaje.soltado`: el repartidor dejó un viaje ya aceptado y vuelve a asignarse |
+| `viaje.ofrecido`, `viaje.aceptado`, `viaje.rechazado`, `viaje.soltado`, `viaje.parada_completada`, `viaje.completado` | Despacho. `viaje.soltado`: el repartidor dejó un viaje ya aceptado y vuelve a asignarse. `viaje.ofrecido`: a cada repartidor al que se le ofrece le llega aparte, con el viaje entero en `datos.viaje`, como lo ve en `GET /viajes/ofrecidos` (monto, distancia, peso, paradas y quién le paga cada envío y cómo, `docs/repartidores.md`, punto d); las partes de los pedidos reciben el aviso sin `datos.viaje`, porque un viaje puede llevar direcciones de otros compradores |
 | `pedido.sin_repartidor`, `pedido.pasa_a_retiro` | Asignación (`docs/repartidores.md`): se cumplió `plazo_asignacion_min` sin repartidor y el comercio eligió `avisar` o `retiro` |
 | `suscripcion.ocurrencia_abierta`, `suscripcion.ocurrencia_generada`, `suscripcion.pausada`, `suscripcion.cancelada`, `suscripcion.precio_cambia` | Suscripciones |
 | `ronda.abierta`, `ronda.cerrada`, `ronda.en_camino`, `ronda.entregada` | Rondas |

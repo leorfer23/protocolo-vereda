@@ -56,6 +56,7 @@ class Acceso:
         self.alternativo = list(alternativo)
         self.casos: List[Caso] = []
         self.token: Optional[str] = None
+        self.clave: Optional[Clave] = None
 
     # -- utilidades -----------------------------------------------------
     def _post(self, ruta, cuerpo=None, token=None, metodo="POST"):
@@ -157,6 +158,7 @@ class Acceso:
         else:
             self.casos.append(_ok("acceso", "abrirSesion", desc))
             self.token = otra["token"]
+            self.clave = clave
         return sesion
 
     def _desafio_de_otra_clave(self, marta):

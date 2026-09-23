@@ -578,15 +578,16 @@ class NivelA:
         ser distinto del nodo bajo prueba: es la parte que prueba interoperabilidad
         real entre nodos, no algo que la suite pueda fijar de antemano. Si el actor
         vive en el mismo dominio que se está probando (el caso común: reseñas entre
-        vecinos del mismo nodo), se reusa el esquema (http/https) de ese origen en
-        vez de forzar https -- para poder probar un nodo de desarrollo sin TLS.
+        vecinos del mismo nodo), se usa ese mismo origen, con su esquema y su
+        puerto, en vez de forzar https -- para poder probar un nodo de desarrollo
+        sin TLS ni puerto 443.
         Un dominio distinto es federación real entre nodos y siempre va por https."""
         if "@" not in identidad:
             return None
         dominio = identidad.split("@", 1)[1]
         mismo_nodo = dominio == urlparse(self.origen).hostname
-        esquema = urlparse(self.origen).scheme if mismo_nodo else "https"
-        url = f"{esquema}://{dominio}/v1/actores/{quote(identidad, safe='')}/claves"
+        base = self.origen if mismo_nodo else f"https://{dominio}"
+        url = f"{base}/v1/actores/{quote(identidad, safe='')}/claves"
         r = self._get(url)
         if not r.ok or r.estado != 200 or not r.cuerpo_es_json or not isinstance(r.cuerpo, list):
             return None

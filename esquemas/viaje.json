@@ -34,10 +34,27 @@
     "requiere_caja_termica": { "type": "boolean", "default": false },
     "pago_repartidor": {
       "type": "object",
-      "required": ["total"],
+      "description": "Lo que cobra el repartidor por el viaje, y de quién y cómo, antes de aceptarlo (docs/repartidores.md, punto d).",
+      "required": ["total", "por_pedido"],
       "properties": {
-        "total": { "$ref": "comunes.json#/$defs/monto" },
-        "por_pedido": { "type": "array", "items": { "type": "object", "required": ["pedido_id", "monto"], "properties": { "pedido_id": { "$ref": "comunes.json#/$defs/id" }, "monto": { "$ref": "comunes.json#/$defs/monto" } } } }
+        "total": { "$ref": "comunes.json#/$defs/monto", "description": "La suma de 'monto' de cada pedido: el envío, sin propinas." },
+        "por_pedido": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["pedido_id", "monto", "cobros"],
+            "properties": {
+              "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+              "monto": { "$ref": "comunes.json#/$defs/monto", "description": "El envío de este pedido: la tarifa pública o, en modo 'usuario', lo que acordó el comprador." },
+              "cobros": {
+                "type": "array",
+                "description": "Quién le paga, cuánto y por qué medio. Son los pagos que nacen en el pedido si acepta ('pago.json'), dichos antes. Los de concepto 'envio' suman 'monto'. Vacío si el envío no le cuesta nada a nadie.",
+                "items": { "$ref": "#/$defs/cobro" }
+              }
+            }
+          }
+        }
       }
     },
     "estado": { "type": "string", "enum": ["ofrecido", "aceptado", "en_curso", "completado", "rechazado", "soltado"], "description": "'rechazado': el repartidor pasó la oferta, y no cuenta en ningún lado. 'soltado': la había aceptado y la dejó (POST /viajes/{id}/soltar); cuenta en su reputación y el viaje vuelve a asignarse." },
@@ -48,5 +65,19 @@
     "vence_oferta": { "$ref": "comunes.json#/$defs/instante", "description": "Solo con estado 'ofrecido': hasta cuándo se puede aceptar. Pasado sin respuesta, la oferta pasa al siguiente repartidor (docs/ranking-y-despacho.md)." },
     "aceptado_en": { "$ref": "comunes.json#/$defs/instante" },
     "ruta": { "type": "array", "items": { "$ref": "comunes.json#/$defs/punto" }, "description": "Polilínea de OSRM." }
+  },
+  "$defs": {
+    "cobro": {
+      "type": "object",
+      "description": "Un pago al repartidor por un pedido del viaje, como lo va a cobrar. Con efectivo, 'pagador' dice cuándo: el comercio le paga al retirar, el comprador al entregar. Con transferencia, el alias sale en las instrucciones del pago, que ve solo quien paga.",
+      "required": ["concepto", "pagador", "metodo", "monto"],
+      "additionalProperties": false,
+      "properties": {
+        "concepto": { "type": "string", "enum": ["envio", "propina_repartidor"] },
+        "pagador": { "type": "string", "enum": ["comprador", "comercio"], "description": "'comprador': el que contrató al repartidor (modo 'usuario') o el que paga su envío por cuenta del comercio ('cobro_envio: al_repartidor'). 'comercio': con 'cobro_envio: al_comercio', o la parte de un envío que el comercio bonificó." },
+        "metodo": { "type": "string", "enum": ["efectivo", "transferencia"] },
+        "monto": { "$ref": "comunes.json#/$defs/monto" }
+      }
+    }
   }
 }

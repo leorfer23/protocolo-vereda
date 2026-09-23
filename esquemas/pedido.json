@@ -110,16 +110,29 @@
     "peso_estimado_kg": { "type": "number", "minimum": 0 },
     "firmas": {
       "type": "object",
-      "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; entrega por el repartidor, o por el comercio en modalidad 'retiro'.",
+      "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; retiro y entrega por el repartidor, sobre '#/$defs/traspaso'; en modalidad 'retiro', entrega por el comercio, con el código del comprador como prueba.",
       "properties": {
         "creacion": { "$ref": "comunes.json#/$defs/firma" },
         "aceptacion": { "$ref": "comunes.json#/$defs/firma" },
-        "retiro": { "$ref": "comunes.json#/$defs/firma", "description": "Del repartidor, al retirar del comercio. Es el traspaso: con repartidor elegido por el comprador, marca hasta dónde responde el comercio." },
-        "entrega": { "$ref": "comunes.json#/$defs/firma" }
+        "retiro": { "$ref": "comunes.json#/$defs/firma", "description": "Del repartidor, al retirar del comercio, sobre el JCS de '#/$defs/traspaso' con accion 'retiro'. Es el traspaso: con repartidor elegido por el comprador, marca hasta dónde responde el comercio." },
+        "entrega": { "$ref": "comunes.json#/$defs/firma", "description": "Con repartidor, la suya al entregar, sobre el JCS de '#/$defs/traspaso' con accion 'entrega'. En modalidad 'retiro', la del comercio." }
       }
     }
   },
   "$defs": {
+    "traspaso": {
+      "type": "object",
+      "description": "Lo que firma el repartidor al retirar y al entregar (docs/repartidores.md, punto j). Todo sale del pedido y de la firma, así que cualquiera lo rearma para verificar 'firmas.retiro' y 'firmas.entrega': 'pedido_id' es el id del pedido, 'repartidor' es 'firma.firmante' e 'instante' es 'firma.instante'. Con la clave en el teléfono, el repartidor manda solo la 'firma' en retirarPedido o entregarPedido; el nodo rearma el traspaso y la verifica.",
+      "required": ["accion", "pedido_id", "repartidor", "instante"],
+      "properties": {
+        "accion": { "type": "string", "enum": ["retiro", "entrega"] },
+        "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+        "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
+        "instante": { "$ref": "comunes.json#/$defs/instante" },
+        "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Fuera del JCS, como toda firma." }
+      },
+      "additionalProperties": false
+    },
     "descuento_aplicado": {
       "type": "object",
       "required": ["nombre", "alcance", "monto"],

@@ -137,6 +137,15 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   toma el viaje, retira y reporta un punto. `GET /pedidos/{id}` en `en_camino` trae ese
   punto en `ubicacion_repartidor`, y ya entregado no lo trae. Si el nodo no deja armar
   algún paso previo (alta de repartidor, despacho en 20 s), el caso se omite, no falla.
+- La oferta dice quién paga: en ese mismo viaje, antes de aceptar, `GET /viajes/ofrecidos` cumple
+  `esquemas/viaje.json` y trae el pedido en `pago_repartidor.por_pedido` con `cobros`, cuyos
+  `envio` suman su `monto` (`docs/repartidores.md`, punto d).
+- Retiro y entrega firmados: `retirarPedido` y `entregarPedido` con una `firma` que no verifica
+  dan `422 firma_invalida` sin mover el pedido. Después, con la clave de la suite si la sesión
+  salió de `/acceso` (custodia propia), o sin `firma` si el nodo custodia la clave, responden
+  `200`, y `firmas.retiro` / `firmas.entrega` son del repartidor y verifican sobre el traspaso
+  `{accion, pedido_id, repartidor, instante}` contra su historial (`docs/repartidores.md`,
+  punto j). Si el nodo pide la firma y la suite no tiene la clave, se omite.
 - Aceptar con tiempo: en el ciclo, `aceptarPedido` con `tiempo_preparacion_min` fuera de rango
   da `422` y no acepta; con `25` responde el pedido con `tiempo_preparacion_min: 25` y `eta` a
   25 minutos de la aceptación (±2 min: es retiro, sin ruta).

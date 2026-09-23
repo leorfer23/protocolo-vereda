@@ -501,7 +501,7 @@
     },
     {
       "name": "viajes_ofrecidos",
-      "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, cómo se cobra el envío y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
+      "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, quién le paga cada envío, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros), y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "properties": {}}
     },
     {
@@ -526,7 +526,7 @@
     },
     {
       "name": "viaje_retirar",
-      "description": "Marca que el repartidor retiró un pedido del comercio y firma el traspaso. Si el comercio le pagó el envío en efectivo al retirar, marcá cobrado_en_mano. Requiere scope 'repartir'.",
+      "description": "Marca que el repartidor retiró un pedido del comercio. Si el nodo custodia su clave, el nodo firma el traspaso; por mandato, un agente no firma por la persona y el retiro queda en el historial sin su firma. Si el comercio le pagó el envío en efectivo al retirar, marcá cobrado_en_mano. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "cobrado_en_mano": {"type": "boolean"}}}
     },
     {

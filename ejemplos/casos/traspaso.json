@@ -1,0 +1,62 @@
+{
+  "$comentario": "Lo que firma el repartidor al retirar y al entregar (docs/repartidores.md, punto j). El nodo lo rearma desde el pedido y la firma.",
+  "esquema": "pedido.json#/$defs/traspaso",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Entrega: acción, pedido, repartidor e instante. Es lo único que entra en el JCS.",
+      "doc": {
+        "accion": "entrega",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "repartidor": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Retiro, ya con su firma: 'firma' queda fuera del JCS, como toda firma.",
+      "doc": {
+        "accion": "retiro",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "repartidor": "marta@vereda.ar",
+        "instante": "2026-09-21T14:50:00-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+          "valor": "AAAA",
+          "instante": "2026-09-21T14:50:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'cobrado' no es una acción: el repartidor firma el retiro o la entrega; el cobro se marca con cobrado_en_mano.",
+      "doc": {
+        "accion": "cobrado",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "repartidor": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El código de retiro no va en lo firmado: es del comprador, y la firma queda a la vista de las otras partes.",
+      "doc": {
+        "accion": "entrega",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "repartidor": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "codigo_retiro": "4821"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin instante no se sabe cuándo, y la firma no se puede ubicar en la validez de la clave.",
+      "doc": {
+        "accion": "retiro",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "repartidor": "marta@vereda.ar"
+      }
+    }
+  ]
+}

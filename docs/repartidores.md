@@ -63,7 +63,8 @@ decidir sobre la propuesta del comprador cuando el comercio no tiene `usuario` e
 La red no arbitra (`docs/federacion.md`, Disputas): no hay fondo de garantía, ni reembolso, ni
 reversión. Lo que este documento fija es **a quién le reclama el comprador**, con qué evidencia y hasta
 dónde. La evidencia es siempre el historial firmado del pedido; ahora también la firma `retiro`
-(`pedido.firmas.retiro`), que el repartidor pone al retirar y marca el traspaso.
+(`pedido.firmas.retiro`), que el repartidor pone al retirar y marca el traspaso, y la de entrega
+(punto j).
 
 | Modo | Quién eligió al repartidor | Quién responde ante el comprador | Hasta cuándo responde el comercio | `pedido.asignacion.responsable_entrega` |
 | --- | --- | --- | --- | --- |
@@ -98,6 +99,17 @@ El repartidor cobra directo, como el comercio. La tarifa por tramo es pública (
 El medio lo elige quien paga dentro de lo que el repartidor acepta (`cobro.metodos` de su perfil, que
 es público). El comprador lo dice al confirmar con `metodo_envio`; el despacho del pool solo ofrece el
 viaje a repartidores que aceptan ese medio.
+
+**La oferta dice todo esto antes de aceptar.** Cada viaje ofrecido (`listarViajesOfrecidos`,
+`verViaje` y el evento `viaje.ofrecido`) trae, por pedido, `pago_repartidor.por_pedido[].cobros`
+(`esquemas/viaje.json#/$defs/cobro`): quién le paga (`comprador` o `comercio`), por qué medio
+(`efectivo` o `transferencia`), cuánto y por qué concepto (`envio` o `propina_repartidor`). Son los
+mismos pagos que nacen en el pedido si acepta, dichos antes y calculados para ese repartidor: si no
+acepta efectivo, lo que le paga el comercio sale por transferencia; si no declaró alias, sale en
+efectivo. Los `envio` de un pedido suman su `monto`. Con efectivo, quién paga dice cuándo cobra: el
+comercio al retirar, el comprador al entregar. En modo `usuario` el pagador es siempre `comprador`, y
+`viaje.modo` dice que es el comprador que lo eligió. Un pago bonificado del comercio es un segundo
+`cobro` con `pagador: comercio`.
 
 **En modo `usuario` el monto también se arregla entre ellos.** El comprador lo dice al confirmar el
 carrito, `monto_envio_acordado_centavos` (`POST /carritos/{id}/confirmar`, herramienta
@@ -243,7 +255,44 @@ repartidor, al repartidor a quien se le está ofreciendo y al comercio de cualqu
 El comprador no lo lee: sigue su pedido con `GET /pedidos/{id}`, y un viaje puede llevar las
 direcciones de otros compradores. A cualquier otro, 404, como si no existiera.
 
-## j. Qué es configurable y qué no
+## j. La firma del repartidor al retirar y al entregar
+
+El retiro y la entrega los firma el repartidor con su clave, como una reseña o un mandato. Es la
+evidencia del punto c: `pedido.firmas.retiro` marca el traspaso y `pedido.firmas.entrega` la entrega.
+
+**Qué se firma.** El JCS (RFC 8785) de `pedido.json#/$defs/traspaso`:
+
+```json
+{ "accion": "entrega", "instante": "2026-09-21T15:04:05-03:00",
+  "pedido_id": "01926b3a-...", "repartidor": "marta@vereda.ar" }
+```
+
+`accion` es `retiro` o `entrega`, `repartidor` es el firmante y `instante` es el de la firma. Todo
+sale del pedido y de la firma guardada, así que cualquiera rearma el traspaso y verifica, sin que el
+nodo guarde nada más. No lleva el código de retiro ni montos: el código es del comprador, y lo que se
+cobró ya está en `pedido.pagos`. Los bytes exactos están en `ejemplos/vectores-firma.json` →
+`traspaso-entrega`.
+
+**Cómo la manda.** Con la clave en el teléfono (custodia propia), el repartidor firma al tocar
+"retiré" o "entregué" y manda la `firma` (`comunes.json#/$defs/firma`) en el cuerpo de
+`POST /pedidos/{id}/retirar` o `POST /pedidos/{id}/entregar`. Un solo campo: el nodo rearma el
+traspaso con la acción de la ruta, el id del pedido y la identidad de la sesión.
+
+**Qué hace el nodo.**
+
+| Caso | Respuesta |
+| --- | --- |
+| `firma` verifica (pasos de `docs/claves-y-firmas.md` contra el historial del repartidor) | Mueve el pedido y guarda la firma tal cual en `firmas.retiro` o `firmas.entrega` |
+| Sin `firma` y el nodo custodia la clave del repartidor | Firma el nodo, sobre el mismo traspaso |
+| Sin `firma`, con sesión y custodia propia | 422 `firma_requerida`; el pedido no se mueve |
+| Sin `firma`, por mandato (`repartir`) | Mueve el pedido sin esa firma: un agente no firma por la persona; el historial dice quién y cuándo |
+| `firmante` distinto de quien actúa, o `instante` a más de 5 minutos del reloj del nodo | 422 `firma_invalida` |
+| No verifica, clave fuera del historial o comprometida | 422 `firma_invalida`, `clave_desconocida` o `clave_comprometida` |
+
+Un 422 no mueve nada: el repartidor vuelve a firmar y reintenta. En modalidad `retiro` entrega el
+comercio y la prueba es el código del comprador; esta firma es la del repartidor.
+
+## k. Qué es configurable y qué no
 
 | Quién | Configura | Dónde |
 | --- | --- | --- |
@@ -255,7 +304,7 @@ Lo único obligatorio es la transparencia:
 
 - el orden de asignación y a quién se le paga el envío están en la ficha pública del comercio;
 - los medios de cobro, las verificaciones y la reputación del repartidor están en su perfil público;
-- el monto, la distancia, el peso y cómo se cobra están en el viaje antes de aceptarlo;
+- el monto, la distancia, el peso, quién paga cada envío y por qué medio están en el viaje antes de aceptarlo;
 - quién eligió al repartidor y quién responde está en cada pedido (`pedido.asignacion`).
 
 Nadie aprueba a nadie: ni el nodo a un repartidor, ni la red a un comercio que usa sus propios, ni el
