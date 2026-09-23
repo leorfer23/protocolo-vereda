@@ -72,7 +72,7 @@
     },
     "envios": {
       "type": "object",
-      "description": "Cómo consigue repartidor este comercio para sus pedidos con entrega, y a quién le pagan el envío. Público: quien compra lo lee antes de pedir. Todo es opcional; sin este bloque rige el default: solo pool, avisar si nadie acepta, envío pagado directo al repartidor. Diseño en docs/repartidores.md.",
+      "description": "Cómo consigue repartidor este comercio para sus pedidos con entrega, y a quién le pagan el envío. Público: quien compra lo lee antes de pedir. Todo es opcional; sin este bloque rige el default: solo pool, avisar si nadie acepta, envío pagado directo al repartidor, efectivo del comercio rendido después de entregar. Diseño en docs/repartidores.md.",
       "properties": {
         "asignacion": {
           "type": "array",
@@ -96,6 +96,12 @@
           "enum": ["al_repartidor", "al_comercio"],
           "default": "al_repartidor",
           "description": "Con repartidor propio o del pool. 'al_repartidor': el comprador le paga el envío directo al repartidor, en efectivo o al alias del repartidor. 'al_comercio': el comprador le paga el envío al comercio junto con los productos, y el comercio le paga al repartidor. Con repartidor elegido por el comprador siempre es 'al_repartidor': lo contrató él."
+        },
+        "rendicion_efectivo": {
+          "type": "string",
+          "enum": ["despues_de_entregar", "al_retirar"],
+          "default": "despues_de_entregar",
+          "description": "Cuándo le da el repartidor al comercio lo que cobra en mano por cuenta de él (productos en efectivo y lo demás que el comprador le paga al comercio en la puerta). 'despues_de_entregar': el repartidor cobra en la entrega y le rinde después; la rendición queda confirmada cuando los dos firman el mismo monto. 'al_retirar': el repartidor le paga al comercio al retirar, adelantando esa plata, y después cobra todo en la entrega. Público: el repartidor lo ve en la oferta de viaje antes de aceptar (docs/repartidores.md, punto l)."
         }
       }
     },

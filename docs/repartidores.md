@@ -133,7 +133,8 @@ o público, nunca otro.
   sus ganancias, y lo que corresponda se dice en la reseña. La red no persigue deudas.
 
 El caso ya existente del efectivo con repartidor no cambia: si los productos también son en
-efectivo, el repartidor cobra todo en la puerta y `pedido.reparto` dice cuánto es de quién.
+efectivo, el repartidor cobra todo en la puerta y `pedido.reparto` dice cuánto es de quién. Lo que
+es del comercio se lo da como dice el punto l: después de entregar, o adelantado al retirar.
 
 ## e. Reputación del repartidor
 
@@ -238,11 +239,12 @@ herramienta por operación, en `mcp/herramientas.json`:
 | `viaje_retirar` | `POST /pedidos/{id}/retirar` (`retirarPedido`) |
 | `viaje_entregar` | `POST /pedidos/{id}/entregar` (`entregarPedido`) |
 | `cobro_confirmar` | `POST /pedidos/{id}/transferencia/confirmar` (`confirmarTransferencia`) |
+| `rendicion_declarar` | `POST /pedidos/{id}/rendicion` (`declararRendicion`) |
 | `mis_viajes` | `GET /repartidor/viajes` (`listarMisViajes`) |
 | `mis_ganancias` | `GET /repartidor/ganancias` (`verMisGanancias`) |
 
-Y dos de los otros lados: `ver_repartidor` (público, `verRepartidor`) y `pedido_asignar`
-(comercio, `asignarRepartidor`).
+Y tres de los otros lados: `ver_repartidor` (público, `verRepartidor`), `pedido_asignar`
+(comercio, `asignarRepartidor`) y `rendicion_confirmar` (comercio, `confirmarRendicion`).
 
 **Historial y ganancias.** `GET /repartidor/viajes` pagina por cursor, como la bandeja del comercio,
 e incluye los soltados; las ofertas rechazadas no dejan rastro. `GET /repartidor/ganancias`
@@ -296,16 +298,98 @@ comercio y la prueba es el código del comprador; esta firma es la del repartido
 
 | Quién | Configura | Dónde |
 | --- | --- | --- |
-| Comercio | Orden de modos, esperas, plazo total, qué pasa si nadie acepta, a quién se paga el envío, lista de propios; y pedido por pedido, quién lo lleva | `comercio.envios`, `comercio.privado.repartidores_propios`, `POST /pedidos/{id}/asignar` |
+| Comercio | Orden de modos, esperas, plazo total, qué pasa si nadie acepta, a quién se paga el envío, cuándo le rinden el efectivo, lista de propios; y pedido por pedido, quién lo lleva | `comercio.envios`, `comercio.privado.repartidores_propios`, `POST /pedidos/{id}/asignar` |
 | Repartidor | Vehículo, restricciones, zona, medios de cobro y alias, cooperativa, de quién es propio, si acepta ser nombrado; y viaje por viaje, aceptar, rechazar o soltar | `PUT /repartidor`, `/viajes/{id}/*` |
 | Comprador | Repartidores de confianza, a quién nombra, cómo paga el envío | `preferencias.repartidores_de_confianza`, `POST /carritos/{id}/confirmar` |
 
 Lo único obligatorio es la transparencia:
 
-- el orden de asignación y a quién se le paga el envío están en la ficha pública del comercio;
+- el orden de asignación, a quién se le paga el envío y cuándo se le rinde el efectivo están en la
+  ficha pública del comercio;
 - los medios de cobro, las verificaciones y la reputación del repartidor están en su perfil público;
-- el monto, la distancia, el peso, quién paga cada envío y por qué medio están en el viaje antes de aceptarlo;
+- el monto, la distancia, el peso, quién paga cada envío y por qué medio, y cuánto efectivo se le
+  va a deber al comercio y cuándo, están en el viaje antes de aceptarlo;
 - quién eligió al repartidor y quién responde está en cada pedido (`pedido.asignacion`).
 
 Nadie aprueba a nadie: ni el nodo a un repartidor, ni la red a un comercio que usa sus propios, ni el
 comercio al repartidor que eligió el comprador —ese solo decide si lo acepta para su pedido.
+
+## l. La rendición del efectivo al comercio
+
+Con un pedido en efectivo que lleva un repartidor, el comprador le paga todo en la puerta:
+productos, envío, propina. Lo de los productos es del comercio, y el repartidor se lo tiene que dar.
+La red no ve esa plata ni la custodia; lo que hace es que las dos partes dejen dicho, cada una con su
+clave, cuánto se dio y cuánto se recibió. **Decisión de Leo (2026-09-23).**
+
+**Cuándo, lo elige el comercio.** `envios.rendicion_efectivo` en su ficha pública:
+
+| Valor | Qué pasa | Riesgo para el repartidor |
+| --- | --- | --- |
+| `despues_de_entregar` (default) | El repartidor cobra en la entrega y después le da al comercio lo suyo | Ninguno de plata: no pone nada de su bolsillo |
+| `al_retirar` | El repartidor le paga al comercio al retirar, adelantando esa plata, y la recupera al cobrar en la entrega | Adelanta: si en la puerta no le pagan, la plata la puso él |
+
+**Qué se debe.** `pedido.rendicion.monto`: la suma de los pagos en efectivo del comprador al
+comercio que cobra el repartidor en la entrega (`productos`, `propina_comercio` y, con
+`cobro_envio: al_comercio`, el `envio`). Lo que el comercio le paga al repartidor (su envío con
+`al_comercio`) sigue siendo un pago aparte, con su propio `cobrado_en_mano` al retirar (punto d):
+pueden arreglarlo en el mismo encuentro, pero cada cosa queda dicha por separado.
+
+La rendición existe solo en pedidos con repartidor (modos `propio`, `pool` y `usuario`) en los que
+el repartidor cobra algo en mano por cuenta del comercio. Nace `pendiente` cuando el repartidor
+acepta el viaje, con el `modo` del comercio congelado en ese momento. Si el pedido se cancela sin
+ninguna constancia, desaparece: no pasó plata de mano. Con constancias queda como está.
+
+**Lo ve antes de aceptar.** Cada pedido del viaje ofrecido trae
+`pago_repartidor.por_pedido[].rendicion` (`esquemas/viaje.json#/$defs/rendicion`): cuánto le va a
+deber al comercio y `cuando`. Con `al_retirar`, ese es el monto que tiene que llevar encima para
+retirar. Ausente si no cobra nada en mano por cuenta del comercio.
+
+**Dos constancias firmadas.** Cada parte firma su parte, sobre
+`pedido.json#/$defs/constancia_rendicion`:
+
+```json
+{ "accion": "rendida", "actor": "marta@vereda.ar", "instante": "2026-09-21T15:30:00-03:00",
+  "monto": { "centavos": 1234000, "moneda": "ARS" }, "pedido_id": "01926b3a-..." }
+```
+
+| Quién | Operación | Herramienta | Acción | Desde cuándo |
+| --- | --- | --- | --- | --- |
+| Repartidor | `POST /pedidos/{id}/rendicion` (`declararRendicion`) | `rendicion_declarar` | `rendida`: "te di $X" | `al_retirar`: desde que aceptó el viaje. `despues_de_entregar`: desde que el pedido está `entregado` |
+| Comercio | `POST /pedidos/{id}/rendicion/confirmar` (`confirmarRendicion`) | `rendicion_confirmar` | `recibida`: "recibí $X" | Después de una `rendida` |
+
+El cuerpo es `{monto, firma?}`. El nodo arma la constancia con la acción de la ruta, el id del
+pedido, el actor (el repartidor, o la identidad del comercio: firma con la clave del comercio,
+no con la de quien lo administra) y el instante de la firma, y la agrega entera a
+`pedido.rendicion.constancias`, que no se edita ni se borra. A diferencia del traspaso, lleva el
+monto: es justamente lo que se firma. Las reglas de la firma son las del punto j: la manda el
+teléfono si tiene la clave; si no viene y el nodo custodia la clave, firma el nodo; con sesión y
+custodia propia, 422 `firma_requerida`; por mandato, la constancia queda sin firma, porque un agente
+no firma por la persona. Los bytes exactos están en `ejemplos/vectores-firma.json` →
+`rendicion-rendida`.
+
+**Estados.** `pedido.rendicion.estado` sale de las constancias:
+
+| Estado | Cuándo | Qué ve el repartidor | Qué ve el comercio | Evento |
+| --- | --- | --- | --- | --- |
+| `pendiente` | Sin ninguna `rendida` | Cuánto debe y cuándo | Cuánto le deben | — |
+| `declarada` | La última `rendida` todavía no tiene `recibida` después | Que declaró y espera | Que el repartidor dice haberle dado $X, para confirmar | `rendicion.declarada` |
+| `confirmada` | La última `recibida`, posterior a la última `rendida`, dice el mismo monto | Cerrada | Cerrada | `rendicion.confirmada` |
+| `en_desacuerdo` | La última `recibida`, posterior a la última `rendida`, dice otro monto | Las dos versiones | Las dos versiones | `rendicion.en_desacuerdo` |
+
+Los tres eventos llegan al comercio y al repartidor del pedido, con la rendición entera en
+`datos.rendicion`. Al comprador no: es entre ellos, y su copia del pedido no trae `rendicion`.
+`confirmada` es final: otra constancia responde 409 `rendicion_confirmada`. Una `recibida` sin una
+`rendida` antes responde 409 `rendicion_sin_declarar`; una `rendida` antes de tiempo, 409
+`rendicion_antes_de_tiempo`; cualquiera en un pedido sin rendición, 409 `rendicion_no_aplica`.
+
+**Si el comercio no confirma, o dice otro monto.** Nada vence, nada se castiga y nadie arbitra
+(`docs/federacion.md`, Disputas). Queda a la vista de los dos, firmado:
+
+- Sin confirmar, la rendición sigue `declarada` con la firma del repartidor: es su constancia de
+  que dijo haber pagado, con fecha.
+- En desacuerdo, están las dos versiones firmadas. Si se arregla (el repartidor completa la
+  diferencia, o el comercio contó mal), cualquiera agrega otra constancia y, cuando la última de
+  cada uno coincide, queda `confirmada`. Las anteriores siguen ahí.
+- Lo que corresponda se dice en la reseña, en los dos sentidos (punto e), que es la única
+  reputación que hay. La red no persigue deudas.
+

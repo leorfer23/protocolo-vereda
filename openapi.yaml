@@ -727,6 +727,52 @@ paths:
       responses:
         "403": { $ref: "#/components/responses/Error" }
         "200": { description: Pedido con el cobro confirmado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+  /pedidos/{id}/rendicion:
+    post:
+      operationId: declararRendicion
+      tags: [pedidos]
+      summary: "Repartidor: declara, firmado, cuánto efectivo le dio al comercio ('te rendí $X')"
+      description: |
+        Agrega una constancia `rendida` a `pedido.rendicion` (docs/repartidores.md, punto l). Solo
+        el repartidor del pedido: cualquier otro recibe 403. Con `rendicion.modo` `al_retirar` se
+        puede desde que aceptó el viaje; con `despues_de_entregar`, desde que el pedido está
+        `entregado` (antes, 409 `rendicion_antes_de_tiempo`). Sin rendición en el pedido, 409
+        `rendicion_no_aplica`; ya `confirmada`, 409 `rendicion_confirmada`.
+
+        La firma es la del repartidor sobre `pedido.json#/$defs/constancia_rendicion` con
+        `accion: rendida`, con las reglas del traspaso (punto j): la manda en `firma` si la clave
+        vive en su teléfono; si el nodo la custodia y no viene, firma el nodo; con sesión y
+        custodia propia, sin `firma` responde 422 `firma_requerida` y no agrega nada; por mandato
+        queda sin firma. Emite `rendicion.declarada` al comercio y al repartidor.
+      security: [ { sesion: [] }, { mandato: [repartir] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ConstanciaRendicion" } } } }
+      responses:
+        "200": { description: "Pedido con la constancia en rendicion.constancias", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { description: "rendicion_no_aplica, rendicion_antes_de_tiempo o rendicion_confirmada", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "firma_requerida, firma_invalida, clave_desconocida, clave_comprometida o un monto en otra moneda", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /pedidos/{id}/rendicion/confirmar:
+    post:
+      operationId: confirmarRendicion
+      tags: [pedidos]
+      summary: "Comercio: confirma, firmado, cuánto efectivo recibió del repartidor ('recibí $X')"
+      description: |
+        Agrega una constancia `recibida` a `pedido.rendicion` (docs/repartidores.md, punto l),
+        firmada con la clave del comercio. Solo quien administra el comercio del pedido. Si el
+        monto es el de la última `rendida`, la rendición queda `confirmada` (evento
+        `rendicion.confirmada`); si no, `en_desacuerdo` (evento `rendicion.en_desacuerdo`), las
+        dos versiones firmadas y a la vista, y cualquiera de los dos puede agregar otra. Sin una
+        `rendida` antes, 409 `rendicion_sin_declarar`. La firma sigue las mismas reglas que
+        `declararRendicion`, con la clave del comercio.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ConstanciaRendicion" } } } }
+      responses:
+        "200": { description: "Pedido con la constancia en rendicion.constancias", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { description: "rendicion_no_aplica, rendicion_sin_declarar o rendicion_confirmada", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "firma_requerida, firma_invalida, clave_desconocida, clave_comprometida o un monto en otra moneda", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /listas:
     get: { operationId: listarListas, tags: [listas], summary: Mis listas, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/lista.json" } } } } } } }
@@ -774,7 +820,7 @@ paths:
     post: { operationId: aceptarCotizacion, tags: [cotizaciones], summary: Aceptar el presupuesto; crea el pedido con precio fijo, security: [ { sesion: [] }, { mandato: [pedir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: Pedido creado } } }
 
   /viajes/ofrecidos:
-    get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso, paradas y, por pedido, quién me paga, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros). Del pool, solo los que caen enteros en mi zona y respetan mi vehículo, caja térmica, capacidad y medios de cobro", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
+    get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso, paradas y, por pedido, quién me paga, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros), y cuánto efectivo le voy a deber al comercio y cuándo se lo doy (por_pedido[].rendicion). Del pool, solo los que caen enteros en mi zona y respetan mi vehículo, caja térmica, capacidad y medios de cobro", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
   /viajes/{id}:
     get:
       operationId: verViaje
@@ -1256,6 +1302,20 @@ components:
         sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
     Carrito: { $ref: "esquemas/carrito.json" }
+    ConstanciaRendicion:
+      type: object
+      required: [monto]
+      description: |
+        Lo que se declara (`rendida`) o se confirma (`recibida`). El nodo arma la constancia
+        `pedido.json#/$defs/constancia_rendicion` con la acción de la ruta, el id del pedido, el
+        actor (el repartidor, o el comercio del pedido), este `monto` y el instante de la firma, y
+        la guarda entera. Con la clave en el teléfono, `firma` va sobre ese objeto: `actor` =
+        `firmante`, `instante` = el de la firma; `firmante` distinto del actor, o `instante` a más
+        de 5 minutos del reloj del nodo, 422 `firma_invalida`. Vector:
+        `ejemplos/vectores-firma.json` → `rendicion-rendida`.
+      properties:
+        monto: { $ref: "esquemas/comunes.json#/$defs/monto" }
+        firma: { $ref: "esquemas/comunes.json#/$defs/firma" }
     FirmaTraspaso:
       description: |
         La firma del repartidor al retirar o entregar, cuando la clave vive en su teléfono: Ed25519

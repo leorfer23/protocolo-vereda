@@ -540,6 +540,230 @@
           ]
         }
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "El comercio rinde 'al_retirar': antes de aceptar, el repartidor ve que tiene que adelantarle $12.340 al retirar y que los recupera al cobrar en la entrega (docs/repartidores.md, punto l).",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ],
+              "rendicion": {
+                "cuando": "al_retirar",
+                "monto": {
+                  "centavos": 1234000,
+                  "moneda": "ARS"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La rendición es después de entregar o al retirar, como lo eligió el comercio: no queda librada a otra cosa.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ],
+              "rendicion": {
+                "cuando": "cuando_pueda",
+                "monto": {
+                  "centavos": 1234000,
+                  "moneda": "ARS"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin monto el repartidor no sabe cuánta plata tiene que llevar encima para retirar.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ],
+              "rendicion": {
+                "cuando": "al_retirar"
+              }
+            }
+          ]
+        }
+      }
     }
   ]
 }

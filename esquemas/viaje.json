@@ -51,7 +51,8 @@
                 "type": "array",
                 "description": "Quién le paga, cuánto y por qué medio. Son los pagos que nacen en el pedido si acepta ('pago.json'), dichos antes. Los de concepto 'envio' suman 'monto'. Vacío si el envío no le cuesta nada a nadie.",
                 "items": { "$ref": "#/$defs/cobro" }
-              }
+              },
+              "rendicion": { "$ref": "#/$defs/rendicion" }
             }
           }
         }
@@ -67,6 +68,16 @@
     "ruta": { "type": "array", "items": { "$ref": "comunes.json#/$defs/punto" }, "description": "Polilínea de OSRM." }
   },
   "$defs": {
+    "rendicion": {
+      "type": "object",
+      "description": "Lo que el repartidor le va a deber al comercio por este pedido y cuándo se lo da, dicho antes de aceptar (docs/repartidores.md, punto l). Ausente si no cobra nada en mano por cuenta del comercio. Con 'al_retirar' lo adelanta de su bolsillo al retirar y lo recupera al cobrar en la entrega.",
+      "required": ["cuando", "monto"],
+      "additionalProperties": false,
+      "properties": {
+        "cuando": { "type": "string", "enum": ["despues_de_entregar", "al_retirar"], "description": "El 'envios.rendicion_efectivo' del comercio." },
+        "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que va a ser 'pedido.rendicion.monto'." }
+      }
+    },
     "cobro": {
       "type": "object",
       "description": "Un pago al repartidor por un pedido del viaje, como lo va a cobrar. Con efectivo, 'pagador' dice cuándo: el comercio le paga al retirar, el comprador al entregar. Con transferencia, el alias sale en las instrucciones del pago, que ve solo quien paga.",
