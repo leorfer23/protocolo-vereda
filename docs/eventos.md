@@ -10,6 +10,16 @@ Todo cambio de estado se publica como un evento (`esquemas/evento.json`), idempo
 | Webhook `POST /webhooks` | Agentes, PSP, sistemas del comercio | HTTP POST firmado; reintentos exponenciales durante 24 h; el receptor responde 2xx |
 | Federación `POST /federacion/entrantes` | Otros nodos | Firma HTTP del nodo emisor; en orden por entidad; mismos reintentos que el webhook. Ver `docs/federacion.md` |
 
+## Quién recibe cada evento por SSE
+
+`GET /eventos` le manda a cada actor solo lo que puede ver:
+
+- Los eventos públicos del nodo (catálogo, claves, vinculaciones, denuncias).
+- Los de las entidades de las que es parte: el comprador, el comercio y el repartidor de un pedido o un viaje; el otorgante de un mandato; los participantes de un grupo o una ronda; los del chat.
+- **Todo lo que ve un comercio lo ve también quien lo administra.** La identidad del comercio y la persona que lo administra (la sesión que lo dio de alta, o quien quedó como dueña tras un reclamo resuelto) son actores distintos; la bandeja del local se abre con la sesión de la persona. Si la ficha cambia de dueño, la nueva lo ve desde ese momento y la anterior deja de verlo. Un agente que escucha con un mandato de esa persona (scope `leer`) ve lo mismo que ella.
+
+Nadie más: un actor ajeno a un pedido no recibe sus eventos.
+
 ## Firma del webhook
 
 Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave pública del nodo publicada en `.well-known/vereda.json`. El receptor verifica antes de procesar. Un secreto compartido opcional (`secreto` al registrar) va en `Vereda-Secreto` como segunda capa.
@@ -30,7 +40,8 @@ Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave
 | `cotizacion.solicitada`, `cotizacion.presupuestada`, `cotizacion.aceptada`, `cotizacion.vencida` | Cotizaciones |
 | `mensaje.nuevo` | Chat |
 | `mandato.otorgado`, `mandato.revocado`, `mandato.requiere_confirmacion`, `mandato.confirmado` | Agentes |
-| `oferta.stock_cambiado`, `oferta.precio_cambiado`, `comercio.abierto`, `comercio.cerrado` | Catálogo (público) |
+| `oferta.stock_cambiado`, `oferta.precio_cambiado` | Catálogo (público) |
+| `comercio.abierto`, `comercio.cerrado` | Cambió `abierto_ahora` del comercio: empezó o terminó una franja de `horarios`, o el comercio lo pisó con `apertura_manual` (público) |
 | `vinculacion.verificada`, `vinculacion.caida`, `vinculacion.vencida` | Una vinculación cambió de estado al comprobarse (`docs/identidad-y-verificacion.md`). Público |
 | `atestacion.recibida` | Alguien atestiguó sobre el actor. En `cliente_frecuente` es el aviso para que la persona acepte o rechace |
 | `denuncia.recibida`, `denuncia.respondida`, `denuncia.estado_cambiado` | Denuncias de suplantación. Públicos: la denuncia ya lo es |

@@ -168,7 +168,7 @@ paths:
         - { name: lat, in: query, required: true, schema: { type: number } }
         - { name: lng, in: query, required: true, schema: { type: number } }
         - { name: tipo, in: query, schema: { type: string } }
-        - { name: abierto, in: query, schema: { type: boolean } }
+        - { name: abierto, in: query, schema: { type: boolean }, description: "Filtra por `abierto_ahora`: horarios, o `apertura_manual` mientras esté vigente." }
         - { name: modalidad, in: query, schema: { type: string, enum: [inmediata, franja, consolidada, ronda, punto_entrega, retiro] } }
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
         - { name: q, in: query, schema: { type: string }, description: "Texto libre, también semántico" }
@@ -197,7 +197,16 @@ paths:
       operationId: editarComercio
       tags: [mi-comercio]
       summary: "Editar la ficha: horarios, modalidades, políticas, medios de cobro, política de datos"
-      description: Solo el dueño. Los campos que no vienen quedan como están; el nodo valida el documento resultante contra esquemas/comercio.json. `identidad`, `verificacion` y `reputacion` no se editan.
+      description: |
+        Solo el dueño, o un agente con su mandato `administrar`. Los campos que no vienen quedan como
+        están. El nodo valida el documento resultante contra
+        esquemas/comercio.json. `identidad`, `verificacion`, `reputacion` y `abierto_ahora` no se editan.
+
+        "Abierto ahora" es `apertura_manual`: `{"abierto": false, "hasta": "..."}` cierra ya aunque
+        los horarios digan abierto; `{"abierto": true}` abre fuera de horario. Sin `hasta` dura hasta
+        que el comercio la cambie o la quite (`"apertura_manual": null`), y con `hasta` en el pasado el
+        nodo la ignora y vuelven a mandar los horarios. Si cambia `abierto_ahora`, el nodo emite
+        `comercio.abierto` o `comercio.cerrado`.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/comercio.json." } } } }
@@ -607,7 +616,20 @@ paths:
       requestBody: { content: { application/json: { schema: { type: object, required: [destinatario, centavos], properties: { destinatario: { type: string, enum: [repartidor, comercio, nodo], description: "'nodo': solo si el nodo acepta propinas, por transferencia a su cuenta (docs/sostenimiento.md)." }, centavos: { type: integer } } } } } }
       responses: { "201": { description: Cobro generado, content: { application/json: { schema: { $ref: "esquemas/pago.json" } } } } }
   /pedidos/{id}/aceptar:
-    post: { operationId: aceptarPedido, tags: [pedidos], summary: "Comercio: aceptar", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post:
+      operationId: aceptarPedido
+      tags: [pedidos]
+      summary: "Comercio: aceptar, opcionalmente diciendo en cuánto lo tiene listo"
+      description: |
+        `tiempo_preparacion_min` son los minutos de preparación de ESTE pedido ("Aceptar · 25 min").
+        Ausente: los `tiempo_preparacion_min` de la ficha del comercio, o 0 si no los publica. El
+        nodo los guarda en el pedido y fija `eta`: el instante de aceptación más esos minutos, más la
+        ruta si hay envío (`docs/ranking-y-despacho.md`). Es lo que ve el comprador y lo que el
+        despacho respeta. Fuera de rango: 422 `documento_invalido`.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: false, content: { application/json: { schema: { type: object, properties: { tiempo_preparacion_min: { type: integer, minimum: 0, maximum: 1440, description: "Minutos de preparación de este pedido. Pisa los de la ficha solo para él." } } } } } }
+      responses: { "200": { description: "Pedido aceptado, con su eta", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "403": { $ref: "#/components/responses/NoEsElDueno" }, "409": { $ref: "#/components/responses/Error" }, "422": { $ref: "#/components/responses/Error" } }
   /pedidos/{id}/rechazar:
     post: { operationId: rechazarPedido, tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
   /pedidos/{id}/items/{item}:

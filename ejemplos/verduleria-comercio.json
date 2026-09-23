@@ -10,6 +10,8 @@
     "zona_entrega": [ { "lat": -34.59, "lng": -58.43 }, { "lat": -34.59, "lng": -58.41 }, { "lat": -34.62, "lng": -58.41 }, { "lat": -34.62, "lng": -58.43 }, { "lat": -34.59, "lng": -58.43 } ]
   },
   "horarios": [ { "dias": ["lu","ma","mi","ju","vi","sa"], "desde": "08:00", "hasta": "20:00" } ],
+  "apertura_manual": { "abierto": false, "hasta": "2026-09-22T12:00:00-03:00" },
+  "abierto_ahora": false,
   "modalidades": [
     { "id": "franja", "tipo": "franja", "nombre": "Te lo llevo hoy", "precio_envio": { "modo": "por_tramo", "tramos": [ { "hasta_km": 2, "monto": { "centavos": 150000, "moneda": "ARS" } }, { "hasta_km": 5, "monto": { "centavos": 250000, "moneda": "ARS" } } ] },
       "franjas": [ { "dias": ["lu","ma","mi","ju","vi","sa"], "desde": "11:00", "hasta": "13:00", "cupo": 15 }, { "dias": ["lu","ma","mi","ju","vi","sa"], "desde": "17:00", "hasta": "20:00", "cupo": 20 } ] },

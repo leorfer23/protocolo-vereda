@@ -134,6 +134,16 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   toma el viaje, retira y reporta un punto. `GET /pedidos/{id}` en `en_camino` trae ese
   punto en `ubicacion_repartidor`, y ya entregado no lo trae. Si el nodo no deja armar
   algún paso previo (alta de repartidor, despacho en 20 s), el caso se omite, no falla.
+- Aceptar con tiempo: en el ciclo, `aceptarPedido` con `tiempo_preparacion_min` fuera de rango
+  da `422` y no acepta; con `25` responde el pedido con `tiempo_preparacion_min: 25` y `eta` a
+  25 minutos de la aceptación (±2 min: es retiro, sin ruta).
+- Eventos de quien administra: contra un nodo con custodia propia, una compradora nueva (de
+  `/acceso`) compra en el comercio de prueba y el stream `GET /eventos` de la sesión de prueba,
+  que lo administra, trae su `pedido.creado` en 15 s. Sin custodia propia se omite.
+- Abierto ahora: la ficha trae `abierto_ahora`; `apertura_manual` cerrada o abierta (con
+  `hasta` a 30 min) se ve en la respuesta del `PATCH`, en `GET /comercios/{id}` y en
+  `buscarComercios?abierto`; con campos de más da `422`; `null` la quita y vuelve el
+  `abierto_ahora` de antes. Corre al final y deja el comercio como estaba.
 - Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
   que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella

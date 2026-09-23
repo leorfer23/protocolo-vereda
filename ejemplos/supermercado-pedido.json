@@ -40,6 +40,7 @@
     { "destinatario": "nodo", "concepto": "aporte_nodo", "pagador": "comercio", "monto": { "centavos": 0, "moneda": "ARS" } }
   ],
   "politica_cancelacion_aplicada": "Podés cancelar hasta que empecemos a armar el pedido.",
+  "tiempo_preparacion_min": 25,
   "requiere_mayoria_edad": false,
   "bultos": 2,
   "peso_estimado_kg": 9.5,
