@@ -102,7 +102,7 @@
     "politica_cancelacion_aplicada": { "type": "string", "description": "Copia del texto vigente al crear el pedido." },
     "eta": { "$ref": "comunes.json#/$defs/instante" },
     "codigo_retiro": { "type": "string", "pattern": "^[0-9]{4,6}$", "description": "Solo modalidad 'retiro', y no siempre presente: lo ve únicamente el usuario, así que la copia del pedido que recibe cualquier otra parte lo omite. Se lo dice al comercio al pasar a buscar, y el comercio lo envía en 'entregar'. Es la prueba de entrega en mano." },
-    "ubicacion_repartidor": { "$ref": "comunes.json#/$defs/punto", "description": "Solo mientras el pedido está en_camino." },
+    "ubicacion_repartidor": { "$ref": "comunes.json#/$defs/punto", "description": "La última ubicación que reportó el repartidor, solo mientras el pedido está en_camino y solo para las partes del pedido. Sale en GET /pedidos/{id} y en el evento pedido.ubicacion_repartidor." },
     "notas_usuario": { "type": "string", "maxLength": 500 },
     "requiere_mayoria_edad": { "type": "boolean", "default": false },
     "bultos": { "type": "integer", "minimum": 1 },

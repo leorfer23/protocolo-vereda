@@ -1773,6 +1773,513 @@
           }
         }
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Pedido en camino visto por una de sus partes: trae el último punto que reportó el repartidor, para dibujarlo sin esperar el próximo evento.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "usuario": "marta@vereda.ar",
+        "comercio": "superbarrio@vereda.ar",
+        "repartidor": "diego.moto@coop-almagro.ar",
+        "via": {
+          "canal": "agente",
+          "agente": "claude",
+          "mandato_id": "01926b3a-8888-7000-8000-000000000001"
+        },
+        "items": [
+          {
+            "id": "i1",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000001",
+            "variante_id": "1l",
+            "nombre": "Leche entera La Serenísima 1 L",
+            "cantidad": {
+              "valor": 6,
+              "unidad": "unidad"
+            },
+            "cantidad_entregada": {
+              "valor": 6,
+              "unidad": "unidad"
+            },
+            "precio_unitario": {
+              "centavos": 195000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "misma_marca",
+            "estado": "confirmado",
+            "monto_final": {
+              "centavos": 1170000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "id": "i2",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000002",
+            "nombre": "Banana",
+            "cantidad": {
+              "valor": 1.5,
+              "unidad": "kg",
+              "aproximada": true
+            },
+            "cantidad_entregada": {
+              "valor": 1.62,
+              "unidad": "kg"
+            },
+            "precio_unitario": {
+              "centavos": 190000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "similar_ok",
+            "estado": "pesado",
+            "monto_final": {
+              "centavos": 307800,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "id": "i3",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000003",
+            "nombre": "Yogur firme frutilla 190 g",
+            "cantidad": {
+              "valor": 4,
+              "unidad": "unidad"
+            },
+            "precio_unitario": {
+              "centavos": 120000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "preguntar",
+            "estado": "sustituido",
+            "sustituto": {
+              "oferta_id": "01926b3a-5555-7000-8000-000000000004",
+              "nombre": "Yogur firme durazno 190 g",
+              "precio_unitario": {
+                "centavos": 120000,
+                "moneda": "ARS"
+              },
+              "propuesto_en": "2026-09-21T16:10:00-03:00",
+              "respuesta": "aceptado"
+            },
+            "cantidad_entregada": {
+              "valor": 4,
+              "unidad": "unidad"
+            },
+            "monto_final": {
+              "centavos": 480000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "id": "i4",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000005",
+            "nombre": "Pan lactal integral",
+            "cantidad": {
+              "valor": 1,
+              "unidad": "unidad"
+            },
+            "precio_unitario": {
+              "centavos": 310000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "quitar",
+            "estado": "faltante",
+            "monto_final": {
+              "centavos": 0,
+              "moneda": "ARS"
+            }
+          }
+        ],
+        "modalidad": {
+          "tipo": "franja",
+          "modalidad_id": "franja-tarde",
+          "direccion": {
+            "texto": "Av. Rivadavia 4520 3° B, entre Yatay y Lambaré, timbre 3B",
+            "punto": {
+              "lat": -34.6103,
+              "lng": -58.4212
+            },
+            "piso_depto": "3° B",
+            "referencia": "Portero hasta las 20"
+          },
+          "franja": {
+            "fecha": "2026-09-21",
+            "desde": "17:00",
+            "hasta": "20:00"
+          }
+        },
+        "estado": "en_camino",
+        "historial": [
+          {
+            "estado": "creado",
+            "instante": "2026-09-21T15:00:00-03:00",
+            "actor": "marta@vereda.ar"
+          },
+          {
+            "estado": "pagado",
+            "instante": "2026-09-21T15:00:40-03:00",
+            "actor": "marta@vereda.ar"
+          },
+          {
+            "estado": "aceptado",
+            "instante": "2026-09-21T15:05:00-03:00",
+            "actor": "superbarrio@vereda.ar"
+          },
+          {
+            "estado": "preparando",
+            "instante": "2026-09-21T16:00:00-03:00",
+            "actor": "superbarrio@vereda.ar"
+          },
+          {
+            "estado": "listo",
+            "instante": "2026-09-21T16:25:00-03:00",
+            "actor": "superbarrio@vereda.ar"
+          },
+          {
+            "estado": "asignado",
+            "instante": "2026-09-21T16:26:00-03:00",
+            "actor": "diego.moto@coop-almagro.ar"
+          },
+          {
+            "estado": "en_camino",
+            "instante": "2026-09-21T16:40:00-03:00",
+            "actor": "diego.moto@coop-almagro.ar"
+          }
+        ],
+        "totales": {
+          "productos": {
+            "centavos": 2245000,
+            "moneda": "ARS"
+          },
+          "envio": {
+            "centavos": 200000,
+            "moneda": "ARS"
+          },
+          "propina_repartidor": {
+            "centavos": 50000,
+            "moneda": "ARS"
+          },
+          "total": {
+            "centavos": 2495000,
+            "moneda": "ARS"
+          },
+          "total_final": {
+            "centavos": 2207800,
+            "moneda": "ARS"
+          },
+          "diferencia_a_devolver": {
+            "centavos": 287200,
+            "moneda": "ARS"
+          }
+        },
+        "reparto": [
+          {
+            "destinatario": "comercio",
+            "concepto": "Productos",
+            "monto": {
+              "centavos": 1957800,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "destinatario": "repartidor",
+            "concepto": "Envío",
+            "monto": {
+              "centavos": 200000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "destinatario": "repartidor",
+            "concepto": "Propina",
+            "monto": {
+              "centavos": 50000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "destinatario": "nodo",
+            "concepto": "aporte_nodo",
+            "pagador": "comercio",
+            "monto": {
+              "centavos": 0,
+              "moneda": "ARS"
+            }
+          }
+        ],
+        "politica_cancelacion_aplicada": "Podés cancelar hasta que empecemos a armar el pedido.",
+        "requiere_mayoria_edad": false,
+        "bultos": 2,
+        "peso_estimado_kg": 9.5,
+        "firmas": {
+          "creacion": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "b64u_clave_publica",
+            "valor": "b64u_firma",
+            "instante": "2026-09-21T15:00:00-03:00"
+          }
+        },
+        "ubicacion_repartidor": {
+          "lat": -34.6189,
+          "lng": -58.4391
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "ubicacion_repartidor es un punto entero: sin 'lng' no se puede dibujar.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "usuario": "marta@vereda.ar",
+        "comercio": "superbarrio@vereda.ar",
+        "repartidor": "diego.moto@coop-almagro.ar",
+        "via": {
+          "canal": "agente",
+          "agente": "claude",
+          "mandato_id": "01926b3a-8888-7000-8000-000000000001"
+        },
+        "items": [
+          {
+            "id": "i1",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000001",
+            "variante_id": "1l",
+            "nombre": "Leche entera La Serenísima 1 L",
+            "cantidad": {
+              "valor": 6,
+              "unidad": "unidad"
+            },
+            "cantidad_entregada": {
+              "valor": 6,
+              "unidad": "unidad"
+            },
+            "precio_unitario": {
+              "centavos": 195000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "misma_marca",
+            "estado": "confirmado",
+            "monto_final": {
+              "centavos": 1170000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "id": "i2",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000002",
+            "nombre": "Banana",
+            "cantidad": {
+              "valor": 1.5,
+              "unidad": "kg",
+              "aproximada": true
+            },
+            "cantidad_entregada": {
+              "valor": 1.62,
+              "unidad": "kg"
+            },
+            "precio_unitario": {
+              "centavos": 190000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "similar_ok",
+            "estado": "pesado",
+            "monto_final": {
+              "centavos": 307800,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "id": "i3",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000003",
+            "nombre": "Yogur firme frutilla 190 g",
+            "cantidad": {
+              "valor": 4,
+              "unidad": "unidad"
+            },
+            "precio_unitario": {
+              "centavos": 120000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "preguntar",
+            "estado": "sustituido",
+            "sustituto": {
+              "oferta_id": "01926b3a-5555-7000-8000-000000000004",
+              "nombre": "Yogur firme durazno 190 g",
+              "precio_unitario": {
+                "centavos": 120000,
+                "moneda": "ARS"
+              },
+              "propuesto_en": "2026-09-21T16:10:00-03:00",
+              "respuesta": "aceptado"
+            },
+            "cantidad_entregada": {
+              "valor": 4,
+              "unidad": "unidad"
+            },
+            "monto_final": {
+              "centavos": 480000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "id": "i4",
+            "oferta_id": "01926b3a-5555-7000-8000-000000000005",
+            "nombre": "Pan lactal integral",
+            "cantidad": {
+              "valor": 1,
+              "unidad": "unidad"
+            },
+            "precio_unitario": {
+              "centavos": 310000,
+              "moneda": "ARS"
+            },
+            "preferencia_sustitucion": "quitar",
+            "estado": "faltante",
+            "monto_final": {
+              "centavos": 0,
+              "moneda": "ARS"
+            }
+          }
+        ],
+        "modalidad": {
+          "tipo": "franja",
+          "modalidad_id": "franja-tarde",
+          "direccion": {
+            "texto": "Av. Rivadavia 4520 3° B, entre Yatay y Lambaré, timbre 3B",
+            "punto": {
+              "lat": -34.6103,
+              "lng": -58.4212
+            },
+            "piso_depto": "3° B",
+            "referencia": "Portero hasta las 20"
+          },
+          "franja": {
+            "fecha": "2026-09-21",
+            "desde": "17:00",
+            "hasta": "20:00"
+          }
+        },
+        "estado": "en_camino",
+        "historial": [
+          {
+            "estado": "creado",
+            "instante": "2026-09-21T15:00:00-03:00",
+            "actor": "marta@vereda.ar"
+          },
+          {
+            "estado": "pagado",
+            "instante": "2026-09-21T15:00:40-03:00",
+            "actor": "marta@vereda.ar"
+          },
+          {
+            "estado": "aceptado",
+            "instante": "2026-09-21T15:05:00-03:00",
+            "actor": "superbarrio@vereda.ar"
+          },
+          {
+            "estado": "preparando",
+            "instante": "2026-09-21T16:00:00-03:00",
+            "actor": "superbarrio@vereda.ar"
+          },
+          {
+            "estado": "listo",
+            "instante": "2026-09-21T16:25:00-03:00",
+            "actor": "superbarrio@vereda.ar"
+          },
+          {
+            "estado": "asignado",
+            "instante": "2026-09-21T16:26:00-03:00",
+            "actor": "diego.moto@coop-almagro.ar"
+          },
+          {
+            "estado": "en_camino",
+            "instante": "2026-09-21T16:40:00-03:00",
+            "actor": "diego.moto@coop-almagro.ar"
+          }
+        ],
+        "totales": {
+          "productos": {
+            "centavos": 2245000,
+            "moneda": "ARS"
+          },
+          "envio": {
+            "centavos": 200000,
+            "moneda": "ARS"
+          },
+          "propina_repartidor": {
+            "centavos": 50000,
+            "moneda": "ARS"
+          },
+          "total": {
+            "centavos": 2495000,
+            "moneda": "ARS"
+          },
+          "total_final": {
+            "centavos": 2207800,
+            "moneda": "ARS"
+          },
+          "diferencia_a_devolver": {
+            "centavos": 287200,
+            "moneda": "ARS"
+          }
+        },
+        "reparto": [
+          {
+            "destinatario": "comercio",
+            "concepto": "Productos",
+            "monto": {
+              "centavos": 1957800,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "destinatario": "repartidor",
+            "concepto": "Envío",
+            "monto": {
+              "centavos": 200000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "destinatario": "repartidor",
+            "concepto": "Propina",
+            "monto": {
+              "centavos": 50000,
+              "moneda": "ARS"
+            }
+          },
+          {
+            "destinatario": "nodo",
+            "concepto": "aporte_nodo",
+            "pagador": "comercio",
+            "monto": {
+              "centavos": 0,
+              "moneda": "ARS"
+            }
+          }
+        ],
+        "politica_cancelacion_aplicada": "Podés cancelar hasta que empecemos a armar el pedido.",
+        "requiere_mayoria_edad": false,
+        "bultos": 2,
+        "peso_estimado_kg": 9.5,
+        "firmas": {
+          "creacion": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "b64u_clave_publica",
+            "valor": "b64u_firma",
+            "instante": "2026-09-21T15:00:00-03:00"
+          }
+        },
+        "ubicacion_repartidor": {
+          "lat": -34.6189
+        }
+      }
     }
   ]
 }

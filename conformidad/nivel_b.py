@@ -13,6 +13,7 @@ Deuda conocida, a propósito: las ventanas de tiempo (carrito vence a las
 prueban. Exigir un reloj de prueba es superficie nueva del protocolo.
 """
 import os
+import time
 import uuid
 from typing import List, Optional
 
@@ -83,6 +84,8 @@ class NivelB:
             self._resena(pedido_id)
         self._direcciones()
         self._viaje_ajeno()
+        self._metodo_pago()
+        self._ubicacion_en_camino()
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
@@ -297,6 +300,201 @@ class NivelB:
         else:
             caso = self._chequear_esquema(opid, desc, "/viajes/{id}", "get", r.cuerpo, "404")
             self.casos.append(caso or _ok("viajes", opid, desc))
+
+    # el comprador elige cómo paga, entre los medios que acepta el comercio --
+    def _comercio_de_la_oferta(self, oferta_id):
+        r = cliente.solicitud("GET", f"{self.base_v1}/ofertas/{oferta_id}", timeout=self.timeout)
+        comercio_id = (r.cuerpo or {}).get("comercio_id") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        if not comercio_id:
+            return None
+        r = cliente.solicitud("GET", f"{self.base_v1}/comercios/{comercio_id}", timeout=self.timeout)
+        return r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+
+    def _carrito_con(self, oferta_id, modalidad):
+        r = cliente.solicitud("POST", f"{self.base_v1}/carritos", headers=self._cabecera(), json_body={}, timeout=self.timeout)
+        cid = (r.cuerpo or {}).get("id") if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        if not cid:
+            return None
+        r = cliente.solicitud("POST", f"{self.base_v1}/carritos/{cid}/items", headers=self._cabecera(),
+                              json_body={"oferta_id": oferta_id, "cantidad": {"valor": 1, "unidad": "unidad"}}, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            return None
+        r = cliente.solicitud("PUT", f"{self.base_v1}/carritos/{cid}/modalidad", headers=self._cabecera(), json_body=modalidad, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            return None
+        return cid
+
+    def _confirmar(self, cid, cuerpo):
+        return cliente.solicitud("POST", f"{self.base_v1}/carritos/{cid}/confirmar", headers={**self._cabecera(), **self._idem()}, json_body=cuerpo, timeout=self.timeout)
+
+    def _metodo_pago(self):
+        cat, opid = "metodo_pago", "confirmarCarrito"
+        oferta = "01920000-0000-7000-8000-0000000000b1"
+        comercio = self._comercio_de_la_oferta(oferta)
+        if not comercio:
+            self.casos.append(_omitido(cat, opid, "elegir cómo pagar al confirmar (metodo_pago)", "no se pudo leer el comercio de la oferta de prueba con GET /ofertas/{id} y GET /comercios/{id}"))
+            return
+        medios = comercio.get("medios_cobro") or []
+        cid = self._carrito_con(oferta, {"tipo": "retiro"})
+        if not cid:
+            self.casos.append(_omitido(cat, opid, "elegir cómo pagar al confirmar (metodo_pago)", "no se pudo armar un carrito con retiro"))
+            return
+
+        desc = "un metodo_pago fuera de efectivo/transferencia responde 422 y no crea el pedido"
+        r = self._confirmar(cid, {"metodo_pago": "cheque"})
+        if not r.ok:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo))
+        elif r.estado != 422:
+            self.casos.append(_fallo(cat, opid, desc, f"esperaba 422, llegó {r.estado}"))
+        else:
+            caso = self._chequear_esquema(opid, desc + " con esquemas/error.json", "/carritos/{id}/confirmar", "post", r.cuerpo, "422")
+            self.casos.append(caso or _ok(cat, opid, desc))
+
+        no_acepta = [m for m in ("transferencia", "efectivo") if m not in medios]
+        desc = "un metodo_pago que el comercio no acepta responde 422 con detalle.medios_cobro, los que sí acepta"
+        if not no_acepta:
+            self.casos.append(_omitido(cat, opid, desc, f"el comercio de prueba acepta efectivo y transferencia ({medios})"))
+        else:
+            r = self._confirmar(cid, {"metodo_pago": no_acepta[0]})
+            cuerpo = r.cuerpo if isinstance(r.cuerpo, dict) else {}
+            esperado = "efectivo_no_disponible" if no_acepta[0] == "efectivo" else "medio_no_disponible"
+            devueltos = (cuerpo.get("detalle") or {}).get("medios_cobro")
+            if not r.ok:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo))
+            elif r.estado != 422 or cuerpo.get("codigo") != esperado:
+                self.casos.append(_fallo(cat, opid, desc, f"con metodo_pago {no_acepta[0]!r} esperaba 422 {esperado}, llegó {r.estado} {cuerpo.get('codigo')}"))
+            elif not isinstance(devueltos, list) or sorted(devueltos) != sorted(medios):
+                self.casos.append(_fallo(cat, opid, desc, f"detalle.medios_cobro es {devueltos} y el comercio publica {medios}"))
+            else:
+                self.casos.append(_ok(cat, opid, desc))
+
+        acepta = [m for m in ("efectivo", "transferencia") if m in medios]
+        desc = "confirmar con un metodo_pago que el comercio acepta crea el pedido cobrado por ese medio"
+        if not acepta:
+            self.casos.append(_omitido(cat, opid, desc, f"el comercio de prueba no acepta efectivo ni transferencia ({medios})"))
+            return
+        r = self._confirmar(cid, {"metodo_pago": acepta[0]})
+        if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}"))
+            return
+        metodos = [p.get("metodo") for p in r.cuerpo.get("pagos") or [] if p.get("concepto") == "productos"]
+        if metodos and all(m == acepta[0] for m in metodos):
+            self.casos.append(_ok(cat, opid, desc))
+        else:
+            self.casos.append(_fallo(cat, opid, desc, f"pidió {acepta[0]!r} y el cobro de los productos salió con {metodos}"))
+        if r.cuerpo.get("id"):
+            cliente.solicitud("POST", f"{self.base_v1}/pedidos/{r.cuerpo['id']}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+
+    # quien abre el pedido a mitad del viaje ve dónde está el repartidor -----
+    # La identidad de prueba compra, opera el comercio y se declara repartidora:
+    # es la única sesión que tiene la suite. Lo que el nodo no deje armar
+    # (despacho, zona, alta de repartidor) se omite; lo que se prueba es que,
+    # con el pedido en_camino y un reporte, GET /pedidos/{id} traiga el punto.
+    def _ubicacion_en_camino(self, espera_s=20.0):
+        cat, opid = "seguimiento", "verPedido"
+        desc = "con el pedido en_camino, GET /pedidos/{id} trae ubicacion_repartidor, el último reporte del repartidor"
+
+        def omitir(motivo):
+            self.casos.append(_omitido(cat, opid, desc, motivo))
+
+        oferta = "01920000-0000-7000-8000-0000000000b1"
+        comercio = self._comercio_de_la_oferta(oferta)
+        punto = (((comercio or {}).get("ubicacion") or {}).get("direccion") or {}).get("punto")
+        envio = next((m for m in (comercio or {}).get("modalidades") or [] if m.get("tipo") == "inmediata"), None)
+        if not punto or not envio:
+            return omitir("el comercio de prueba no publica su punto o una modalidad 'inmediata'")
+        medios = comercio.get("medios_cobro") or []
+        if "efectivo" not in medios:
+            return omitir("el comercio de prueba no acepta efectivo, y sin PSP no hay cómo pagar el pedido de prueba")
+
+        cerca = {"lat": round(punto["lat"] - 0.002, 6), "lng": round(punto["lng"] + 0.002, 6)}
+        declaracion = {"nombre": "Repartidora de conformidad", "vehiculo": "bici",
+                       "zona": {"centro": punto, "radio_km": 5}, "cobro": {"metodos": ["efectivo"]}}
+        r = cliente.solicitud("PUT", f"{self.base_v1}/repartidor", headers=self._cabecera(), json_body=declaracion, timeout=self.timeout)
+        if not r.ok or r.estado not in (200, 201):
+            return omitir(f"PUT /repartidor no dio de alta a la identidad de prueba como repartidora ({r.motivo or r.estado})")
+        cliente.solicitud("PUT", f"{self.base_v1}/repartidor/disponibilidad", headers=self._cabecera(), json_body={"disponible": True}, timeout=self.timeout)
+        cliente.solicitud("PUT", f"{self.base_v1}/repartidor/ubicacion", headers=self._cabecera(), json_body=punto, timeout=self.timeout)
+        try:
+            self._ubicacion_en_camino_con(cat, opid, desc, oferta, envio, punto, cerca, omitir, espera_s)
+        finally:
+            cliente.solicitud("PUT", f"{self.base_v1}/repartidor/disponibilidad", headers=self._cabecera(), json_body={"disponible": False}, timeout=self.timeout)
+
+    def _ubicacion_en_camino_con(self, cat, opid, desc, oferta, envio, punto, cerca, omitir, espera_s):
+        modalidad = {"tipo": "inmediata", "modalidad_id": envio.get("id"), "direccion": {"texto": "Prueba de conformidad", "punto": cerca}}
+        cid = self._carrito_con(oferta, modalidad)
+        if not cid:
+            return omitir("no se pudo armar un carrito con envío inmediato a 200 m del comercio")
+        r = self._confirmar(cid, {"metodo_pago": "efectivo"})
+        pedido = r.cuerpo if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        if not pedido or not pedido.get("id"):
+            return omitir(f"no se pudo confirmar el pedido con envío ({r.motivo or r.estado})")
+        pid = pedido["id"]
+        pasos = [("POST", f"/pedidos/{pid}/aceptar", None)]
+        pasos += [("PATCH", f"/pedidos/{pid}/items/{it['id']}", {"estado": "confirmado"}) for it in pedido.get("items") or [] if it.get("id")]
+        pasos.append(("POST", f"/pedidos/{pid}/listo", None))
+        for metodo, ruta, cuerpo in pasos:
+            r = cliente.solicitud(metodo, self.base_v1 + ruta, headers=self._cabecera(), json_body=cuerpo, timeout=self.timeout)
+            if not r.ok or r.estado != 200:
+                return omitir(f"{metodo} {ruta} respondió {r.motivo or r.estado} al preparar el pedido")
+
+        viaje = None
+        limite = time.monotonic() + espera_s
+        while time.monotonic() < limite and not viaje:
+            r = cliente.solicitud("GET", f"{self.base_v1}/viajes/ofrecidos", headers=self._cabecera(), timeout=self.timeout)
+            for v in (r.cuerpo if r.ok and isinstance(r.cuerpo, list) else []):
+                if any(pid in (p.get("pedidos") or []) for p in v.get("paradas") or []):
+                    viaje = v
+            if not viaje:
+                time.sleep(1)
+        if not viaje or not viaje.get("id"):
+            return omitir(f"el despacho no le ofreció el viaje del pedido a la repartidora de prueba en {espera_s:.0f} s")
+        r = cliente.solicitud("POST", f"{self.base_v1}/viajes/{viaje['id']}/aceptar", headers=self._cabecera(), json_body={}, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            return omitir(f"aceptar el viaje respondió {r.motivo or r.estado}")
+        r = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pid}/retirar", headers=self._cabecera(), json_body={}, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            return omitir(f"retirar el pedido respondió {r.motivo or r.estado}")
+
+        en_camino = {"lat": round(punto["lat"] - 0.001, 6), "lng": round(punto["lng"] + 0.001, 6)}
+        r = cliente.solicitud("PUT", f"{self.base_v1}/repartidor/ubicacion", headers=self._cabecera(), json_body=en_camino, timeout=self.timeout)
+        if not r.ok or r.estado != 204:
+            self.casos.append(_fallo(cat, "reportarUbicacion", "reportar la ubicación con el pedido en camino responde 204", r.motivo or f"llegó {r.estado}"))
+            return
+
+        visto, cuerpo = None, None
+        limite = time.monotonic() + espera_s
+        while time.monotonic() < limite:
+            r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pid}", headers=self._cabecera(), timeout=self.timeout)
+            cuerpo = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+            visto = (cuerpo or {}).get("ubicacion_repartidor")
+            if visto and abs(visto.get("lat", 0) - en_camino["lat"]) < 1e-5 and abs(visto.get("lng", 0) - en_camino["lng"]) < 1e-5:
+                break
+            time.sleep(0.5)
+        if not cuerpo:
+            self.casos.append(_fallo(cat, opid, desc, "GET /pedidos/{id} no respondió 200"))
+        elif cuerpo.get("estado") != "en_camino":
+            omitir(f"el pedido quedó en {cuerpo.get('estado')!r} después de retirar, no en 'en_camino'")
+        elif not visto:
+            self.casos.append(_fallo(cat, opid, desc, f"a {espera_s:.0f} s del reporte, el pedido en_camino no trae ubicacion_repartidor"))
+        elif abs(visto.get("lat", 0) - en_camino["lat"]) >= 1e-5 or abs(visto.get("lng", 0) - en_camino["lng"]) >= 1e-5:
+            self.casos.append(_fallo(cat, opid, desc, f"trae {visto} y el último reporte fue {en_camino}"))
+        else:
+            caso = self._chequear_esquema(opid, "el pedido en_camino cumple esquemas/pedido.json", "/pedidos/{id}", "get", cuerpo)
+            if caso:
+                self.casos.append(caso)
+            self.casos.append(_ok(cat, opid, desc))
+
+        r = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pid}/entregar", headers=self._cabecera(), json_body={"cobrado_en_mano": True}, timeout=self.timeout)
+        desc_fin = "entregado el pedido, GET /pedidos/{id} ya no trae ubicacion_repartidor"
+        if not r.ok or r.estado != 200:
+            self.casos.append(_omitido(cat, opid, desc_fin, f"entregar respondió {r.motivo or r.estado}"))
+            return
+        r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pid}", headers=self._cabecera(), timeout=self.timeout)
+        if r.ok and isinstance(r.cuerpo, dict) and "ubicacion_repartidor" not in r.cuerpo:
+            self.casos.append(_ok(cat, opid, desc_fin))
+        else:
+            self.casos.append(_fallo(cat, opid, desc_fin, r.motivo or f"estado {r.estado}, ubicacion_repartidor={(r.cuerpo or {}).get('ubicacion_repartidor') if isinstance(r.cuerpo, dict) else '?'}"))
 
     # 2. reseña: dentro de ventana se acepta una vez; la segunda, no --------
     def _resena(self, pedido_id):
