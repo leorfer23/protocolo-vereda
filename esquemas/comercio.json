@@ -205,7 +205,7 @@
         "desde": { "$ref": "comunes.json#/$defs/instante" },
         "hasta": { "$ref": "comunes.json#/$defs/instante" },
         "visitas_ficha": { "type": "integer", "minimum": 0, "description": "Lecturas de la ficha del comercio en el período." },
-        "apariciones_busqueda": { "type": "integer", "minimum": 0, "description": "Veces que el comercio o una oferta suya salió en un resultado de búsqueda." },
+        "apariciones_busqueda": { "type": "integer", "minimum": 0, "description": "Veces que el comercio o una oferta suya salió en un resultado de búsqueda. El feed en video (buscarOfertas con con_video) no suma." },
         "pedidos": {
           "type": "object",
           "required": ["creados", "entregados"],

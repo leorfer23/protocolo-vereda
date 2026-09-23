@@ -252,6 +252,54 @@ class NivelA:
         caso = self._esquema_o_no_json(opid, "el cuerpo de /buscar cumple lo declarado en openapi.yaml", op, r)
         if caso:
             self.casos.append(caso)
+        self._buscar_con_video(opid, op)
+        self._buscar_paginado(opid)
+
+    def _buscar_con_video(self, opid, op):
+        desc = "GET /buscar?con_video=true solo trae ofertas con clip"
+        url = f"{self.base_v1}/buscar?lat={self.lat}&lng={self.lng}&con_video=true"
+        r = self._get(url)
+        if not r.ok or r.estado != 200 or not r.cuerpo_es_json:
+            self.casos.append(_fallo("esquema", opid, desc, r.motivo if not r.ok else f"estado {r.estado} no es 200 con JSON"))
+            return
+        caso = self._esquema_o_no_json(opid, "el cuerpo de /buscar?con_video cumple lo declarado en openapi.yaml", op, r)
+        if caso:
+            self.casos.append(caso)
+        resultados = r.cuerpo.get("resultados") if isinstance(r.cuerpo, dict) else None
+        if not resultados:
+            self.casos.append(_omitido("esquema", opid, desc, "no hay ofertas con video cerca del punto"))
+            return
+        sin = [x.get("oferta", {}).get("nombre") for x in resultados if not x.get("oferta", {}).get("videos")]
+        self.casos.append(_fallo("esquema", opid, desc, f"ofertas sin videos: {sin[:5]}") if sin else _ok("esquema", opid, desc))
+
+    def _buscar_paginado(self, opid):
+        desc = "GET /buscar pagina con limite y cursor sin repetir resultados"
+        base = f"{self.base_v1}/buscar?lat={self.lat}&lng={self.lng}"
+        r = self._get(base + "&limite=1")
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo("estructura", opid, desc, r.motivo if not r.ok else f"estado {r.estado}, se esperaba una página"))
+            return
+        primera = r.cuerpo.get("resultados") or []
+        if len(primera) > 1:
+            self.casos.append(_fallo("estructura", opid, desc, f"con limite=1 trajo {len(primera)}"))
+            return
+        cursor = r.cuerpo.get("cursor_siguiente")
+        if not cursor:
+            self.casos.append(_omitido("estructura", opid, desc, "hay una sola oferta cerca del punto"))
+            return
+        r2 = self._get(base + "&limite=1&cursor=" + quote(cursor, safe=""))
+        segunda = (r2.cuerpo.get("resultados") or []) if r2.ok and isinstance(r2.cuerpo, dict) else None
+        if segunda is None or r2.estado != 200:
+            self.casos.append(_fallo("estructura", opid, desc, f"el cursor_siguiente no dio la página siguiente (estado {r2.estado})"))
+            return
+        ids = lambda xs: [x.get("oferta", {}).get("id") or x.get("oferta", {}).get("nombre") for x in xs]
+        if set(ids(primera)) & set(ids(segunda)):
+            self.casos.append(_fallo("estructura", opid, desc, "la segunda página repite la primera"))
+            return
+        r3 = self._get(base + "&limite=1&cursor=no-es-un-cursor")
+        if r3.ok and r3.estado != 422:
+            self.casos.append(_fallo("errores", opid, "GET /buscar con un cursor inventado responde 422", f"respondió {r3.estado}"))
+        self.casos.append(_ok("estructura", opid, desc))
 
     def _rondas(self):
         opid = "buscarRondas"
