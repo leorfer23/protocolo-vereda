@@ -133,6 +133,11 @@
       "inputSchema": { "type": "object", "properties": {} }
     },
     {
+      "name": "mis_comercios",
+      "description": "Los comercios que administra la persona, con id, nombre, tipo y si está abierto ahora (abierto_ahora). Leelo primero para saber sobre qué comercio_id operar; vacío si no administra ninguno. Requiere scope 'administrar'.",
+      "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
       "name": "comercio_editar",
       "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. También abre o cierra ya, pisando los horarios, con 'apertura_manual' ({abierto, hasta?}; null la quita). Ej: 'cerramos los lunes', 'cerrá hasta las 18', 'hoy abrimos aunque sea feriado', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Requiere scope 'administrar'.",
       "inputSchema": {

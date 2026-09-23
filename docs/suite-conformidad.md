@@ -125,6 +125,8 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Direcciones guardadas: `PUT /yo/direcciones` reemplaza la lista y la devuelve, `GET /yo` la
   muestra, etiquetas repetidas o una dirección sin punto dan `422`, y un token de mandato no
   la escribe nunca. Al final se restauran las que la sesión de prueba tenía.
+- Mis comercios: `GET /yo/comercios` con la sesión de prueba responde `200` con `MiComercio[]` y
+  trae el comercio de prueba, del que esa sesión es dueña (es la que acepta el pedido del ciclo).
 - Elegir cómo pagar: con el comercio de prueba, `metodo_pago` fuera de
   `efectivo`/`transferencia` da `422`; uno que el comercio no acepta da `422`
   `efectivo_no_disponible` o `medio_no_disponible` con `detalle.medios_cobro` igual a los

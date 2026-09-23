@@ -89,6 +89,7 @@ class NivelB:
         if pedido_id:
             self._resena(pedido_id)
         self._direcciones()
+        self._mis_comercios()
         self._viaje_ajeno()
         self._metodo_pago()
         self._ubicacion_en_camino()
@@ -490,6 +491,32 @@ class NivelB:
         desc = "restaurar las direcciones que la sesión de prueba tenía antes"
         if not r.ok or r.estado != 200:
             self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+
+    # los comercios que administra la sesión de prueba ------------------------
+    def _mis_comercios(self):
+        opid, cat = "listarMisComercios", "mi-comercio"
+        desc = "GET /yo/comercios con sesión responde 200 con la lista de comercios que administra"
+        r = cliente.solicitud("GET", f"{self.base_v1}/yo/comercios", headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        caso = self._chequear_esquema(opid, "la respuesta cumple MiComercio[]", "/yo/comercios", "get", r.cuerpo)
+        if caso:
+            self.casos.append(caso)
+        self.casos.append(_ok(cat, opid, desc))
+
+        # la sesión de prueba acepta el pedido del ciclo: es la dueña del comercio de la oferta b1
+        desc = "GET /yo/comercios incluye el comercio de prueba, que la sesión administra"
+        r_of = cliente.solicitud("GET", f"{self.base_v1}/ofertas/01920000-0000-7000-8000-0000000000b1", timeout=self.timeout)
+        comercio_id = (r_of.cuerpo or {}).get("comercio_id") if r_of.ok and r_of.estado == 200 and isinstance(r_of.cuerpo, dict) else None
+        if not comercio_id:
+            self.casos.append(_omitido(cat, opid, desc, "no se pudo leer el comercio de la oferta de prueba"))
+            return
+        ids = [c.get("id") for c in r.cuerpo if isinstance(c, dict)] if isinstance(r.cuerpo, list) else []
+        if comercio_id in ids:
+            self.casos.append(_ok(cat, opid, desc))
+        else:
+            self.casos.append(_fallo(cat, opid, desc, f"{comercio_id} no está en {ids}"))
 
     # un viaje que no es de uno no se lee, ni se sabe si existe -------------
     def _viaje_ajeno(self):
