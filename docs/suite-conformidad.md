@@ -144,6 +144,10 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   `hasta` a 30 min) se ve en la respuesta del `PATCH`, en `GET /comercios/{id}` y en
   `buscarComercios?abierto`; con campos de más da `422`; `null` la quita y vuelve el
   `abierto_ahora` de antes. Corre al final y deja el comercio como estaba.
+- Clips (`docs/medios.md`): con el comercio y la oferta de prueba, `PATCH` con un clip en
+  `videos` responde `200` y `GET /comercios/{id}` y `GET /ofertas/{id}` lo devuelven tal
+  cual; uno de 45 s o sin póster da `422` y no pisa el que estaba. Al final se restauran
+  los clips que tenían.
 - Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
   que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella

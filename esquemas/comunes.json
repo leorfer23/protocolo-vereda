@@ -251,6 +251,72 @@
       },
       "additionalProperties": false
     },
+    "video": {
+      "type": "object",
+      "description": "Clip corto de un local o un producto. Vive en cualquier URL: el nodo no está obligado a alojarlo ni a transcodificarlo (docs/medios.md). Se reproduce sin sonido. Lo que trae alcanza para que una app decida mostrarlo o quedarse con el póster sin bajar nada: ahorro de datos, movimiento reducido o una conexión lenta.",
+      "required": [
+        "url",
+        "tipo",
+        "poster",
+        "duracion_s"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "video/mp4",
+            "video/webm"
+          ],
+          "description": "Tipo MIME del archivo. 'video/mp4' (H.264 o HEVC) es el que reproducen todas las apps; 'video/webm' solo la web."
+        },
+        "poster": {
+          "$ref": "#/$defs/imagen",
+          "description": "Cuadro fijo que se muestra antes de que el clip cargue y en su lugar cuando no se reproduce. Con la misma proporción que el clip."
+        },
+        "duracion_s": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 15,
+          "description": "Duración en segundos. Quince como máximo: es un clip que se repite, no un video para mirar."
+        },
+        "ancho": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Píxeles. Con 'alto', deja reservar el lugar antes de que cargue."
+        },
+        "alto": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Peso del archivo. Con él la app decide si lo baja con datos móviles."
+        },
+        "con_sonido": {
+          "type": "boolean",
+          "default": false,
+          "description": "Si el archivo trae pista de audio. Igual empieza sin sonido; la app puede ofrecer activarlo."
+        },
+        "alt": {
+          "type": "string",
+          "description": "Qué se ve en el clip, para agentes y accesibilidad."
+        }
+      },
+      "dependentRequired": {
+        "ancho": [
+          "alto"
+        ],
+        "alto": [
+          "ancho"
+        ]
+      },
+      "additionalProperties": false
+    },
     "firma": {
       "type": "object",
       "description": "Firma Ed25519 sobre la representación canónica (JCS, RFC 8785) del objeto sin los campos que no escribió el firmante: 'firma' siempre, y además 'respuesta', 'senales' y 'visible' donde existan. Vale si verifica con 'clave_publica', esa clave está en el historial de 'firmante' e 'instante' cae dentro de su validez. Ver docs/claves-y-firmas.md.",

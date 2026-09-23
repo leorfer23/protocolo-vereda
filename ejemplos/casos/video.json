@@ -1,0 +1,61 @@
+{
+  "$comentario": "Casos del clip de un local o un producto (comunes.json#/$defs/video, docs/medios.md).",
+  "esquema": "comunes.json#/$defs/video",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Lo mínimo: dónde está, qué tipo es, su póster y cuánto dura.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" }, "duracion_s": 8 }
+    },
+    {
+      "espera": "valido",
+      "porque": "Completo: medidas, peso, audio y descripción.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg", "alt": "El mostrador con cajones de fruta" }, "duracion_s": 12.5, "ancho": 1080, "alto": 1920, "bytes": 2400000, "con_sonido": false, "alt": "Cajones de fruta que llegan del Mercado Central" }
+    },
+    {
+      "espera": "valido",
+      "porque": "Justo quince segundos.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.webm", "tipo": "video/webm", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" }, "duracion_s": 15 }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin póster la app no tiene qué mostrar antes de que cargue ni cuando no lo reproduce.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "duracion_s": 8 }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin duración la app no puede decidir sin bajarlo.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" } }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Más de quince segundos no es un clip.",
+      "doc": { "url": "https://cdn.lahuerta.ar/recorrida.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" }, "duracion_s": 45 }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Duración cero.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" }, "duracion_s": 0 }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un tipo que no es de video.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.gif", "tipo": "image/gif", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" }, "duracion_s": 4 }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Ancho sin alto no deja reservar el lugar.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" }, "duracion_s": 8, "ancho": 1080 }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El póster es una imagen: url y alt, nada más.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg", "ancho": 1080 }, "duracion_s": 8 }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Campo desconocido.",
+      "doc": { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg" }, "duracion_s": 8, "autoplay": true }
+    }
+  ]
+}

@@ -694,6 +694,155 @@
           }
         ]
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Imágenes y un clip del producto: el video se suma, no reemplaza.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "imagenes": [
+          {
+            "url": "https://cdn.lahuerta.ar/portada.jpg"
+          }
+        ],
+        "videos": [
+          {
+            "url": "https://cdn.lahuerta.ar/portada.mp4",
+            "tipo": "video/mp4",
+            "poster": {
+              "url": "https://cdn.lahuerta.ar/portada.jpg"
+            },
+            "duracion_s": 8,
+            "ancho": 1080,
+            "alto": 1920,
+            "bytes": 2400000
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Más de tres clips.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "videos": [
+          {
+            "url": "https://cdn.lahuerta.ar/portada.mp4",
+            "tipo": "video/mp4",
+            "poster": {
+              "url": "https://cdn.lahuerta.ar/portada.jpg"
+            },
+            "duracion_s": 8,
+            "ancho": 1080,
+            "alto": 1920,
+            "bytes": 2400000
+          },
+          {
+            "url": "https://cdn.lahuerta.ar/portada.mp4",
+            "tipo": "video/mp4",
+            "poster": {
+              "url": "https://cdn.lahuerta.ar/portada.jpg"
+            },
+            "duracion_s": 8,
+            "ancho": 1080,
+            "alto": 1920,
+            "bytes": 2400000
+          },
+          {
+            "url": "https://cdn.lahuerta.ar/portada.mp4",
+            "tipo": "video/mp4",
+            "poster": {
+              "url": "https://cdn.lahuerta.ar/portada.jpg"
+            },
+            "duracion_s": 8,
+            "ancho": 1080,
+            "alto": 1920,
+            "bytes": 2400000
+          },
+          {
+            "url": "https://cdn.lahuerta.ar/portada.mp4",
+            "tipo": "video/mp4",
+            "poster": {
+              "url": "https://cdn.lahuerta.ar/portada.jpg"
+            },
+            "duracion_s": 8,
+            "ancho": 1080,
+            "alto": 1920,
+            "bytes": 2400000
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un clip sin póster.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "producto",
+        "nombre": "Yerba 1 kg",
+        "precio": {
+          "modo": "fijo",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "unidad"
+        },
+        "videos": [
+          {
+            "url": "https://cdn.lahuerta.ar/portada.mp4",
+            "tipo": "video/mp4",
+            "duracion_s": 8,
+            "ancho": 1080,
+            "alto": 1920,
+            "bytes": 2400000
+          }
+        ]
+      }
     }
   ]
 }
