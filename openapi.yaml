@@ -1051,9 +1051,10 @@ paths:
         Administra un comercio su dueño: la identidad cuya sesión lo dio de alta (`crearComercio`),
         o la del reclamante si un reclamo de propiedad se resolvió a su favor
         (`docs/identidad-y-verificacion.md`, punto 6). Es la misma identidad a la que las
-        operaciones del lado comercio responden 403 `no_es_el_dueno` si no coincide. La identidad
-        del comercio (`comercio.json#/identidad`) es otra: es su dirección en la red, no una persona,
-        y no administra nada.
+        operaciones del lado comercio responden 403 `no_es_el_dueno` si no coincide. Suele ser una
+        persona, distinta de la identidad del comercio (`comercio.json#/identidad`, su dirección en
+        la red); si un nodo da de alta un comercio que se administra a sí mismo, esa identidad lo
+        ve acá como cualquier dueño.
 
         Sirve para que una app o un agente sepa, sin adivinar ni guardar nada propio, desde qué
         fichas puede operar la persona que entró: un teléfono que restaura la clave de la dueña ve
