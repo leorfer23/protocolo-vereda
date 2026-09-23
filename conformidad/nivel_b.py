@@ -73,6 +73,27 @@ class NivelB:
     def _idem(self):
         return {"Idempotency-Key": str(uuid.uuid4())}
 
+    def _sesion_nueva(self) -> Optional[str]:
+        """Token de una identidad nueva por /acceso. Si el nodo limita el acceso
+        por minuto (429, con Retry-After) y la suite ya gastó el cupo en las
+        pruebas de acceso, espera a que se renueve y reintenta una vez."""
+        prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout)
+        for intento in range(2):
+            clave = acceso.Clave()
+            r = prueba._post("/acceso/desafio", {"clave_publica": clave.publica})
+            if r.ok and r.estado == 429 and intento == 0:
+                try:
+                    espera = int((r.cabeceras or {}).get("Retry-After") or 60)
+                except ValueError:
+                    espera = 60
+                time.sleep(min(max(espera, 1), 65))
+                continue
+            if not (r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) and r.cuerpo.get("desafio")):
+                return None
+            r = prueba._canje(clave, r.cuerpo)
+            return (r.cuerpo or {}).get("token") if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        return None
+
     # -- corrida ------------------------------------------------------------
     def correr(self) -> List[Caso]:
         self.casos = []
@@ -278,9 +299,7 @@ class NivelB:
         if capacidades.get("custodia_propia") is not True:
             self.casos.append(_omitido(cat, opid, desc, "hace falta una segunda identidad y el nodo no publica acceso.custodia_propia: true"))
             return
-        prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout)
-        compradora = prueba._entrar(acceso.Clave())
-        token = (compradora or {}).get("token")
+        token = self._sesion_nueva()
         if not token:
             self.casos.append(_omitido(cat, opid, desc, "no se pudo abrir la sesión de una compradora nueva por /acceso"))
             return
@@ -436,8 +455,7 @@ class NivelB:
         if capacidades.get("custodia_propia") is not True:
             self.casos.append(_omitido(cat, opid, "quién ve el nombre del comprador en partes", "hace falta una segunda identidad y el nodo no publica acceso.custodia_propia: true"))
             return
-        prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout)
-        token = (prueba._entrar(acceso.Clave()) or {}).get("token")
+        token = self._sesion_nueva()
         if not token:
             self.casos.append(_omitido(cat, opid, "quién ve el nombre del comprador en partes", "no se pudo abrir la sesión de una compradora nueva por /acceso"))
             return
@@ -507,7 +525,7 @@ class NivelB:
                 self.casos.append(_ok(cat, opid, desc))
 
             desc = "quien no es parte del pedido no lo ve: 404, sin nombres"
-            otra = (prueba._entrar(acceso.Clave()) or {}).get("token")
+            otra = self._sesion_nueva()
             if not otra:
                 self.casos.append(_omitido(cat, opid, desc, "no se pudo abrir la sesión de una tercera identidad por /acceso"))
             else:
