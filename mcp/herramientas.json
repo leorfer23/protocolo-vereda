@@ -78,6 +78,11 @@
       "inputSchema": { "type": "object", "required": ["contexto_tipo", "contexto_id", "texto"], "properties": { "contexto_tipo": { "type": "string" }, "contexto_id": { "type": "string" }, "texto": { "type": "string" }, "tipo": { "type": "string", "enum": ["texto", "propuesta", "aceptar", "rechazar"] } } }
     },
     {
+      "name": "ver_mensajes",
+      "description": "Lee la conversación de un pedido (o de una cotización, suscripción, grupo o ronda): lo que escribieron el comercio, el repartidor y la persona, en orden. Miralo antes de responder con enviar_mensaje y cuando la persona pregunte '¿qué dijo el local?'. Requiere 'leer'.",
+      "inputSchema": { "type": "object", "required": ["contexto_tipo", "contexto_id"], "properties": { "contexto_tipo": { "type": "string", "enum": ["pedido", "cotizacion", "suscripcion", "grupo", "ronda"] }, "contexto_id": { "type": "string" } } }
+    },
+    {
       "name": "mis_listas",
       "description": "Listas de compras de la persona (carritos persistentes). Requiere 'leer'.",
       "inputSchema": { "type": "object", "properties": {} }
