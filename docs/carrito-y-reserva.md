@@ -21,6 +21,15 @@ La red es sin permiso y los agentes arman carritos con el alcance `armar`, que n
 - `cupo_por_dia` de la oferta y cupos de franja de la modalidad: mismo tratamiento.
 - Stock `binario`: no hay nada que contar. Si falta al preparar, el comercio lo resuelve con `faltante` o sustitución, como siempre.
 
+## Elegir cómo pagar
+
+El comercio publica qué medios acepta en `medios_cobro`. Si acepta más de uno, el comprador elige al confirmar con `metodo_pago` (`efectivo` o `transferencia`).
+
+- Sin `metodo_pago` elige el comercio: el primero que acepta para esa modalidad, con el efectivo adelante cuando está, porque es el que no necesita a nadie más.
+- Un medio que el comercio no acepta es `422` y no crea el pedido: `efectivo_no_disponible` si pidió efectivo, `medio_no_disponible` si pidió otro. Los dos traen `detalle.medios_cobro`, los que sí acepta, para que la persona elija de nuevo.
+- Elegir efectivo no saltea las condiciones del comercio (abajo): si no las cumple, también es `422 efectivo_no_disponible`.
+- `metodo_envio` es otra cosa: cómo se le paga el envío al repartidor cuando va directo a él (`docs/repartidores.md`).
+
 ## Efectivo
 
 El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de primera clase, y el comercio decide cómo lo acepta.

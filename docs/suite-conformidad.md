@@ -125,6 +125,15 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Direcciones guardadas: `PUT /yo/direcciones` reemplaza la lista y la devuelve, `GET /yo` la
   muestra, etiquetas repetidas o una dirección sin punto dan `422`, y un token de mandato no
   la escribe nunca. Al final se restauran las que la sesión de prueba tenía.
+- Elegir cómo pagar: con el comercio de prueba, `metodo_pago` fuera de
+  `efectivo`/`transferencia` da `422`; uno que el comercio no acepta da `422`
+  `efectivo_no_disponible` o `medio_no_disponible` con `detalle.medios_cobro` igual a los
+  `medios_cobro` publicados; uno que acepta crea el pedido con el cobro de los productos por
+  ese medio.
+- Seguimiento en camino: la identidad de prueba se declara repartidora, pide con envío,
+  toma el viaje, retira y reporta un punto. `GET /pedidos/{id}` en `en_camino` trae ese
+  punto en `ubicacion_repartidor`, y ya entregado no lo trae. Si el nodo no deja armar
+  algún paso previo (alta de repartidor, despacho en 20 s), el caso se omite, no falla.
 - Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
   que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella

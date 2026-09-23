@@ -1,0 +1,57 @@
+{
+  "$comentario": "Casos para esquemas/error.json. El de elegir un medio que el comercio no acepta trae en 'detalle.medios_cobro' los que sí acepta, para que la persona elija de nuevo (docs/carrito-y-reserva.md, elegir cómo pagar).",
+  "esquema": "error.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Pidió transferencia a un comercio que solo cobra en efectivo o QR.",
+      "doc": {
+        "codigo": "medio_no_disponible",
+        "mensaje": "Ese comercio no cobra por transferencia.",
+        "estado_http": 422,
+        "detalle": {
+          "medios_cobro": [
+            "efectivo",
+            "qr_interoperable"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Pidió efectivo a un comercio que no lo acepta.",
+      "doc": {
+        "codigo": "efectivo_no_disponible",
+        "mensaje": "Ese comercio no acepta efectivo.",
+        "estado_http": 422,
+        "detalle": {
+          "medios_cobro": [
+            "transferencia"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin 'mensaje' no hay frase que un agente le pueda decir a la persona.",
+      "doc": {
+        "codigo": "medio_no_disponible",
+        "estado_http": 422,
+        "detalle": {
+          "medios_cobro": [
+            "efectivo"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El código va en minúsculas y guiones bajos.",
+      "doc": {
+        "codigo": "MedioNoDisponible",
+        "mensaje": "Ese comercio no cobra por transferencia.",
+        "estado_http": 422
+      }
+    }
+  ]
+}
