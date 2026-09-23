@@ -28,6 +28,16 @@
       "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string" } } }
     },
     {
+      "name": "ver_resenas",
+      "description": "Las reseñas públicas de un comercio, un repartidor o un usuario (GET /actores/{identidad}/resenas), con sus respuestas y marcas. Al comercio le sirve para ver cuáles le falta responder. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["identidad"], "properties": { "identidad": { "type": "string" } } }
+    },
+    {
+      "name": "resena_responder",
+      "description": "El comercio responde públicamente una reseña que le hicieron. La respuesta sale firmada, marcada como escrita por su agente, y no se edita ni se borra: mostrale el texto a la persona antes de mandarlo. Escribir reseñas no lo puede hacer un agente. Requiere scope 'administrar'.",
+      "inputSchema": { "type": "object", "required": ["resena_id", "texto"], "properties": { "resena_id": { "type": "string" }, "texto": { "type": "string", "maxLength": 2000 } } }
+    },
+    {
       "name": "ver_reputacion",
       "description": "Por qué un comercio tiene la reputación que tiene: el número, el promedio ponderado, cuántos compradores volvieron, y cuántas reseñas no computaron por ser del dueño o por caer en una ráfaga. La fórmula viene en la respuesta y está publicada en docs/resenas.md. Con mandato, además, el cálculo hecho para quien pregunta: pesan más los vecinos y la gente con comercios en común. Ej: '¿es confiable esta verdulería?', '¿por qué le bajó la puntuación?'. No requiere mandato.",
       "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string" } } }

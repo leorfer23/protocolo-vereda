@@ -973,7 +973,19 @@ paths:
   /resenas:
     post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
   /resenas/{id}/respuesta:
-    post: { operationId: responderResena, tags: [resenas], summary: Responder públicamente una reseña, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: OK } } }
+    post:
+      operationId: responderResena
+      tags: [resenas]
+      summary: Responder públicamente una reseña
+      description: |
+        Con sesión responde el reseñado, o quien administra el comercio reseñado. Con mandato
+        `administrar` responde el agente del comercio, solo por un comercio que administra quien le
+        dio el mandato: la respuesta la firma el nodo con la clave que custodia del comercio, como
+        cuando responde la persona, y lleva `via` con `canal: agente` y el `mandato_id`, dentro de lo
+        firmado. Escribir una reseña sigue siendo solo de la persona (`crearResena`, sesión).
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses: { "201": { description: OK }, "403": { $ref: "#/components/responses/Error" } }
   /actores/{identidad}/claves:
     get:
       operationId: listarClavesDeActor

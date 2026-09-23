@@ -176,7 +176,10 @@ reseña, antes y después de que la respondieran y la marcaran, con el mismo JCS
 ### Lo que no existe
 
 - **No se borra ni se oculta.** Ni el comercio, ni el nodo, ni el operador. La única acción del
-  reseñado es responder, públicamente y firmado.
+  reseñado es responder, públicamente y firmado. El comercio puede responder por medio de su agente,
+  con un mandato `administrar`: la respuesta lleva `via` con `canal: agente` y el `mandato_id`, y
+  queda a la vista que la escribió el agente. Escribir una reseña, en cambio, es siempre de la
+  persona.
 - **No se paga.** No hay reseñas patrocinadas, destacados, "opiniones verificadas por el comercio" ni
   ningún camino por el que la plata mueva el número.
 - **No hay moderación discrecional.** Todo lo que baja el peso de una reseña está en este archivo,
