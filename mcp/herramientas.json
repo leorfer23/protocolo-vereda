@@ -134,7 +134,7 @@
     },
     {
       "name": "comercio_editar",
-      "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. Ej: 'cerramos los lunes', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Requiere scope 'administrar'.",
+      "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. También abre o cierra ya, pisando los horarios, con 'apertura_manual' ({abierto, hasta?}; null la quita). Ej: 'cerramos los lunes', 'cerrá hasta las 18', 'hoy abrimos aunque sea feriado', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Requiere scope 'administrar'.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -303,7 +303,7 @@
     },
     {
       "name": "pedido_aceptar",
-      "description": "El comercio acepta un pedido pagado o con pago en mano. Si pasa el plazo de aceptación sin respuesta, el pedido se cancela solo y cuenta como rechazado en la reputación: aceptar o rechazar rápido es lo que conviene. Requiere scope 'administrar'.",
+      "description": "El comercio acepta un pedido pagado o con pago en mano, y opcionalmente dice en cuántos minutos lo tiene listo ('aceptalo, sale en 25'): eso mueve la hora estimada que ve el comprador. Sin minutos, usa los de la ficha. Si pasa el plazo de aceptación sin respuesta, el pedido se cancela solo y cuenta como rechazado en la reputación: aceptar o rechazar rápido es lo que conviene. Requiere scope 'administrar'.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -312,6 +312,12 @@
         "properties": {
           "pedido_id": {
             "type": "string"
+          },
+          "tiempo_preparacion_min": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1440,
+            "description": "Minutos de preparación de este pedido. Ausente: los de la ficha del comercio."
           }
         }
       }

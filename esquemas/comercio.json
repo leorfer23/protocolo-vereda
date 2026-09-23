@@ -23,7 +23,18 @@
       }
     },
     "horarios": { "type": "array", "items": { "$ref": "comunes.json#/$defs/franja_horaria" }, "description": "Cuándo acepta pedidos. Vacío: siempre." },
-    "tiempo_preparacion_min": { "type": "integer", "minimum": 0, "description": "Minutos típicos para ofertas 'preparado'." },
+    "tiempo_preparacion_min": { "type": "integer", "minimum": 0, "description": "Minutos típicos para ofertas 'preparado'. Un pedido puede traer los suyos al aceptarlo." },
+    "apertura_manual": {
+      "type": "object",
+      "description": "El toggle 'Abierto ahora': pisa 'horarios' hasta 'hasta'. Lo escribe el comercio con editarComercio (o un agente con su mandato 'administrar'); null lo quita. Vencido, el nodo lo ignora.",
+      "required": ["abierto"],
+      "properties": {
+        "abierto": { "type": "boolean", "description": "false: cerrado aunque los horarios digan abierto. true: abierto aunque estén cerrados." },
+        "hasta": { "$ref": "comunes.json#/$defs/instante", "description": "Hasta cuándo manda. Ausente: hasta que el comercio lo cambie o lo quite." }
+      },
+      "additionalProperties": false
+    },
+    "abierto_ahora": { "type": "boolean", "readOnly": true, "description": "Lo calcula el nodo al responder: 'apertura_manual' si está vigente, si no 'horarios'. Es lo que filtra buscarComercios con 'abierto' y lo que ve el comprador en la ficha. No se edita." },
     "modalidades": {
       "type": "array",
       "minItems": 1,

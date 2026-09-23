@@ -12,10 +12,16 @@ Deuda conocida, a propósito: las ventanas de tiempo (carrito vence a las
 24 h, `plazo_aceptacion_min`, la ventana de 7 días para reseñar) no se
 prueban. Exigir un reloj de prueba es superficie nueva del protocolo.
 """
+import json
 import os
+import queue
+import threading
 import time
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
+
+import requests
 
 from jsonschema import Draft202012Validator
 
@@ -86,6 +92,8 @@ class NivelB:
         self._viaje_ajeno()
         self._metodo_pago()
         self._ubicacion_en_camino()
+        self._eventos_de_quien_administra(capacidades)
+        self._apertura_manual()
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
@@ -161,11 +169,26 @@ class NivelB:
 
         item_id = ((r_conf.cuerpo or {}).get("items") or [{}])[0].get("id")
 
-        r_acept = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/aceptar", headers=self._cabecera(), timeout=self.timeout)
+        desc_mal = "aceptar con tiempo_preparacion_min fuera de rango responde 422 y no acepta"
+        r_mal = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/aceptar", headers=self._cabecera(), json_body={"tiempo_preparacion_min": -5}, timeout=self.timeout)
+        if not r_mal.ok:
+            self.casos.append(_fallo(cat, "aceptarPedido", desc_mal, r_mal.motivo))
+        elif r_mal.estado != 422:
+            self.casos.append(_fallo(cat, "aceptarPedido", desc_mal, f"esperaba 422, llegó {r_mal.estado}"))
+        else:
+            self.casos.append(_ok(cat, "aceptarPedido", desc_mal))
+
+        minutos = 25
+        antes = datetime.now(timezone.utc)
+        r_acept = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/aceptar", headers=self._cabecera(), json_body={"tiempo_preparacion_min": minutos}, timeout=self.timeout)
         if not r_acept.ok or r_acept.estado != 200:
             self.casos.append(_fallo(cat, "aceptarPedido", "aceptar el pedido responde 200", r_acept.motivo or f"estado {r_acept.estado}"))
             return pedido_id
         self.casos.append(_ok(cat, "aceptarPedido", "aceptar el pedido responde 200"))
+        caso = self._chequear_esquema("aceptarPedido", "el pedido aceptado cumple esquemas/pedido.json", "/pedidos/{id}/aceptar", "post", r_acept.cuerpo)
+        if caso:
+            self.casos.append(caso)
+        self._eta_del_aceptado(r_acept.cuerpo, minutos, antes)
 
         desc_listo_temprano = "marcar 'listo' con ítems todavía sin resolver responde 409, no 200"
         r_listo_temprano = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/listo", headers=self._cabecera(), timeout=self.timeout)
@@ -219,6 +242,186 @@ class NivelB:
             return pedido_id
         self.casos.append(_ok(cat, "entregarPedido", "entregar con el código correcto responde 200"))
         return pedido_id
+
+    # aceptar con tiempo: los minutos que dio el comercio mueven la eta ------
+    def _eta_del_aceptado(self, pedido, minutos, antes):
+        cat, opid = "ciclo", "aceptarPedido"
+        desc = f"aceptar con tiempo_preparacion_min {minutos} lo guarda en el pedido y fija eta a esos minutos de la aceptación (retiro, sin ruta)"
+        if not isinstance(pedido, dict):
+            self.casos.append(_fallo(cat, opid, desc, "la respuesta no es un pedido"))
+            return
+        if pedido.get("tiempo_preparacion_min") != minutos:
+            self.casos.append(_fallo(cat, opid, desc, f"tiempo_preparacion_min vino {pedido.get('tiempo_preparacion_min')!r}"))
+            return
+        try:
+            eta = datetime.fromisoformat(str(pedido.get("eta")).replace("Z", "+00:00"))
+        except ValueError:
+            self.casos.append(_fallo(cat, opid, desc, f"eta no es un instante: {pedido.get('eta')!r}"))
+            return
+        esperado = antes + timedelta(minutes=minutos)
+        if abs((eta - esperado).total_seconds()) > 120:
+            self.casos.append(_fallo(cat, opid, desc, f"eta {pedido.get('eta')} y se esperaba cerca de {esperado.isoformat()}"))
+            return
+        self.casos.append(_ok(cat, opid, desc))
+
+    # quien administra el comercio recibe sus eventos por SSE (docs/eventos.md) --
+    # Hace falta una compradora que no sea la sesión de prueba: sale de /acceso,
+    # así que solo contra un nodo con custodia propia.
+    def _eventos_de_quien_administra(self, capacidades, espera_s=15.0):
+        cat, opid = "eventos", "escucharEventos"
+        desc = "quien administra el comercio recibe por GET /eventos el pedido.creado de una compra ajena en su comercio"
+        if capacidades.get("custodia_propia") is not True:
+            self.casos.append(_omitido(cat, opid, desc, "hace falta una segunda identidad y el nodo no publica acceso.custodia_propia: true"))
+            return
+        prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout)
+        compradora = prueba._entrar(acceso.Clave())
+        token = (compradora or {}).get("token")
+        if not token:
+            self.casos.append(_omitido(cat, opid, desc, "no se pudo abrir la sesión de una compradora nueva por /acceso"))
+            return
+
+        vistos: "queue.Queue[dict]" = queue.Queue()
+        corte = threading.Event()
+        abierto = threading.Event()
+        falla = []
+
+        def escuchar():
+            try:
+                with requests.get(f"{self.base_v1}/eventos", headers={**self._cabecera(), "Accept": "text/event-stream"}, stream=True, timeout=(self.timeout, espera_s + 5)) as r:
+                    if r.status_code != 200:
+                        falla.append(f"el stream respondió {r.status_code}")
+                        return
+                    abierto.set()
+                    tipo, datos = "", ""
+                    for linea in r.iter_lines(decode_unicode=True):
+                        if corte.is_set():
+                            return
+                        if linea is None:
+                            continue
+                        if linea == "":
+                            if datos:
+                                try:
+                                    vistos.put({"tipo": tipo, "evento": json.loads(datos)})
+                                except ValueError:
+                                    pass
+                            tipo, datos = "", ""
+                        elif linea.startswith("event:"):
+                            tipo = linea[6:].strip()
+                        elif linea.startswith("data:"):
+                            datos += linea[5:].strip()
+            except requests.exceptions.RequestException as e:
+                if not corte.is_set():
+                    falla.append(f"el stream se cortó ({str(e)[:120]})")
+            finally:
+                abierto.set()
+
+        hilo = threading.Thread(target=escuchar, daemon=True)
+        hilo.start()
+        abierto.wait(self.timeout)
+        if falla:
+            self.casos.append(_fallo(cat, opid, desc, falla[0]))
+            return
+
+        sesion_prueba = self.sesion
+        self.sesion = token
+        try:
+            cid = self._carrito_con("01920000-0000-7000-8000-0000000000b1", {"tipo": "retiro"})
+            r = self._confirmar(cid, {}) if cid else None
+        finally:
+            self.sesion = sesion_prueba
+        pedido_id = (r.cuerpo or {}).get("id") if r and r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        if not pedido_id:
+            corte.set()
+            self.casos.append(_omitido(cat, opid, desc, "la compradora nueva no pudo confirmar un pedido de la oferta de prueba"))
+            return
+
+        limite = time.monotonic() + espera_s
+        visto = False
+        while time.monotonic() < limite and not visto:
+            try:
+                e = vistos.get(timeout=max(0.1, limite - time.monotonic()))
+            except queue.Empty:
+                break
+            entidad = (e["evento"] or {}).get("entidad") or {}
+            visto = e["tipo"] == "pedido.creado" and entidad.get("id") == pedido_id
+        corte.set()
+        cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/cancelar", headers={"Authorization": f"Bearer {token}"}, json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+        if visto:
+            self.casos.append(_ok(cat, opid, desc))
+        else:
+            self.casos.append(_fallo(cat, opid, desc, falla[0] if falla else f"en {espera_s:.0f} s no llegó pedido.creado del pedido {pedido_id}"))
+
+    # "abierto ahora": apertura_manual pisa los horarios y se ve en la ficha y en la búsqueda --
+    # Va al final: deja el comercio de prueba como estaba (sin apertura_manual).
+    def _apertura_manual(self):
+        cat, opid = "apertura", "editarComercio"
+        comercio = self._comercio_de_la_oferta("01920000-0000-7000-8000-0000000000b1")
+        if not comercio or not comercio.get("id"):
+            self.casos.append(_omitido(cat, opid, "apertura_manual cierra y abre el comercio", "no se pudo leer el comercio de la oferta de prueba"))
+            return
+        cid = comercio["id"]
+        punto = ((comercio.get("ubicacion") or {}).get("direccion") or {}).get("punto") or {}
+
+        def editar(apertura):
+            return cliente.solicitud("PATCH", f"{self.base_v1}/comercios/{cid}", headers=self._cabecera(), json_body={"apertura_manual": apertura}, timeout=self.timeout)
+
+        def en_busqueda(abierto):
+            if "lat" not in punto or "lng" not in punto:
+                return None
+            r = cliente.get(f"{self.base_v1}/comercios?lat={punto['lat']}&lng={punto['lng']}&abierto={'true' if abierto else 'false'}", timeout=self.timeout)
+            if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, list):
+                return None
+            return any(isinstance(c, dict) and c.get("id") == cid for c in r.cuerpo)
+
+        desc = "la ficha trae abierto_ahora, booleano calculado por el nodo"
+        if isinstance(comercio.get("abierto_ahora"), bool):
+            self.casos.append(_ok(cat, "verComercio", desc))
+        else:
+            self.casos.append(_fallo(cat, "verComercio", desc, f"abierto_ahora vino {comercio.get('abierto_ahora')!r}"))
+
+        hasta = (datetime.now(timezone.utc) + timedelta(minutes=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        for abierto in (False, True):
+            estado = "cerrado" if not abierto else "abierto"
+            desc = f"apertura_manual {{abierto: {str(abierto).lower()}}} deja el comercio {estado} en la ficha y en buscarComercios?abierto"
+            r = editar({"abierto": abierto, "hasta": hasta})
+            if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+                self.casos.append(_fallo(cat, opid, desc, r.motivo or f"el PATCH respondió {r.estado}"))
+                continue
+            caso = self._chequear_esquema(opid, "la ficha editada cumple esquemas/comercio.json", "/comercios/{id}", "patch", r.cuerpo)
+            if caso:
+                self.casos.append(caso)
+            ficha = cliente.get(f"{self.base_v1}/comercios/{cid}", headers={"Cache-Control": "no-cache"}, timeout=self.timeout)
+            visto = (ficha.cuerpo or {}).get("abierto_ahora") if ficha.ok and isinstance(ficha.cuerpo, dict) else None
+            if r.cuerpo.get("abierto_ahora") is not abierto or visto is not abierto:
+                self.casos.append(_fallo(cat, opid, desc, f"abierto_ahora: PATCH {r.cuerpo.get('abierto_ahora')!r}, GET {visto!r}"))
+                continue
+            si, no = en_busqueda(abierto), en_busqueda(not abierto)
+            if si is None or no is None:
+                self.casos.append(_fallo(cat, "buscarComercios", desc, "no se pudo buscar comercios en el punto del comercio de prueba"))
+            elif not si or no:
+                self.casos.append(_fallo(cat, "buscarComercios", desc, f"con abierto={str(abierto).lower()} aparece: {si}; con abierto={str(not abierto).lower()} aparece: {no}"))
+            else:
+                self.casos.append(_ok(cat, opid, desc))
+
+        desc = "apertura_manual con campos de más responde 422"
+        r = editar({"abierto": False, "motivo": "vacaciones"})
+        if not r.ok:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo))
+        elif r.estado != 422:
+            self.casos.append(_fallo(cat, opid, desc, f"esperaba 422, llegó {r.estado}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        desc = "apertura_manual: null la quita y vuelven a mandar los horarios"
+        r = editar(None)
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"el PATCH respondió {r.estado}"))
+        elif "apertura_manual" in r.cuerpo:
+            self.casos.append(_fallo(cat, opid, desc, f"la ficha sigue trayendo apertura_manual {r.cuerpo['apertura_manual']!r}"))
+        elif r.cuerpo.get("abierto_ahora") != comercio.get("abierto_ahora"):
+            self.casos.append(_fallo(cat, opid, desc, f"abierto_ahora quedó {r.cuerpo.get('abierto_ahora')!r} y antes de tocarlo era {comercio.get('abierto_ahora')!r}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
 
     # direcciones guardadas: reemplaza la lista entera, valida, y nunca por mandato --
     def _direcciones(self):
