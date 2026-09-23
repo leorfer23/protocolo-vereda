@@ -152,6 +152,15 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Eventos de quien administra: contra un nodo con custodia propia, una compradora nueva (de
   `/acceso`) compra en el comercio de prueba y el stream `GET /eventos` de la sesión de prueba,
   que lo administra, trae su `pedido.creado` en 15 s. Sin custodia propia se omite.
+- Nombres del pedido: `PUT /yo/nombre` guarda el nombre sin los espacios de los bordes y
+  `GET /yo` lo muestra; vacío, de puros espacios, de más de 80 caracteres, que no es texto o
+  sin `nombre` da `422`; un token de mandato no lo escribe; `null` lo borra. Al final se
+  restaura el de la sesión de prueba. Con custodia propia, una compradora nueva que entra sin
+  nombre no tiene `nombre` en `GET /yo` (el nodo no pone el handle), elige uno y compra en el
+  comercio de prueba: con el pedido activo, ella y quien administra el comercio ven su nombre
+  en `partes.usuario`, y `partes.comercio` trae el del comercio; una tercera identidad recibe
+  `404`. Cancelado, ella lo sigue viendo y el comercio (sin lista de clientes aceptada) ya no.
+  Sin custodia propia, esa parte se omite.
 - Abierto ahora: la ficha trae `abierto_ahora`; `apertura_manual` cerrada o abierta (con
   `hasta` a 30 min) se ve en la respuesta del `PATCH`, en `GET /comercios/{id}` y en
   `buscarComercios?abierto`; con campos de más da `422`; `null` la quita y vuelve el

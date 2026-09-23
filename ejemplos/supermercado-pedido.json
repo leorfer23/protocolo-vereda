@@ -1,9 +1,14 @@
 {
-  "$comentario": "Pedido de supermercado en franja con pesables, una sustitución aceptada y un faltante. Reparto visible. Diferencia a devolver por el comercio.",
+  "$comentario": "Pedido de supermercado en franja con pesables, una sustitución aceptada y un faltante. Reparto visible. Diferencia a devolver por el comercio. Es la copia que lee Marta: ya entregado, ve su propio nombre en partes; el comercio, sin lista de clientes aceptada, la vería sin él.",
   "id": "01926b3a-7777-7000-8000-000000000001", "nodo":"vereda.ar","creado":"2026-09-21T15:00:00-03:00","actualizado":"2026-09-21T15:00:00-03:00","version_esquema":"1.0",
   "usuario": "marta@vereda.ar",
   "comercio": "superbarrio@vereda.ar",
   "repartidor": "diego.moto@coop-almagro.ar",
+  "partes": {
+    "usuario": { "identidad": "marta@vereda.ar", "nombre": "Marta" },
+    "comercio": { "identidad": "superbarrio@vereda.ar", "nombre": "Súper Barrio" },
+    "repartidor": { "identidad": "diego.moto@coop-almagro.ar", "nombre": "Diego" }
+  },
   "via": { "canal": "agente", "agente": "claude", "mandato_id": "01926b3a-8888-7000-8000-000000000001" },
   "items": [
     { "id": "i1", "oferta_id": "01926b3a-5555-7000-8000-000000000001", "variante_id": "1l", "nombre": "Leche entera La Serenísima 1 L", "cantidad": { "valor": 6, "unidad": "unidad" }, "cantidad_entregada": { "valor": 6, "unidad": "unidad" }, "precio_unitario": { "centavos": 195000, "moneda": "ARS" }, "preferencia_sustitucion": "misma_marca", "estado": "confirmado", "monto_final": { "centavos": 1170000, "moneda": "ARS" } },

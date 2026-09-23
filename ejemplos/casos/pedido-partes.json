@@ -1,0 +1,77 @@
+{
+  "$comentario": "Cómo se llama cada parte de un pedido, para mostrar (docs/datos-y-privacidad.md). El nodo lo arma al leer según quién lee: una parte sin 'nombre' es válida y es lo que ve quien no tiene por qué verlo.",
+  "esquema": "pedido.json#/$defs/partes",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Pedido activo leído por el comercio: comprador con su nombre, comercio y repartidor.",
+      "doc": {
+        "usuario": {
+          "identidad": "juan@vereda.ar",
+          "nombre": "Juan"
+        },
+        "comercio": {
+          "identidad": "lahuerta@vereda.ar",
+          "nombre": "Verdulería La Huerta"
+        },
+        "repartidor": {
+          "identidad": "lucas@vereda.ar",
+          "nombre": "Lucas"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Pedido terminado leído por el comercio sin lista de clientes aceptada: el comprador viene sin nombre.",
+      "doc": {
+        "usuario": {
+          "identidad": "juan@vereda.ar"
+        },
+        "comercio": {
+          "identidad": "lahuerta@vereda.ar",
+          "nombre": "Verdulería La Huerta"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El nombre no puede venir vacío: si no hay, la parte va sin 'nombre'.",
+      "doc": {
+        "usuario": {
+          "identidad": "juan@vereda.ar",
+          "nombre": ""
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Cada parte lleva su identidad.",
+      "doc": {
+        "usuario": {
+          "nombre": "Juan"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Solo nombre e identidad: el contacto o la dirección no viajan en 'partes'.",
+      "doc": {
+        "usuario": {
+          "identidad": "juan@vereda.ar",
+          "nombre": "Juan",
+          "telefono": "+5491155550000"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Las partes son comprador, comercio y repartidor; no hay otras.",
+      "doc": {
+        "operador": {
+          "identidad": "nodo@vereda.ar",
+          "nombre": "Nodo"
+        }
+      }
+    }
+  ]
+}

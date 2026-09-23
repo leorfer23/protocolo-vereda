@@ -66,7 +66,7 @@
         "clave_publica": { "$ref": "#/$defs/clave_ed25519" },
         "desafio": { "type": "string", "minLength": 1 },
         "firma": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$", "description": "Ed25519 sobre el JCS de prueba_de_clave, base64url sin relleno." },
-        "nombre": { "type": "string", "maxLength": 80, "description": "El nombre que se muestra. Solo se usa si la clave es nueva en este nodo; volver a entrar no lo pisa." }
+        "nombre": { "type": "string", "maxLength": 80, "description": "El nombre que se muestra. Solo se usa si la clave es nueva en este nodo; volver a entrar no lo pisa. Si falta, la persona queda sin nombre hasta que elija uno con PUT /yo/nombre: el nodo no inventa ninguno." }
       },
       "additionalProperties": false
     },
