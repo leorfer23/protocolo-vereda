@@ -69,8 +69,8 @@
     },
     {
       "name": "carrito_modalidad",
-      "description": "Elige cómo se entrega: inmediata, franja, consolidada (más barata, llega en días), ronda, punto de entrega o retiro. Proponé la más barata que cumpla el apuro de la persona. Requiere 'armar'.",
-      "inputSchema": { "type": "object", "required": ["carrito_id", "tipo"], "properties": { "carrito_id": { "type": "string" }, "tipo": { "type": "string" }, "modalidad_id": { "type": "string" }, "franja": { "type": "object" }, "ronda_id": { "type": "string" }, "grupo_id": { "type": "string" } } }
+      "description": "Elige cómo se entrega: inmediata, franja, consolidada (más barata, llega en días), ronda, punto de entrega o retiro, y con envío a cuál de las direcciones guardadas ('direccion_etiqueta'). Proponé la más barata que cumpla el apuro de la persona. Requiere 'armar'.",
+      "inputSchema": { "type": "object", "required": ["carrito_id", "tipo"], "properties": { "carrito_id": { "type": "string" }, "tipo": { "type": "string" }, "modalidad_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "Con envío: 'casa', 'trabajo', una de mis_direcciones. El nodo pone la dirección exacta que la persona guardó con esa etiqueta." }, "franja": { "type": "object" }, "ronda_id": { "type": "string" }, "grupo_id": { "type": "string" } } }
     },
     {
       "name": "carrito_confirmar",
@@ -134,7 +134,12 @@
     },
     {
       "name": "mis_preferencias",
-      "description": "Perfil declarativo de la persona: direcciones, restricciones alimentarias, política de sustituciones, comercios favoritos, repartidores de confianza, tope, horarios en que no recibe, notas. Leelo al empezar. Requiere 'leer'.",
+      "description": "Perfil declarativo de la persona: restricciones alimentarias, política de sustituciones, comercios favoritos, repartidores de confianza, tope, horarios en que no recibe, notas. Leelo al empezar. Las direcciones no vienen acá: sus etiquetas están en mis_direcciones. Requiere 'leer'.",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "mis_direcciones",
+      "description": "Las etiquetas de las direcciones que la persona guardó ('casa', 'oficina'), sin calle ni ubicación: la dirección exacta no la ve un agente. Usá una en carrito_crear o carrito_modalidad ('direccion_etiqueta'). Cargar o cambiar direcciones lo hace solo la persona. Requiere 'leer'.",
       "inputSchema": { "type": "object", "properties": {} }
     },
     {
