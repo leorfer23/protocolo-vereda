@@ -505,18 +505,26 @@ class NivelB:
             self.casos.append(caso)
         self.casos.append(_ok(cat, opid, desc))
 
-        # la sesión de prueba acepta el pedido del ciclo: es la dueña del comercio de la oferta b1
-        desc = "GET /yo/comercios incluye el comercio de prueba, que la sesión administra"
-        r_of = cliente.solicitud("GET", f"{self.base_v1}/ofertas/01920000-0000-7000-8000-0000000000b1", timeout=self.timeout)
-        comercio_id = (r_of.cuerpo or {}).get("comercio_id") if r_of.ok and r_of.estado == 200 and isinstance(r_of.cuerpo, dict) else None
-        if not comercio_id:
-            self.casos.append(_omitido(cat, opid, desc, "no se pudo leer el comercio de la oferta de prueba"))
+        # Qué comercios administra la sesión de prueba lo decide cada nodo: puede
+        # ser la identidad del comercio y no su dueña, y entonces la lista viene
+        # vacía. Lo que sí vale siempre: cada uno existe y coincide con su ficha.
+        desc = "cada comercio de GET /yo/comercios existe y coincide con su ficha pública"
+        mios = r.cuerpo if isinstance(r.cuerpo, list) else []
+        if not mios:
+            self.casos.append(_omitido(cat, opid, desc, "la sesión de prueba no administra ningún comercio"))
             return
-        ids = [c.get("id") for c in r.cuerpo if isinstance(c, dict)] if isinstance(r.cuerpo, list) else []
-        if comercio_id in ids:
-            self.casos.append(_ok(cat, opid, desc))
-        else:
-            self.casos.append(_fallo(cat, opid, desc, f"{comercio_id} no está en {ids}"))
+        for c in mios:
+            cid = c.get("id") if isinstance(c, dict) else None
+            r_c = cliente.solicitud("GET", f"{self.base_v1}/comercios/{cid}", timeout=self.timeout)
+            ficha = r_c.cuerpo if r_c.ok and r_c.estado == 200 and isinstance(r_c.cuerpo, dict) else None
+            if ficha is None:
+                self.casos.append(_fallo(cat, opid, desc, f"GET /comercios/{cid} respondió {r_c.estado}"))
+                return
+            distinto = [k for k in ("identidad", "nombre", "tipo") if ficha.get(k) != c.get(k)]
+            if distinto:
+                self.casos.append(_fallo(cat, opid, desc, f"{cid}: {', '.join(distinto)} no coincide con la ficha"))
+                return
+        self.casos.append(_ok(cat, opid, desc))
 
     # un viaje que no es de uno no se lee, ni se sabe si existe -------------
     def _viaje_ajeno(self):
