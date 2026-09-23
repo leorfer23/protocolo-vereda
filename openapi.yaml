@@ -1194,6 +1194,28 @@ paths:
         "200": { description: Guardado, content: { application/json: { schema: { type: object, properties: { nombre: { type: string } }, description: "El nombre como quedó guardado. Sin 'nombre' si se borró." } } } }
         "422": { $ref: "#/components/responses/Error" }
   /yo/direcciones:
+    get:
+      operationId: listarDirecciones
+      tags: [yo]
+      summary: "Mis direcciones guardadas. Al agente, solo sus etiquetas"
+      description: |
+        Con sesión, la lista entera, como la guardó `guardarDirecciones`. Con mandato `leer`, solo
+        las etiquetas (`[{ "etiqueta": "casa" }, …]`), sin calle, altura ni punto: con eso el agente
+        nombra una dirección en `carrito_crear` o `carrito_modalidad` (`direccion_etiqueta`) y el
+        nodo pone la dirección exacta del lado del servidor. Las direcciones sin etiqueta no se le
+        muestran al agente (`docs/datos-y-privacidad.md`).
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  anyOf:
+                    - { $ref: "esquemas/comunes.json#/$defs/direccion" }
+                    - { type: object, required: [etiqueta], additionalProperties: false, properties: { etiqueta: { type: string } }, description: "Lo que ve un agente: solo la etiqueta." }
     put:
       operationId: guardarDirecciones
       tags: [yo]
@@ -1201,8 +1223,9 @@ paths:
       description: |
         Lo que no se manda se borra; una lista vacía las borra todas. Las etiquetas no se repiten
         (422 si se repiten): son lo que usan `preferencias.direccion_habitual` y
-        `direccion_etiqueta` al crear un carrito. Solo por sesión: la dirección exacta la ven el
-        comercio y el repartidor de un pedido activo, no un agente (`docs/datos-y-privacidad.md`).
+        `direccion_etiqueta` al crear un carrito o elegir su modalidad. Escribirlas es solo por sesión:
+        la dirección exacta la ven el comercio y el repartidor de un pedido activo, no un agente, que
+        solo lee las etiquetas (`listarDirecciones`, `docs/datos-y-privacidad.md`).
       security: [ { sesion: [] } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/direcciones" } } } }
       responses:
