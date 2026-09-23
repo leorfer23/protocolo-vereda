@@ -1009,6 +1009,7 @@ class NivelB:
             self.casos.append(_ok(cat, opid, desc_fin))
         else:
             self.casos.append(_fallo(cat, opid, desc_fin, r.motivo or f"estado {r.estado}, ubicacion_repartidor={(r.cuerpo or {}).get('ubicacion_repartidor') if isinstance(r.cuerpo, dict) else '?'}"))
+        self._rendicion(pid)
 
     # la oferta dice quién le paga al repartidor, cuánto y cómo ------------
     # docs/repartidores.md, punto d: antes de aceptar, por pedido, 'cobros'
@@ -1087,6 +1088,86 @@ class NivelB:
             self.casos.append(_fallo(cat, opid, desc, f"firmada por {guardada.get('firmante')!r}, no por el repartidor {yo!r}"))
             return True
         ok, motivo = NivelA(self.origen, timeout=self.timeout)._verificar_firma({**traspaso(guardada.get("instante")), "firma": guardada}, {})
+        self.casos.append(_ok(cat, opid, desc) if ok else _fallo(cat, opid, desc, motivo))
+        return True
+
+    # la rendición del efectivo al comercio, firmada por los dos ------------
+    # docs/repartidores.md, punto l: el pedido en efectivo entregado por la
+    # repartidora trae 'rendicion' con lo que cobró por cuenta del comercio.
+    # Declarar con una firma que no verifica da 422; declarar bien la deja
+    # 'declarada'; el comercio confirma el mismo monto y queda 'confirmada', con
+    # las dos constancias verificando contra el historial de su actor. Después,
+    # otra constancia da 409 rendicion_confirmada. La sesión de prueba es a la
+    # vez la repartidora y quien administra el comercio.
+    def _rendicion(self, pid):
+        cat = "rendicion"
+        r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pid}", headers=self._cabecera(), timeout=self.timeout)
+        pedido = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else {}
+        desc = "entregado un pedido en efectivo por la repartidora, trae rendicion pendiente con lo que cobró por cuenta del comercio"
+        rend = pedido.get("rendicion")
+        cobrado = sum(((p.get("monto") or {}).get("centavos") or 0) for p in pedido.get("pagos") or []
+                      if p.get("metodo") == "efectivo" and p.get("destinatario") == pedido.get("comercio") and not p.get("pagador"))
+        if not isinstance(rend, dict):
+            self.casos.append(_fallo(cat, "verPedido", desc, "GET /pedidos/{id} no trae 'rendicion'"))
+            return
+        if rend.get("estado") != "pendiente" or (rend.get("monto") or {}).get("centavos") != cobrado:
+            self.casos.append(_fallo(cat, "verPedido", desc, f"estado {rend.get('estado')!r}, monto {(rend.get('monto') or {}).get('centavos')} y los pagos en efectivo al comercio suman {cobrado}"))
+            return
+        self.casos.append(_ok(cat, "verPedido", desc))
+        monto = rend["monto"]
+        ruta = f"{self.base_v1}/pedidos/{pid}/rendicion"
+        yo = pedido.get("repartidor")
+
+        ahora = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        falsa = acceso.Clave()
+        mala = {"firmante": yo, "clave_publica": falsa.publica, "valor": falsa.firmar({"otra": "cosa"}), "instante": ahora}
+        desc = "declararRendicion con una firma que no verifica responde 422 firma_invalida y no agrega constancia"
+        r = cliente.solicitud("POST", ruta, headers=self._cabecera(), json_body={"monto": monto, "firma": mala}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+        if r.ok and r.estado == 422 and codigo == "firma_invalida":
+            self.casos.append(_ok(cat, "declararRendicion", desc))
+        else:
+            self.casos.append(_fallo(cat, "declararRendicion", desc, f"llegó {r.estado} {codigo or r.motivo}"))
+            if r.ok and r.estado == 200:
+                return
+
+        firma = None
+        if self.clave:
+            constancia = {"accion": "rendida", "pedido_id": pid, "actor": yo, "monto": monto, "instante": ahora}
+            firma = {"firmante": yo, "clave_publica": self.clave.publica, "valor": self.clave.firmar(constancia), "instante": ahora}
+        if not self._constancia(pid, ruta, "declararRendicion", "rendida", yo, monto, firma, "declarada"):
+            return
+        if not self._constancia(pid, ruta + "/confirmar", "confirmarRendicion", "recibida", pedido.get("comercio"), monto, None, "confirmada"):
+            return
+
+        desc = "con la rendición confirmada, otra constancia responde 409 rendicion_confirmada"
+        r = cliente.solicitud("POST", ruta, headers=self._cabecera(), json_body={"monto": monto}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+        self.casos.append(_ok(cat, "declararRendicion", desc) if r.ok and r.estado == 409 and codigo == "rendicion_confirmada"
+                          else _fallo(cat, "declararRendicion", desc, f"llegó {r.estado} {codigo or r.motivo}"))
+
+    def _constancia(self, pid, ruta, opid, accion, actor, monto, firma, estado) -> bool:
+        cat = "rendicion"
+        r = cliente.solicitud("POST", ruta, headers=self._cabecera(), json_body={"monto": monto, **({"firma": firma} if firma else {})}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+        if r.ok and r.estado == 422 and codigo == "firma_requerida":
+            self.casos.append(_omitido(cat, opid, f"constancia '{accion}' firmada", "la clave de su actor es de custodia propia y la suite no la tiene"))
+            return False
+        desc = f"{opid} responde 200 y deja la rendición '{estado}'"
+        rend = (r.cuerpo or {}).get("rendicion") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        if not isinstance(rend, dict) or rend.get("estado") != estado:
+            self.casos.append(_fallo(cat, opid, desc, f"llegó {r.estado} {codigo or r.motivo or ''}, rendicion.estado={(rend or {}).get('estado')!r}"))
+            return False
+        caso = self._chequear_esquema(opid, "el pedido con la constancia cumple esquemas/pedido.json", ruta.split("/v1", 1)[1].replace(pid, "{id}"), "post", r.cuerpo)
+        if caso:
+            self.casos.append(caso)
+        self.casos.append(_ok(cat, opid, desc))
+        desc = f"la constancia '{accion}' es de {actor} y verifica sobre {{accion, pedido_id, actor, monto, instante}} contra su historial de claves"
+        ultima = (rend.get("constancias") or [None])[-1]
+        if not isinstance(ultima, dict) or ultima.get("accion") != accion or ultima.get("actor") != actor or ultima.get("monto") != monto:
+            self.casos.append(_fallo(cat, opid, desc, f"la última constancia es {ultima!r}"))
+            return True
+        ok, motivo = NivelA(self.origen, timeout=self.timeout)._verificar_firma(ultima, {})
         self.casos.append(_ok(cat, opid, desc) if ok else _fallo(cat, opid, desc, motivo))
         return True
 

@@ -157,6 +157,18 @@ v_traspaso = vector("traspaso-entrega",
     "Marta, repartidora, entrega el pedido y firma con la clave de su teléfono. Manda solo 'firma' en POST /pedidos/{id}/entregar; el nodo rearma este objeto con la acción de la ruta, el id del pedido, la identidad de la sesión y firma.instante, y lo verifica. Lo guarda en pedido.firmas.entrega (docs/repartidores.md, punto j).",
     traspaso, "firma", "marta@vereda.ar", TS, "pedido.json#/$defs/traspaso")
 
+# --- 5c. Rendición: el repartidor declara cuánto efectivo le dio al comercio ---
+rendicion = {
+    "accion": "rendida",
+    "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+    "actor": "marta@vereda.ar",
+    "monto": {"centavos": 1234000, "moneda": "ARS"},
+    "instante": TS,
+}
+v_rendicion = vector("rendicion-rendida",
+    "Marta, repartidora, cobró en la puerta los productos en efectivo y le da al comercio lo suyo después de entregar. Firma con la clave de su teléfono y manda {monto, firma} en POST /pedidos/{id}/rendicion; el nodo arma este objeto con la acción de la ruta, el id del pedido, la identidad de la sesión, el monto y firma.instante, lo verifica y lo guarda entero en pedido.rendicion.constancias. La 'recibida' del comercio es igual, con su identidad y su clave (docs/repartidores.md, punto l).",
+    rendicion, "firma", "marta@vereda.ar", TS, "pedido.json#/$defs/constancia_rendicion")
+
 # --- 6. Casos JCS sin firma: donde las implementaciones se separan ---
 CASOS = [
     ("orden-de-claves", "Las claves se ordenan por sus unidades de código UTF-16, no por alfabeto ni por orden de aparición.",
@@ -245,7 +257,7 @@ doc = {
         {"actor": "marta@vereda.ar (clave nueva del vector de rotación)", "etiqueta_semilla": "marta-clave-2",
          "semilla_sha256_de": "vereda:vector:marta-clave-2", "semilla_hex": semilla("marta-clave-2").hex(), "clave_publica": pub_nueva},
     ],
-    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso],
+    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_rendicion],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
 }

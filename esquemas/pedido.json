@@ -109,6 +109,7 @@
     "requiere_mayoria_edad": { "type": "boolean", "default": false },
     "bultos": { "type": "integer", "minimum": 1 },
     "peso_estimado_kg": { "type": "number", "minimum": 0 },
+    "rendicion": { "$ref": "#/$defs/rendicion" },
     "firmas": {
       "type": "object",
       "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; retiro y entrega por el repartidor, sobre '#/$defs/traspaso'; en modalidad 'retiro', entrega por el comercio, con el código del comprador como prueba.",
@@ -137,6 +138,40 @@
       "properties": {
         "identidad": { "$ref": "comunes.json#/$defs/identidad" },
         "nombre": { "type": "string", "minLength": 1, "maxLength": 120, "description": "El que eligió la parte: 'nombre' de su usuario, de su ficha de comercio o de su perfil de repartidor. Ausente si no eligió ninguno o si quien lee no tiene por qué verlo." }
+      },
+      "additionalProperties": false
+    },
+    "rendicion": {
+      "type": "object",
+      "description": "Lo que el repartidor le debe al comercio por lo que cobra en mano por cuenta de él, y las constancias firmadas de que se lo dio (docs/repartidores.md, punto l). Lo escribe el nodo. Existe solo en pedidos con repartidor en los que el comprador le paga al comercio algo en efectivo que cobra el repartidor; un pedido cancelado sin constancias no la tiene. La ven el comercio y el repartidor del pedido; la copia del comprador la omite. La red no ve plata: registra lo que cada uno firmó.",
+      "required": ["modo", "monto", "estado", "constancias"],
+      "properties": {
+        "modo": { "type": "string", "enum": ["despues_de_entregar", "al_retirar"], "description": "El 'envios.rendicion_efectivo' del comercio al asignar el repartidor, congelado en el pedido." },
+        "monto": { "$ref": "comunes.json#/$defs/monto", "description": "La suma de los pagos en efectivo del comprador al comercio que cobra el repartidor en la entrega ('productos', 'propina_comercio' y, con 'cobro_envio: al_comercio', 'envio'). Es lo que se debe; lo que se rindió está en las constancias." },
+        "estado": {
+          "type": "string",
+          "enum": ["pendiente", "declarada", "confirmada", "en_desacuerdo"],
+          "description": "Sale de las constancias, no se escribe aparte. 'pendiente': el repartidor todavía no declaró. 'declarada': la última 'rendida' del repartidor no tiene una 'recibida' del comercio después. 'confirmada': la última 'recibida', posterior a la última 'rendida', dice el mismo monto; ya no se agregan constancias. 'en_desacuerdo': dice otro monto; cualquiera de los dos puede agregar otra. Nada vence ni castiga: queda a la vista y firmado."
+        },
+        "constancias": {
+          "type": "array",
+          "description": "En el orden en que llegaron, sin edición ni borrado. Cada una es el objeto firmado entero.",
+          "items": { "$ref": "#/$defs/constancia_rendicion" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "constancia_rendicion": {
+      "type": "object",
+      "description": "Lo que firma cada parte sobre la rendición (docs/repartidores.md, punto l): el repartidor 'rendida' (te di tanto), el comercio 'recibida' (recibí tanto). La firma va sobre el JCS del objeto sin 'firma'; 'actor' es 'firma.firmante' e 'instante' es 'firma.instante'. Se guarda tal cual en 'rendicion.constancias', así que cualquiera la verifica sin rearmar nada. Sin 'firma' solo cuando la hizo un agente por mandato, que no firma por la persona.",
+      "required": ["accion", "pedido_id", "actor", "monto", "instante"],
+      "properties": {
+        "accion": { "type": "string", "enum": ["rendida", "recibida"] },
+        "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+        "actor": { "$ref": "comunes.json#/$defs/identidad", "description": "'rendida': el repartidor del pedido. 'recibida': el comercio del pedido, con su clave." },
+        "monto": { "$ref": "comunes.json#/$defs/monto" },
+        "instante": { "$ref": "comunes.json#/$defs/instante" },
+        "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Fuera del JCS, como toda firma." }
       },
       "additionalProperties": false
     },

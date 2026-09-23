@@ -1,0 +1,235 @@
+{
+  "$comentario": "La rendición del efectivo al comercio en el pedido (docs/repartidores.md, punto l). Las firmas son de ejemplo, no verifican; el vector 'rendicion-rendida' sí.",
+  "esquema": "pedido.json#/$defs/rendicion",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Recién aceptado el viaje: se sabe cuánto se debe y todavía nadie firmó nada.",
+      "doc": {
+        "modo": "despues_de_entregar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "pendiente",
+        "constancias": []
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El repartidor declaró y el comercio confirmó el mismo monto, cada uno con su clave: confirmada.",
+      "doc": {
+        "modo": "despues_de_entregar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "confirmada",
+        "constancias": [
+          {
+            "accion": "rendida",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "marta@vereda.ar",
+            "monto": {
+              "centavos": 1234000,
+              "moneda": "ARS"
+            },
+            "instante": "2026-09-21T15:30:00-03:00",
+            "firma": {
+              "firmante": "marta@vereda.ar",
+              "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+              "valor": "AAAA",
+              "instante": "2026-09-21T15:30:00-03:00"
+            }
+          },
+          {
+            "accion": "recibida",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "lahuerta@nodo.rosario.coop",
+            "monto": {
+              "centavos": 1234000,
+              "moneda": "ARS"
+            },
+            "instante": "2026-09-21T15:31:00-03:00",
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+              "valor": "AAAA",
+              "instante": "2026-09-21T15:31:00-03:00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El comercio dice haber recibido menos: en_desacuerdo, las dos versiones firmadas y a la vista. Nadie arbitra.",
+      "doc": {
+        "modo": "al_retirar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "en_desacuerdo",
+        "constancias": [
+          {
+            "accion": "rendida",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "marta@vereda.ar",
+            "monto": {
+              "centavos": 1234000,
+              "moneda": "ARS"
+            },
+            "instante": "2026-09-21T14:50:00-03:00",
+            "firma": {
+              "firmante": "marta@vereda.ar",
+              "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+              "valor": "AAAA",
+              "instante": "2026-09-21T14:50:00-03:00"
+            }
+          },
+          {
+            "accion": "recibida",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "lahuerta@nodo.rosario.coop",
+            "monto": {
+              "centavos": 1034000,
+              "moneda": "ARS"
+            },
+            "instante": "2026-09-21T14:51:00-03:00",
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+              "valor": "AAAA",
+              "instante": "2026-09-21T14:51:00-03:00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Por mandato: el agente del repartidor declaró sin firma, porque un agente no firma por la persona.",
+      "doc": {
+        "modo": "despues_de_entregar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "declarada",
+        "constancias": [
+          {
+            "accion": "rendida",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "marta@vereda.ar",
+            "monto": {
+              "centavos": 1234000,
+              "moneda": "ARS"
+            },
+            "instante": "2026-09-21T15:30:00-03:00"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'perdonada' no es un estado: la red no condona ni castiga; si se arreglan, lo dicen con otra constancia.",
+      "doc": {
+        "modo": "despues_de_entregar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "perdonada",
+        "constancias": []
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una constancia es 'rendida' o 'recibida': no hay 'reclamada'.",
+      "doc": {
+        "modo": "despues_de_entregar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "declarada",
+        "constancias": [
+          {
+            "accion": "reclamada",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "lahuerta@nodo.rosario.coop",
+            "monto": {
+              "centavos": 1234000,
+              "moneda": "ARS"
+            },
+            "instante": "2026-09-21T15:30:00-03:00",
+            "firma": {
+              "firmante": "lahuerta@nodo.rosario.coop",
+              "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+              "valor": "AAAA",
+              "instante": "2026-09-21T15:30:00-03:00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin monto la constancia no dice nada: el monto es lo que se firma.",
+      "doc": {
+        "modo": "despues_de_entregar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "declarada",
+        "constancias": [
+          {
+            "accion": "rendida",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "marta@vereda.ar",
+            "instante": "2026-09-21T15:30:00-03:00",
+            "firma": {
+              "firmante": "marta@vereda.ar",
+              "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+              "valor": "AAAA",
+              "instante": "2026-09-21T15:30:00-03:00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La rendición no guarda datos de cuenta ni comprobantes: la red no ve plata, registra lo que cada parte firmó.",
+      "doc": {
+        "modo": "despues_de_entregar",
+        "monto": {
+          "centavos": 1234000,
+          "moneda": "ARS"
+        },
+        "estado": "declarada",
+        "constancias": [
+          {
+            "accion": "rendida",
+            "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+            "actor": "marta@vereda.ar",
+            "monto": {
+              "centavos": 1234000,
+              "moneda": "ARS"
+            },
+            "instante": "2026-09-21T15:30:00-03:00",
+            "firma": {
+              "firmante": "marta@vereda.ar",
+              "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+              "valor": "AAAA",
+              "instante": "2026-09-21T15:30:00-03:00"
+            }
+          }
+        ],
+        "alias": "marta.mp"
+      }
+    }
+  ]
+}

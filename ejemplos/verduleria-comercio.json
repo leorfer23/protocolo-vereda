@@ -24,6 +24,7 @@
   ],
   "politica_cancelacion": { "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.", "hasta_estado": "aceptado", "cobra_preparado": false, "plazo_devolucion_horas": 24 },
   "datos": { "retencion_dias": 90, "lista_de_clientes": false, "estandar": true },
+  "envios": { "asignacion": ["propios", "pool"], "rendicion_efectivo": "al_retirar" },
   "medios_cobro": ["qr_interoperable", "transferencia", "efectivo"],
   "acepta_propinas": true,
   "imagenes": [ { "url": "https://cdn.lahuerta.ar/frente.jpg", "alt": "El frente del local sobre Yatay" } ],

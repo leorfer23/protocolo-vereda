@@ -501,7 +501,7 @@
     },
     {
       "name": "viajes_ofrecidos",
-      "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, quién le paga cada envío, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros), y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
+      "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, quién le paga cada envío, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros), cuánto efectivo le va a deber al comercio y si se lo adelanta al retirar (por_pedido[].rendicion), y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "properties": {}}
     },
     {
@@ -538,6 +538,16 @@
       "name": "cobro_confirmar",
       "description": "El repartidor confirma que recibió la transferencia del envío o de la propina en su cuenta ('recibido'). Solo él puede: es el único que ve su cuenta. Preguntale a la persona si la vio antes de confirmar. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "required": ["pedido_id", "concepto"], "properties": {"pedido_id": {"type": "string"}, "concepto": {"type": "string", "enum": ["envio", "propina_repartidor"]}}}
+    },
+    {
+      "name": "rendicion_declarar",
+      "description": "El repartidor declara cuánto efectivo le dio al comercio por un pedido ('te rendí $X'): lo que cobró en mano por cuenta del comercio, que está en pedido.rendicion.monto. Si el comercio rinde 'al_retirar', se declara al retirar, cuando le adelanta la plata; si no, después de entregar. Si el nodo custodia su clave, firma el nodo; por mandato, un agente no firma por la persona y la constancia queda sin firma. Preguntale a la persona cuánto le dio antes de declarar. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "monto_centavos"], "properties": {"pedido_id": {"type": "string"}, "monto_centavos": {"type": "integer", "minimum": 0}}}
+    },
+    {
+      "name": "rendicion_confirmar",
+      "description": "El comercio confirma cuánto efectivo recibió del repartidor por un pedido ('recibí $X'). Si coincide con lo que declaró el repartidor, la rendición queda confirmada; si no, queda en desacuerdo, las dos versiones firmadas y a la vista. Usala cuando llega 'rendicion.declarada'. Preguntale a la persona cuánto recibió: nunca copies el monto declarado sin que lo diga. Requiere scope 'administrar'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "monto_centavos"], "properties": {"pedido_id": {"type": "string"}, "monto_centavos": {"type": "integer", "minimum": 0}}}
     },
     {
       "name": "mis_viajes",

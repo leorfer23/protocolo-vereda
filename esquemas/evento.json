@@ -9,7 +9,7 @@
     "id": { "$ref": "comunes.json#/$defs/id" },
     "tipo": {
       "type": "string",
-      "pattern": "^(pedido|item|pago|viaje|suscripcion|ronda|grupo|cotizacion|mensaje|mandato|comercio|oferta|clave|vinculacion|atestacion|denuncia|reclamo)\\.[a-z_]+$",
+      "pattern": "^(pedido|item|pago|viaje|suscripcion|ronda|grupo|cotizacion|mensaje|mandato|comercio|oferta|clave|vinculacion|atestacion|denuncia|reclamo|rendicion)\\.[a-z_]+$",
       "examples": ["pedido.pagado", "pedido.aceptado", "item.sustitucion_propuesta", "pago.confirmado", "viaje.ofrecido", "suscripcion.ocurrencia_abierta", "ronda.cerrada", "mensaje.nuevo", "oferta.stock_cambiado"]
     },
     "instante": { "$ref": "comunes.json#/$defs/instante" },
