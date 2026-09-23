@@ -157,6 +157,8 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Aceptar con tiempo: en el ciclo, `aceptarPedido` con `tiempo_preparacion_min` fuera de rango
   da `422` y no acepta; con `25` responde el pedido con `tiempo_preparacion_min: 25` y `eta` a
   25 minutos de la aceptación (±2 min: es retiro, sin ruta).
+- Preparando: en el ciclo, el primer `resolverItemPedido` sobre el pedido `aceptado` lo deja
+  `preparando` en `GET /pedidos/{id}`. Si antes de resolver no estaba `aceptado`, se omite.
 - Eventos de quien administra: contra un nodo con custodia propia, una compradora nueva (de
   `/acceso`) compra en el comercio de prueba y el stream `GET /eventos` de la sesión de prueba,
   que lo administra, trae su `pedido.creado` en 15 s. Sin custodia propia se omite.

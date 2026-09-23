@@ -662,6 +662,11 @@ paths:
       operationId: resolverItemPedido
       tags: [pedidos]
       summary: "Comercio: marcar ítem confirmado, sustituido (propone), faltante o pesado"
+      description: |
+        El primer ítem que resuelve el comercio en un pedido `aceptado` lo pasa a `preparando`, en
+        la misma operación, y el nodo publica `pedido.preparando` además del `item.*`. Así el
+        comprador y el local ven que empezó a prepararse sin un paso aparte. Los ítems siguientes
+        no mueven el estado.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [estado], properties: { estado: { type: string, enum: [confirmado, sustituido, faltante, pesado] }, sustituto: { type: object }, cantidad_entregada: { $ref: "esquemas/comunes.json#/$defs/cantidad" } } } } } }
