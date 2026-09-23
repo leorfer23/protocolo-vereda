@@ -202,6 +202,26 @@
       }
     },
     {
+      "name": "promocion_crear",
+      "description": "Crea una promoción del comercio: 2x1, 3x2, segunda unidad con descuento, precio por cantidad, descuento por total, envío bonificado, descuento por efectivo o por retiro. Ej: 'armá un 2x1 en empanadas hasta el domingo'. Se calcula con el algoritmo público de docs/promociones.md. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id",
+          "promocion"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "promocion": {
+            "type": "object",
+            "description": "La promoción completa, con la forma de esquemas/promocion.json."
+          }
+        }
+      }
+    },
+    {
       "name": "promocion_editar",
       "description": "Cambia una promoción del comercio: vigencia, tramos, tope o pausarla. Ej: 'extendé el 2x1 hasta el domingo', 'pausá el descuento por efectivo'. Los pedidos ya creados no cambian: sus precios están congelados. Requiere scope 'administrar'.",
       "inputSchema": {
@@ -338,6 +358,43 @@
         "properties": {
           "pedido_id": {
             "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "pedido_item_resolver",
+      "description": "El comercio resuelve un ítem del pedido mientras lo arma: confirmado (lo tiene), sustituido (propone un reemplazo, que la persona acepta o rechaza), faltante (no lo tiene) o pesado (con la cantidad real, para los pesables). El primer ítem resuelto pasa el pedido de 'aceptado' a 'preparando'. pedido_listo exige todos resueltos. Ej: 'la muzza está, el tomate pesó 1,43 kg, no hay palta'. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "pedido_id",
+          "item_id",
+          "estado"
+        ],
+        "properties": {
+          "pedido_id": {
+            "type": "string"
+          },
+          "item_id": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string",
+            "enum": [
+              "confirmado",
+              "sustituido",
+              "faltante",
+              "pesado"
+            ]
+          },
+          "sustituto": {
+            "type": "object",
+            "description": "Con 'sustituido': el reemplazo que se propone, como en PATCH /pedidos/{id}/items/{item}."
+          },
+          "cantidad_entregada": {
+            "type": "object",
+            "description": "Con 'pesado': la cantidad real, con la forma de comunes.json#/$defs/cantidad (valor y unidad)."
           }
         }
       }
