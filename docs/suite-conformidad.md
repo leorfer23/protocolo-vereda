@@ -88,7 +88,9 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
    `/comercios/{id}`, `.../ofertas`, `.../promociones`, `.../reputacion`, `/ofertas/{id}`, `/catalogo/{ean}`, `/buscar`,
    `/rondas`, `/rondas/{id}`, `/.well-known/vereda.json`, `/zona/calles`, `/actores/{id}/claves`,
    `/actores/{id}/mudanza`, `/actores/{id}/resenas`) valida contra el esquema que
-   `openapi.yaml` referencia. Sin fixtures propios: valida lo que el nodo realmente tenga
+   `openapi.yaml` referencia. `/buscar?con_video=true` trae solo ofertas con `videos`, y `/buscar` pagina:
+   `limite=1` trae una, el `cursor_siguiente` da la siguiente sin repetirla y un cursor inventado da `422`.
+   Sin fixtures propios: valida lo que el nodo realmente tenga
    publicado, sea un comercio o cien. `/zona/calles` es opcional: un `404` con
    `esquemas/error.json` queda omitido, no fallado (`docs/mapa.md`).
 3. *Errores.* Una ruta con parámetro que no existe (`ean` inventado, `id` inventado)

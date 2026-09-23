@@ -517,7 +517,14 @@ paths:
       operationId: buscarOfertas
       tags: [ofertas]
       summary: Búsqueda de ofertas entre comercios cercanos, por texto, atributos o EAN
-      description: Para agentes. "leche sin lactosa cerca", "algo liviano sin gluten", ean=7790742001009.
+      description: |
+        Para agentes y para la app. "leche sin lactosa cerca", "algo liviano sin gluten", ean=7790742001009.
+        Sin `q` ni `ean` trae todas las ofertas disponibles de los comercios que llegan al punto: con
+        `con_video=true` es el feed en video del barrio, en el mismo orden público (docs/ranking-y-despacho.md).
+        Paginado por cursor opaco, como `listarPedidosDelComercio`: se pide con `limite` y, si hay más, la
+        respuesta trae `cursor_siguiente`. El cursor fija la consulta (punto, filtros y orden): las páginas que
+        siguen salen del mismo orden que la primera. Un cursor vencido, ajeno o de otra consulta responde 422.
+        Los resultados con `con_video=true` no suman `apariciones_busqueda` en las métricas del comercio.
       security: []
       parameters:
         - { $ref: "#/components/parameters/ifNoneMatch" }
@@ -527,9 +534,13 @@ paths:
         - { name: lng, in: query, required: true, schema: { type: number } }
         - { name: atributos, in: query, schema: { type: string }, description: "sin_tacc=true,refrigerado=false" }
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
+        - { name: con_video, in: query, schema: { type: boolean, default: false }, description: "Solo ofertas con al menos un clip en `videos`" }
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+        - { name: cursor, in: query, schema: { type: string }, description: El `cursor_siguiente` de la página anterior }
       responses:
-        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { type: object, properties: { oferta: { $ref: "esquemas/oferta.json" }, comercio: { $ref: "esquemas/comercio.json" }, distancia_km: { type: number } } } } } } }
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "#/components/schemas/PaginaDeResultados" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
+        "422": { $ref: "#/components/responses/Error" }
 
   /carritos:
     post:
@@ -1435,6 +1446,20 @@ components:
       required: [pedidos]
       properties:
         pedidos: { type: array, items: { $ref: "esquemas/pedido.json" } }
+        cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
+    PaginaDeResultados:
+      type: object
+      required: [resultados]
+      properties:
+        resultados:
+          type: array
+          items:
+            type: object
+            required: [oferta, comercio, distancia_km]
+            properties:
+              oferta: { $ref: "esquemas/oferta.json" }
+              comercio: { $ref: "esquemas/comercio.json" }
+              distancia_km: { type: number }
         cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
     PaginaDeViajes:
       type: object

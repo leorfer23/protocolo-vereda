@@ -15,6 +15,7 @@ Un comercio se muestra con fotos y, si quiere, con clips cortos: el local por de
 - **Corto.** Quince segundos como máximo (`duracion_s`). Es algo que se repite en loop, no un video para mirar.
 - **Sin sonido.** Siempre empieza callado. `con_sonido` dice si el archivo trae audio, para que la app pueda ofrecer activarlo; nunca lo activa sola.
 - **Con póster obligatorio.** `poster` es una imagen con la misma proporción que el clip. Se muestra mientras carga y en su lugar cuando no se reproduce.
+- **Vertical, 9:16, para los clips de oferta.** Es lo recomendado, no lo obligatorio: el feed en video del barrio (`GET /buscar?con_video=true`) se mira a pantalla completa en un teléfono, y una app puede mostrar ahí solo los clips verticales (los que declaran `ancho` y `alto` con `alto > ancho`). Un clip horizontal sigue valiendo en la ficha y en la tarjeta.
 - **En un formato que todos reproducen.** `tipo` es `video/mp4` (H.264 o HEVC) o `video/webm`. El mp4 es el que reproducen todas las apps; el webm, solo la web.
 
 ## Lo decide la app, con lo que trae el documento
@@ -28,6 +29,10 @@ Ahorro de datos, movimiento reducido, una conexión lenta o una batería baja so
 - `alt`: qué se ve, para lectores de pantalla y para agentes, que no miran el clip.
 
 Con movimiento reducido activado, lo esperable es mostrar el póster y reproducir solo si la persona lo pide.
+
+## El feed en video
+
+El feed es la misma búsqueda de ofertas, no un algoritmo aparte: `GET /buscar` sin texto y con `con_video=true` trae, de a páginas, las ofertas con clip de los comercios que llegan al punto, en el orden público de `docs/ranking-y-despacho.md`. Nadie paga para aparecer, sin sesión el orden es el mismo para todos, y cada resultado trae la oferta entera: el botón de compra sabe qué producto es, cuánto sale y de qué local. Ver el feed no suma apariciones en búsqueda a las métricas del comercio.
 
 ## Lo que cuesta al nodo
 

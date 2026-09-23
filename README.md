@@ -36,6 +36,7 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 | `docs/` | Acceso (desafío firmado, código por mensaje, la clave en el dispositivo y el respaldo con frase), federación (con mudanza, disputas y catálogo maestro), claves y firmas, eventos y webhooks, ranking y despacho, repartidores (asignación, responsabilidad, cobro y reputación), reseñas y reputación contextual, identidad y verificación sin autoridad (vinculaciones, duplicados, denuncias, reclamo de fichas), carrito y reserva, promociones, datos y privacidad, sostenimiento del nodo (aportes, propinas y gastos publicados), imágenes y video (clips cortos que no le cuestan al nodo), el mapa (las calles de la zona, servidas por el nodo desde OpenStreetMap), diseño de la suite de conformidad (fase 1) |
 | `validar.py` | Valida los ejemplos contra los esquemas, `openapi.yaml` contra OpenAPI 3.1, reproduce byte a byte el JCS y los bytes de los vectores de firma, acceso y respaldo, y verifica sus firmas |
 | `generar-vectores.py` | Regenera `ejemplos/vectores-firma.json` y `ejemplos/vectores-acceso.json`. Determinista: dos corridas dan el mismo archivo |
+| `CAMBIOS.md` | Lo que cambió después de publicar, con los cambios incompatibles marcados |
 | `conformidad/` | Suite de conformidad, fase 1 (`docs/suite-conformidad.md`). Corre por HTTP contra la URL de cualquier nodo: nivel A (anónimo), B (autenticado, `--sesion`/`--mandato`) y C (federación) — `python3 -m conformidad https://un-nodo.ar --nivel a,b,c` |
 
 ```

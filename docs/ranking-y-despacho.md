@@ -10,6 +10,8 @@ score = 0.5 · 1/(1 + d/2km) + 0.35 · p_min/p + 0.15 · entregados/(aceptados +
 
 `d` distancia en línea recta, `p` precio del ítem o ticket promedio, `p_min` el menor entre candidatos. El usuario o agente puede ordenar por cualquier criterio solo (`orden=distancia|precio|reputacion`); esta fórmula es solo el default.
 
+La misma fórmula ordena el feed en video (`GET /buscar?con_video=true`, `docs/medios.md`): tener video no suma puntos, solo filtra. Con paginado, `p_min` se calcula sobre todo el conjunto de la consulta y no sobre cada página, así una página no cambia el orden de la anterior.
+
 El tercer término —`entregados/(aceptados + rechazados)`— es cumplimiento, no opinión: mide si el comercio entrega lo que acepta. Las reseñas no entran en el ranking por defecto; entran cuando se pide `orden=reputacion`.
 
 ## Orden por reputación
