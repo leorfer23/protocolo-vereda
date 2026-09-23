@@ -30,6 +30,7 @@ MAPA = {
     "supermercado-promocion.json": "promocion.json",
     "repartidor-bici.json": "repartidor.json",
     "sostenimiento.json": "sostenimiento.json",
+    "calles-zona.json": "calles.json",
 }
 
 fallos = 0

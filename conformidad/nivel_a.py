@@ -146,6 +146,7 @@ class NivelA:
         self.casos = []
         self._bien_conocido()
         self._sostenimiento()
+        self._calles()
         comercios = self._comercios()
         self._buscar()
         rondas = self._rondas()
@@ -192,6 +193,27 @@ class NivelA:
             return
         self.casos.append(self._chequear_estructura(opid, "GET /sostenimiento", url, r))
         caso = self._esquema_o_no_json(opid, "el cuerpo de /sostenimiento cumple esquemas/sostenimiento.json", op, r)
+        if caso:
+            self.casos.append(caso)
+
+    def _calles(self):
+        # docs/mapa.md: servir calles es opcional; si el nodo no tiene, 404 con error.json.
+        opid = "verCallesDeLaZona"
+        op = self._op("/zona/calles")
+        url = self.base_v1 + "/zona/calles"
+        r = self._get(url)
+        if not r.ok:
+            self.casos.append(_fallo("estructura", opid, "GET /zona/calles", r.motivo))
+            return
+        if r.estado == 404:
+            v = self._validar({"$ref": "https://vereda.ar/esquemas/v1/error.json"}, r.cuerpo) if r.cuerpo_es_json else None
+            if v is None or v:
+                self.casos.append(_fallo("errores", opid, "GET /zona/calles sin calles cargadas", "el 404 no trae un cuerpo esquemas/error.json"))
+            else:
+                self.casos.append(_omitido("estructura", opid, "GET /zona/calles", "el nodo no tiene calles cargadas (404)"))
+            return
+        self.casos.append(self._chequear_estructura(opid, "GET /zona/calles", url, r))
+        caso = self._esquema_o_no_json(opid, "el cuerpo de /zona/calles cumple esquemas/calles.json", op, r)
         if caso:
             self.casos.append(caso)
 

@@ -1,0 +1,62 @@
+{
+  "$comentario": "Casos de las calles de la zona (esquemas/calles.json, docs/mapa.md).",
+  "esquema": "calles.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Lo mínimo: una calle sin nombre, con su rectángulo, su versión y la atribución.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" },
+        "features": [ { "type": "Feature", "properties": { "tipo": "calle" }, "geometry": { "type": "LineString", "coordinates": [[-58.44, -34.60], [-58.43, -34.60]] } } ] }
+    },
+    {
+      "espera": "valido",
+      "porque": "Un nodo que todavía no tiene calles cargadas puede servir la colección vacía, con su atribución.",
+      "doc": { "type": "FeatureCollection", "version": "vacia", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" }, "features": [] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin atribución: los datos de OpenStreetMap solo se pueden usar diciendo de dónde salen.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "features": [] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una atribución que no nombra a OpenStreetMap no cumple la ODbL.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© Mi nodo", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" }, "features": [] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Solo líneas: un punto de interés no es parte del mapa de Vereda.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" },
+        "features": [ { "type": "Feature", "properties": { "tipo": "calle", "nombre": "Kiosco" }, "geometry": { "type": "Point", "coordinates": [-58.44, -34.60] } } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un tipo de vía fuera del vocabulario: la app no sabría cómo dibujarlo.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" },
+        "features": [ { "type": "Feature", "properties": { "tipo": "residential" }, "geometry": { "type": "LineString", "coordinates": [[-58.44, -34.60], [-58.43, -34.60]] } } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Propiedades de más (etiquetas de OSM enteras): el archivo tiene que ser chico y sin datos que la app no usa.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" },
+        "features": [ { "type": "Feature", "properties": { "tipo": "calle", "nombre": "Aguirre", "maxspeed": "40" }, "geometry": { "type": "LineString", "coordinates": [[-58.44, -34.60], [-58.43, -34.60]] } } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una línea de un solo punto no se puede dibujar.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" },
+        "features": [ { "type": "Feature", "properties": { "tipo": "calle" }, "geometry": { "type": "LineString", "coordinates": [[-58.44, -34.60]] } } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El rectángulo tiene cuatro números, no dos puntos.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [[-58.45, -34.61], [-58.41, -34.59]], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" }, "features": [] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Latitud fuera de rango. Ojo: las posiciones van [lng, lat], al revés del {lat, lng} del resto del protocolo.",
+      "doc": { "type": "FeatureCollection", "version": "osm-2026-09-22", "bbox": [-58.45, -34.61, -58.41, -34.59], "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" },
+        "features": [ { "type": "Feature", "properties": { "tipo": "calle" }, "geometry": { "type": "LineString", "coordinates": [[-58.44, -34.60], [-58.43, -134.60]] } } ] }
+    }
+  ]
+}

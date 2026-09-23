@@ -82,14 +82,15 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 
 **Nivel A — anónimo, de solo lectura.**
 
-1. *Estructura.* Las 13 lecturas públicas responden al método declarado, devuelven `ETag`
+1. *Estructura.* Las 14 lecturas públicas responden al método declarado, devuelven `ETag`
    y `Cache-Control` en `200`, y `304` sin cuerpo al repetir con `If-None-Match`.
 2. *Esquema en vivo.* Toda respuesta `200` de una ruta pública (`/comercios`,
    `/comercios/{id}`, `.../ofertas`, `.../promociones`, `.../reputacion`, `/ofertas/{id}`, `/catalogo/{ean}`, `/buscar`,
-   `/rondas`, `/rondas/{id}`, `/.well-known/vereda.json`, `/actores/{id}/claves`,
+   `/rondas`, `/rondas/{id}`, `/.well-known/vereda.json`, `/zona/calles`, `/actores/{id}/claves`,
    `/actores/{id}/mudanza`, `/actores/{id}/resenas`) valida contra el esquema que
    `openapi.yaml` referencia. Sin fixtures propios: valida lo que el nodo realmente tenga
-   publicado, sea un comercio o cien.
+   publicado, sea un comercio o cien. `/zona/calles` es opcional: un `404` con
+   `esquemas/error.json` queda omitido, no fallado (`docs/mapa.md`).
 3. *Errores.* Una ruta con parámetro que no existe (`ean` inventado, `id` inventado)
    devuelve el `estado_http` declarado con cuerpo `esquemas/error.json`, y `codigo` dentro
    del vocabulario de `error.json#/properties/codigo/examples`.
