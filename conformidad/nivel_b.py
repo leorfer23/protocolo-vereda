@@ -226,11 +226,14 @@ class NivelB:
             self.casos.append(_fallo(cat, "marcarPedidoListo", desc_listo_temprano, f"esperaba 409, llegó {r_listo_temprano.estado}"))
 
         if item_id:
+            r_antes = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pedido_id}", headers=self._cabecera(), timeout=self.timeout)
+            estado_antes = (r_antes.cuerpo or {}).get("estado") if r_antes.ok and r_antes.cuerpo_es_json else None
             r_res = cliente.solicitud("PATCH", f"{self.base_v1}/pedidos/{pedido_id}/items/{item_id}", headers=self._cabecera(), json_body={"estado": "confirmado"}, timeout=self.timeout)
             if not r_res.ok or r_res.estado != 200:
                 self.casos.append(_fallo(cat, "resolverItemPedido", "confirmar el ítem responde 200", r_res.motivo or f"estado {r_res.estado}"))
             else:
                 self.casos.append(_ok(cat, "resolverItemPedido", "confirmar el ítem responde 200"))
+                self._paso_a_preparando(cat, pedido_id, estado_antes)
         else:
             self.casos.append(_omitido(cat, "resolverItemPedido", "confirmar el ítem", "el pedido no trajo items[0].id"))
 
@@ -268,6 +271,18 @@ class NivelB:
             return pedido_id
         self.casos.append(_ok(cat, "entregarPedido", "entregar con el código correcto responde 200"))
         return pedido_id
+
+    def _paso_a_preparando(self, cat, pedido_id, estado_antes):
+        desc = "el primer ítem resuelto pasa el pedido de 'aceptado' a 'preparando'"
+        if estado_antes != "aceptado":
+            self.casos.append(_omitido(cat, "resolverItemPedido", desc, f"antes de resolver el pedido estaba '{estado_antes}', no 'aceptado'"))
+            return
+        r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pedido_id}", headers=self._cabecera(), timeout=self.timeout)
+        estado = (r.cuerpo or {}).get("estado") if r.ok and r.cuerpo_es_json else None
+        if estado == "preparando":
+            self.casos.append(_ok(cat, "resolverItemPedido", desc))
+        else:
+            self.casos.append(_fallo(cat, "resolverItemPedido", desc, r.motivo or f"el pedido quedó '{estado}'"))
 
     # aceptar con tiempo: los minutos que dio el comercio mueven la eta ------
     def _eta_del_aceptado(self, pedido, minutos, antes):

@@ -202,7 +202,7 @@
     "estado": {
       "type": "string",
       "enum": ["creado", "pagado", "aceptado", "preparando", "listo", "asignado", "en_camino", "entregado", "cancelado"],
-      "description": "Con entrega: creado, pagado, aceptado, preparando, listo, asignado, en_camino, entregado. Con retiro: de 'listo' pasa a 'entregado', sin 'asignado' ni 'en_camino'. Con efectivo: de 'creado' pasa a 'aceptado', sin 'pagado'; el pago queda 'en_mano' hasta la entrega. Ver docs/carrito-y-reserva.md."
+      "description": "Con entrega: creado, pagado, aceptado, preparando, listo, asignado, en_camino, entregado. Con retiro: de 'listo' pasa a 'entregado', sin 'asignado' ni 'en_camino'. Con efectivo: de 'creado' pasa a 'aceptado', sin 'pagado'; el pago queda 'en_mano' hasta la entrega. De 'aceptado' pasa a 'preparando' con el primer ítem que resuelve el comercio (resolverItemPedido). Ver docs/carrito-y-reserva.md."
     },
     "item": {
       "type": "object",

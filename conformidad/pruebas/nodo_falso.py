@@ -478,6 +478,9 @@ class Handler(BaseHTTPRequestHandler):
         for it in p["items"]:
             if it["id"] == item_id:
                 it["estado"] = cuerpo.get("estado", "confirmado")
+        if p["estado"] == "aceptado":
+            p["estado"] = "preparando"
+            p["historial"].append({"estado": "preparando", "instante": _instante(), "actor": COMERCIO_B_IDENTIDAD})
         return 200, None
 
     def _marcar_listo(self, actor, pedido_id):
