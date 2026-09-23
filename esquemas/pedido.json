@@ -10,6 +10,7 @@
     "usuario": { "$ref": "comunes.json#/$defs/identidad" },
     "comercio": { "$ref": "comunes.json#/$defs/identidad" },
     "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
+    "partes": { "$ref": "#/$defs/partes" },
     "asignacion": {
       "type": "object",
       "description": "Cómo se consiguió el repartidor de este pedido y quién responde por la entrega ante el comprador (docs/repartidores.md). Lo escribe el nodo.",
@@ -120,6 +121,25 @@
     }
   },
   "$defs": {
+    "partes": {
+      "type": "object",
+      "description": "Cómo se llama cada parte, para mostrar ('#4821 · Juan', 'Lucas lleva tu pedido'). Lo arma el nodo al leer el pedido, según quién lo lee; no se guarda ni se firma. El nombre del comercio y el del repartidor son públicos y salen siempre. El del comprador lo ven él, el comercio y el repartidor del pedido mientras está activo; terminado (entregado o cancelado) lo sigue viendo el comprador, el repartidor ya no, y el comercio solo si guarda lista de clientes y el comprador la aceptó ('acepta_lista_de_clientes'). Sin nombre elegido, o fuera de esa ventana, la parte viene sin 'nombre': nunca se pone el handle de la identidad en su lugar (docs/datos-y-privacidad.md).",
+      "properties": {
+        "usuario": { "$ref": "#/$defs/parte" },
+        "comercio": { "$ref": "#/$defs/parte" },
+        "repartidor": { "$ref": "#/$defs/parte", "description": "Solo con repartidor asignado." }
+      },
+      "additionalProperties": false
+    },
+    "parte": {
+      "type": "object",
+      "required": ["identidad"],
+      "properties": {
+        "identidad": { "$ref": "comunes.json#/$defs/identidad" },
+        "nombre": { "type": "string", "minLength": 1, "maxLength": 120, "description": "El que eligió la parte: 'nombre' de su usuario, de su ficha de comercio o de su perfil de repartidor. Ausente si no eligió ninguno o si quien lee no tiene por qué verlo." }
+      },
+      "additionalProperties": false
+    },
     "traspaso": {
       "type": "object",
       "description": "Lo que firma el repartidor al retirar y al entregar (docs/repartidores.md, punto j). Todo sale del pedido y de la firma, así que cualquiera lo rearma para verificar 'firmas.retiro' y 'firmas.entrega': 'pedido_id' es el id del pedido, 'repartidor' es 'firma.firmante' e 'instante' es 'firma.instante'. Con la clave en el teléfono, el repartidor manda solo la 'firma' en retirarPedido o entregarPedido; el nodo rearma el traspaso y la verifica.",

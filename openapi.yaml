@@ -347,7 +347,9 @@ paths:
         Solo el dueño. Es la bandeja de trabajo: se filtra por estado y por fecha de creación.
         Paginado por cursor opaco: se pide con `limite` y, si hay más, la respuesta trae
         `cursor_siguiente` para la página que sigue. El cursor no es un número de página y no se
-        construye a mano; un cursor vencido o ajeno responde 422.
+        construye a mano; un cursor vencido o ajeno responde 422. Cada pedido trae `partes` con la
+        misma regla que `verPedido`: el nombre del comprador solo en los activos, o en los
+        terminados si aceptó la lista de clientes del comercio.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters:
         - { $ref: "#/components/parameters/id" }
@@ -585,6 +587,10 @@ paths:
         esperar el próximo evento. Solo la ven las partes del pedido y solo en `en_camino`; antes y
         después no sale (docs/datos-y-privacidad.md). Si el repartidor todavía no reportó ninguna,
         no viene.
+
+        Trae `partes`: cómo se llama cada parte, para mostrar. El nombre del comprador lo ven él, el
+        comercio y el repartidor mientras el pedido está activo; terminado, el comprador siempre y
+        el comercio solo con lista de clientes aceptada. Fuera de eso la parte viene sin `nombre`.
       security: [ { sesion: [] }, { mandato: [leer] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } }
@@ -1084,6 +1090,24 @@ paths:
         "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/MiComercio" } } } } }
   /yo/preferencias:
     put: { operationId: guardarPreferencias, tags: [yo], summary: Preferencias declarativas que cualquier agente autorizado lee, security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/preferencias" } } } }, responses: { "204": { description: OK } } }
+  /yo/nombre:
+    put:
+      operationId: guardarNombre
+      tags: [yo]
+      summary: "Mi nombre para mostrar: el que ven el comercio y el repartidor de mis pedidos activos"
+      description: |
+        El nombre con el que la persona aparece en `partes.usuario` de sus pedidos
+        (`esquemas/pedido.json`): '#4821 · Juan' en la bandeja del comercio, a quién le lleva el
+        repartidor. Lo elige ella y puede ser solo el de pila; no se verifica contra nada. Se manda
+        recortado de espacios, entre 1 y 80 caracteres; vacío o más largo es `422`. `null` lo
+        borra y la persona queda sin nombre: en sus pedidos la parte sale sin `nombre`, nunca con
+        el handle de la identidad. Solo por sesión, como las direcciones: un agente no cambia cómo
+        se llama alguien.
+      security: [ { sesion: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [nombre], additionalProperties: false, properties: { nombre: { type: [string, "null"], maxLength: 80 } } } } } }
+      responses:
+        "200": { description: Guardado, content: { application/json: { schema: { type: object, properties: { nombre: { type: string } }, description: "El nombre como quedó guardado. Sin 'nombre' si se borró." } } } }
+        "422": { $ref: "#/components/responses/Error" }
   /yo/direcciones:
     put:
       operationId: guardarDirecciones

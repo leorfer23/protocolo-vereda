@@ -5,10 +5,10 @@
   "description": "Quien compra. Su nombre y dirección solo los ven el comercio y el repartidor de un pedido activo. Sus preferencias las lee cualquier agente que él autorice.",
   "type": "object",
   "allOf": [{ "$ref": "comunes.json#/$defs/metadatos" }],
-  "required": ["identidad", "nombre", "reputacion"],
+  "required": ["identidad", "reputacion"],
   "properties": {
     "identidad": { "$ref": "comunes.json#/$defs/identidad" },
-    "nombre": { "type": "string" },
+    "nombre": { "type": "string", "minLength": 1, "maxLength": 80, "description": "El nombre para mostrar que eligió la persona ('Juan', 'Ana P.'): al entrar por primera vez (acceso.json#/$defs/pedido_sesion) o con PUT /yo/nombre. Ausente si no eligió ninguno: el nodo nunca pone el handle de la identidad en su lugar. Quién lo ve en un pedido está en pedido.json#/properties/partes." },
     "direcciones": { "$ref": "#/$defs/direcciones" },
     "preferencias": { "$ref": "#/$defs/preferencias" },
     "mi_vereda": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" }, "description": "Comercios a los que ya le compró. Su historial." },

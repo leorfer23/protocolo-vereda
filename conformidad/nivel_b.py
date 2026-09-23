@@ -73,6 +73,27 @@ class NivelB:
     def _idem(self):
         return {"Idempotency-Key": str(uuid.uuid4())}
 
+    def _sesion_nueva(self) -> Optional[str]:
+        """Token de una identidad nueva por /acceso. Si el nodo limita el acceso
+        por minuto (429, con Retry-After) y la suite ya gastó el cupo en las
+        pruebas de acceso, espera a que se renueve y reintenta una vez."""
+        prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout)
+        for intento in range(2):
+            clave = acceso.Clave()
+            r = prueba._post("/acceso/desafio", {"clave_publica": clave.publica})
+            if r.ok and r.estado == 429 and intento == 0:
+                try:
+                    espera = int((r.cabeceras or {}).get("Retry-After") or 60)
+                except ValueError:
+                    espera = 60
+                time.sleep(min(max(espera, 1), 65))
+                continue
+            if not (r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) and r.cuerpo.get("desafio")):
+                return None
+            r = prueba._canje(clave, r.cuerpo)
+            return (r.cuerpo or {}).get("token") if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        return None
+
     # -- corrida ------------------------------------------------------------
     def correr(self) -> List[Caso]:
         self.casos = []
@@ -96,6 +117,7 @@ class NivelB:
         self._metodo_pago()
         self._ubicacion_en_camino()
         self._eventos_de_quien_administra(capacidades)
+        self._nombres(capacidades)
         self._apertura_manual()
         self._videos()
         if self.mandato:
@@ -277,9 +299,7 @@ class NivelB:
         if capacidades.get("custodia_propia") is not True:
             self.casos.append(_omitido(cat, opid, desc, "hace falta una segunda identidad y el nodo no publica acceso.custodia_propia: true"))
             return
-        prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout)
-        compradora = prueba._entrar(acceso.Clave())
-        token = (compradora or {}).get("token")
+        token = self._sesion_nueva()
         if not token:
             self.casos.append(_omitido(cat, opid, desc, "no se pudo abrir la sesión de una compradora nueva por /acceso"))
             return
@@ -354,6 +374,194 @@ class NivelB:
             self.casos.append(_ok(cat, opid, desc))
         else:
             self.casos.append(_fallo(cat, opid, desc, falla[0] if falla else f"en {espera_s:.0f} s no llegó pedido.creado del pedido {pedido_id}"))
+
+    # nombres del pedido: el que elige la persona y quién lo ve (docs/datos-y-privacidad.md) --
+    def _nombres(self, capacidades):
+        cat, opid = "nombres", "guardarNombre"
+        url = f"{self.base_v1}/yo/nombre"
+        r_yo = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=self._cabecera(), timeout=self.timeout)
+        if not r_yo.ok or r_yo.estado != 200 or not isinstance(r_yo.cuerpo, dict):
+            self.casos.append(_omitido(cat, opid, "PUT /yo/nombre", "no se pudo leer GET /yo para guardar y después restaurar el nombre de la sesión de prueba"))
+            return
+        original = r_yo.cuerpo.get("nombre")
+
+        desc = "PUT /yo/nombre con sesión lo guarda sin los espacios de los bordes y lo devuelve"
+        r = cliente.solicitud("PUT", url, headers=self._cabecera(), json_body={"nombre": "  Prueba de nombres  "}, timeout=self.timeout)
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        caso = self._chequear_esquema(opid, "la respuesta de PUT /yo/nombre cumple su esquema", "/yo/nombre", "put", r.cuerpo)
+        if caso:
+            self.casos.append(caso)
+        if r.cuerpo.get("nombre") == "Prueba de nombres":
+            self.casos.append(_ok(cat, opid, desc))
+        else:
+            self.casos.append(_fallo(cat, opid, desc, f"devolvió {r.cuerpo.get('nombre')!r}"))
+
+        desc = "GET /yo muestra el nombre recién guardado"
+        r_ver = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=self._cabecera(), timeout=self.timeout)
+        visto = r_ver.cuerpo.get("nombre") if r_ver.ok and isinstance(r_ver.cuerpo, dict) else None
+        self.casos.append(_ok(cat, "verPerfil", desc) if visto == "Prueba de nombres" else _fallo(cat, "verPerfil", desc, f"GET /yo trae {visto!r}"))
+
+        rechazos = [
+            ("un nombre vacío responde 422", {"nombre": ""}),
+            ("un nombre de puros espacios responde 422", {"nombre": "   "}),
+            ("un nombre de más de 80 caracteres responde 422", {"nombre": "x" * 81}),
+            ("un nombre que no es texto responde 422", {"nombre": 5}),
+            ("un cuerpo sin 'nombre' responde 422", {}),
+        ]
+        for desc, cuerpo in rechazos:
+            r = cliente.solicitud("PUT", url, headers=self._cabecera(), json_body=cuerpo, timeout=self.timeout)
+            if not r.ok:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo))
+            elif r.estado != 422:
+                self.casos.append(_fallo(cat, opid, desc, f"esperaba 422, llegó {r.estado}"))
+            else:
+                caso = self._chequear_esquema(opid, desc + " con esquemas/error.json", "/yo/nombre", "put", r.cuerpo, "422")
+                self.casos.append(caso or _ok(cat, opid, desc))
+
+        if self.mandato:
+            desc = "PUT /yo/nombre con un token de mandato se rechaza: solo la persona elige cómo se llama"
+            r = cliente.solicitud("PUT", url, headers=self._cabecera(mandato=True), json_body={"nombre": "Otro"}, timeout=self.timeout)
+            if not r.ok:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo))
+            elif r.estado in (401, 403):
+                self.casos.append(_ok(cat, opid, desc))
+            else:
+                self.casos.append(_fallo(cat, opid, desc, f"esperaba 403, llegó {r.estado}"))
+        else:
+            self.casos.append(_omitido(cat, opid, "PUT /yo/nombre rechaza un token de mandato", "no se pasó --mandato"))
+
+        desc = "PUT /yo/nombre con null lo borra: GET /yo ya no trae 'nombre'"
+        r = cliente.solicitud("PUT", url, headers=self._cabecera(), json_body={"nombre": None}, timeout=self.timeout)
+        r_ver = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+        elif not r_ver.ok or not isinstance(r_ver.cuerpo, dict) or "nombre" in r_ver.cuerpo:
+            self.casos.append(_fallo(cat, opid, desc, f"GET /yo trae {(r_ver.cuerpo or {}).get('nombre') if isinstance(r_ver.cuerpo, dict) else r_ver.estado!r}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        r = cliente.solicitud("PUT", url, headers=self._cabecera(), json_body={"nombre": original}, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, "restaurar el nombre que la sesión de prueba tenía antes", r.motivo or f"esperaba 200, llegó {r.estado}"))
+
+        self._nombres_en_el_pedido(capacidades)
+
+    # Una compradora nueva compra en el comercio de prueba: el comercio ve su nombre
+    # mientras el pedido está activo y ya no cuando terminó; quien no es parte, nada.
+    def _nombres_en_el_pedido(self, capacidades):
+        cat, opid = "nombres", "verPedido"
+        if capacidades.get("custodia_propia") is not True:
+            self.casos.append(_omitido(cat, opid, "quién ve el nombre del comprador en partes", "hace falta una segunda identidad y el nodo no publica acceso.custodia_propia: true"))
+            return
+        token = self._sesion_nueva()
+        if not token:
+            self.casos.append(_omitido(cat, opid, "quién ve el nombre del comprador en partes", "no se pudo abrir la sesión de una compradora nueva por /acceso"))
+            return
+        suya = {"Authorization": f"Bearer {token}"}
+
+        desc = "quien entra por primera vez sin nombre no tiene 'nombre' en GET /yo: el nodo no pone el handle"
+        r = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=suya, timeout=self.timeout)
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, "verPerfil", desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+        elif "nombre" in r.cuerpo:
+            self.casos.append(_fallo(cat, "verPerfil", desc, f"trae nombre {r.cuerpo['nombre']!r}"))
+        else:
+            self.casos.append(_ok(cat, "verPerfil", desc))
+
+        nombre = "Julia de conformidad"
+        r = cliente.solicitud("PUT", f"{self.base_v1}/yo/nombre", headers=suya, json_body={"nombre": nombre}, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            self.casos.append(_omitido(cat, opid, "quién ve el nombre del comprador en partes", f"la compradora nueva no pudo elegir su nombre ({r.motivo or r.estado})"))
+            return
+        sesion_prueba = self.sesion
+        self.sesion = token
+        try:
+            cid = self._carrito_con("01920000-0000-7000-8000-0000000000b1", {"tipo": "retiro"})
+            r = self._confirmar(cid, {}) if cid else None
+        finally:
+            self.sesion = sesion_prueba
+        pedido = r.cuerpo if r and r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        if not pedido or not pedido.get("id"):
+            self.casos.append(_omitido(cat, opid, "quién ve el nombre del comprador en partes", "la compradora nueva no pudo confirmar un pedido de la oferta de prueba"))
+            return
+        pid, compradora = pedido["id"], pedido.get("usuario")
+
+        def partes(cabecera):
+            r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pid}", headers=cabecera, timeout=self.timeout)
+            if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+                return r, None
+            return r, r.cuerpo.get("partes") or {}
+
+        def usuario_de(p):
+            return (p or {}).get("usuario") or {}
+
+        try:
+            desc = "activo, la compradora ve en partes su nombre y el del comercio"
+            r, p = partes(suya)
+            if p is None:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo or f"GET /pedidos/{{id}} respondió {r.estado}"))
+            else:
+                caso = self._chequear_esquema(opid, "el pedido con partes cumple esquemas/pedido.json", "/pedidos/{id}", "get", r.cuerpo)
+                if caso:
+                    self.casos.append(caso)
+                comercio = p.get("comercio") or {}
+                if usuario_de(p) != {"identidad": compradora, "nombre": nombre}:
+                    self.casos.append(_fallo(cat, opid, desc, f"partes.usuario es {usuario_de(p)}"))
+                elif comercio.get("identidad") != r.cuerpo.get("comercio") or not comercio.get("nombre"):
+                    self.casos.append(_fallo(cat, opid, desc, f"partes.comercio es {comercio}"))
+                else:
+                    self.casos.append(_ok(cat, opid, desc))
+
+            desc = "activo, quien administra el comercio ve el nombre de la compradora"
+            r, p = partes(self._cabecera())
+            administra = p is not None
+            if not administra:
+                self.casos.append(_omitido(cat, opid, desc, f"la sesión de prueba no ve el pedido ({r.motivo or r.estado}): no administra el comercio de la oferta de prueba"))
+            elif usuario_de(p).get("nombre") != nombre:
+                self.casos.append(_fallo(cat, opid, desc, f"partes.usuario es {usuario_de(p)}"))
+            else:
+                self.casos.append(_ok(cat, opid, desc))
+
+            desc = "quien no es parte del pedido no lo ve: 404, sin nombres"
+            otra = self._sesion_nueva()
+            if not otra:
+                self.casos.append(_omitido(cat, opid, desc, "no se pudo abrir la sesión de una tercera identidad por /acceso"))
+            else:
+                r, _ = partes({"Authorization": f"Bearer {otra}"})
+                if not r.ok:
+                    self.casos.append(_fallo(cat, opid, desc, r.motivo))
+                elif r.estado != 404:
+                    self.casos.append(_fallo(cat, opid, desc, f"esperaba 404, llegó {r.estado}"))
+                else:
+                    self.casos.append(_ok(cat, opid, desc))
+        finally:
+            r_canc = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pid}/cancelar", headers=suya, json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+        if not r_canc.ok or r_canc.estado != 200:
+            self.casos.append(_omitido(cat, opid, "terminado el pedido, quién sigue viendo el nombre", f"la compradora no pudo cancelar ({r_canc.motivo or r_canc.estado})"))
+            return
+
+        desc = "cancelado, la compradora sigue viendo su nombre en partes"
+        r, p = partes(suya)
+        if usuario_de(p).get("nombre") == nombre:
+            self.casos.append(_ok(cat, opid, desc))
+        else:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"partes.usuario es {usuario_de(p)}"))
+
+        desc = "cancelado y sin lista de clientes aceptada, el comercio ya no ve el nombre de la compradora"
+        if not administra:
+            self.casos.append(_omitido(cat, opid, desc, "la sesión de prueba no administra el comercio de la oferta de prueba"))
+            return
+        r, p = partes(self._cabecera())
+        if p is None:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"GET /pedidos/{{id}} respondió {r.estado}"))
+        elif "nombre" in usuario_de(p):
+            self.casos.append(_fallo(cat, opid, desc, f"partes.usuario sigue trayendo {usuario_de(p)['nombre']!r}"))
+        elif usuario_de(p).get("identidad") != compradora:
+            self.casos.append(_fallo(cat, opid, desc, f"partes.usuario es {usuario_de(p)}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
 
     # "abierto ahora": apertura_manual pisa los horarios y se ve en la ficha y en la búsqueda --
     # Va al final: deja el comercio de prueba como estaba (sin apertura_manual).
