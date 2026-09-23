@@ -13,7 +13,7 @@
     "rol_autor": { "type": "string", "enum": ["usuario", "comercio", "repartidor"] },
     "puntaje": { "type": "integer", "minimum": 1, "maximum": 5 },
     "texto": { "type": "string", "maxLength": 2000 },
-    "respuesta": { "type": "object", "properties": { "texto": { "type": "string", "maxLength": 2000 }, "instante": { "$ref": "comunes.json#/$defs/instante" }, "firma": { "$ref": "comunes.json#/$defs/firma" } } },
+    "respuesta": { "type": "object", "properties": { "texto": { "type": "string", "maxLength": 2000 }, "instante": { "$ref": "comunes.json#/$defs/instante" }, "via": { "$ref": "pedido.json#/properties/via", "description": "Quién la escribió. Con 'canal: agente' la escribió el agente del comercio con su mandato ('mandato_id'). Entra en lo que cubre 'firma'. Ausente: la persona." }, "firma": { "$ref": "comunes.json#/$defs/firma" } } },
     "visible": { "type": "boolean", "description": "Falso mientras espera la reseña recíproca o el cierre de la ventana de 7 días. Lo fija el nodo." },
     "senales": {
       "type": "object",
