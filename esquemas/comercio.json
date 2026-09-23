@@ -120,6 +120,7 @@
     "notas_para_agentes": { "type": "string", "maxLength": 2000, "description": "Lo que un mozo diría: 'la fugazzeta tarda 30 min los viernes'." },
     "atributos": { "$ref": "comunes.json#/$defs/atributos" },
     "imagenes": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },
+    "videos": { "type": "array", "maxItems": 3, "items": { "$ref": "comunes.json#/$defs/video" }, "description": "Clips del local. El primero es la portada: la app lo muestra en la tarjeta y en la ficha en lugar de la primera imagen cuando decide reproducir. 'imagenes' sigue siendo lo que se muestra cuando no hay video o no se reproduce." },
     "fidelidad": {
       "type": "object",
       "description": "Puntos por comprar seguido en este comercio. Valen solo acá; el saldo lo lleva el nodo del comercio y lo entrega firmado.",

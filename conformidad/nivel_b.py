@@ -95,6 +95,7 @@ class NivelB:
         self._ubicacion_en_camino()
         self._eventos_de_quien_administra(capacidades)
         self._apertura_manual()
+        self._videos()
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
@@ -614,6 +615,72 @@ class NivelB:
             self.casos.append(_fallo(cat, opid, desc, f"pidió {acepta[0]!r} y el cobro de los productos salió con {metodos}"))
         if r.cuerpo.get("id"):
             cliente.solicitud("POST", f"{self.base_v1}/pedidos/{r.cuerpo['id']}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+
+    # clips del local y del producto (docs/medios.md) -------------------------
+    # Con el comercio y la oferta de prueba: el nodo guarda el clip tal cual y lo
+    # devuelve al leerlo; uno de más de 15 s o sin póster da 422 y no pisa el que
+    # estaba. Al final se restaura lo que tenían.
+    def _videos(self):
+        oferta_id = "01920000-0000-7000-8000-0000000000b1"
+        comercio = self._comercio_de_la_oferta(oferta_id)
+        if not comercio or not comercio.get("id"):
+            self.casos.append(_omitido("videos", "editarComercio", "clips del local y del producto (docs/medios.md)", "no se pudo leer el comercio de la oferta de prueba con GET /ofertas/{id} y GET /comercios/{id}"))
+            return
+        cid = comercio["id"]
+        r = cliente.solicitud("GET", f"{self.base_v1}/ofertas/{oferta_id}", timeout=self.timeout)
+        oferta = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else {}
+        clip = {
+            "url": "https://conformidad.invalid/clip.mp4", "tipo": "video/mp4",
+            "poster": {"url": "https://conformidad.invalid/clip.jpg", "alt": "Póster de prueba"},
+            "duracion_s": 8, "ancho": 1080, "alto": 1920, "bytes": 2000000, "con_sonido": False,
+            "alt": "Clip de prueba de conformidad",
+        }
+        largo = {**clip, "duracion_s": 45}
+        sin_poster = {k: v for k, v in clip.items() if k != "poster"}
+        blancos = [
+            ("editarComercio", "el clip del local", f"/comercios/{cid}", "/comercios/{id}", f"/comercios/{cid}", "/comercios/{id}", comercio),
+            ("editarOferta", "el clip del producto", f"/comercios/{cid}/ofertas/{oferta_id}", "/comercios/{id}/ofertas/{oferta}", f"/ofertas/{oferta_id}", "/ofertas/{id}", oferta),
+        ]
+        for opid, que, ruta, plantilla, lectura, lectura_plantilla, original in blancos:
+            if not original:
+                self.casos.append(_omitido("videos", opid, f"{que} se guarda y se lee tal cual", f"no se pudo leer {lectura}"))
+                continue
+            desc = f"{que} se guarda con PATCH y GET {lectura_plantilla} lo devuelve tal cual"
+            r = cliente.solicitud("PATCH", self.base_v1 + ruta, headers=self._cabecera(), json_body={"videos": [clip]}, timeout=self.timeout)
+            if r.ok and r.estado == 403:
+                self.casos.append(_omitido("videos", opid, desc, "la sesión de prueba no administra el comercio de la oferta de prueba (403)"))
+                continue
+            if not r.ok or r.estado != 200:
+                self.casos.append(_fallo("videos", opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+                continue
+            caso = self._chequear_esquema(opid, f"{que}: la respuesta del PATCH cumple su esquema", plantilla, "patch", r.cuerpo)
+            if caso:
+                self.casos.append(caso)
+            leido = cliente.solicitud("GET", self.base_v1 + lectura, timeout=self.timeout)
+            videos = (leido.cuerpo or {}).get("videos") if leido.ok and isinstance(leido.cuerpo, dict) else None
+            if videos == [clip]:
+                self.casos.append(_ok("videos", opid, desc))
+            else:
+                self.casos.append(_fallo("videos", opid, desc, f"se mandó {[clip]} y GET {lectura} trae {videos}"))
+
+            for malo, porque in ((largo, "de 45 s"), (sin_poster, "sin póster")):
+                desc = f"{que} {porque} responde 422 y no pisa el que estaba"
+                r = cliente.solicitud("PATCH", self.base_v1 + ruta, headers=self._cabecera(), json_body={"videos": [malo]}, timeout=self.timeout)
+                if not r.ok:
+                    self.casos.append(_fallo("videos", opid, desc, r.motivo))
+                    continue
+                if r.estado != 422:
+                    self.casos.append(_fallo("videos", opid, desc, f"esperaba 422, llegó {r.estado}"))
+                    continue
+                leido = cliente.solicitud("GET", self.base_v1 + lectura, timeout=self.timeout)
+                videos = (leido.cuerpo or {}).get("videos") if leido.ok and isinstance(leido.cuerpo, dict) else None
+                if videos != [clip]:
+                    self.casos.append(_fallo("videos", opid, desc, f"después del 422, GET {lectura} trae {videos}"))
+                    continue
+                caso = self._chequear_esquema(opid, desc + " con esquemas/error.json", plantilla, "patch", r.cuerpo, "422")
+                self.casos.append(caso or _ok("videos", opid, desc))
+
+            cliente.solicitud("PATCH", self.base_v1 + ruta, headers=self._cabecera(), json_body={"videos": original.get("videos") or []}, timeout=self.timeout)
 
     # quien abre el pedido a mitad del viaje ve dónde está el repartidor -----
     # La identidad de prueba compra, opera el comercio y se declara repartidora:

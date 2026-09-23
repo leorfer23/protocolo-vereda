@@ -236,6 +236,14 @@
         "$ref": "comunes.json#/$defs/imagen"
       }
     },
+    "videos": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "$ref": "comunes.json#/$defs/video"
+      },
+      "description": "Clips del producto. Se suman a 'imagenes', no las reemplazan: una app que no reproduce video muestra las imágenes o el póster."
+    },
     "precio": {
       "$ref": "#/$defs/precio"
     },

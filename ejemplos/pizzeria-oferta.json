@@ -9,6 +9,8 @@
   "categorias": ["Pizzas"],
   "precio": { "modo": "fijo", "monto": { "centavos": 1200000, "moneda": "ARS" } },
   "cantidad": { "unidad": "unidad", "minimo": 1, "maximo": 10, "paso": 1 },
+  "imagenes": [ { "url": "https://cdn.lapiedra.ar/pizza.jpg", "alt": "Pizza de muzzarella recién salida" } ],
+  "videos": [ { "url": "https://cdn.lapiedra.ar/horno.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lapiedra.ar/pizza.jpg" }, "duracion_s": 6, "ancho": 1080, "alto": 1080, "bytes": 1500000, "alt": "La pizza entra al horno a leña" } ],
   "grupos_opciones": [
     { "id": "tamano", "nombre": "Tamaño", "minimo": 1, "maximo": 1,
       "opciones": [
