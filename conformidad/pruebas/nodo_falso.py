@@ -15,6 +15,8 @@ Cada ruta rompe una cosa distinta a propósito:
 - /.well-known/vereda.json: 200 pero el cuerpo no es JSON, y sin ETag/Cache-Control.
 - /v1/sostenimiento: caché y revalidación correctas, pero acepta propinas sin
   decir a qué cuenta (esquema roto, docs/sostenimiento.md).
+- /v1/zona/calles: caché y revalidación correctas, pero sin 'atribucion' (esquema
+  roto: los datos de OpenStreetMap exigen decir de dónde salen, docs/mapa.md).
 - /v1/comercios: cabeceras de caché presentes pero la revalidación no funciona
   (siempre 200, nunca 304), y al comercio le falta 'ubicacion' (esquema roto).
 - /v1/buscar: cabeceras y revalidación correctas, pero el cuerpo es un objeto
@@ -259,6 +261,9 @@ class Handler(BaseHTTPRequestHandler):
             # acepta propinas pero no dice a qué cuenta: esquema roto, caché bien
             self._responder_con_cache({"nodo": "127.0.0.1", "moneda": "ARS", "quien_paga": "comercio",
                                        "acepta_propinas_de_usuarios": True, "gastos_publicados": []}, "sostenimiento-v1")
+        elif p == "/v1/zona/calles":
+            self._responder_con_cache({"type": "FeatureCollection", "version": "falsa", "bbox": [-58.45, -34.61, -58.41, -34.59],
+                                       "features": []}, "calles-v1")
         elif p.startswith("/v1/comercios?") or p == "/v1/comercios":
             self._json(200, [COMERCIO_ROTO], {"ETag": '"comercios-v1"', "Cache-Control": "public, max-age=60"})
         elif p == f"/v1/comercios/{COMERCIO_ID}":

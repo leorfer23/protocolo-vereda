@@ -157,6 +157,25 @@ paths:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/sostenimiento.json" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
 
+  /zona/calles:
+    get:
+      operationId: verCallesDeLaZona
+      tags: [descubrimiento]
+      summary: "Las calles de la zona del nodo, para dibujar el mapa sin pedirle nada a un tercero"
+      description: |
+        Público, sin token y sin parámetros: el mismo archivo para todos, así pedirlo no dice dónde
+        está nadie, ni siquiera al nodo. Un GeoJSON (RFC 7946) de líneas con tipo de vía y nombre,
+        que el operador bajó una vez de OpenStreetMap y que se sirve con su atribución ODbL
+        (docs/mapa.md). Chico y estable: la app lo guarda y revalida con `If-None-Match`. Un nodo
+        que no tiene calles cargadas responde 404 `no_encontrado` y la app dibuja su cuadrícula de
+        respaldo.
+      security: []
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/geo+json: { schema: { $ref: "esquemas/calles.json" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { description: "Este nodo no tiene calles cargadas (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
   /comercios:
     get:
       operationId: buscarComercios

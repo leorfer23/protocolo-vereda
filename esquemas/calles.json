@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/calles.json",
+  "title": "Calles de la zona",
+  "description": "Respuesta de GET /zona/calles: las calles de la zona del nodo, para que la app dibuje el mapa sin pedirle nada a un tercero (docs/mapa.md). Es un GeoJSON (RFC 7946) acotado: solo líneas, cada una con su tipo de vía y su nombre, sin puntos de interés, sin edificios, sin tiles. 'version' y 'atribucion' son miembros extra que RFC 7946 permite en la colección; un lector de GeoJSON común los ignora y dibuja igual.",
+  "type": "object",
+  "required": ["type", "version", "bbox", "atribucion", "features"],
+  "properties": {
+    "type": { "const": "FeatureCollection" },
+    "version": { "type": "string", "minLength": 1, "maxLength": 64, "description": "Cambia cada vez que el operador vuelve a bajar las calles. Opaca: la app la guarda junto al archivo y solo la compara. El 'ETag' de la respuesta sale de lo mismo.", "examples": ["osm-2026-09-22"] },
+    "fecha_datos": { "type": "string", "format": "date", "description": "El día de los datos de origen: el 'timestamp' del extracto de OpenStreetMap que bajó el operador." },
+    "bbox": {
+      "type": "array",
+      "description": "El rectángulo que cubren las calles, en el orden de RFC 7946: [oeste, sur, este, norte], es decir [lng mínima, lat mínima, lng máxima, lat máxima]. Es donde la app encuadra el mapa y fuera del cual dibuja su cuadrícula de respaldo.",
+      "prefixItems": [
+        { "type": "number", "minimum": -180, "maximum": 180 },
+        { "type": "number", "minimum": -90, "maximum": 90 },
+        { "type": "number", "minimum": -180, "maximum": 180 },
+        { "type": "number", "minimum": -90, "maximum": 90 }
+      ],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "atribucion": {
+      "type": "object",
+      "description": "Obligatoria. Los datos de OpenStreetMap son libres con una condición: decir de dónde salen (licencia ODbL). La app muestra 'texto' sobre el mapa, discreto y siempre visible, y enlaza 'url'.",
+      "required": ["texto", "licencia", "url"],
+      "properties": {
+        "texto": { "type": "string", "pattern": "OpenStreetMap", "maxLength": 120, "examples": ["© OpenStreetMap"] },
+        "licencia": { "const": "ODbL-1.0" },
+        "url": { "const": "https://www.openstreetmap.org/copyright" }
+      },
+      "additionalProperties": false
+    },
+    "features": { "type": "array", "maxItems": 20000, "items": { "$ref": "#/$defs/calle" } }
+  },
+  "$defs": {
+    "tipo_via": {
+      "type": "string",
+      "enum": ["autopista", "avenida", "calle", "pasaje", "peatonal"],
+      "description": "Cómo se dibuja: 'autopista' y 'avenida' más marcadas, 'calle' fina, 'pasaje' y 'peatonal' más finas todavía. La correspondencia con las etiquetas 'highway' de OpenStreetMap está en docs/mapa.md."
+    },
+    "posicion": {
+      "type": "array",
+      "description": "[lng, lat] en WGS84, en ese orden (RFC 7946). Con cinco decimales (~1 m) alcanza para dibujar un barrio.",
+      "prefixItems": [
+        { "type": "number", "minimum": -180, "maximum": 180 },
+        { "type": "number", "minimum": -90, "maximum": 90 }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "calle": {
+      "type": "object",
+      "description": "Un tramo de calle: una polilínea. Una calle larga puede venir en varios tramos con el mismo nombre.",
+      "required": ["type", "properties", "geometry"],
+      "properties": {
+        "type": { "const": "Feature" },
+        "properties": {
+          "type": "object",
+          "required": ["tipo"],
+          "properties": {
+            "tipo": { "$ref": "#/$defs/tipo_via" },
+            "nombre": { "type": "string", "minLength": 1, "maxLength": 120, "description": "Como figura en el origen. Ausente si la vía no tiene nombre." }
+          },
+          "additionalProperties": false
+        },
+        "geometry": {
+          "type": "object",
+          "required": ["type", "coordinates"],
+          "properties": {
+            "type": { "const": "LineString" },
+            "coordinates": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/posicion" } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

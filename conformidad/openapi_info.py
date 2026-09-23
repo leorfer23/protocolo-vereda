@@ -61,12 +61,15 @@ def resolver_esquema(api, fragmento, _visitados=frozenset()):
 
 
 def esquema_respuesta(api, op, estado="200"):
-    """El JSON Schema, ya resuelto, del cuerpo `application/json` de una respuesta.
-    None si esa respuesta no está declarada o no tiene cuerpo (ej. un 204)."""
+    """El JSON Schema, ya resuelto, del cuerpo JSON de una respuesta: `application/json`
+    o un tipo `+json` como `application/geo+json`. None si esa respuesta no está
+    declarada o no tiene cuerpo (ej. un 204)."""
     resp = op.get("responses", {}).get(estado)
     if not resp:
         return None
-    esquema = resp.get("content", {}).get("application/json", {}).get("schema")
+    contenido = resp.get("content", {})
+    tipo = next((t for t in contenido if t == "application/json" or t.endswith("+json")), None)
+    esquema = contenido.get(tipo, {}).get("schema") if tipo else None
     if esquema is None:
         return None
     return resolver_esquema(api, esquema)

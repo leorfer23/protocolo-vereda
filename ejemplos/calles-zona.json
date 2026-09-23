@@ -1,0 +1,20 @@
+{
+  "$comentario": "Lo que sirve GET /zona/calles (docs/mapa.md), recortado a cinco tramos para que se lea. Las coordenadas están dibujadas a mano y redondeadas: muestran la forma, no salen de OpenStreetMap. Un nodo real sirve cientos de tramos bajados de un extracto de OSM.",
+  "type": "FeatureCollection",
+  "version": "osm-2026-09-22",
+  "fecha_datos": "2026-09-22",
+  "bbox": [-58.45, -34.61, -58.414, -34.59],
+  "atribucion": { "texto": "© OpenStreetMap", "licencia": "ODbL-1.0", "url": "https://www.openstreetmap.org/copyright" },
+  "features": [
+    { "type": "Feature", "properties": { "tipo": "avenida", "nombre": "Avenida Corrientes" },
+      "geometry": { "type": "LineString", "coordinates": [[-58.4180, -34.6040], [-58.4300, -34.6030], [-58.4400, -34.5985], [-58.4480, -34.5925]] } },
+    { "type": "Feature", "properties": { "tipo": "avenida", "nombre": "Avenida Raúl Scalabrini Ortiz" },
+      "geometry": { "type": "LineString", "coordinates": [[-58.4250, -34.5920], [-58.4330, -34.5955], [-58.4420, -34.6000]] } },
+    { "type": "Feature", "properties": { "tipo": "calle", "nombre": "Malabia" },
+      "geometry": { "type": "LineString", "coordinates": [[-58.4300, -34.5940], [-58.4370, -34.5978], [-58.4430, -34.6010]] } },
+    { "type": "Feature", "properties": { "tipo": "calle", "nombre": "Aguirre" },
+      "geometry": { "type": "LineString", "coordinates": [[-58.4420, -34.5925], [-58.4390, -34.5970], [-58.4360, -34.6010]] } },
+    { "type": "Feature", "properties": { "tipo": "pasaje" },
+      "geometry": { "type": "LineString", "coordinates": [[-58.4345, -34.5990], [-58.4352, -34.5996]] } }
+  ]
+}
