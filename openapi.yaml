@@ -610,7 +610,10 @@ paths:
         Trae `partes`: cómo se llama cada parte, para mostrar. El nombre del comprador lo ven él, el
         comercio y el repartidor mientras el pedido está activo; terminado, el comprador siempre y
         el comercio solo con lista de clientes aceptada. Fuera de eso la parte viene sin `nombre`.
-      security: [ { sesion: [] }, { mandato: [leer] } ]
+
+        El agente del comercio lo lee con `administrar`, el mismo scope con que lo atiende: solo
+        los pedidos de los comercios de la persona que le dio el mandato.
+      security: [ { sesion: [] }, { mandato: [leer] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } }
   /pedidos/{id}/items/{item}/respuesta:

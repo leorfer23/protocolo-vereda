@@ -13,6 +13,11 @@
       "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "q": { "type": "string" }, "ean": { "type": "string" }, "lat": { "type": "number" }, "lng": { "type": "number" }, "atributos": { "type": "object" }, "orden": { "type": "string", "enum": ["ranking", "distancia", "precio", "reputacion"], "default": "ranking", "description": "Mismo criterio que la API. 'ranking' es la fórmula pública de docs/ranking-y-despacho.md." } } }
     },
     {
+      "name": "ver_carta",
+      "description": "La carta completa de un comercio (GET /comercios/{id}/ofertas): cada oferta con precio, variantes, opciones, stock y disponibilidad, incluidas las que están sin stock. Sirve para ver todo lo que vende un local sin buscar por texto, y al comercio para revisar su propio catálogo. Opcionalmente filtrada por categoría. No requiere mandato.",
+      "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string" }, "categoria": { "type": "string" } } }
+    },
+    {
       "name": "ver_oferta",
       "description": "Detalle completo de una oferta por su id (GET /ofertas/{id}): precio, opciones (con mínimos y máximos), variantes, disponibilidad, modalidades. Leer antes de armar un carrito para saber qué hay que elegir. No requiere mandato.",
       "inputSchema": { "type": "object", "required": ["oferta_id"], "properties": { "oferta_id": { "type": "string" } } }
@@ -64,7 +69,7 @@
     },
     {
       "name": "estado_pedido",
-      "description": "Estado actual, ítems (con sustituciones pendientes), hora estimada, el reparto del dinero y, mientras el pedido está en_camino, dónde está el repartidor ('ubicacion_repartidor', su último reporte). Requiere 'leer'.",
+      "description": "Estado actual, ítems (con sustituciones pendientes), hora estimada, el reparto del dinero y, mientras el pedido está en_camino, dónde está el repartidor ('ubicacion_repartidor', su último reporte). Requiere 'leer'; el agente del comercio lee los pedidos de su comercio con 'administrar'.",
       "inputSchema": { "type": "object", "required": ["pedido_id"], "properties": { "pedido_id": { "type": "string" } } }
     },
     {
