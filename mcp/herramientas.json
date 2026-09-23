@@ -134,7 +134,7 @@
     },
     {
       "name": "mis_comercios",
-      "description": "Los comercios que administra la persona, con id, nombre, tipo y si está abierto ahora. Leelo primero para saber sobre qué comercio_id operar; vacío si no administra ninguno. Requiere scope 'administrar'.",
+      "description": "Los comercios que administra la persona, con id, nombre, tipo y si está abierto ahora (abierto_ahora). Leelo primero para saber sobre qué comercio_id operar; vacío si no administra ninguno. Requiere scope 'administrar'.",
       "inputSchema": {"type": "object", "properties": {}}
     },
     {

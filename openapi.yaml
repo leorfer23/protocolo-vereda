@@ -1252,13 +1252,13 @@ components:
     MiComercio:
       type: object
       description: "Resumen de un comercio que administro. La ficha entera está en `verComercio`."
-      required: [id, identidad, nombre, tipo, abierto]
+      required: [id, identidad, nombre, tipo, abierto_ahora]
       properties:
         id: { type: string, description: "El id de las rutas /comercios/{id}." }
         identidad: { $ref: "esquemas/comunes.json#/$defs/identidad" }
         nombre: { type: string, maxLength: 120 }
         tipo: { $ref: "esquemas/comercio.json#/properties/tipo" }
-        abierto: { type: boolean, description: "Si acepta pedidos ahora, según sus `horarios` y el reloj del nodo: el mismo criterio que el filtro `abierto` de `buscarComercios`." }
+        abierto_ahora: { $ref: "esquemas/comercio.json#/properties/abierto_ahora", description: "El mismo valor que la ficha: `apertura_manual` si está vigente, si no `horarios`." }
     PaginaDePedidos:
       type: object
       required: [pedidos]
