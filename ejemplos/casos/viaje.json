@@ -21,7 +21,10 @@
                 "lat": -32.95,
                 "lng": -60.65
               }
-            }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
           },
           {
             "orden": 2,
@@ -32,7 +35,10 @@
                 "lat": -32.94,
                 "lng": -60.64
               }
-            }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
           }
         ],
         "estado": "ofrecido",
@@ -41,7 +47,27 @@
           "total": {
             "centavos": 80000,
             "moneda": "ARS"
-          }
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            }
+          ]
         }
       }
     },
@@ -65,7 +91,10 @@
                 "lat": -32.95,
                 "lng": -60.65
               }
-            }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
           },
           {
             "orden": 2,
@@ -76,7 +105,10 @@
                 "lat": -32.94,
                 "lng": -60.64
               }
-            }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
           }
         ],
         "estado": "ofrecido",
@@ -85,7 +117,27 @@
           "total": {
             "centavos": 80000,
             "moneda": "ARS"
-          }
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            }
+          ]
         }
       }
     },
@@ -108,7 +160,10 @@
                 "lat": -32.95,
                 "lng": -60.65
               }
-            }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
           },
           {
             "orden": 2,
@@ -119,7 +174,10 @@
                 "lat": -32.94,
                 "lng": -60.64
               }
-            }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
           }
         ],
         "estado": "aceptado",
@@ -127,7 +185,359 @@
           "total": {
             "centavos": 80000,
             "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Envío bonificado a medias: el comprador paga su parte en efectivo al entregar y el comercio el resto por transferencia. Los dos 'envio' suman el monto del pedido.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
           }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 50000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "concepto": "envio",
+                  "pagador": "comercio",
+                  "metodo": "transferencia",
+                  "monto": {
+                    "centavos": 30000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "concepto": "propina_repartidor",
+                  "pagador": "comprador",
+                  "metodo": "efectivo",
+                  "monto": {
+                    "centavos": 10000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La oferta dice cuánto pero no de quién ni cómo: sin 'por_pedido' el repartidor no sabe quién le paga antes de aceptar.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un pedido sin 'cobros': falta quién paga y por qué medio.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Al repartidor le paga el comprador o el comercio, nunca la red: 'nodo' no es un pagador.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "nodo",
+                  "metodo": "transferencia",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Al repartidor se le paga en efectivo o por transferencia, directo: no hay tarjeta ni QR del PSP en su cobro.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "paradas": [
+          {
+            "orden": 1,
+            "tipo": "retiro_comercio",
+            "direccion": {
+              "texto": "San Martín 1200, Rosario",
+              "punto": {
+                "lat": -32.95,
+                "lng": -60.65
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          },
+          {
+            "orden": 2,
+            "tipo": "entrega_usuario",
+            "direccion": {
+              "texto": "Pellegrini 800, Rosario",
+              "punto": {
+                "lat": -32.94,
+                "lng": -60.64
+              }
+            },
+            "pedidos": [
+              "01926b3a-9999-7000-8000-0000000000d1"
+            ]
+          }
+        ],
+        "estado": "ofrecido",
+        "vence_oferta": "2026-09-21T15:00:30-03:00",
+        "pago_repartidor": {
+          "total": {
+            "centavos": 80000,
+            "moneda": "ARS"
+          },
+          "por_pedido": [
+            {
+              "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+              "monto": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              },
+              "cobros": [
+                {
+                  "concepto": "envio",
+                  "pagador": "comprador",
+                  "metodo": "tarjeta",
+                  "monto": {
+                    "centavos": 80000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            }
+          ]
         }
       }
     }

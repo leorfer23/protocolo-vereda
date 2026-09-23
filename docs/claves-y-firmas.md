@@ -16,6 +16,8 @@ Las claves de prueba se derivan de una semilla publicada, `SHA-256("vereda:vecto
 
 Para regenerarlos, `python3 generar-vectores.py`. Es determinista: dos corridas dan el mismo archivo.
 
+El retiro y la entrega de un pedido los firma el repartidor sobre un objeto chico que se rearma desde el pedido (`pedido.json#/$defs/traspaso`); cómo lo manda desde el teléfono y qué hace el nodo si falta está en `docs/repartidores.md`, punto j.
+
 Cómo entra una persona con su clave, qué clave abre sesión y cómo se respalda la clave privada con una frase está en `docs/acceso.md`.
 
 ## Historial
