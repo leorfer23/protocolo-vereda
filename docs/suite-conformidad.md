@@ -175,7 +175,8 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   Sin custodia propia, esa parte se omite.
 - Abierto ahora: la ficha trae `abierto_ahora`; `apertura_manual` cerrada o abierta (con
   `hasta` a 30 min) se ve en la respuesta del `PATCH`, en `GET /comercios/{id}` y en
-  `buscarComercios?abierto`; con campos de más da `422`; `null` la quita y vuelve el
+  `buscarComercios?abierto`; con el comercio cerrado, confirmar un carrito da `409
+  comercio_cerrado`; con campos de más da `422`; `null` la quita y vuelve el
   `abierto_ahora` de antes. Corre al final y deja el comercio como estaba.
 - Clips (`docs/medios.md`): con el comercio y la oferta de prueba, `PATCH` con un clip en
   `videos` responde `200` y `GET /comercios/{id}` y `GET /ofertas/{id}` lo devuelven tal

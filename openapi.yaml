@@ -601,7 +601,7 @@ paths:
       responses:
         "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
-        "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado). No se crea el pedido; el carrito queda no_disponible.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado); el carrito queda no_disponible. O el comercio está cerrado (comercio_cerrado): sin `programado_para`, porque `abierto_ahora` es false; programado, porque sus `horarios` no cubren ese instante. En los dos casos no se crea el pedido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "410": { $ref: "#/components/responses/CarritoVencido" }
         "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada). O un metodo_pago que el comercio no acepta: efectivo_no_disponible si es efectivo, medio_no_disponible si es otro, los dos con detalle.medios_cobro, los que sí acepta. O efectivo que el comprador no puede usar con las condiciones del comercio (efectivo_no_disponible).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
