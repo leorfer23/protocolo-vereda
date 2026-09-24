@@ -15,7 +15,8 @@ Un agente no entra por `/acceso`: actúa con un mandato que la persona le otorga
 
 ## Qué se anota
 
-- **Toda escritura que el nodo aceptó con ese mandato**, y solo esas: una entrada por llamada exitosa que cambió algo, en la misma transacción que el cambio. Si la escritura se deshace, la entrada también.
+- **Toda escritura que el nodo aceptó con ese mandato**, y solo esas: una entrada por llamada exitosa que cambió algo, por la API o por MCP. Se anota cuando la escritura ya quedó hecha: una que falla o se deshace no deja entrada.
+- **Los reportes de ubicación del repartidor (`reportarUbicacion`) se pueden omitir.** Llegan cada pocos segundos durante un viaje y taparían todo lo demás sin decirle nada a la persona.
 - **No se anotan las lecturas** ni los rechazos (`fuera_de_mandato`, `requiere_confirmacion`, errores). Lo que la persona aprueba después con `POST /confirmaciones/{codigo}` lo hace ella con su sesión, así que tampoco es actividad del agente.
 - **Lo que la persona hace con su sesión no entra.** Es la actividad del agente, no el historial de la cuenta.
 

@@ -37,7 +37,7 @@
   "$defs": {
     "actividad": {
       "title": "Una entrada de la actividad de un mandato",
-      "description": "Lo que el agente escribió con este mandato, para que la persona que lo otorgó lo lea (GET /mandatos/{id}/actividad, docs/mandatos.md). El nodo anota una por cada escritura que aceptó con el mandato; las lecturas y los rechazos no se anotan.",
+      "description": "Lo que el agente escribió con este mandato, para que la persona que lo otorgó lo lea (GET /mandatos/{id}/actividad, docs/mandatos.md). El nodo anota una por cada escritura que aceptó con el mandato; las lecturas y los rechazos no se anotan, y los reportes de ubicación del repartidor se pueden omitir.",
       "type": "object",
       "required": ["operacion", "entidad", "resumen", "instante"],
       "properties": {
