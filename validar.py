@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Valida los ejemplos contra los esquemas, el OpenAPI y los vectores de firma."""
-import json, sys, glob, os, yaml, hashlib, base64
+import json, sys, glob, os, re, yaml, hashlib, base64
 from openapi_spec_validator import validate
 import rfc8785
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
@@ -79,6 +79,18 @@ try:
         print(f"✗ rutas públicas sin ETag, Cache-Control y 304: {', '.join(sin_cache)}")
     else:
         print("✓ todas las rutas públicas son cacheables y revalidables")
+    # Una respuesta exitosa sin esquema no se puede validar ni tipar: o declara
+    # su cuerpo, o dice que no tiene ("Sin cuerpo." al principio de la descripción).
+    sin_esquema = [f"{o['operationId']} {c}" for p, item in api["paths"].items() for m, o in item.items() if m in METODOS
+                   for c, r in o["responses"].items() if str(c).startswith("2") and str(c) != "204"
+                   and "content" not in r and "$ref" not in r and not r.get("description", "").startswith("Sin cuerpo.")]
+    refs = set(re.findall(r'\$ref: "(esquemas/[^"#]+)', open(API).read()))
+    rotas = sorted(f for f in refs if not os.path.exists(os.path.join(BASE, f)))
+    if sin_esquema or rotas:
+        fallos += 1
+        print(f"✗ respuestas 2xx sin esquema ni 'Sin cuerpo.': {', '.join(sin_esquema)}" if sin_esquema else f"✗ $ref a esquemas que no existen: {', '.join(rotas)}")
+    else:
+        print("✓ toda respuesta 2xx declara su esquema o que no tiene cuerpo")
 except Exception as e:
     fallos += 1
     print(f"✗ openapi.yaml\n    {str(e).splitlines()[0][:200]}")
