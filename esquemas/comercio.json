@@ -149,6 +149,7 @@
         "cuit_verificado": { "type": "boolean" },
         "foto_geolocalizada": { "type": "boolean" },
         "cuenta_cobro_coincide": { "type": "boolean", "description": "La vinculación 'cuenta_cobro' está 'verificada': compradores que transfirieron dicen que el titular del alias coincide (docs/identidad-y-verificacion.md)." },
+        "homonimos_cerca": { "type": "integer", "minimum": 0, "description": "Cuántos comercios no vinculados con el mismo nombre hay a 1.500 m o menos (docs/identidad-y-verificacion.md, punto 3). Lo fija el nodo y lo mantiene al día cuando un comercio cercano se da de alta, cambia de nombre o de lugar, o se vincula. Es para que un listado (buscarComercios) avise 'hay otro con el mismo nombre cerca' sin pedir la verificación de cada resultado; cuáles son, a qué distancia y con qué pruebas está en GET /actores/{identidad}/verificacion (mismo_nombre_cerca). No es una sospecha ni toca el ranking. Ausente: 0." },
         "verificado_en": { "$ref": "comunes.json#/$defs/instante" }
       }
     },

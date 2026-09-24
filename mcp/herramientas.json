@@ -4,7 +4,7 @@
   "herramientas": [
     {
       "name": "buscar_comercios",
-      "description": "Comercios que entregan en un lugar, ordenados por cercanía, precio y confiabilidad (fórmula pública). Ej: 'pizzerías abiertas cerca de casa', 'verdulerías con retiro'. No requiere mandato.",
+      "description": "Comercios que entregan en un lugar, ordenados por cercanía, precio y confiabilidad (fórmula pública). Ej: 'pizzerías abiertas cerca de casa', 'verdulerías con retiro'. Si un resultado trae verificacion.homonimos_cerca > 0, hay otro comercio con el mismo nombre cerca: decíselo a la persona y, para distinguirlos, usá ver_verificacion. No requiere mandato.",
       "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "lat": { "type": "number" }, "lng": { "type": "number" }, "tipo": { "type": "string" }, "abierto": { "type": "boolean" }, "modalidad": { "type": "string" }, "q": { "type": "string", "description": "Texto libre: 'comida liviana', 'sin tacc'" }, "orden": { "type": "string", "enum": ["ranking", "distancia", "precio", "reputacion"], "default": "ranking", "description": "Mismo criterio que la API. 'ranking' es la fórmula pública de docs/ranking-y-despacho.md." } } }
     },
     {

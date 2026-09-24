@@ -200,6 +200,11 @@ distinguirlas sin preguntarle a nadie: antigüedad (`alta`), pedidos entregados,
 verificadas y distancia redondeada a 100 m. Con eso la app puede avisar "hay otro comercio con el
 mismo nombre a 300 m" y mostrar los dos.
 
+La ficha del comercio trae además el conteo, `verificacion.homonimos_cerca`, para que un listado
+(`buscarComercios`) pueda avisar sin pedir la verificación de cada resultado. El detalle sigue en
+`GET /actores/{identidad}/verificacion`. El nodo mantiene el conteo al día en los dos comercios
+cuando uno se da de alta, cambia de nombre o de lugar, o se vincula con el otro.
+
 ### La evidencia decide
 
 El protocolo no decide cuál es el verdadero. Pone a los dos uno al lado del otro: uno con dos años,
@@ -325,6 +330,7 @@ en qué momento, sin pedir nada extra.
 | `pago.instrucciones` | `titular`, `comprobacion_titular`, `advertencia` | Advertir **antes** de transferir. La `advertencia` se muestra tal cual |
 | `declararTransferencia` | `titular_coincide` | Recoger el veredicto del comprador |
 | `verificacion.mismo_nombre_cerca` | Nombre, distancia, antigüedad, pedidos, pruebas | Avisar "hay otro con el mismo nombre a 300 m" y mostrar los dos |
+| Ficha y listado (`verComercio`, `buscarComercios`) | `verificacion.homonimos_cerca` | Avisar en el listado que hay un homónimo cerca, sin pedir la verificación de cada resultado |
 | `GET /comercios/{id}/reclamos` | Reclamos con su prueba y su estado | Ver si la ficha cambió de dueño, cuándo y con qué prueba |
 
 Ante una denuncia, la app muestra la verificación de los dos perfiles —denunciado y suplantado— lado
