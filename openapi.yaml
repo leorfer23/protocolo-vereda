@@ -1344,7 +1344,8 @@ paths:
         Solo la persona que otorgó el mandato, con su sesión: un token de mandato recibe 403, y el
         mandato de otra persona responde 404, igual que uno que no existe. Una entrada por cada
         escritura que el nodo aceptó con ese mandato (`esquemas/mandato.json#/$defs/actividad`);
-        las lecturas y los rechazos no se anotan. Sigue legible con el mandato revocado o vencido.
+        las lecturas y los rechazos no se anotan, y `reportarUbicacion` se puede omitir. Sigue legible
+        con el mandato revocado o vencido.
         El nodo guarda al menos los últimos 90 días; lo anterior lo puede borrar.
         Paginado por cursor opaco, como `listarPedidosDelComercio`. Reglas en `docs/mandatos.md`.
       security: [ { sesion: [] } ]
