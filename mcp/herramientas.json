@@ -177,7 +177,7 @@
           },
           "cambios": {
             "type": "object",
-            "description": "Solo los campos que cambian, con la forma de esquemas/comercio.json."
+            "description": "Solo los campos que cambian, con la forma de esquemas/comercio.json. Además 'clave_cifrado': la clave pública X25519 del chat cifrado del comercio (base64url, 32 bytes; null la retira), que va al historial de claves y no a la ficha. La privada queda en el dispositivo de quien administra el comercio; el nodo no la custodia (docs/claves-y-firmas.md)."
           }
         }
       }

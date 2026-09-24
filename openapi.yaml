@@ -221,6 +221,12 @@ paths:
         están. El nodo valida el documento resultante contra
         esquemas/comercio.json. `identidad`, `verificacion`, `reputacion` y `abierto_ahora` no se editan.
 
+        `clave_cifrado` (X25519 pública, base64url, 32 bytes) publica la clave del chat cifrado del
+        comercio; `null` la retira. No queda en la ficha: va a la entrada activa del historial de claves
+        del comercio (`GET /actores/{identidad}/claves`). La privada la genera y guarda quien administra
+        el comercio en su dispositivo; el nodo no la custodia (`docs/claves-y-firmas.md`, "Clave de
+        cifrado"). Una clave que no mide 32 bytes responde 422.
+
         "Abierto ahora" es `apertura_manual`: `{"abierto": false, "hasta": "..."}` cierra ya aunque
         los horarios digan abierto; `{"abierto": true}` abre fuera de horario. Sin `hasta` dura hasta
         que el comercio la cambie o la quite (`"apertura_manual": null`), y con `hasta` en el pasado el
