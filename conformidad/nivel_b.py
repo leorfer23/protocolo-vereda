@@ -622,6 +622,8 @@ class NivelB:
             if r.cuerpo.get("abierto_ahora") is not abierto or visto is not abierto:
                 self.casos.append(_fallo(cat, opid, desc, f"abierto_ahora: PATCH {r.cuerpo.get('abierto_ahora')!r}, GET {visto!r}"))
                 continue
+            if not abierto:
+                self._confirmar_cerrado(cat)
             si, no = en_busqueda(abierto), en_busqueda(not abierto)
             if si is None or no is None:
                 self.casos.append(_fallo(cat, "buscarComercios", desc, "no se pudo buscar comercios en el punto del comercio de prueba"))
@@ -647,6 +649,27 @@ class NivelB:
             self.casos.append(_fallo(cat, opid, desc, f"la ficha sigue trayendo apertura_manual {r.cuerpo['apertura_manual']!r}"))
         elif r.cuerpo.get("abierto_ahora") != comercio.get("abierto_ahora"):
             self.casos.append(_fallo(cat, opid, desc, f"abierto_ahora quedó {r.cuerpo.get('abierto_ahora')!r} y antes de tocarlo era {comercio.get('abierto_ahora')!r}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+    def _confirmar_cerrado(self, cat):
+        opid, desc = "confirmarCarrito", "con el comercio cerrado, confirmar un carrito responde 409 comercio_cerrado y no crea el pedido"
+        r = cliente.solicitud("POST", f"{self.base_v1}/carritos", headers=self._cabecera(), json_body={}, timeout=self.timeout)
+        carrito_id = (r.cuerpo or {}).get("id") if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        if not carrito_id:
+            self.casos.append(_fallo(cat, "crearCarrito", desc, r.motivo or f"POST /carritos respondió {r.estado}"))
+            return
+        for metodo, ruta, cuerpo in (("POST", "items", {"oferta_id": "01920000-0000-7000-8000-0000000000b1", "cantidad": {"valor": 1, "unidad": "unidad"}}), ("PUT", "modalidad", {"tipo": "retiro"})):
+            r = cliente.solicitud(metodo, f"{self.base_v1}/carritos/{carrito_id}/{ruta}", headers=self._cabecera(), json_body=cuerpo, timeout=self.timeout)
+            if not r.ok or r.estado != 200:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo or f"{metodo} /carritos/{{id}}/{ruta} respondió {r.estado}"))
+                return
+        r = cliente.solicitud("POST", f"{self.base_v1}/carritos/{carrito_id}/confirmar", headers={**self._cabecera(), **self._idem()}, json_body={}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+        if not r.ok:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo))
+        elif r.estado != 409 or codigo != "comercio_cerrado":
+            self.casos.append(_fallo(cat, opid, desc, f"esperaba 409 comercio_cerrado, llegó {r.estado} {codigo!r}"))
         else:
             self.casos.append(_ok(cat, opid, desc))
 
