@@ -9,6 +9,12 @@ info:
     o un mandato de agente (OAuth 2.1). Los errores siguen esquemas/error.json y traen una
     frase en español que un agente puede repetirle a la persona.
 
+    Un comercio lo administra su dueña o un miembro de su equipo (docs/equipo.md). Donde una
+    operación dice "Solo el dueño", vale también para un miembro con el permiso que nombra su
+    `x-permiso-equipo`: la lista de permisos de esquemas/equipo.json que alcanzan para hacerla
+    (con uno basta). `[]`: cualquier miembro. `[duena]`: solo la dueña. Un mandato
+    `administrar` puede lo mismo que su otorgante en ese comercio, nunca más.
+
     La sesión se consigue en /acceso, en la raíz del dominio y fuera de /v1 (docs/acceso.md).
     Con custodia propia —la forma de las apps nativas— se entra firmando un desafío con la
     clave Ed25519 del dispositivo: sin contraseña, sin alta que alguien apruebe. Con custodia
@@ -233,6 +239,7 @@ paths:
         nodo la ignora y vuelven a mandar los horarios. Si cambia `abierto_ahora`, el nodo emite
         `comercio.abierto` o `comercio.cerrado`.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/comercio.json." } } } }
       responses:
@@ -282,6 +289,7 @@ paths:
       tags: [mi-comercio]
       summary: Publicar una oferta del catálogo
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/oferta.json" } } } }
       responses:
@@ -295,6 +303,7 @@ paths:
       summary: "Editar una oferta: precio, opciones, variantes, disponibilidad, atributos"
       description: Solo el dueño. Los campos que no vienen quedan como están; el nodo valida el documento resultante contra esquemas/oferta.json. Para cambiar solo stock y precio de muchas a la vez está PUT /comercios/{id}/stock.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: oferta, in: path, required: true, schema: { type: string } } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/oferta.json." } } } }
       responses:
@@ -333,6 +342,7 @@ paths:
       tags: [mi-comercio]
       summary: Crear una promoción. Se calcula con el algoritmo público de docs/promociones.md
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/promocion.json" } } } }
       responses:
@@ -346,6 +356,7 @@ paths:
       summary: "Editar una promoción: vigencia, tramos, tope, activarla o pausarla"
       description: "Solo el dueño. Los campos que no vienen quedan como están; el nodo valida el documento resultante contra esquemas/promocion.json. Una promoción que ya se aplicó a un pedido no cambia ese pedido: los precios se congelan al crearlo."
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: promocion, in: path, required: true, schema: { type: string } } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/promocion.json." } } } }
       responses:
@@ -359,6 +370,7 @@ paths:
       tags: [ofertas]
       summary: Actualización de stock en lote (supermercados con sistema)
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: array, items: { type: object, required: [oferta_id], properties: { oferta_id: { type: string }, variante_id: { type: string }, stock: { type: number }, disponible: { type: boolean }, precio_centavos: { type: integer } } } } } } }
       responses: { "204": { description: Aplicado }, "403": { $ref: "#/components/responses/NoEsElDueno" } }
@@ -376,6 +388,7 @@ paths:
         misma regla que `verPedido`: el nombre del comprador solo en los activos, o en los
         terminados si aceptó la lista de clientes del comercio.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters:
         - { $ref: "#/components/parameters/id" }
         - { name: estado, in: query, schema: { type: array, items: { type: string } }, style: form, explode: false, description: "Uno o varios estados de esquemas/pedido.json (pagado,aceptado). Ausente: todos." }
@@ -397,6 +410,7 @@ paths:
         ni dirección, y no hay forma de pedir quién visitó la ficha. Un nodo que no puede agregar
         sin identificar no publica la métrica.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [numeros]
       parameters:
         - { $ref: "#/components/parameters/id" }
         - { name: desde, in: query, schema: { type: string, format: date-time } }
@@ -425,6 +439,7 @@ paths:
         La URL no se publica sola: el comercio la pone en `imagenes` con `editarComercio` o
         `editarOferta`. Video no se sube: sigue por URL.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo, datos]
       parameters:
         - { name: comercio, in: query, required: true, description: "El id del comercio (el de las rutas /comercios/{id}).", schema: { type: string } }
       requestBody:
@@ -453,6 +468,7 @@ paths:
         sistema. Va firmado con la clave del nodo, así el destino lo verifica. Lo que el comercio
         hace con esos datos fuera del nodo es su responsabilidad, incluida la legal (Ley 25.326).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [duena]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       responses:
         "200": { description: Paquete firmado, content: { application/json: { schema: { $ref: "#/components/schemas/ExportacionComercio" } } } }
@@ -467,6 +483,7 @@ paths:
         visibilidad (docs/sostenimiento.md). Los pagos son los 'aporte_nodo' de este comercio,
         con las instrucciones para transferir a la cuenta del nodo.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       responses:
         "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/AporteComercio" } } } }
@@ -480,6 +497,7 @@ paths:
         los aportes que vengan; los ya generados quedan como estaban y vencen solos sin
         consecuencia. Con 'por_pedido', el monto se congela en el reparto de cada pedido nuevo.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/comercio.json#/properties/aporte_nodo" } } } }
       responses:
@@ -492,6 +510,7 @@ paths:
       tags: [mi-comercio]
       summary: "El comercio declara que transfirió un aporte al nodo. No lo confirma: lo confirma el operador del nodo al verlo en su cuenta"
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [pago_id], properties: { pago_id: { $ref: "esquemas/comunes.json#/$defs/id" }, comprobante: { type: string, maxLength: 500 } } } } } }
       responses:
@@ -499,6 +518,110 @@ paths:
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "404": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
+
+  /comercios/{id}/equipo:
+    get:
+      operationId: verEquipo
+      tags: [mi-comercio]
+      summary: "El equipo del comercio: la dueña y cada miembro con su rol y sus permisos"
+      description: |
+        Lo lee cualquiera que administre el comercio: la dueña o un miembro, con cualquier permiso.
+        Las invitaciones pendientes vienen solo para quien tiene el permiso `equipo`. No es
+        público y no se federa (docs/equipo.md).
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: []
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/equipo.json" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/equipo/invitaciones:
+    post:
+      operationId: invitarAlEquipo
+      tags: [mi-comercio]
+      summary: "Invitar a alguien al equipo con un rol y sus permisos. Devuelve el código y el enlace, una sola vez"
+      description: |
+        Nadie aprueba la invitación: la crea quien tiene el permiso `equipo` y la acepta quien
+        tenga el código, con su propia sesión. Solo se pueden dar permisos que uno mismo tiene: un
+        miembro con `equipo` y `pedidos` no invita a nadie con `catalogo` (403 `sin_permiso`, con
+        `detalle.falta`). La dueña da cualquiera. `codigo` y `enlace` vienen solo en esta
+        respuesta. Vence a las `vence_en_horas` (72 si no viene, 168 como máximo).
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [equipo]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/nueva_invitacion" } } } }
+      responses:
+        "201": { description: "Creada, con `codigo` y `enlace`", content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/invitacion" } } } }
+        "403": { $ref: "#/components/responses/SinPermiso" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/equipo/invitaciones/{invitacion}:
+    delete:
+      operationId: revocarInvitacion
+      tags: [mi-comercio]
+      summary: "Anular una invitación pendiente: el código deja de servir en el acto"
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [equipo]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: invitacion, in: path, required: true, schema: { type: string } } ]
+      responses:
+        "204": { description: Anulada }
+        "403": { $ref: "#/components/responses/SinPermiso" }
+        "404": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/equipo/{identidad}:
+    patch:
+      operationId: cambiarMiembro
+      tags: [mi-comercio]
+      summary: "Cambiarle el rol o los permisos a un miembro. Rige desde la próxima llamada que haga"
+      description: |
+        Con el permiso `equipo`, y solo para dar o sacar permisos que uno mismo tiene. A la dueña
+        no se la cambia (403 `sin_permiso`). Uno no se cambia sus propios permisos: se los cambia
+        otro, o se va.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [equipo]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: identidad, in: path, required: true, schema: { $ref: "esquemas/comunes.json#/$defs/identidad" } } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/cambio_de_miembro" } } } }
+      responses:
+        "200": { description: El miembro como quedó, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/miembro" } } } }
+        "403": { $ref: "#/components/responses/SinPermiso" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: sacarDelEquipo
+      tags: [mi-comercio]
+      summary: "Sacar a alguien del equipo, o irse uno mismo. Pierde el acceso en el acto, también su agente"
+      description: |
+        Con el permiso `equipo`, o sin ninguno si es uno mismo el que se va. A la dueña no se la
+        saca (403 `sin_permiso`): el comercio cambia de dueña solo por un reclamo
+        (docs/identidad-y-verificacion.md). El nodo decide en cada llamada quién administra, así
+        que la persona que sale y los mandatos `administrar` que ella otorgó dejan de poder operar
+        el comercio desde la llamada siguiente, sin nada que revocar aparte. Lo que hizo mientras
+        estuvo queda a su nombre.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [equipo]
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: identidad, in: path, required: true, schema: { $ref: "esquemas/comunes.json#/$defs/identidad" } } ]
+      responses:
+        "204": { description: Fuera del equipo }
+        "403": { $ref: "#/components/responses/SinPermiso" }
+        "404": { $ref: "#/components/responses/Error" }
+  /equipo/aceptar:
+    post:
+      operationId: aceptarInvitacion
+      tags: [mi-comercio]
+      summary: "Aceptar una invitación al equipo de un comercio, con la sesión propia"
+      description: |
+        Quien acepta entra con su identidad, la de su clave, y con el rol y los permisos de la
+        invitación. Desde ahí el comercio aparece en su `GET /yo/comercios`. Un código que no
+        existe, ya se usó, se anuló o venció responde 410 `invitacion_invalida`, sin decir cuál de
+        las cuatro. La dueña, o quien ya es miembro, recibe 409 `ya_es_miembro` y la invitación
+        sigue sirviendo para otra persona.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [codigo], additionalProperties: false, properties: { codigo: { $ref: "esquemas/equipo.json#/$defs/invitacion/properties/codigo" } } } } } }
+      responses:
+        "201": { description: Adentro, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/miembro" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "410": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Reintentar" }
 
   /comercios/{id}/reclamos:
     get:
@@ -667,6 +790,7 @@ paths:
         El agente del comercio lo lee con `administrar`, el mismo scope con que lo atiende: solo
         los pedidos de los comercios de la persona que le dio el mandato.
       security: [ { sesion: [] }, { mandato: [leer] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } }
   /pedidos/{id}/items/{item}/respuesta:
@@ -708,11 +832,12 @@ paths:
         ruta si hay envío (`docs/ranking-y-despacho.md`). Es lo que ve el comprador y lo que el
         despacho respeta. Fuera de rango: 422 `documento_invalido`.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: false, content: { application/json: { schema: { type: object, properties: { tiempo_preparacion_min: { type: integer, minimum: 0, maximum: 1440, description: "Minutos de preparación de este pedido. Pisa los de la ficha solo para él." } } } } } }
       responses: { "200": { description: "Pedido aceptado, con su eta", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "403": { $ref: "#/components/responses/NoEsElDueno" }, "409": { $ref: "#/components/responses/Error" }, "422": { $ref: "#/components/responses/Error" } }
   /pedidos/{id}/rechazar:
-    post: { operationId: rechazarPedido, tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "Rechazado: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
+    post: { operationId: rechazarPedido, tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] }, { mandato: [administrar] } ], x-permiso-equipo: [pedidos], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "Rechazado: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
   /pedidos/{id}/items/{item}:
     patch:
       operationId: resolverItemPedido
@@ -724,11 +849,12 @@ paths:
         comprador y el local ven que empezó a prepararse sin un paso aparte. Los ítems siguientes
         no mueven el estado.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [estado], properties: { estado: { type: string, enum: [confirmado, sustituido, faltante, pesado] }, sustituto: { type: object }, cantidad_entregada: { $ref: "esquemas/comunes.json#/$defs/cantidad" } } } } } }
       responses: { "200": { description: "El pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } }
   /pedidos/{id}/listo:
-    post: { operationId: marcarPedidoListo, tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "Listo: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "409": { $ref: "#/components/responses/Error" } } }
+    post: { operationId: marcarPedidoListo, tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] }, { mandato: [administrar] } ], x-permiso-equipo: [pedidos], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "Listo: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "409": { $ref: "#/components/responses/Error" } } }
   /pedidos/{id}/asignar:
     post:
       operationId: asignarRepartidor
@@ -740,6 +866,7 @@ paths:
         `pedido.sin_repartidor`, o para llevarlo él (`modo: comercio`, sin viaje: entrega el
         comercio con `entregar`). Mientras el pedido no esté `en_camino`.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [modo], properties: { modo: { type: string, enum: [comercio, propio, usuario, pool] }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "Con modo 'propio': a cuál de los propios se le ofrece solo a él. Ausente: a todos." } } } } } }
       responses: { "200": { description: Pedido con su asignación, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "403": { $ref: "#/components/responses/NoEsElDueno" }, "409": { $ref: "#/components/responses/Error" } }
@@ -775,6 +902,7 @@ paths:
         sin `firma` responde 422 `firma_requerida` sin entregar. En modalidad retiro entrega el
         comercio y la prueba es el código del comprador.
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro. Si no coincide, 422 codigo_retiro_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
       responses:
@@ -787,6 +915,7 @@ paths:
       summary: "Quien paga: declara que ya transfirió. No confirma el cobro (docs/carrito-y-reserva.md, transferencia directa)"
       description: "Lo usa el comprador, y también el comercio cuando es el pagador del envío (docs/repartidores.md). Con 'concepto' se dice cuál de los pagos del pedido."
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor, propina_nodo], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md); 'propina_nodo', al nodo (docs/sostenimiento.md)." }, comprobante: { type: string, maxLength: 500, description: "Número de operación o una nota corta. El nodo no guarda archivos." }, titular_coincide: { type: boolean, description: "Si el titular que le mostró su banco al transferir coincide con 'pago.instrucciones.titular'. El nodo guarda solo este veredicto, y cuenta para la vinculación 'cuenta_cobro' del destinatario (docs/identidad-y-verificacion.md). Ausente: la persona no dijo." } } } } } }
       responses:
@@ -802,6 +931,7 @@ paths:
         pedido pasa a pagado), el repartidor para `envio` y `propina_repartidor`. Cualquier otro
         recibe 403 no_es_el_destinatario. Es el único que puede: es el único que ve su cuenta.
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." } } } } } }
       responses:
@@ -846,6 +976,7 @@ paths:
         `rendida` antes, 409 `rendicion_sin_declarar`. La firma sigue las mismas reglas que
         `declararRendicion`, con la clave del comercio.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ConstanciaRendicion" } } } }
       responses:
@@ -921,6 +1052,7 @@ paths:
         'administrar' solo como comercio. A cualquier otro el nodo responde 404, igual que si el
         viaje no existiera.
       security: [ { sesion: [] }, { mandato: [repartir] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       responses:
         "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/viaje.json" } } } }
@@ -1039,6 +1171,7 @@ paths:
         cuando responde la persona, y lleva `via` con `canal: agente` y el `mandato_id`, dentro de lo
         firmado. Escribir una reseña sigue siendo solo de la persona (`crearResena`, sesión).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       responses: { "201": { description: "La reseña con su respuesta", content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, "403": { $ref: "#/components/responses/Error" } }
   /actores/{identidad}/claves:
@@ -1098,6 +1231,7 @@ paths:
         comprobar (ver `vinculaciones` en `/.well-known/vereda.json`) responde 422
         `vinculacion_no_soportada`.
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ]
       requestBody:
         required: true
@@ -1120,6 +1254,7 @@ paths:
       summary: "Comprobar ahora una vinculación, sin esperar la recomprobación de cada 7 días. En 'whatsapp', con el código del desafío"
       description: "Mismos permisos que `declararVinculacion`. Responde 200 con la vinculación y su estado nuevo aunque la prueba no aparezca: no encontrarla no es un error, es un resultado, y `senales.motivo` dice qué faltó."
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { codigo: { type: string, pattern: "^[0-9]{6}$", description: "Solo 'whatsapp': el código que el nodo mandó a ese número." } } } } } }
       responses:
@@ -1149,6 +1284,7 @@ paths:
         persona con 3 o más pedidos entregados en él; si no, 422 `sin_pedidos_suficientes`. Queda con
         `visible: false` hasta que la persona la acepta.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { name: identidad, in: path, required: true, schema: { type: string } } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/atestacion" } } } }
       responses:
@@ -1186,6 +1322,7 @@ paths:
       tags: [identidad]
       summary: "El denunciado responde una denuncia, una sola vez, en público y firmado"
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [datos]
       parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/id" } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [texto], properties: { texto: { type: string, minLength: 1, maxLength: 1000 }, firma: { $ref: "esquemas/comunes.json#/$defs/firma", description: "Solo con custodia propia." } } } } } }
       responses:
@@ -1223,9 +1360,12 @@ paths:
         como alguien puede administrar varios comercios devuelve una lista, y no administrar
         ninguno es `200` con `[]`, no `404`.
 
-        Un token de mandato `administrar` ve los mismos comercios que su otorgante: el mandato
-        actúa en su nombre. Orden: del alta más vieja a la más nueva.
+        También los comercios de cuyo equipo es miembro, con su `rol` y sus `permisos`
+        (docs/equipo.md). Un token de mandato `administrar` ve los mismos comercios que su
+        otorgante, con los mismos permisos: el mandato actúa en su nombre y no puede más que él.
+        Orden: del alta más vieja a la más nueva.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: []
       responses:
         "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/MiComercio" } } } } }
   /yo/preferencias:
@@ -1388,7 +1528,8 @@ components:
     Error: { description: Error, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     Reintentar: { description: "Ahora no. El emisor reintenta, respetando Retry-After si viene.", headers: { Retry-After: { schema: { type: integer }, description: Segundos } } }
     CarritoVencido: { description: "El carrito venció (24 h sin cambios). Código carrito_vencido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
-    NoEsElDueno: { description: "No es el dueño del comercio (código no_es_el_dueno), o el mandato no trae el scope 'administrar'.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    NoEsElDueno: { description: "No administra el comercio: no es la dueña ni está en su equipo (código no_es_el_dueno), o el mandato no trae el scope 'administrar'. Si está en el equipo pero le falta el permiso de la operación, el código es sin_permiso (docs/equipo.md).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    SinPermiso: { description: "Está en el equipo pero le falta el permiso que pide la operación (código sin_permiso, con `detalle.falta`: el permiso que falta), o quiere cambiar o sacar a la dueña. Quien no está en el equipo recibe no_es_el_dueno, como siempre.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinCambios: { description: Sin cambios desde el ETag enviado, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } } }
   securitySchemes:
     sesion: { type: http, scheme: bearer, description: "Token de sesión. Se obtiene en /acceso: firmando un desafío con la clave propia, o con un código por mensaje si el nodo custodia la clave (docs/acceso.md)" }
@@ -1399,7 +1540,7 @@ components:
         authorizationCode:
           authorizationUrl: https://vereda.ar/oauth/autorizar
           tokenUrl: https://vereda.ar/oauth/token
-          scopes: { leer: Leer, armar: Armar carritos y listas, hablar: Responder en pedidos activos, suscribir: Suscripciones, pedir: "Confirmar pedidos hasta el tope del mandato", repartir: "Repartir en nombre de un repartidor: perfil, disponibilidad, ubicación, viajes, retiro, entrega, cobro del envío, historial y ganancias. Nunca sirve para comprar ni para administrar un comercio", administrar: "Administrar un comercio propio: ficha, catálogo, promociones, stock, pedidos, métricas y exportación. Nunca sirve para comprar" }
+          scopes: { leer: Leer, armar: Armar carritos y listas, hablar: Responder en pedidos activos, suscribir: Suscripciones, pedir: "Confirmar pedidos hasta el tope del mandato", repartir: "Repartir en nombre de un repartidor: perfil, disponibilidad, ubicación, viajes, retiro, entrega, cobro del envío, historial y ganancias. Nunca sirve para comprar ni para administrar un comercio", administrar: "Administrar un comercio: ficha, catálogo, promociones, stock, pedidos, métricas, equipo y exportación. Nunca sirve para comprar. El agente puede, en cada comercio, lo mismo que su otorgante: todo si es la dueña, solo sus permisos si es del equipo (docs/equipo.md)" }
     nodo: { type: http, scheme: bearer, description: Firma HTTP entre nodos (RFC 9421) con la clave del nodo emisor }
   schemas:
     Nodo:
@@ -1505,6 +1646,8 @@ components:
         nombre: { type: string, maxLength: 120 }
         tipo: { $ref: "esquemas/comercio.json#/properties/tipo" }
         abierto_ahora: { $ref: "esquemas/comercio.json#/properties/abierto_ahora", description: "El mismo valor que la ficha: `apertura_manual` si está vigente, si no `horarios`." }
+        rol: { type: string, description: "'dueña' si es la dueña; si no, su rol en el equipo (esquemas/equipo.json#/$defs/rol). Ausente en un nodo que no implementa equipos: ahí es siempre la dueña." }
+        permisos: { type: array, uniqueItems: true, items: { $ref: "esquemas/equipo.json#/$defs/permiso" }, description: "Lo que puede en este comercio. La dueña los tiene todos, y además exportar. La app muestra solo lo que puede hacer." }
     PaginaDePedidos:
       type: object
       required: [pedidos]

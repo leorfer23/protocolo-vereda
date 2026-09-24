@@ -189,6 +189,16 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   `tipos` la lista. Texto con `Content-Type: image/jpeg` da `415 tipo_no_admitido`, un
   archivo de más de `limite_bytes` da `413 medio_muy_grande`, sin token `401`, y con custodia
   propia otra identidad da `403`. El tope por comercio no se prueba: llenarlo es caro.
+- Equipo del comercio (`docs/equipo.md`), con custodia propia; si el nodo responde `501` en
+  `verEquipo`, se omite. La dueña lee el equipo (`esquemas/equipo.json`) e invita con
+  `pedidos` (`201`, con `codigo` y `enlace`); `exportar` como permiso da `422`. Una identidad
+  nueva acepta con su sesión (`201`, con su identidad, el rol y los permisos) y el mismo código
+  con otra da `410 invitacion_invalida`. El comercio aparece en su `GET /yo/comercios` con rol
+  y permisos, y lee la bandeja; editar la ficha, las métricas, exportar e invitar le dan `403
+  sin_permiso` (con `detalle.falta`). Sacar a la dueña da `403 sin_permiso`. La dueña la saca
+  (`204`) y desde la llamada siguiente la bandeja le da `403 no_es_el_dueno` y el comercio ya
+  no está en su lista. El techo del agente de un miembro no se prueba acá: pide un mandato de
+  una identidad de la suite.
 - Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
   que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella
