@@ -21,11 +21,13 @@ Esquema en `esquemas/equipo.json`; rutas en `openapi.yaml` (`verEquipo`, `invita
 
 | Permiso | Qué puede |
 | --- | --- |
-| `pedidos` | La bandeja, aceptar y rechazar, resolver ítems, marcar listo, entregar, asignar repartidor, transferencias y rendiciones, leer los pedidos y viajes del comercio |
+| `pedidos` | La bandeja, aceptar y rechazar, resolver ítems, marcar listo, entregar, asignar repartidor, transferencias y rendiciones, leer los pedidos y viajes del comercio, y todo lo que pasa dentro de un pedido o una cotización: su chat, sus eventos en `GET /eventos` y presupuestar |
 | `catalogo` | Ofertas, stock, promociones y fotos |
 | `numeros` | Las métricas del comercio |
 | `datos` | La ficha (horarios, abierto ahora, modalidades, cobro, envíos, política de datos, `clave_cifrado`), el aporte al nodo, vinculaciones y atestaciones, y responder reseñas y denuncias |
 | `equipo` | Invitar, cambiar rol y permisos, y sacar gente |
+
+**`pedidos` cubre lo que pasa dentro de un pedido, aunque la operación no sea sobre el comercio.** El chat (`enviarMensaje`, `listarMensajes`) con `contexto` un pedido o una cotización del comercio, los eventos de esos pedidos y cotizaciones en `GET /eventos` (`pedido.*`, `item.*`, `pago.*`, `viaje.*`, `rendicion.*`, `cotizacion.*` y `mensaje.nuevo` de esos chats) y `presupuestarCotizacion` los hace un miembro con `pedidos` igual que la dueña: la bandeja no sirve si quien atiende no ve ni contesta. Sin `pedidos`, esos pedidos no son suyos: el chat responde 404 como a cualquier ajeno y el stream no los trae. Lo que un comercio recibe fuera de un pedido (grupos, suscripciones, rondas, reclamos, atestaciones) sigue siendo solo de la dueña hasta que un permiso lo cubra.
 
 **Exportar el comercio es solo de la dueña.** El paquete lleva los datos de los compradores; que salgan del nodo es una decisión de quien responde por ellos.
 

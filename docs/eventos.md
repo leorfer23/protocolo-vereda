@@ -16,7 +16,7 @@ Todo cambio de estado se publica como un evento (`esquemas/evento.json`), idempo
 
 - Los eventos públicos del nodo (catálogo, claves, vinculaciones, denuncias).
 - Los de las entidades de las que es parte: el comprador, el comercio y el repartidor de un pedido o un viaje; el otorgante de un mandato; los participantes de un grupo o una ronda; los del chat.
-- **Todo lo que ve un comercio lo ve también quien lo administra.** La identidad del comercio y la persona que lo administra (la sesión que lo dio de alta, o quien quedó como dueña tras un reclamo resuelto) son actores distintos; la bandeja del local se abre con la sesión de la persona. Si la ficha cambia de dueño, la nueva lo ve desde ese momento y la anterior deja de verlo. Un agente que escucha con un mandato de esa persona (scope `leer`) ve lo mismo que ella.
+- **Todo lo que ve un comercio lo ve también quien lo administra.** La identidad del comercio y la persona que lo administra (la sesión que lo dio de alta, o quien quedó como dueña tras un reclamo resuelto) son actores distintos; la bandeja del local se abre con la sesión de la persona. Si la ficha cambia de dueño, la nueva lo ve desde ese momento y la anterior deja de verlo. Un miembro del equipo con `pedidos` ve los de los pedidos y cotizaciones del comercio, y nada más de él (`docs/equipo.md`). Un agente que escucha con un mandato de esa persona (scope `leer`) ve lo mismo que ella.
 
 Nadie más: un actor ajeno a un pedido no recibe sus eventos.
 
