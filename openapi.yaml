@@ -982,14 +982,16 @@ paths:
       responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mensaje.json" } } } } } }
 
   /resenas:
-    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada, content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, "409": { description: Ya reseñado o pedido no entregado } } }
+    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", description: "Si la sesión administra el comercio del pedido, la reseña es del comercio: 'autor' es el comercio, 'rol_autor' es 'comercio' y la firma el nodo con la clave del comercio que custodia, aunque la persona custodie la suya. Quien compró o repartió el pedido reseña como sí mismo. Un 'autor' que no sea quien escribe ni el comercio que administra responde 403 'no_es_tu_resena' (docs/resenas.md).", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada, content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, "409": { description: Ya reseñado o pedido no entregado } } }
   /resenas/{id}/respuesta:
     post:
       operationId: responderResena
       tags: [resenas]
       summary: Responder públicamente una reseña
       description: |
-        Con sesión responde el reseñado, o quien administra el comercio reseñado. Con mandato
+        Con sesión responde el reseñado, o quien administra el comercio reseñado: en ese caso responde
+        el comercio y la respuesta la firma el nodo con la clave que custodia del comercio. Quien
+        escribió la reseña no la responde como el comercio (403 `no_es_tu_resena`). Con mandato
         `administrar` responde el agente del comercio, solo por un comercio que administra quien le
         dio el mandato: la respuesta la firma el nodo con la clave que custodia del comercio, como
         cuando responde la persona, y lleva `via` con `canal: agente` y el `mandato_id`, dentro de lo
