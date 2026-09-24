@@ -1026,7 +1026,7 @@ paths:
   /cotizaciones:
     post: { operationId: pedirCotizacion, tags: [cotizaciones], summary: Pedir presupuesto por una oferta a cotizar, security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } }, responses: { "201": { description: Solicitada, content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } } } }
   /cotizaciones/{id}/presupuesto:
-    put: { operationId: presupuestarCotizacion, tags: [cotizaciones], summary: "Comercio: responder con presupuesto firmado", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "La cotización con su presupuesto", content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } } } }
+    put: { operationId: presupuestarCotizacion, tags: [cotizaciones], summary: "Comercio: responder con presupuesto firmado", x-permiso-equipo: [pedidos], security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "La cotización con su presupuesto", content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } } } }
   /cotizaciones/{id}/aceptar:
     post: { operationId: aceptarCotizacion, tags: [cotizaciones], summary: Aceptar el presupuesto; crea el pedido con precio fijo, security: [ { sesion: [] }, { mandato: [pedir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: "Pedido creado", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
 

@@ -2,6 +2,10 @@
 
 Lo que cambia en el protocolo después de publicarlo, del más nuevo al más viejo. Un cambio **incompatible** obliga a los clientes a actualizarse.
 
+## 2026-09-24
+
+- Aclaración del equipo (#58): el permiso `pedidos` cubre todo lo que pasa dentro de un pedido o una cotización del comercio, no solo las operaciones sobre el comercio. Un miembro con `pedidos` lee y escribe el chat de esos pedidos y cotizaciones, recibe sus eventos en `GET /eventos` y presupuesta (`presupuestarCotizacion` suma `x-permiso-equipo: [pedidos]`). Grupos, suscripciones y lo demás que un comercio recibe fuera de un pedido siguen siendo solo de la dueña. Sin rutas nuevas; ningún cliente cambia. Detalle en `docs/equipo.md` y `docs/eventos.md`.
+
 ## 2026-09-23
 
 - `esquemas/comercio.json` suma `verificacion.homonimos_cerca`: cuántos comercios no vinculados con el mismo nombre hay a 1.500 m o menos. Lo fija el nodo. Así `buscarComercios` puede avisar "hay otro con el mismo nombre cerca" sin pedir la verificación de cada resultado; el detalle sigue en `GET /actores/{identidad}/verificacion`. Opcional: ningún cliente cambia.
