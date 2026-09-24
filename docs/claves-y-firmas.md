@@ -86,6 +86,8 @@ La entrada de clave lleva además `clave_cifrado`, una clave pública X25519 par
 
 Si un destinatario no publica `clave_cifrado`, el chat de ese contexto va sin cifrar.
 
+**Un comercio publica la suya con `PATCH /comercios/{id}`** (`clave_cifrado`, X25519 pública en base64url; `null` la retira). La carga quien lo administra, generada en su dispositivo: la privada queda ahí y el nodo nunca la ve, aunque custodie la clave de firma del comercio. Así el chat con un comercio es de punta a punta aunque su firma sea de custodia del nodo. El nodo no la guarda en la ficha sino en la entrada activa del historial de claves del comercio, donde la busca quien le escribe (`GET /actores/{identidad}/claves`). Una clave que no mide 32 bytes responde 422.
+
 ## Claves del nodo
 
 - El `keyid` de las firmas HTTP (RFC 9421) es la clave pública del nodo.
