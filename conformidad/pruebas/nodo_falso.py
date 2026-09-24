@@ -55,7 +55,7 @@ de prueba fijo (MANDATO_VALIDO, scopes 'armar' + 'pedir_semanal:5000') --
 el nivel B nunca los genera solo, los recibe por flag, así que alguien
 tiene que conocerlos: son estos. El ciclo carrito -> confirmar -> aceptar
 -> listo -> entregar -> reseña, con efectivo y retiro (sin PSP ni
-repartidor), funciona de punta a punta salvo cuatro roturas puntuales:
+repartidor), funciona de punta a punta salvo cinco roturas puntuales:
 - 'listo' no chequea que todos los ítems estén resueltos (defecto nº1).
 - el tope del mandato se calcula pero nunca se aplica: confirmar nunca
   responde 402 fuera_de_mandato (defecto nº2).
@@ -65,6 +65,8 @@ repartidor), funciona de punta a punta salvo cuatro roturas puntuales:
   el que más le importa a Leo).
 - una reseña repetida para el mismo par pedido/autor/destinatario no
   responde 409: se acepta de nuevo (defecto nº4).
+- GET /mandatos/{id}/actividad no anota nada (siempre vacía) y se la
+  muestra también al token del mandato, no solo a la sesión (defecto nº5).
 
 GET /v1/yo y GET /v1/mandatos no plantan ningún defecto: existen para que la
 suite arme la reseña con la identidad real de la sesión y el comercio del
@@ -255,6 +257,11 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(401, ERROR_NO_AUTENTICADO)
             else:
                 self._json(200, [_mandato_publico()])
+        elif p == f"/v1/mandatos/{MANDATO_ID}/actividad":
+            if actor is None:
+                self._json(401, ERROR_NO_AUTENTICADO)
+            else:
+                self._json(200, {"actividad": []})
         elif p == "/.well-known/vereda.json":
             self._enviar(200, "<html>esto no es JSON</html>", content_type="text/html")
         elif p == "/v1/sostenimiento":

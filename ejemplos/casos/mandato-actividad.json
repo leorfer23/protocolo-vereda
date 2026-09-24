@@ -1,0 +1,45 @@
+{
+  "$comentario": "Casos de una entrada de la actividad de un mandato (GET /mandatos/{id}/actividad, docs/mandatos.md).",
+  "esquema": "mandato.json#/$defs/actividad",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "El agente del comercio cargó una promoción.",
+      "doc": {
+        "operacion": "crearPromocion",
+        "entidad": { "tipo": "promocion", "id": "01926b3a-9999-7000-8000-000000000001" },
+        "resumen": "Agregó una promoción 2x1",
+        "instante": "2026-09-23T10:15:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin resumen la persona no entiende qué pasó sin abrir la entidad.",
+      "doc": {
+        "operacion": "crearPromocion",
+        "entidad": { "tipo": "promocion", "id": "01926b3a-9999-7000-8000-000000000001" },
+        "instante": "2026-09-23T10:15:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La entidad dice sobre qué escribió: sin id no se puede ir a verla.",
+      "doc": {
+        "operacion": "actualizarStock",
+        "entidad": { "tipo": "oferta" },
+        "resumen": "Marcó sin stock la leche entera",
+        "instante": "2026-09-23T10:15:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El resumen es para leer de un vistazo: más de 140 caracteres no entra.",
+      "doc": {
+        "operacion": "actualizarStock",
+        "entidad": { "tipo": "oferta", "id": "01926b3a-9999-7000-8000-000000000002" },
+        "resumen": "Marcó sin stock la leche entera y además la yerba, el azúcar, la harina, los fideos, el arroz, el aceite, las galletitas, el café y el dulce de leche",
+        "instante": "2026-09-23T10:15:00-03:00"
+      }
+    }
+  ]
+}

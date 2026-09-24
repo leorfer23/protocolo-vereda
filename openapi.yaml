@@ -1335,6 +1335,28 @@ paths:
     post: { operationId: otorgarMandato, tags: [mandatos], summary: Otorgar mandato a un agente (fin del flujo OAuth), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } }, responses: { "201": { description: "Otorgado. Es la única vez que el nodo muestra el token del agente", content: { application/json: { schema: { allOf: [ { $ref: "esquemas/mandato.json" }, { type: object, required: [token], properties: { token: { type: string, description: "Lo que el agente manda en Authorization: Bearer. No se vuelve a mostrar." } } } ] } } } } } }
   /mandatos/{id}/revocar:
     post: { operationId: revocarMandato, tags: [mandatos], summary: Revocar en un toque, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: Revocado, content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } } } }
+  /mandatos/{id}/actividad:
+    get:
+      operationId: verActividadDeMandato
+      tags: [mandatos]
+      summary: Lo que hizo mi agente con este mandato, de lo más nuevo a lo más viejo
+      description: |
+        Solo la persona que otorgó el mandato, con su sesión: un token de mandato recibe 403, y el
+        mandato de otra persona responde 404, igual que uno que no existe. Una entrada por cada
+        escritura que el nodo aceptó con ese mandato (`esquemas/mandato.json#/$defs/actividad`);
+        las lecturas y los rechazos no se anotan. Sigue legible con el mandato revocado o vencido.
+        El nodo guarda al menos los últimos 90 días; lo anterior lo puede borrar.
+        Paginado por cursor opaco, como `listarPedidosDelComercio`. Reglas en `docs/mandatos.md`.
+      security: [ { sesion: [] } ]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+        - { name: cursor, in: query, schema: { type: string }, description: El `cursor_siguiente` de la página anterior }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/PaginaDeActividad" } } } }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
   /confirmaciones/{codigo}:
     post: { operationId: aprobarConfirmacion, tags: [mandatos], summary: La persona aprueba una acción del agente que excedía el mandato, security: [ { sesion: [] } ], parameters: [ { name: codigo, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: "Aprobada; la acción se ejecuta. Hoy la única acción que se confirma es confirmar un carrito, y devuelve el pedido creado", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
 
@@ -1653,6 +1675,12 @@ components:
       required: [pedidos]
       properties:
         pedidos: { type: array, items: { $ref: "esquemas/pedido.json" } }
+        cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
+    PaginaDeActividad:
+      type: object
+      required: [actividad]
+      properties:
+        actividad: { type: array, items: { $ref: "esquemas/mandato.json#/$defs/actividad" } }
         cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
     PaginaDeResultados:
       type: object

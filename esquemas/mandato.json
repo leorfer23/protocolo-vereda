@@ -33,5 +33,27 @@
     "estado": { "type": "string", "enum": ["activo", "revocado", "vencido"] },
     "revocado_en": { "$ref": "comunes.json#/$defs/instante" },
     "firma": { "$ref": "comunes.json#/$defs/firma" }
+  },
+  "$defs": {
+    "actividad": {
+      "title": "Una entrada de la actividad de un mandato",
+      "description": "Lo que el agente escribió con este mandato, para que la persona que lo otorgó lo lea (GET /mandatos/{id}/actividad, docs/mandatos.md). El nodo anota una por cada escritura que aceptó con el mandato; las lecturas y los rechazos no se anotan.",
+      "type": "object",
+      "required": ["operacion", "entidad", "resumen", "instante"],
+      "properties": {
+        "operacion": { "type": "string", "pattern": "^[a-z][A-Za-z]*$", "description": "El operationId de openapi.yaml que el agente invocó: 'crearPromocion', 'actualizarStock', 'confirmarCarrito'.", "examples": ["crearPromocion", "actualizarStock", "confirmarCarrito", "aceptarPedido"] },
+        "entidad": {
+          "type": "object",
+          "required": ["tipo", "id"],
+          "description": "Sobre qué escribió: lo que creó o cambió.",
+          "properties": {
+            "tipo": { "type": "string", "pattern": "^[a-z_]+$", "description": "Sin enum cerrado: el nombre del esquema, sin '.json'.", "examples": ["comercio", "oferta", "promocion", "pedido", "carrito", "viaje", "mensaje"] },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        },
+        "resumen": { "type": "string", "minLength": 1, "maxLength": 140, "description": "Qué hizo, corto y en el idioma del barrio, para leer de un vistazo. Lo escribe el nodo, no el agente.", "examples": ["Agregó una promoción 2x1", "Marcó sin stock la leche entera", "Aceptó el pedido de Marta"] },
+        "instante": { "$ref": "comunes.json#/$defs/instante" }
+      }
+    }
   }
 }

@@ -126,9 +126,11 @@ class NivelB:
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
+            self._actividad_mandato()
             self._revocacion_mandato()
         else:
             self.casos.append(_omitido("mandato", "confirmarCarrito", "tope del mandato por período (fuera_de_mandato)", "no se pasó --mandato"))
+            self.casos.append(_omitido("mandato", "verActividadDeMandato", "la persona ve qué escribió su agente con el mandato", "no se pasó --mandato"))
             self.casos.append(_omitido("mandato", "rotarClave", "rotarClave rechaza un token de mandato -- la prueba más importante de este nivel", "no se pasó --mandato"))
             self.casos.append(_omitido("mandato", "revocarMandato", "revocar un mandato lo invalida de inmediato", "no se pasó --mandato"))
         return self.casos
@@ -1506,7 +1508,44 @@ class NivelB:
         else:
             self.casos.append(_fallo(cat, opid, desc, f"esperaba 401 o 403, llegó {r_mandato.estado} -- un agente pudo rotar la clave de la persona que le dio permisos"))
 
-    # 5. revocación inmediata ------------------------------------------------
+    # 5. la persona ve qué hizo su agente ---------------------------------------
+    def _actividad_mandato(self):
+        # Corre después de _mandato_tope, que crea carritos con el mandato: esa
+        # escritura tiene que aparecer en la actividad (docs/mandatos.md).
+        cat = "mandato"
+        opid = "verActividadDeMandato"
+        ruta = "/mandatos/{id}/actividad"
+        desc = "después de que el agente crea un carrito con el mandato, su actividad lo muestra (crearCarrito sobre un carrito)"
+        r_list = cliente.solicitud("GET", f"{self.base_v1}/mandatos", headers=self._cabecera(), timeout=self.timeout)
+        activos = [m for m in (r_list.cuerpo if r_list.ok and isinstance(r_list.cuerpo, list) else []) if isinstance(m, dict) and m.get("estado") == "activo"]
+        if len(activos) != 1:
+            self.casos.append(_omitido(cat, opid, desc, f"GET /mandatos no identificó un único mandato activo (hay {len(activos)})"))
+            return
+        url = f"{self.base_v1}/mandatos/{activos[0].get('id')}/actividad"
+
+        r = cliente.solicitud("GET", url, headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 200 or not r.cuerpo_es_json:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+        else:
+            caso = self._chequear_esquema(opid, "la actividad del mandato cumple PaginaDeActividad", ruta, "get", r.cuerpo)
+            if caso:
+                self.casos.append(caso)
+            entradas = (r.cuerpo or {}).get("actividad") if isinstance(r.cuerpo, dict) else None
+            if any(isinstance(e, dict) and e.get("operacion") == "crearCarrito" and (e.get("entidad") or {}).get("tipo") == "carrito" for e in entradas or []):
+                self.casos.append(_ok(cat, opid, desc))
+            else:
+                self.casos.append(_fallo(cat, opid, desc, f"ninguna entrada crearCarrito/carrito entre {len(entradas or [])}"))
+
+        r_ag = cliente.solicitud("GET", url, headers=self._cabecera(mandato=True), timeout=self.timeout)
+        desc_ag = "la actividad la lee la persona con su sesión: con el token del mandato responde 403"
+        if not r_ag.ok:
+            self.casos.append(_fallo(cat, opid, desc_ag, r_ag.motivo))
+        elif r_ag.estado in (401, 403):
+            self.casos.append(_ok(cat, opid, desc_ag))
+        else:
+            self.casos.append(_fallo(cat, opid, desc_ag, f"esperaba 403, llegó {r_ag.estado}"))
+
+    # 6. revocación inmediata ------------------------------------------------
     def _revocacion_mandato(self):
         cat = "mandato"
         opid = "revocarMandato"

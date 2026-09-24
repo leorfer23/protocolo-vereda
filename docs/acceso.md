@@ -23,7 +23,7 @@ Por qué afuera:
 - **Es lo que ya sirven el nodo de referencia y su SDK.** Moverlo rompería a los clientes que
   existen sin ganar nada.
 - **No es para agentes.** Un agente nunca entra por `/acceso`: actúa con un mandato que la
-  persona le otorga desde su sesión (`docs/mandatos.md` del nodo de referencia,
+  persona le otorga desde su sesión (`docs/mandatos.md`,
   `esquemas/mandato.json`). Por eso tampoco hay herramienta MCP de acceso: el servidor MCP
   autentica con el mandato.
 
