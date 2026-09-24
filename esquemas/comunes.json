@@ -213,7 +213,7 @@
     },
     "atributos": {
       "type": "object",
-      "description": "Etiquetas abiertas. Clave libre en snake_case; valor booleano, número o texto corto. Los agentes las leen; nadie las restringe.",
+      "description": "Etiquetas abiertas. Clave libre en snake_case; valor booleano, número o texto corto. Los agentes las leen; nadie las restringe. docs/atributos.md sugiere un vocabulario común por rubro (almacén, vinoteca, verdulería, panadería, carnicería) y la información nutricional por 100 g o ml, para que dos comercios llamen igual a lo mismo; sugiere, no obliga: cualquier otra clave vale igual.",
       "propertyNames": {
         "pattern": "^[a-z][a-z0-9_]*$"
       },
@@ -231,6 +231,59 @@
           "refrigerado": true,
           "picante": "medio",
           "origen": "Mendoza"
+        },
+        {
+          "marca": "La Serenísima",
+          "contenido_neto": 1,
+          "contenido_unidad": "l",
+          "sin_lactosa": true,
+          "refrigerado": true,
+          "nutricional_por": "100ml",
+          "calorias_100g": 61,
+          "proteinas_100g": 3.1,
+          "grasas_100g": 3,
+          "sodio_100g": 50
+        },
+        {
+          "marca": "Molinos",
+          "contenido_neto": 500,
+          "contenido_unidad": "g",
+          "sin_tacc": true,
+          "vegano": true,
+          "exceso_sodio": true,
+          "calorias_100g": 350,
+          "carbohidratos_100g": 72,
+          "azucares_100g": 1.5,
+          "proteinas_100g": 12,
+          "grasas_100g": 1.8,
+          "grasas_saturadas_100g": 0.3,
+          "fibra_100g": 3,
+          "sodio_100g": 620
+        },
+        {
+          "bodega": "Catena Zapata",
+          "varietal": "malbec",
+          "cosecha": 2021,
+          "region": "Valle de Uco",
+          "graduacion": 13.5,
+          "tipo_vino": "tinto"
+        },
+        {
+          "origen": "Cinturón hortícola platense",
+          "organico": true,
+          "de_estacion": true
+        },
+        {
+          "masa_madre": true,
+          "integral": true,
+          "del_dia": true
+        },
+        {
+          "corte": "vacío",
+          "animal": "vaca",
+          "con_hueso": false,
+          "alimentacion": "pastura",
+          "envasado_al_vacio": true
         }
       ]
     },

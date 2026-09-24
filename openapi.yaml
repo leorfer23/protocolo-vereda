@@ -574,7 +574,7 @@ paths:
         - { name: ean, in: query, schema: { type: string } }
         - { name: lat, in: query, required: true, schema: { type: number } }
         - { name: lng, in: query, required: true, schema: { type: number } }
-        - { name: atributos, in: query, schema: { type: string }, description: "sin_tacc=true,refrigerado=false" }
+        - { name: atributos, in: query, schema: { type: string }, description: "Filtro por igualdad exacta, clave=valor separados por coma: sin_tacc=true,varietal=malbec. Vocabulario sugerido por rubro en docs/atributos.md" }
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
         - { name: con_video, in: query, schema: { type: boolean, default: false }, description: "Solo ofertas con al menos un clip en `videos`" }
         - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
