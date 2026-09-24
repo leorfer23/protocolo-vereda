@@ -1,0 +1,31 @@
+{
+  "$comentario": "Casos de una invitación al equipo (docs/equipo.md).",
+  "esquema": "equipo.json#/$defs/invitacion",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "La respuesta de invitarAlEquipo: la única vez que viajan el código y el enlace.",
+      "doc": { "id": "01926b3a-9999-7000-8000-000000000001", "comercio": "verduleria.yatay@vereda.ar", "comercio_nombre": "Verdulería Yatay", "rol": "atención", "permisos": ["pedidos"], "codigo": "q3J8vX2kLmN9pR4sT7wY1z", "enlace": "vereda://equipo?nodo=vereda.ar&codigo=q3J8vX2kLmN9pR4sT7wY1z", "creada_por": "marta@vereda.ar", "creada_en": "2026-09-23T09:10:00-03:00", "vence": "2026-09-26T09:10:00-03:00", "estado": "pendiente" }
+    },
+    {
+      "espera": "valido",
+      "porque": "Aceptada: dice por quién.",
+      "doc": { "id": "01926b3a-9999-7000-8000-000000000002", "comercio": "verduleria.yatay@vereda.ar", "rol": "atención", "permisos": ["pedidos"], "creada_por": "marta@vereda.ar", "creada_en": "2026-09-23T09:10:00-03:00", "vence": "2026-09-26T09:10:00-03:00", "estado": "aceptada", "aceptada_por": "sofi@vereda.ar" }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un código corto se adivina: al menos 16 caracteres.",
+      "doc": { "id": "01926b3a-9999-7000-8000-000000000003", "comercio": "verduleria.yatay@vereda.ar", "rol": "atención", "permisos": ["pedidos"], "codigo": "123456", "creada_por": "marta@vereda.ar", "creada_en": "2026-09-23T09:10:00-03:00", "vence": "2026-09-26T09:10:00-03:00", "estado": "pendiente" }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El enlace es del esquema de la app, no una página del nodo.",
+      "doc": { "id": "01926b3a-9999-7000-8000-000000000004", "comercio": "verduleria.yatay@vereda.ar", "rol": "atención", "permisos": ["pedidos"], "enlace": "https://vereda.ar/equipo?codigo=q3J8vX2kLmN9pR4sT7wY1z", "creada_por": "marta@vereda.ar", "creada_en": "2026-09-23T09:10:00-03:00", "vence": "2026-09-26T09:10:00-03:00", "estado": "pendiente" }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un estado que no existe.",
+      "doc": { "id": "01926b3a-9999-7000-8000-000000000005", "comercio": "verduleria.yatay@vereda.ar", "rol": "atención", "permisos": ["pedidos"], "creada_por": "marta@vereda.ar", "creada_en": "2026-09-23T09:10:00-03:00", "vence": "2026-09-26T09:10:00-03:00", "estado": "aprobada" }
+    }
+  ]
+}

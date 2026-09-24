@@ -91,6 +91,19 @@ try:
         print(f"✗ respuestas 2xx sin esquema ni 'Sin cuerpo.': {', '.join(sin_esquema)}" if sin_esquema else f"✗ $ref a esquemas que no existen: {', '.join(rotas)}")
     else:
         print("✓ toda respuesta 2xx declara su esquema o que no tiene cuerpo")
+    # Toda operación del lado comercio dice qué permiso del equipo la habilita
+    # (docs/equipo.md). Quedan afuera las que no actúan sobre un comercio que ya existe.
+    permisos = set(esquemas["equipo.json"]["$defs"]["permiso"]["enum"]) | {"duena"}
+    sin_permiso = [f"{o['operationId']}" for p, item in api["paths"].items() for m, o in item.items() if m in METODOS
+                   and any("administrar" in (s.get("mandato") or []) for s in o.get("security", []))
+                   and o["operationId"] not in ("crearComercio", "aceptarInvitacion")
+                   and not (isinstance(o.get("x-permiso-equipo"), list) and set(o["x-permiso-equipo"]) <= permisos
+                            and ("duena" not in o["x-permiso-equipo"] or o["x-permiso-equipo"] == ["duena"]))]
+    if sin_permiso:
+        fallos += 1
+        print(f"✗ operaciones con 'administrar' sin un x-permiso-equipo válido: {', '.join(sin_permiso)}")
+    else:
+        print("✓ toda operación con 'administrar' dice qué permiso del equipo la habilita")
 except Exception as e:
     fallos += 1
     print(f"✗ openapi.yaml\n    {str(e).splitlines()[0][:200]}")

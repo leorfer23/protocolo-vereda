@@ -1,0 +1,51 @@
+{
+  "$comentario": "Casos del equipo de un comercio (docs/equipo.md).",
+  "esquema": "equipo.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "La dueña con dos miembros, visto por quien tiene 'equipo': trae la invitación pendiente, sin código.",
+      "doc": {
+        "comercio": "verduleria.yatay@vereda.ar",
+        "duena": "marta@vereda.ar",
+        "miembros": [
+          { "identidad": "lucas@vereda.ar", "nombre": "Lucas", "rol": "encargado", "permisos": ["pedidos", "catalogo", "numeros", "equipo"], "agregado_por": "marta@vereda.ar", "agregado_en": "2026-09-20T10:00:00-03:00" },
+          { "identidad": "sofi@vereda.ar", "rol": "atención", "permisos": ["pedidos"], "agregado_por": "lucas@vereda.ar", "agregado_en": "2026-09-22T18:30:00-03:00", "cambiado_por": "marta@vereda.ar", "cambiado_en": "2026-09-23T09:00:00-03:00" }
+        ],
+        "invitaciones": [
+          { "id": "01926b3a-9999-7000-8000-000000000001", "comercio": "verduleria.yatay@vereda.ar", "rol": "catálogo", "permisos": ["catalogo"], "creada_por": "marta@vereda.ar", "creada_en": "2026-09-23T09:10:00-03:00", "vence": "2026-09-26T09:10:00-03:00", "estado": "pendiente" }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Un comercio sin equipo: la dueña sola.",
+      "doc": { "comercio": "verduleria.yatay@vereda.ar", "duena": "marta@vereda.ar", "miembros": [] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un miembro sin permisos no sirve: para no poder nada, se lo saca.",
+      "doc": { "comercio": "verduleria.yatay@vereda.ar", "duena": "marta@vereda.ar", "miembros": [ { "identidad": "sofi@vereda.ar", "rol": "atención", "permisos": [], "agregado_por": "marta@vereda.ar", "agregado_en": "2026-09-22T18:30:00-03:00" } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Exportar no es un permiso: es solo de la dueña.",
+      "doc": { "comercio": "verduleria.yatay@vereda.ar", "duena": "marta@vereda.ar", "miembros": [ { "identidad": "sofi@vereda.ar", "rol": "contaduría", "permisos": ["numeros", "exportar"], "agregado_por": "marta@vereda.ar", "agregado_en": "2026-09-22T18:30:00-03:00" } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El mismo permiso dos veces.",
+      "doc": { "comercio": "verduleria.yatay@vereda.ar", "duena": "marta@vereda.ar", "miembros": [ { "identidad": "sofi@vereda.ar", "rol": "atención", "permisos": ["pedidos", "pedidos"], "agregado_por": "marta@vereda.ar", "agregado_en": "2026-09-22T18:30:00-03:00" } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Rol vacío: el comercio lo nombra, aunque sea con una palabra.",
+      "doc": { "comercio": "verduleria.yatay@vereda.ar", "duena": "marta@vereda.ar", "miembros": [ { "identidad": "sofi@vereda.ar", "rol": "", "permisos": ["pedidos"], "agregado_por": "marta@vereda.ar", "agregado_en": "2026-09-22T18:30:00-03:00" } ] }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Falta la dueña: todo equipo la dice.",
+      "doc": { "comercio": "verduleria.yatay@vereda.ar", "miembros": [] }
+    }
+  ]
+}

@@ -159,8 +159,33 @@
     },
     {
       "name": "mis_comercios",
-      "description": "Los comercios que administra la persona, con id, nombre, tipo y si está abierto ahora (abierto_ahora). Leelo primero para saber sobre qué comercio_id operar; vacío si no administra ninguno. Requiere scope 'administrar'.",
+      "description": "Los comercios que administra la persona, con id, nombre, tipo, si está abierto ahora (abierto_ahora), su rol ('dueña' o el del equipo) y sus permisos. Leelo primero para saber sobre qué comercio_id operar y qué podés hacer en cada uno: en un comercio donde la persona es del equipo, vos podés solo lo que ella puede. Vacío si no administra ninguno. Requiere scope 'administrar'.",
       "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+      "name": "equipo_ver",
+      "description": "El equipo del comercio (GET /comercios/{id}/equipo): la dueña y cada miembro con su rol y sus permisos ('pedidos', 'catalogo', 'numeros', 'datos', 'equipo'). Con el permiso 'equipo' trae también las invitaciones pendientes. Ej: 'quiénes están en el equipo', 'qué puede hacer Sofi'. Requiere scope 'administrar'.",
+      "inputSchema": {"type": "object", "required": ["comercio_id"], "properties": {"comercio_id": {"type": "string"}}}
+    },
+    {
+      "name": "equipo_invitar",
+      "description": "Invita a alguien al equipo del comercio con un rol y sus permisos (POST /comercios/{id}/equipo/invitaciones). Devuelve un código y un enlace vereda://equipo?… que se ven una sola vez: pasáselos a la persona para que los comparta en mano o por mensaje, nunca en público. Solo se dan permisos que la persona que te mandó tiene. El rol es libre ('encargado', 'atención', 'catálogo'); lo que habilita son los permisos. Ej: 'invitá a Sofi para atender pedidos', 'sumá un encargado con todo menos números'. Requiere scope 'administrar' y el permiso 'equipo'.",
+      "inputSchema": {"type": "object", "required": ["comercio_id", "rol", "permisos"], "properties": {"comercio_id": {"type": "string"}, "rol": {"type": "string", "maxLength": 40}, "permisos": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["pedidos", "catalogo", "numeros", "datos", "equipo"]}}, "vence_en_horas": {"type": "integer", "minimum": 1, "maximum": 168, "default": 72}}}
+    },
+    {
+      "name": "equipo_aceptar",
+      "description": "Acepta una invitación al equipo de un comercio con el código que le pasaron a la persona (POST /equipo/aceptar). Entra ella, con su identidad, con el rol y los permisos de la invitación. Confirmale a qué comercio entra antes. Ej: 'me pasaron este código de la verdulería'. Requiere scope 'administrar'.",
+      "inputSchema": {"type": "object", "required": ["codigo"], "properties": {"codigo": {"type": "string"}}}
+    },
+    {
+      "name": "equipo_cambiar",
+      "description": "Cambia el rol o los permisos de un miembro del equipo (PATCH /comercios/{id}/equipo/{identidad}), o anula una invitación pendiente con 'invitacion_id'. Rige desde su próxima acción. A la dueña no se la cambia. Ej: 'dale a Lucas acceso a los números', 'que Sofi ya no toque la carta', 'anulá la invitación de ayer'. Requiere scope 'administrar' y el permiso 'equipo'.",
+      "inputSchema": {"type": "object", "required": ["comercio_id"], "properties": {"comercio_id": {"type": "string"}, "identidad": {"type": "string", "description": "El miembro, actor@nodo."}, "rol": {"type": "string", "maxLength": 40}, "permisos": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["pedidos", "catalogo", "numeros", "datos", "equipo"]}}, "invitacion_id": {"type": "string", "description": "Para anular una invitación pendiente en vez de cambiar a un miembro."}}}
+    },
+    {
+      "name": "equipo_sacar",
+      "description": "Saca a alguien del equipo del comercio, o saca a la persona misma si se quiere ir (DELETE /comercios/{id}/equipo/{identidad}). Pierde el acceso en el acto, y también los agentes a los que les dio mandato. Lo que hizo queda a su nombre. A la dueña no se la saca. Preguntale a la persona antes. Ej: 'sacá a Lucas del equipo', 'me voy del equipo de la panadería'. Requiere scope 'administrar' y el permiso 'equipo', salvo para irse uno mismo.",
+      "inputSchema": {"type": "object", "required": ["comercio_id", "identidad"], "properties": {"comercio_id": {"type": "string"}, "identidad": {"type": "string", "description": "El miembro, actor@nodo."}}}
     },
     {
       "name": "comercio_editar",

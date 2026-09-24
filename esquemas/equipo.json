@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/equipo.json",
+  "title": "Equipo de un comercio",
+  "description": "Las personas que administran un comercio además de su dueña, cada una con su rol y sus permisos. Lo arma la dueña (o quien tenga el permiso 'equipo'): nadie más aprueba a nadie. Cada miembro entra con su propia clave y todo lo que hace queda a su nombre. No es público y nunca se federa. Diseño en docs/equipo.md.",
+  "type": "object",
+  "required": ["comercio", "duena", "miembros"],
+  "properties": {
+    "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+    "duena": { "$ref": "comunes.json#/$defs/identidad", "description": "Quien dio de alta el comercio, o quien lo ganó en un reclamo (openapi.yaml, listarMisComercios). Puede todo, incluido exportar, y nadie la saca ni le cambia los permisos. No figura en 'miembros'." },
+    "miembros": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/miembro" } },
+    "invitaciones": { "type": "array", "items": { "$ref": "#/$defs/invitacion" }, "description": "Las pendientes. Solo las ve quien tiene el permiso 'equipo'; sin él, ausente." }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "permiso": {
+      "type": "string",
+      "enum": ["pedidos", "catalogo", "numeros", "datos", "equipo"],
+      "description": "Qué parte del comercio puede operar un miembro. 'pedidos': la bandeja, aceptar y rechazar, resolver ítems, marcar listo, entregar, asignar repartidor, transferencias y rendiciones. 'catalogo': ofertas, stock, promociones y fotos. 'numeros': métricas. 'datos': la ficha (horarios, modalidades, apertura, cobro, envíos, política de datos, clave_cifrado), el aporte al nodo, vinculaciones, atestaciones, y responder reseñas y denuncias. 'equipo': invitar, cambiar rol y permisos, y sacar gente. Exportar el comercio no es de ningún permiso: es solo de la dueña, porque lleva los datos de los compradores. Qué permiso pide cada operación lo dice 'x-permiso-equipo' en openapi.yaml."
+    },
+    "permisos": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/permiso" }
+    },
+    "rol": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Cómo lo llama el comercio. Texto libre: no da permisos por sí mismo, los da 'permisos'. Las apps sugieren estos, con sus permisos típicos, sin obligar a ninguno.",
+      "examples": ["encargado", "atención", "despacho", "catálogo", "contaduría"]
+    },
+    "miembro": {
+      "type": "object",
+      "required": ["identidad", "rol", "permisos", "agregado_por", "agregado_en"],
+      "properties": {
+        "identidad": { "$ref": "comunes.json#/$defs/identidad", "description": "La persona, con su propia clave. Nunca la del comercio ni la de la dueña." },
+        "nombre": { "type": "string", "maxLength": 120, "readOnly": true, "description": "El nombre que la persona usa en el nodo, para mostrarlo en la lista. Lo pone el nodo." },
+        "rol": { "$ref": "#/$defs/rol" },
+        "permisos": { "$ref": "#/$defs/permisos" },
+        "agregado_por": { "$ref": "comunes.json#/$defs/identidad", "description": "Quien creó la invitación que aceptó." },
+        "agregado_en": { "$ref": "comunes.json#/$defs/instante" },
+        "cambiado_por": { "$ref": "comunes.json#/$defs/identidad", "description": "Quien le cambió por última vez el rol o los permisos." },
+        "cambiado_en": { "$ref": "comunes.json#/$defs/instante" }
+      },
+      "additionalProperties": false
+    },
+    "invitacion": {
+      "type": "object",
+      "description": "Lo que abre la puerta del equipo a una persona. Sirve una sola vez y vence. La acepta quien tenga el código, con su propia sesión: por eso el código se comparte en mano, por mensaje o como QR, y nunca se publica.",
+      "required": ["id", "comercio", "rol", "permisos", "creada_por", "creada_en", "vence", "estado"],
+      "properties": {
+        "id": { "$ref": "comunes.json#/$defs/id" },
+        "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+        "comercio_nombre": { "type": "string", "maxLength": 120, "readOnly": true, "description": "Para que quien la recibe sepa a qué local entra antes de aceptar." },
+        "rol": { "$ref": "#/$defs/rol" },
+        "permisos": { "$ref": "#/$defs/permisos" },
+        "codigo": { "type": "string", "minLength": 16, "maxLength": 128, "pattern": "^[A-Za-z0-9_-]+$", "description": "Secreto, con al menos 128 bits de azar. Solo viene en la respuesta de invitarAlEquipo; después nadie lo vuelve a ver, ni siquiera quien la creó. El nodo guarda solo su hash." },
+        "enlace": { "type": "string", "format": "uri", "pattern": "^vereda://equipo\\?", "description": "Lo mismo que 'codigo', listo para un QR o un mensaje: vereda://equipo?nodo=<dominio>&codigo=<codigo>. La app lo abre y llama a aceptarInvitacion en ese nodo. Solo en la respuesta de invitarAlEquipo." },
+        "creada_por": { "$ref": "comunes.json#/$defs/identidad" },
+        "creada_en": { "$ref": "comunes.json#/$defs/instante" },
+        "vence": { "$ref": "comunes.json#/$defs/instante", "description": "A las 72 horas si quien la crea no dice otra cosa; nunca más de 7 días." },
+        "estado": { "type": "string", "enum": ["pendiente", "aceptada", "revocada", "vencida"] },
+        "aceptada_por": { "$ref": "comunes.json#/$defs/identidad" }
+      },
+      "additionalProperties": false
+    },
+    "nueva_invitacion": {
+      "type": "object",
+      "description": "Cuerpo de invitarAlEquipo.",
+      "required": ["rol", "permisos"],
+      "properties": {
+        "rol": { "$ref": "#/$defs/rol" },
+        "permisos": { "$ref": "#/$defs/permisos" },
+        "vence_en_horas": { "type": "integer", "minimum": 1, "maximum": 168, "default": 72 }
+      },
+      "additionalProperties": false
+    },
+    "cambio_de_miembro": {
+      "type": "object",
+      "description": "Cuerpo de cambiarMiembro. Lo que no viene queda como está.",
+      "minProperties": 1,
+      "properties": {
+        "rol": { "$ref": "#/$defs/rol" },
+        "permisos": { "$ref": "#/$defs/permisos" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

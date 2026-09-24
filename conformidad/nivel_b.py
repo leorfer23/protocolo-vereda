@@ -122,6 +122,7 @@ class NivelB:
         self._apertura_manual()
         self._videos()
         self._medios(capacidades)
+        self._equipo(capacidades)
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
@@ -1026,6 +1027,123 @@ class NivelB:
                 self.casos.append(_fallo(cat, opid, desc, f"el código vino {(r.cuerpo or {}).get('codigo')!r}"))
             else:
                 self.casos.append(self._chequear_esquema(opid, desc + " con esquemas/error.json", "/medios", "post", r.cuerpo, str(estado)) or _ok(cat, opid, desc))
+
+    # equipo del comercio (docs/equipo.md) -----------------------------------
+    # La sesión de prueba es la dueña del comercio de prueba; una identidad nueva
+    # de /acceso entra al equipo solo con 'pedidos'. Se prueba lo que no puede
+    # fallar: entra con su clave, puede lo suyo y nada más, y sacarla corta ya.
+    def _equipo(self, capacidades):
+        cat = "equipo"
+        if capacidades.get("custodia_propia") is not True:
+            self.casos.append(_omitido(cat, "invitarAlEquipo", "equipo del comercio (docs/equipo.md)", "hace falta una segunda identidad y el nodo no publica acceso.custodia_propia: true"))
+            return
+        comercio = self._comercio_de_la_oferta("01920000-0000-7000-8000-0000000000b1")
+        if not comercio or not comercio.get("id"):
+            self.casos.append(_omitido(cat, "invitarAlEquipo", "equipo del comercio", "no se pudo leer el comercio de la oferta de prueba"))
+            return
+        cid = comercio["id"]
+        base = f"{self.base_v1}/comercios/{cid}/equipo"
+
+        def con(token):
+            return {"Authorization": f"Bearer {token}"}
+
+        opid, desc = "verEquipo", "la dueña lee el equipo (200, esquemas/equipo.json)"
+        r = cliente.solicitud("GET", base, headers=self._cabecera(), timeout=self.timeout)
+        if r.ok and r.estado == 501:
+            self.casos.append(_omitido(cat, opid, "equipo del comercio (docs/equipo.md)", "el nodo responde 501: no implementa equipos"))
+            return
+        if r.ok and r.estado == 403:
+            self.casos.append(_omitido(cat, opid, "equipo del comercio", "la sesión de prueba no administra el comercio de la oferta de prueba (403)"))
+            return
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        self.casos.append(self._chequear_esquema(opid, desc, "/comercios/{id}/equipo", "get", r.cuerpo) or _ok(cat, opid, desc))
+
+        miembro, otra = self._sesion_nueva(), self._sesion_nueva()
+        if not miembro or not otra:
+            self.casos.append(_omitido(cat, "aceptarInvitacion", "equipo del comercio", "no se pudieron abrir dos identidades nuevas por /acceso"))
+            return
+        r = cliente.solicitud("GET", f"{self.base_v1}/yo", headers=con(miembro), timeout=self.timeout)
+        yo = (r.cuerpo or {}).get("identidad") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+
+        opid, desc = "invitarAlEquipo", "la dueña invita con rol 'atención' y permiso 'pedidos' (201, con codigo y enlace vereda://equipo?)"
+        r = cliente.solicitud("POST", f"{base}/invitaciones", headers=self._cabecera(), json_body={"rol": "atención", "permisos": ["pedidos"]}, timeout=self.timeout)
+        inv = r.cuerpo if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        if not inv or not inv.get("codigo") or not str(inv.get("enlace", "")).startswith("vereda://equipo?"):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"llegó {r.estado}: {str(r.cuerpo)[:200]}"))
+            return
+        self.casos.append(self._chequear_esquema(opid, desc, "/comercios/{id}/equipo/invitaciones", "post", inv, "201") or _ok(cat, opid, desc))
+
+        opid, desc = "invitarAlEquipo", "permisos que no existen ('exportar') responden 422"
+        r = cliente.solicitud("POST", f"{base}/invitaciones", headers=self._cabecera(), json_body={"rol": "x", "permisos": ["exportar"]}, timeout=self.timeout)
+        self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 422 else _fallo(cat, opid, desc, r.motivo or f"esperaba 422, llegó {r.estado}"))
+
+        opid, desc = "aceptarInvitacion", "la persona invitada acepta con su sesión (201): entra con su identidad, el rol y los permisos de la invitación"
+        r = cliente.solicitud("POST", f"{self.base_v1}/equipo/aceptar", headers=con(miembro), json_body={"codigo": inv["codigo"]}, timeout=self.timeout)
+        m = r.cuerpo if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        if not m:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}: {str(r.cuerpo)[:200]}"))
+            return
+        mal = [k for k, v in (("rol", "atención"), ("permisos", ["pedidos"])) if m.get(k) != v] + (["identidad"] if yo and m.get("identidad") != yo else [])
+        caso = self._chequear_esquema(opid, desc, "/equipo/aceptar", "post", m, "201")
+        self.casos.append(caso if caso and caso.resultado == "fallo" else (_fallo(cat, opid, desc, f"no coincide: {', '.join(mal)}") if mal else _ok(cat, opid, desc)))
+        yo = yo or m.get("identidad")
+
+        opid, desc = "aceptarInvitacion", "el mismo código otra vez, con otra identidad, responde 410 invitacion_invalida"
+        r = cliente.solicitud("POST", f"{self.base_v1}/equipo/aceptar", headers=con(otra), json_body={"codigo": inv["codigo"]}, timeout=self.timeout)
+        self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 410 and (r.cuerpo or {}).get("codigo") == "invitacion_invalida" else _fallo(cat, opid, desc, r.motivo or f"llegó {r.estado} {(r.cuerpo or {}).get('codigo') if isinstance(r.cuerpo, dict) else ''}"))
+
+        opid, desc = "listarMisComercios", "el comercio aparece en GET /yo/comercios del miembro, con rol y permisos"
+        r = cliente.solicitud("GET", f"{self.base_v1}/yo/comercios", headers=con(miembro), timeout=self.timeout)
+        suyo = next((c for c in (r.cuerpo if r.ok and isinstance(r.cuerpo, list) else []) if isinstance(c, dict) and c.get("id") == cid), None)
+        self.casos.append(_ok(cat, opid, desc) if suyo and suyo.get("permisos") == ["pedidos"] and suyo.get("rol") == "atención" else _fallo(cat, opid, desc, f"llegó {r.estado}: {str(suyo or r.cuerpo)[:200]}"))
+
+        opid, desc = "listarPedidosDelComercio", "con 'pedidos', el miembro lee la bandeja del comercio (200)"
+        r = cliente.solicitud("GET", f"{self.base_v1}/comercios/{cid}/pedidos?limite=1", headers=con(miembro), timeout=self.timeout)
+        self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 200 else _fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+
+        sin = [
+            ("editarComercio", "PATCH", f"{self.base_v1}/comercios/{cid}", {"notas_para_agentes": comercio.get("notas_para_agentes") or "conformidad"}, "datos"),
+            ("metricasDelComercio", "GET", f"{self.base_v1}/comercios/{cid}/metricas", None, "numeros"),
+            ("exportarComercio", "GET", f"{self.base_v1}/comercios/{cid}/exportar", None, None),
+            ("invitarAlEquipo", "POST", f"{base}/invitaciones", {"rol": "x", "permisos": ["pedidos"]}, "equipo"),
+        ]
+        for opid, metodo, url, cuerpo, falta in sin:
+            desc = f"sin '{falta or 'ser la dueña'}', el miembro recibe 403 sin_permiso y no cambia nada"
+            r = cliente.solicitud(metodo, url, headers=con(miembro), json_body=cuerpo, timeout=self.timeout)
+            codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+            detalle = ((r.cuerpo or {}).get("detalle") or {}) if isinstance(r.cuerpo, dict) else {}
+            if not r.ok or r.estado != 403 or codigo != "sin_permiso":
+                self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 403 sin_permiso, llegó {r.estado} {codigo}"))
+            elif falta and detalle.get("falta") != falta:
+                self.casos.append(_fallo(cat, opid, desc, f"detalle.falta vino {detalle.get('falta')!r}"))
+            else:
+                self.casos.append(_ok(cat, opid, desc))
+
+        opid, desc = "sacarDelEquipo", "sacar a la dueña responde 403 sin_permiso"
+        r = cliente.solicitud("GET", base, headers=con(miembro), timeout=self.timeout)
+        duena = (r.cuerpo or {}).get("duena") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        if duena:
+            r = cliente.solicitud("DELETE", f"{base}/{duena}", headers=self._cabecera(), timeout=self.timeout)
+            self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 403 and (r.cuerpo or {}).get("codigo") == "sin_permiso" else _fallo(cat, opid, desc, r.motivo or f"esperaba 403, llegó {r.estado}"))
+        else:
+            self.casos.append(_fallo(cat, "verEquipo", "un miembro lee el equipo y trae 'duena'", f"llegó {r.estado}"))
+
+        opid, desc = "sacarDelEquipo", "la dueña saca al miembro (204) y desde la llamada siguiente recibe 403 no_es_el_dueno"
+        r = cliente.solicitud("DELETE", f"{base}/{yo}", headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 204:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 204, llegó {r.estado}"))
+            return
+        r = cliente.solicitud("GET", f"{self.base_v1}/comercios/{cid}/pedidos?limite=1", headers=con(miembro), timeout=self.timeout)
+        r_yo = cliente.solicitud("GET", f"{self.base_v1}/yo/comercios", headers=con(miembro), timeout=self.timeout)
+        sigue = any(isinstance(c, dict) and c.get("id") == cid for c in (r_yo.cuerpo if r_yo.ok and isinstance(r_yo.cuerpo, list) else []))
+        if not r.ok or r.estado != 403 or (r.cuerpo or {}).get("codigo") != "no_es_el_dueno":
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"después de sacarlo, la bandeja respondió {r.estado}"))
+        elif sigue:
+            self.casos.append(_fallo(cat, opid, desc, "el comercio sigue en su GET /yo/comercios"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
 
     # quien abre el pedido a mitad del viaje ve dónde está el repartidor -----
     # La identidad de prueba compra, opera el comercio y se declara repartidora:

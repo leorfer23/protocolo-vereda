@@ -59,7 +59,7 @@
         "properties": {
           "estado": { "$ref": "#/$defs/estado" },
           "instante": { "$ref": "comunes.json#/$defs/instante" },
-          "actor": { "$ref": "comunes.json#/$defs/identidad" },
+          "actor": { "$ref": "comunes.json#/$defs/identidad", "description": "Quien hizo la transición. Del lado del comercio es la persona que la hizo, la dueña o un miembro de su equipo, no la identidad del comercio: así queda a nombre de quien aceptó, preparó o entregó (docs/equipo.md). Si la hizo un agente, la del otorgante del mandato." },
           "motivo": { "type": "string" },
           "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado", "nodo_no_disponible", "sin_repartidor"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
         }
