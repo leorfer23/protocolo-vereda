@@ -183,6 +183,34 @@
       }
     },
     {
+      "name": "medio_subir",
+      "description": "Sube una foto del comercio propio al nodo y devuelve su 'url', para ponerla después en 'imagenes' con comercio_editar u oferta_editar. Solo si el nodo lo ofrece ('endpoints.medios' en /.well-known/vereda.json); si no, responde no_implementado y la foto va por URL. JPEG o PNG, hasta 'medios.limite_bytes'; una HEIC se convierte a JPEG antes. El nodo le borra la ubicación y demás metadatos. Ej: 'subí esta foto de la vidriera', 'usá esta foto para la milanesa'. Requiere scope 'administrar'.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "comercio_id",
+          "contenido_base64",
+          "tipo"
+        ],
+        "properties": {
+          "comercio_id": {
+            "type": "string"
+          },
+          "contenido_base64": {
+            "type": "string",
+            "description": "El archivo, en base64."
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png"
+            ]
+          }
+        }
+      }
+    },
+    {
       "name": "oferta_crear",
       "description": "Publica una oferta nueva en el catálogo: producto, pesable, preparado, compuesto, servicio o recurrente, con su precio, grupos de opciones, variantes y disponibilidad. Ej: 'agregá milanesa de pollo a $8.500 con guarnición a elección'. Requiere scope 'administrar'.",
       "inputSchema": {

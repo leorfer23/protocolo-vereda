@@ -34,11 +34,31 @@ Con movimiento reducido activado, lo esperable es mostrar el póster y reproduci
 
 El feed es la misma búsqueda de ofertas, no un algoritmo aparte: `GET /buscar` sin texto y con `con_video=true` trae, de a páginas, las ofertas con clip de los comercios que llegan al punto, en el orden público de `docs/ranking-y-despacho.md`. Nadie paga para aparecer, sin sesión el orden es el mismo para todos, y cada resultado trae la oferta entera: el botón de compra sabe qué producto es, cuánto sale y de qué local. Ver el feed no suma apariciones en búsqueda a las métricas del comercio.
 
+## Subir fotos al nodo
+
+Una dueña de local no tiene un hosting donde dejar sus fotos. Por eso un nodo **puede** ofrecer dónde subirlas. Es una capacidad opcional: cada operador decide si la ofrece, y ninguna app puede contar con que exista.
+
+- **Cómo se sabe.** El nodo que la ofrece publica en `/.well-known/vereda.json` la URL en `endpoints.medios` y qué acepta en `medios`: `limite_bytes` (el tamaño máximo de un archivo), `tipos` (`image/jpeg`, `image/png`) y `maximo_por_comercio` (cuántas fotos distintas guarda por comercio). Sin `endpoints.medios`, la app pide la URL como siempre.
+- **Solo fotos.** Video no se sube: sigue por URL, porque es lo más caro de servir.
+- **Achicadas en el teléfono.** La app convierte una foto HEIC a JPEG, la achica hasta que entre en `limite_bytes` (en el nodo de referencia, 2 MB) y recién ahí la sube. El nodo no genera versiones ni recorta.
+- **Quién sube.** El dueño del comercio con su sesión, o su agente con el mandato `administrar`, con `POST /medios?comercio=<id>` y el archivo tal cual en el cuerpo. La respuesta trae la `url`; el comercio la pone en `imagenes` de su ficha o de una oferta (o en el `poster` de un clip). Nadie aprueba nada: queda publicada cuando la pone.
+- **Sin metadatos.** El nodo borra EXIF, ubicación, datos de la cámara y XMP antes de guardar: lo que sirve no dice dónde se sacó la foto. Mira los bytes, no la cabecera: lo que no es una imagen de `tipos` que se pueda decodificar no se guarda.
+- **Tope por comercio.** Hasta `maximo_por_comercio` fotos distintas. La misma foto subida dos veces devuelve la misma URL y cuenta una vez.
+- **Si el operador la apaga.** Deja de aceptar subidas (`501 no_implementado`) y saca `endpoints.medios` del anuncio, pero sigue sirviendo las fotos que ya se subieron: están en fichas publicadas.
+
+| Qué pasa | Estado | Código |
+| --- | --- | --- |
+| El nodo no aloja fotos, o se apagó | 501 | `no_implementado` |
+| No es el dueño, o el mandato no trae `administrar` | 403 | `no_es_el_dueno` |
+| Pesa más que `limite_bytes` | 413 | `medio_muy_grande` |
+| No es una imagen de `tipos` | 415 | `tipo_no_admitido` |
+| El comercio ya tiene `maximo_por_comercio` fotos | 409 | `tope_de_medios_alcanzado` |
+
 ## Lo que cuesta al nodo
 
 Un nodo lo corre cualquiera en su propio servidor, y el video es lo más caro de servir. Por eso:
 
 - **El video vive en cualquier URL.** El comercio lo sube donde quiera (su hosting, un bucket, un CDN) y en la ficha va solo el enlace. El nodo guarda y sirve ese enlace, nada más.
 - **El nodo no está obligado a alojarlo ni a transcodificarlo.** No genera versiones, no recorta, no convierte. Lo que publica es lo que declaró el comercio.
-- **Alojarlo es opcional.** Un nodo que quiera ofrecer dónde subir los clips puede hacerlo detrás de la misma interfaz de almacenamiento compatible con S3 que usa para imágenes (`docs/plan-implementacion.md`), con un límite de tamaño por archivo que publica él. Ese servicio es suyo, no del protocolo: ninguna app puede contar con que exista.
+- **Alojar video es opcional y no es del protocolo.** Un nodo que quiera ofrecer dónde subir los clips puede hacerlo detrás de la misma interfaz de almacenamiento compatible con S3 que usa para las fotos (`docs/plan-implementacion.md`), con un límite de tamaño por archivo que publica él. Ninguna app puede contar con que exista.
 - **Lo que declara el comercio es su responsabilidad.** El nodo valida la forma (`duracion_s` hasta 15, póster presente, tipo conocido) pero no baja el archivo para comprobar que dure lo que dice. Si no coincide, la app lo nota al reproducir y puede cortarlo en quince segundos.

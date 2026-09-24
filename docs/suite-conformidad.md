@@ -182,6 +182,13 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   `videos` responde `200` y `GET /comercios/{id}` y `GET /ofertas/{id}` lo devuelven tal
   cual; uno de 45 s o sin póster da `422` y no pisa el que estaba. Al final se restauran
   los clips que tenían.
+- Fotos subidas al nodo (`docs/medios.md`), solo si el nodo publica `endpoints.medios`; si
+  no, se omite: es opcional. `medios` cumple `CapacidadMedios`; con la sesión de prueba, una
+  JPEG con EXIF y GPS se sube al comercio de prueba (`201`, `MedioSubido`) y su `url` sirve
+  una JPEG sin esos metadatos; la misma foto otra vez da la misma `url`; una PNG se sube si
+  `tipos` la lista. Texto con `Content-Type: image/jpeg` da `415 tipo_no_admitido`, un
+  archivo de más de `limite_bytes` da `413 medio_muy_grande`, sin token `401`, y con custodia
+  propia otra identidad da `403`. El tope por comercio no se prueba: llenarlo es caro.
 - Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
   que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella

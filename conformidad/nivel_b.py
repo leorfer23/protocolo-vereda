@@ -12,6 +12,7 @@ Deuda conocida, a propósito: las ventanas de tiempo (carrito vence a las
 24 h, `plazo_aceptacion_min`, la ventana de 7 días para reseñar) no se
 prueban. Exigir un reloj de prueba es superficie nueva del protocolo.
 """
+import base64
 import json
 import os
 import queue
@@ -120,6 +121,7 @@ class NivelB:
         self._nombres(capacidades)
         self._apertura_manual()
         self._videos()
+        self._medios(capacidades)
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
@@ -937,6 +939,93 @@ class NivelB:
                 self.casos.append(caso or _ok("videos", opid, desc))
 
             cliente.solicitud("PATCH", self.base_v1 + ruta, headers=self._cabecera(), json_body={"videos": original.get("videos") or []}, timeout=self.timeout)
+
+    # fotos subidas al nodo (docs/medios.md): opcional, se omite si no la anuncia --
+    # Una JPEG de 16x16 con EXIF (Make "VeredaConformidad" y GPS en Buenos
+    # Aires) y una PNG de 4x4. Van fijas y no aleatorias: la misma foto dos
+    # veces cuenta una sola para el tope, así la suite no lo gasta de a corridas.
+    JPEG_CON_EXIF = base64.b64decode(
+        "/9j/4AAQSkZJRgABAQAAAQABAAD/4QCmRXhpZgAATU0AKgAAAAgAAgEPAAIAAAASAAAAJoglAAQAAAABAAAAOAAAAABWZXJlZGFDb25mb3JtaWRhZAAABAABAAIAAAACUwAAAAACAAUAAAADAAAAbgADAAIAAAACVwAAAAAEAAUAAAADAAAAhgAAAAAAAAAiAAAAAQAAACQAAAABAAAADAAAAAEAAAA6AAAAAQAAABYAAAABAAAABQAAAAH/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAQABADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDIooor5E/SD//Z")
+    PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGPkqrBhgAEmOAsvBwAl7gDG5WhPYQAAAABJRU5ErkJggg==")
+
+    def _medios(self, capacidades):
+        cat, opid = "medios", "subirMedio"
+        r = cliente.get(self.origen + "/.well-known/vereda.json", timeout=self.timeout)
+        nodo = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else {}
+        endpoint = (nodo.get("endpoints") or {}).get("medios")
+        medios = nodo.get("medios") if isinstance(nodo.get("medios"), dict) else {}
+        if not endpoint:
+            self.casos.append(_omitido(cat, opid, "subir fotos al nodo (docs/medios.md)", "el nodo no publica endpoints.medios: es opcional"))
+            return
+        desc = "con endpoints.medios, /.well-known/vereda.json trae medios con limite_bytes, tipos y maximo_por_comercio"
+        errores = self._validar(self.api["components"]["schemas"]["CapacidadMedios"], medios) if medios else None
+        if errores is None or errores:
+            self.casos.append(_fallo(cat, "verNodo", desc, self._formatear_errores(errores) if errores else "falta 'medios'"))
+            return
+        self.casos.append(_ok(cat, "verNodo", desc))
+        comercio = self._comercio_de_la_oferta("01920000-0000-7000-8000-0000000000b1")
+        if not comercio or not comercio.get("id"):
+            self.casos.append(_omitido(cat, opid, "subir fotos al nodo", "no se pudo leer el comercio de la oferta de prueba"))
+            return
+        url = f"{endpoint}?comercio={comercio['id']}"
+
+        def subir(cuerpo, tipo, cabecera=None):
+            h = {"Content-Type": tipo, **(self._cabecera() if cabecera is None else cabecera)}
+            return cliente.solicitud_cruda("POST", url, headers=h, cuerpo=cuerpo, timeout=self.timeout)
+
+        desc = "una JPEG con EXIF y GPS se sube (201) y la URL sirve una JPEG sin esos metadatos"
+        r = subir(self.JPEG_CON_EXIF, "image/jpeg")
+        if r.ok and r.estado == 403:
+            self.casos.append(_omitido(cat, opid, desc, "la sesión de prueba no administra el comercio de la oferta de prueba (403)"))
+            return
+        if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}: {str(r.cuerpo)[:200]}"))
+            return
+        caso = self._chequear_esquema(opid, "la respuesta de subirMedio cumple MedioSubido", "/medios", "post", r.cuerpo, "201")
+        if caso:
+            self.casos.append(caso)
+        subida = r.cuerpo
+        try:
+            f = requests.get(subida.get("url", ""), timeout=self.timeout)
+            servida, tipo_servido = f.content if f.status_code == 200 else None, f.headers.get("Content-Type", "")
+        except requests.RequestException as e:
+            servida, tipo_servido = None, str(e)[:120]
+        if servida is None:
+            self.casos.append(_fallo(cat, opid, desc, f"GET {subida.get('url')} no respondió 200 ({tipo_servido})"))
+        elif not servida.startswith(b"\xff\xd8") or not tipo_servido.startswith("image/jpeg"):
+            self.casos.append(_fallo(cat, opid, desc, f"la URL no sirve una JPEG (Content-Type {tipo_servido!r})"))
+        elif b"Exif" in servida or b"VeredaConformidad" in servida:
+            self.casos.append(_fallo(cat, opid, desc, "la foto servida conserva el EXIF (cámara y ubicación)"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        desc = "la misma foto subida otra vez devuelve la misma URL"
+        r = subir(self.JPEG_CON_EXIF, "image/jpeg")
+        otra = (r.cuerpo or {}).get("url") if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        self.casos.append(_ok(cat, opid, desc) if otra == subida.get("url") else _fallo(cat, opid, desc, f"primero {subida.get('url')}, después {otra} ({r.estado})"))
+
+        if "image/png" in medios["tipos"]:
+            desc = "una PNG se sube (201)"
+            r = subir(self.PNG, "image/png")
+            self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 201 else _fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}"))
+
+        malos = [
+            ("texto con Content-Type image/jpeg responde 415 tipo_no_admitido: el nodo mira los bytes", b"no soy una foto", "image/jpeg", None, 415, "tipo_no_admitido"),
+            (f"más de limite_bytes ({medios['limite_bytes']}) responde 413 medio_muy_grande", self.JPEG_CON_EXIF + b"\0" * medios["limite_bytes"], "image/jpeg", None, 413, "medio_muy_grande"),
+            ("sin token responde 401", self.JPEG_CON_EXIF, "image/jpeg", {}, 401, None),
+        ]
+        if capacidades.get("custodia_propia") is True:
+            ajena = self._sesion_nueva()
+            if ajena:
+                malos.append(("otra identidad, que no administra el comercio, responde 403", self.JPEG_CON_EXIF, "image/jpeg", {"Authorization": f"Bearer {ajena}"}, 403, None))
+        for desc, cuerpo, tipo, cabecera, estado, codigo in malos:
+            r = subir(cuerpo, tipo, cabecera)
+            if not r.ok or r.estado != estado:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba {estado}, llegó {r.estado}"))
+            elif codigo and (r.cuerpo or {}).get("codigo") != codigo:
+                self.casos.append(_fallo(cat, opid, desc, f"el código vino {(r.cuerpo or {}).get('codigo')!r}"))
+            else:
+                self.casos.append(self._chequear_esquema(opid, desc + " con esquemas/error.json", "/medios", "post", r.cuerpo, str(estado)) or _ok(cat, opid, desc))
 
     # quien abre el pedido a mitad del viaje ve dónde está el repartidor -----
     # La identidad de prueba compra, opera el comercio y se declara repartidora:
