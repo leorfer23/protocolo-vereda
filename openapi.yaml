@@ -123,7 +123,7 @@ paths:
       security: []
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/acceso.json#/$defs/pedido_codigo" } } } }
       responses:
-        "202": { description: "Enviado (o no había nada que enviar: la respuesta es la misma)" }
+        "202": { description: "Sin cuerpo. Enviado (o no había nada que enviar: la respuesta es la misma)" }
         "422": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Reintentar" }
         "501": { description: "Este nodo no ofrece acceso alternativo por ese canal (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
@@ -635,7 +635,7 @@ paths:
       security: [ { sesion: [] }, { mandato: [hablar] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [respuesta], properties: { respuesta: { type: string, enum: [aceptado, rechazado] } } } } } }
-      responses: { "200": { description: OK } }
+      responses: { "200": { description: "El pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } }
   /pedidos/{id}/cancelar:
     post:
       operationId: cancelarPedido
@@ -644,7 +644,7 @@ paths:
       security: [ { sesion: [] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { motivo: { type: string } } } } } }
-      responses: { "200": { description: Cancelado }, "409": { $ref: "#/components/responses/Error" } }
+      responses: { "200": { description: "Cancelado: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "409": { $ref: "#/components/responses/Error" } }
   /pedidos/{id}/propina:
     post:
       operationId: agregarPropina
@@ -670,7 +670,7 @@ paths:
       requestBody: { required: false, content: { application/json: { schema: { type: object, properties: { tiempo_preparacion_min: { type: integer, minimum: 0, maximum: 1440, description: "Minutos de preparación de este pedido. Pisa los de la ficha solo para él." } } } } } }
       responses: { "200": { description: "Pedido aceptado, con su eta", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "403": { $ref: "#/components/responses/NoEsElDueno" }, "409": { $ref: "#/components/responses/Error" }, "422": { $ref: "#/components/responses/Error" } }
   /pedidos/{id}/rechazar:
-    post: { operationId: rechazarPedido, tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post: { operationId: rechazarPedido, tags: [pedidos], summary: "Comercio: rechazar (antes de aceptar)", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "Rechazado: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
   /pedidos/{id}/items/{item}:
     patch:
       operationId: resolverItemPedido
@@ -684,9 +684,9 @@ paths:
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: item, in: path, required: true, schema: { type: string } } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [estado], properties: { estado: { type: string, enum: [confirmado, sustituido, faltante, pesado] }, sustituto: { type: object }, cantidad_entregada: { $ref: "esquemas/comunes.json#/$defs/cantidad" } } } } } }
-      responses: { "200": { description: OK } }
+      responses: { "200": { description: "El pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } }
   /pedidos/{id}/listo:
-    post: { operationId: marcarPedidoListo, tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { $ref: "#/components/responses/Error" } } }
+    post: { operationId: marcarPedidoListo, tags: [pedidos], summary: "Comercio: listo para retirar. Requiere todos los ítems resueltos.", security: [ { sesion: [] }, { mandato: [administrar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "Listo: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "409": { $ref: "#/components/responses/Error" } } }
   /pedidos/{id}/asignar:
     post:
       operationId: asignarRepartidor
@@ -814,15 +814,15 @@ paths:
 
   /listas:
     get: { operationId: listarListas, tags: [listas], summary: Mis listas, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/lista.json" } } } } } } }
-    post: { operationId: crearLista, tags: [listas], summary: Crear lista, security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/lista.json" } } } }, responses: { "201": { description: Creada } } }
+    post: { operationId: crearLista, tags: [listas], summary: Crear lista, security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/lista.json" } } } }, responses: { "201": { description: Creada, content: { application/json: { schema: { $ref: "esquemas/lista.json" } } } } } }
   /listas/{id}:
-    patch: { operationId: editarLista, tags: [listas], summary: Editar ítems o compartir, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    patch: { operationId: editarLista, tags: [listas], summary: Editar ítems o compartir, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "La lista como quedó", content: { application/json: { schema: { $ref: "esquemas/lista.json" } } } } } }
 
   /suscripciones:
     get: { operationId: listarSuscripciones, tags: [suscripciones], summary: Mis suscripciones (usuario) o mi cartera (comercio), security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/suscripcion.json" } } } } } } }
-    post: { operationId: crearSuscripcion, tags: [suscripciones], summary: Crear. Siempre requiere confirmación humana si la crea un agente., security: [ { sesion: [] }, { mandato: [suscribir] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/suscripcion.json" } } } }, responses: { "201": { description: Creada }, "402": { $ref: "#/components/responses/Error" } } }
+    post: { operationId: crearSuscripcion, tags: [suscripciones], summary: Crear. Siempre requiere confirmación humana si la crea un agente., security: [ { sesion: [] }, { mandato: [suscribir] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/suscripcion.json" } } } }, responses: { "201": { description: Creada, content: { application/json: { schema: { $ref: "esquemas/suscripcion.json" } } } }, "402": { $ref: "#/components/responses/Error" } } }
   /suscripciones/{id}:
-    patch: { operationId: editarSuscripcion, tags: [suscripciones], summary: "Pausar, reanudar, cancelar o editar la plantilla", security: [ { sesion: [] }, { mandato: [suscribir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    patch: { operationId: editarSuscripcion, tags: [suscripciones], summary: "Pausar, reanudar, cancelar o editar la plantilla", security: [ { sesion: [] }, { mandato: [suscribir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "La suscripción como quedó", content: { application/json: { schema: { $ref: "esquemas/suscripcion.json" } } } } } }
   /suscripciones/{id}/ocurrencias/{fecha}:
     patch:
       operationId: editarOcurrencia
@@ -831,31 +831,31 @@ paths:
       security: [ { sesion: [] }, { mandato: [suscribir] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { name: fecha, in: path, required: true, schema: { type: string, format: date } } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { saltear: { type: boolean }, items: { type: array } } } } } }
-      responses: { "200": { description: OK } }
+      responses: { "200": { description: "La suscripción, con la ocurrencia cambiada", content: { application/json: { schema: { $ref: "esquemas/suscripcion.json" } } } } }
 
   /rondas:
     get: { operationId: buscarRondas, tags: [rondas], summary: Rondas abiertas cerca de un punto, security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { name: lat, in: query, schema: { type: number } }, { name: lng, in: query, schema: { type: number } } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/ronda.json" } } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
-    post: { operationId: crearRonda, tags: [rondas], summary: Crear una ronda (comercio o usuario que reúne vecinos), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } }, responses: { "201": { description: Creada } } }
+    post: { operationId: crearRonda, tags: [rondas], summary: Crear una ronda (comercio o usuario que reúne vecinos), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } }, responses: { "201": { description: Creada, content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } } } }
   /rondas/{id}:
     get: { operationId: verRonda, tags: [rondas], summary: Una ronda (por id o por link), security: [], parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/ronda.json" } } } }, "304": { $ref: "#/components/responses/SinCambios" } } }
 
   /grupos:
-    post: { operationId: crearGrupo, tags: [grupos], summary: Crear pedido grupal (carrito abierto con link), security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } }, responses: { "201": { description: Creado } } }
+    post: { operationId: crearGrupo, tags: [grupos], summary: Crear pedido grupal (carrito abierto con link), security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } }, responses: { "201": { description: Creado, content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } } } }
   /grupos/{id}:
     get: { operationId: verGrupo, tags: [grupos], summary: Ver grupo, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } } } }
   /grupos/{id}/unirse:
-    post: { operationId: unirseAGrupo, tags: [grupos], summary: Sumarse con el link, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post: { operationId: unirseAGrupo, tags: [grupos], summary: Sumarse con el link, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "El grupo, con vos adentro", content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } } } }
   /grupos/{id}/mis-items:
-    put: { operationId: editarMisItemsGrupo, tags: [grupos], summary: Mis ítems dentro del grupo, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    put: { operationId: editarMisItemsGrupo, tags: [grupos], summary: Mis ítems dentro del grupo, security: [ { sesion: [] }, { mandato: [armar] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "El grupo como quedó", content: { application/json: { schema: { $ref: "esquemas/grupo.json" } } } } } }
   /grupos/{id}/cerrar:
-    post: { operationId: cerrarGrupo, tags: [grupos], summary: "Cerrar: genera el pedido con secciones por persona y un cobro por participante", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: Pedido generado } } }
+    post: { operationId: cerrarGrupo, tags: [grupos], summary: "Cerrar: genera el pedido con secciones por persona y un cobro por participante", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: "Pedido generado", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
 
   /cotizaciones:
-    post: { operationId: pedirCotizacion, tags: [cotizaciones], summary: Pedir presupuesto por una oferta a cotizar, security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } }, responses: { "201": { description: Solicitada } } }
+    post: { operationId: pedirCotizacion, tags: [cotizaciones], summary: Pedir presupuesto por una oferta a cotizar, security: [ { sesion: [] }, { mandato: [armar] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } }, responses: { "201": { description: Solicitada, content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } } } }
   /cotizaciones/{id}/presupuesto:
-    put: { operationId: presupuestarCotizacion, tags: [cotizaciones], summary: "Comercio: responder con presupuesto firmado", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    put: { operationId: presupuestarCotizacion, tags: [cotizaciones], summary: "Comercio: responder con presupuesto firmado", security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "La cotización con su presupuesto", content: { application/json: { schema: { $ref: "esquemas/cotizacion.json" } } } } } }
   /cotizaciones/{id}/aceptar:
-    post: { operationId: aceptarCotizacion, tags: [cotizaciones], summary: Aceptar el presupuesto; crea el pedido con precio fijo, security: [ { sesion: [] }, { mandato: [pedir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: Pedido creado } } }
+    post: { operationId: aceptarCotizacion, tags: [cotizaciones], summary: Aceptar el presupuesto; crea el pedido con precio fijo, security: [ { sesion: [] }, { mandato: [pedir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "201": { description: "Pedido creado", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
 
   /viajes/ofrecidos:
     get: { operationId: listarViajesOfrecidos, tags: [viajes], summary: "Repartidor: viajes que se me ofrecen, con monto, distancia, peso, paradas y, por pedido, quién me paga, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros), y cuánto efectivo le voy a deber al comercio y cuándo se lo doy (por_pedido[].rendicion). Del pool, solo los que caen enteros en mi zona y respetan mi vehículo, caja térmica, capacidad y medios de cobro", security: [ { sesion: [] }, { mandato: [repartir] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/viaje.json" } } } } } } }
@@ -884,9 +884,9 @@ paths:
         "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/viaje.json" } } } }
         "404": { $ref: "#/components/responses/Error" }
   /viajes/{id}/aceptar:
-    post: { operationId: aceptarViaje, tags: [viajes], summary: "Repartidor: aceptar. Rechazar no penaliza.", security: [ { sesion: [] }, { mandato: [repartir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK }, "409": { description: Ya asignado } } }
+    post: { operationId: aceptarViaje, tags: [viajes], summary: "Repartidor: aceptar. Rechazar no penaliza.", security: [ { sesion: [] }, { mandato: [repartir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "El viaje, ya tuyo", content: { application/json: { schema: { $ref: "esquemas/viaje.json" } } } }, "409": { description: Ya asignado } } }
   /viajes/{id}/rechazar:
-    post: { operationId: rechazarViaje, tags: [viajes], summary: "Repartidor: pasar. No cuenta en ningún lado", security: [ { sesion: [] }, { mandato: [repartir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: OK } } }
+    post: { operationId: rechazarViaje, tags: [viajes], summary: "Repartidor: pasar. No cuenta en ningún lado", security: [ { sesion: [] }, { mandato: [repartir] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: "Sin cuerpo. El viaje vuelve a ofrecerse a otros" } } }
   /viajes/{id}/soltar:
     post:
       operationId: soltarViaje
@@ -972,7 +972,7 @@ paths:
       description: Texto libre o estructurado (propuesta / aceptar / rechazar). Un agente de voz entra por acá con origen voz_transcripta.
       security: [ { sesion: [] }, { mandato: [hablar] } ]
       requestBody: { content: { application/json: { schema: { $ref: "esquemas/mensaje.json" } } } }
-      responses: { "201": { description: Enviado } }
+      responses: { "201": { description: Enviado, content: { application/json: { schema: { $ref: "esquemas/mensaje.json" } } } } }
     get:
       operationId: listarMensajes
       tags: [mensajes]
@@ -982,7 +982,7 @@ paths:
       responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mensaje.json" } } } } } }
 
   /resenas:
-    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada }, "409": { description: Ya reseñado o pedido no entregado } } }
+    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada, content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, "409": { description: Ya reseñado o pedido no entregado } } }
   /resenas/{id}/respuesta:
     post:
       operationId: responderResena
@@ -996,7 +996,7 @@ paths:
         firmado. Escribir una reseña sigue siendo solo de la persona (`crearResena`, sesión).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      responses: { "201": { description: OK }, "403": { $ref: "#/components/responses/Error" } }
+      responses: { "201": { description: "La reseña con su respuesta", content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, "403": { $ref: "#/components/responses/Error" } }
   /actores/{identidad}/claves:
     get:
       operationId: listarClavesDeActor
@@ -1151,11 +1151,11 @@ paths:
 
   /mandatos:
     get: { operationId: listarMandatos, tags: [mandatos], summary: Mis mandatos activos, security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mandato.json" } } } } } } }
-    post: { operationId: otorgarMandato, tags: [mandatos], summary: Otorgar mandato a un agente (fin del flujo OAuth), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } }, responses: { "201": { description: Otorgado } } }
+    post: { operationId: otorgarMandato, tags: [mandatos], summary: Otorgar mandato a un agente (fin del flujo OAuth), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } }, responses: { "201": { description: "Otorgado. Es la única vez que el nodo muestra el token del agente", content: { application/json: { schema: { allOf: [ { $ref: "esquemas/mandato.json" }, { type: object, required: [token], properties: { token: { type: string, description: "Lo que el agente manda en Authorization: Bearer. No se vuelve a mostrar." } } } ] } } } } } }
   /mandatos/{id}/revocar:
-    post: { operationId: revocarMandato, tags: [mandatos], summary: Revocar en un toque, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: Revocado } } }
+    post: { operationId: revocarMandato, tags: [mandatos], summary: Revocar en un toque, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: Revocado, content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } } } }
   /confirmaciones/{codigo}:
-    post: { operationId: aprobarConfirmacion, tags: [mandatos], summary: La persona aprueba una acción del agente que excedía el mandato, security: [ { sesion: [] } ], parameters: [ { name: codigo, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: Aprobada; la acción se ejecuta } } }
+    post: { operationId: aprobarConfirmacion, tags: [mandatos], summary: La persona aprueba una acción del agente que excedía el mandato, security: [ { sesion: [] } ], parameters: [ { name: codigo, in: path, required: true, schema: { type: string } } ], responses: { "200": { description: "Aprobada; la acción se ejecuta. Hoy la única acción que se confirma es confirmar un carrito, y devuelve el pedido creado", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } } } }
 
   /yo:
     get: { operationId: verPerfil, tags: [yo], summary: Mi perfil y preferencias, security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/usuario.json" } } } } } }
@@ -1280,7 +1280,7 @@ paths:
       security: [ { sesion: [] } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [canal, valor], properties: { canal: { type: string, enum: [telefono, email] }, valor: { type: string, maxLength: 254 }, via: { type: string, enum: [sms, whatsapp, email], description: "Por dónde mandar el código. Default: 'sms' para teléfono, 'email' para email." } } } } } }
       responses:
-        "202": { description: "Código enviado. Vence a los 10 minutos" }
+        "202": { description: "Código enviado. Vence a los 10 minutos", content: { application/json: { schema: { type: object, required: [enviado, vence_en_segundos], properties: { enviado: { type: boolean, const: true }, vence_en_segundos: { type: integer, minimum: 1 } } } } } }
         "422": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Reintentar" }
   /yo/contacto/confirmar:
@@ -1296,7 +1296,7 @@ paths:
   /yo/exportar:
     get: { operationId: exportarCuenta, tags: [yo], summary: "Todo lo mío, firmado: identidad, clave, historial, reseñas. Para irme a otro nodo.", security: [ { sesion: [] } ], responses: { "200": { description: Paquete firmado, content: { application/json: { schema: { type: object } } } } } }
   /yo/borrar:
-    post: { operationId: borrarCuenta, tags: [yo], summary: Borrar mi cuenta y datos personales (las reseñas firmadas quedan anonimizadas), security: [ { sesion: [] } ], responses: { "202": { description: En proceso } } }
+    post: { operationId: borrarCuenta, tags: [yo], summary: Borrar mi cuenta y datos personales (las reseñas firmadas quedan anonimizadas), security: [ { sesion: [] } ], responses: { "202": { description: "En proceso", content: { application/json: { schema: { type: object, required: [procesar_en], properties: { procesar_en: { $ref: "esquemas/comunes.json#/$defs/instante", description: "Cuándo se borra. Hasta entonces, iniciar sesión lo cancela." } } } } } } } }
 
   /eventos:
     get:
@@ -1305,7 +1305,7 @@ paths:
       summary: Stream SSE de eventos de mis entidades
       security: [ { sesion: [] }, { mandato: [leer] } ]
       parameters: [ { name: desde, in: query, schema: { type: string }, description: Último id de evento visto } ]
-      responses: { "200": { description: text/event-stream de esquemas/evento.json } }
+      responses: { "200": { description: "Un evento de esquemas/evento.json por mensaje SSE", content: { text/event-stream: { schema: { type: string } } } } }
   /webhooks:
     post:
       operationId: registrarWebhook
@@ -1313,7 +1313,7 @@ paths:
       summary: Registrar webhook (agentes, PSP, sistemas del comercio). Firmado con la clave del nodo; reintentos exponenciales 24 h.
       security: [ { sesion: [] }, { mandato: [leer] } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [url, tipos], properties: { url: { type: string, format: uri }, tipos: { type: array, items: { type: string } }, secreto: { type: string } } } } } }
-      responses: { "201": { description: Registrado } }
+      responses: { "201": { description: Registrado, content: { application/json: { schema: { type: object, required: [id, url, tipos], properties: { id: { type: string }, url: { type: string, format: uri }, tipos: { type: array, items: { type: string } } }, description: "El secreto no vuelve: lo guarda solo quien lo mandó." } } } } }
 
   /federacion/entrantes:
     post:
@@ -1325,7 +1325,7 @@ paths:
         - { name: Vereda-Version, in: header, required: true, schema: { type: string, pattern: "^1\\.[0-9]+$" }, description: "Versión menor en la que viene el evento: la más alta que comparten emisor y receptor según sus .well-known." }
       requestBody: { content: { application/json: { schema: { $ref: "esquemas/evento.json" } } } }
       responses:
-        "202": { description: "Aceptado. Un evento repetido (mismo id, mismo contenido) se acepta de nuevo sin volver a aplicarlo." }
+        "202": { description: "Sin cuerpo. Aceptado. Un evento repetido (mismo id, mismo contenido) se acepta de nuevo sin volver a aplicarlo." }
         "400": { description: "version_no_soportada; detalle.versiones trae las que el receptor acepta. No se reintenta igual: se reenvía en una versión común o se abandona.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "401": { description: "firma_invalida, clave_desconocida o clave_comprometida. No se reintenta.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "409": { description: "secuencia_fuera_de_orden (detalle.ultima_secuencia dice desde dónde reenviar), o un id ya visto con otro contenido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
