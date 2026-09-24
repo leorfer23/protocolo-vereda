@@ -400,6 +400,42 @@ paths:
         "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comercio.json#/$defs/metricas" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "422": { $ref: "#/components/responses/Error" }
+  /medios:
+    post:
+      operationId: subirMedio
+      tags: [mi-comercio]
+      summary: "Opcional: subir una foto de un comercio al nodo y recibir su URL"
+      description: |
+        Solo si el nodo publica `endpoints.medios` en /.well-known/vereda.json; si no, o si el
+        operador la apagó, 501 `no_implementado` y las fotos van por URL, como siempre
+        (docs/medios.md). Solo el dueño del comercio, o un agente con su mandato `administrar`.
+
+        El cuerpo es el archivo tal cual, con su `Content-Type`. El nodo mira los bytes, no la
+        cabecera: lo que no es una imagen de `medios.tipos` que se pueda decodificar responde 415
+        `tipo_no_admitido`. Antes de guardarla le borra todos los metadatos (EXIF, ubicación,
+        cámara, XMP): lo que sirve no dice dónde ni con qué se sacó. Subir la misma foto dos veces
+        devuelve la misma URL y cuenta una sola vez para `maximo_por_comercio`.
+
+        La URL no se publica sola: el comercio la pone en `imagenes` con `editarComercio` o
+        `editarOferta`. Video no se sube: sigue por URL.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters:
+        - { name: comercio, in: query, required: true, description: "El id del comercio (el de las rutas /comercios/{id}).", schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          image/jpeg: { schema: { type: string, contentMediaType: image/jpeg } }
+          image/png: { schema: { type: string, contentMediaType: image/png } }
+      responses:
+        "201": { description: Guardada, content: { application/json: { schema: { $ref: "#/components/schemas/MedioSubido" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { description: "No existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "El comercio ya tiene `maximo_por_comercio` fotos guardadas (tope_de_medios_alcanzado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "413": { description: "Pesa más que `limite_bytes` (medio_muy_grande). `detalle.limite_bytes` dice cuánto acepta", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "415": { description: "No es una imagen de `medios.tipos` que se pueda decodificar (tipo_no_admitido). `detalle.tipos` dice cuáles acepta", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { $ref: "#/components/responses/Reintentar" }
+        "501": { description: "Este nodo no aloja fotos (no_implementado): van por URL", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /comercios/{id}/exportar:
     get:
       operationId: exportarComercio
@@ -1370,12 +1406,32 @@ components:
         claves: { $ref: "esquemas/comunes.json#/$defs/claves" }
         operador: { type: string }
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
-        endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string } } }
+        endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string }, medios: { type: string, format: uri, description: "Dónde se suben las fotos de un comercio (subirMedio). Ausente si el operador no ofrece alojarlas: entonces van por URL (docs/medios.md)." } } }
+        medios: { $ref: "#/components/schemas/CapacidadMedios" }
         codigo_fuente: { type: string, format: uri }
         acceso: { $ref: "esquemas/acceso.json#/$defs/capacidades", description: "Cómo se entra a este nodo (docs/acceso.md). Una app que habla con cualquier nodo mira esto antes de ofrecer la entrada." }
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
         sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
+    CapacidadMedios:
+      type: object
+      description: "Presente solo junto a `endpoints.medios`: qué acepta este nodo al subir una foto (docs/medios.md)."
+      required: [limite_bytes, tipos, maximo_por_comercio]
+      additionalProperties: false
+      properties:
+        limite_bytes: { type: integer, minimum: 1, description: "Tamaño máximo de un archivo, en bytes. El nodo de referencia acepta 2 MB (2097152). La app achica antes de subir." }
+        tipos: { type: array, minItems: 1, uniqueItems: true, items: { type: string, enum: [image/jpeg, image/png] }, description: "Tipos que acepta. Una foto HEIC del teléfono se convierte a JPEG en el teléfono, antes de subir." }
+        maximo_por_comercio: { type: integer, minimum: 1, description: "Cuántas fotos distintas guarda como máximo para un mismo comercio." }
+    MedioSubido:
+      type: object
+      required: [url, tipo, bytes]
+      additionalProperties: false
+      properties:
+        url: { type: string, format: uri, description: "Pública y estable. Va tal cual en `imagenes[].url` de la ficha o de una oferta, o en el `poster` de un clip." }
+        tipo: { type: string, enum: [image/jpeg, image/png] }
+        bytes: { type: integer, minimum: 1, description: "Lo que pesa el archivo que sirve el nodo, ya sin metadatos." }
+        ancho: { type: integer, minimum: 1 }
+        alto: { type: integer, minimum: 1 }
     Carrito: { $ref: "esquemas/carrito.json" }
     ConstanciaRendicion:
       type: object
