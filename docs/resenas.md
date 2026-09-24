@@ -178,8 +178,8 @@ reseña, antes y después de que la respondieran y la marcaran, con el mismo JCS
 - **No se borra ni se oculta.** Ni el comercio, ni el nodo, ni el operador. La única acción del
   reseñado es responder, públicamente y firmado. El comercio puede responder por medio de su agente,
   con un mandato `administrar`: la respuesta lleva `via` con `canal: agente` y el `mandato_id`, y
-  queda a la vista que la escribió el agente. Escribir una reseña, en cambio, es siempre de la
-  persona.
+  queda a la vista que la escribió el agente. Escribir una reseña, en cambio, es siempre desde una
+  sesión, nunca del agente.
 - **No se paga.** No hay reseñas patrocinadas, destacados, "opiniones verificadas por el comercio" ni
   ningún camino por el que la plata mueva el número.
 - **No hay moderación discrecional.** Todo lo que baja el peso de una reseña está en este archivo,
@@ -203,6 +203,23 @@ repartidor reseña al comprador. Cómo pesan:
   puede leer la del otro antes de escribir la suya, y así la reseña del comercio no puede ser la
   respuesta a la del comprador. Mientras tanto la reseña ya está firmada y guardada: nadie puede
   retirarla al ver la otra.
+
+### Quién firma cuando reseña un comercio
+
+Un comercio lo administra una persona, pero la reputación es del comercio. Por eso, si la sesión de
+quien escribe administra el comercio del pedido, la reseña es **del comercio**: `autor` es la
+identidad del comercio, `rol_autor` es `comercio`, y la firma el nodo con la clave del comercio que
+custodia. Da igual que la persona custodie la suya (`custodia_clave: propia`): la que firma es la
+del comercio, no la de ella. Mandar `autor` con la identidad del comercio es válido y da lo mismo;
+mandar cualquier otra identidad ajena es 403 `no_es_tu_resena`.
+
+Con la respuesta pasa lo mismo: quien administra el comercio reseñado responde como el comercio, y
+la respuesta la firma el nodo con la clave del comercio. Hay una excepción: quien escribió la
+reseña no la puede responder como el comercio (403 `no_es_tu_resena`), para que nadie se conteste
+a sí mismo con otra identidad.
+
+Quien compró o repartió el pedido reseña siempre como sí mismo, aunque además administre el
+comercio.
 
 ## Reseñas al repartidor y del repartidor
 
