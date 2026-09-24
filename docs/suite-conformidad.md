@@ -206,6 +206,9 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Mandato: tope por período (`pedir:<centavos>`, atómico bajo dos pedidos simultáneos),
   revocación inmediata, y que `POST /yo/claves/rotar` **nunca** se pueda invocar con un
   mandato de agente (`docs/claves-y-firmas.md`: "Rotar nunca se puede hacer por mandato").
+- Actividad del mandato (`docs/mandatos.md`): después de que el agente escribe con el mandato,
+  `GET /mandatos/{id}/actividad` con la sesión de quien lo otorgó trae al menos una entrada,
+  cumple `PaginaDeActividad`, y con el token del mandato responde `403`.
 
 **Nivel C — federación (la suite actúa como nodo par).**
 
