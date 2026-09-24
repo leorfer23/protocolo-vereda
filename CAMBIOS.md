@@ -4,6 +4,7 @@ Lo que cambia en el protocolo después de publicarlo, del más nuevo al más vie
 
 ## 2026-09-24
 
+- Ver una invitación al equipo antes de aceptarla: `GET /equipo/invitaciones/{codigo}` (`verInvitacion`) devuelve `equipo.json#/$defs/invitacion` sin `codigo` ni `enlace`, con `comercio_nombre`, para que la app muestre a qué local entra la persona. No consume la invitación. Mismo alcance que `aceptarInvitacion` (sesión o mandato `administrar`) y el mismo 410 `invitacion_invalida` para un código que ya no sirve. Ningún cliente cambia.
 - Aclaración del equipo (#58): el permiso `pedidos` cubre todo lo que pasa dentro de un pedido o una cotización del comercio, no solo las operaciones sobre el comercio. Un miembro con `pedidos` lee y escribe el chat de esos pedidos y cotizaciones, recibe sus eventos en `GET /eventos` y presupuesta (`presupuestarCotizacion` suma `x-permiso-equipo: [pedidos]`). Grupos, suscripciones y lo demás que un comercio recibe fuera de un pedido siguen siendo solo de la dueña. Sin rutas nuevas; ningún cliente cambia. Detalle en `docs/equipo.md` y `docs/eventos.md`.
 
 ## 2026-09-23

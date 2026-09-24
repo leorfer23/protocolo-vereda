@@ -1081,6 +1081,16 @@ class NivelB:
         r = cliente.solicitud("POST", f"{base}/invitaciones", headers=self._cabecera(), json_body={"rol": "x", "permisos": ["exportar"]}, timeout=self.timeout)
         self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 422 else _fallo(cat, opid, desc, r.motivo or f"esperaba 422, llegó {r.estado}"))
 
+        opid, desc = "verInvitacion", "la persona invitada ve la invitación antes de aceptarla (200): comercio, rol y permisos, sin codigo ni enlace"
+        r = cliente.solicitud("GET", f"{self.base_v1}/equipo/invitaciones/{inv['codigo']}", headers=con(miembro), timeout=self.timeout)
+        vista = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        if not vista:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}: {str(r.cuerpo)[:200]}"))
+        else:
+            mal = [k for k, v in (("rol", "atención"), ("permisos", ["pedidos"]), ("comercio", inv.get("comercio"))) if vista.get(k) != v] + [k for k in ("codigo", "enlace") if k in vista]
+            caso = self._chequear_esquema(opid, desc, "/equipo/invitaciones/{codigo}", "get", vista, "200")
+            self.casos.append(caso if caso and caso.resultado == "fallo" else (_fallo(cat, opid, desc, f"no coincide: {', '.join(mal)}") if mal else _ok(cat, opid, desc)))
+
         opid, desc = "aceptarInvitacion", "la persona invitada acepta con su sesión (201): entra con su identidad, el rol y los permisos de la invitación"
         r = cliente.solicitud("POST", f"{self.base_v1}/equipo/aceptar", headers=con(miembro), json_body={"codigo": inv["codigo"]}, timeout=self.timeout)
         m = r.cuerpo if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
@@ -1095,6 +1105,10 @@ class NivelB:
         opid, desc = "aceptarInvitacion", "el mismo código otra vez, con otra identidad, responde 410 invitacion_invalida"
         r = cliente.solicitud("POST", f"{self.base_v1}/equipo/aceptar", headers=con(otra), json_body={"codigo": inv["codigo"]}, timeout=self.timeout)
         self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 410 and (r.cuerpo or {}).get("codigo") == "invitacion_invalida" else _fallo(cat, opid, desc, r.motivo or f"llegó {r.estado} {(r.cuerpo or {}).get('codigo') if isinstance(r.cuerpo, dict) else ''}"))
+
+        opid, desc = "verInvitacion", "una invitación ya aceptada responde 410 invitacion_invalida"
+        r = cliente.solicitud("GET", f"{self.base_v1}/equipo/invitaciones/{inv['codigo']}", headers=con(otra), timeout=self.timeout)
+        self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 410 and (r.cuerpo or {}).get("codigo") == "invitacion_invalida" else _fallo(cat, opid, desc, r.motivo or f"llegó {r.estado}"))
 
         opid, desc = "listarMisComercios", "el comercio aparece en GET /yo/comercios del miembro, con rol y permisos"
         r = cliente.solicitud("GET", f"{self.base_v1}/yo/comercios", headers=con(miembro), timeout=self.timeout)

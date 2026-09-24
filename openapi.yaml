@@ -603,6 +603,23 @@ paths:
         "204": { description: Fuera del equipo }
         "403": { $ref: "#/components/responses/SinPermiso" }
         "404": { $ref: "#/components/responses/Error" }
+  /equipo/invitaciones/{codigo}:
+    get:
+      operationId: verInvitacion
+      tags: [mi-comercio]
+      summary: "Ver a qué comercio, con qué rol y qué permisos invita un código, antes de aceptarlo"
+      description: |
+        Para que la persona sepa a qué local entra antes de decir que sí. Devuelve la invitación
+        sin `codigo` ni `enlace`, con `comercio_nombre`. No la consume ni la cambia: después se
+        acepta con `aceptarInvitacion`. Un código que no existe, ya se usó, se anuló o venció
+        responde 410 `invitacion_invalida`, sin decir cuál de las cuatro, igual que al aceptar.
+        El código es un secreto: el nodo no lo escribe en sus registros.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      parameters: [ { name: codigo, in: path, required: true, schema: { $ref: "esquemas/equipo.json#/$defs/invitacion/properties/codigo" } } ]
+      responses:
+        "200": { description: La invitación, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/invitacion" } } } }
+        "410": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Reintentar" }
   /equipo/aceptar:
     post:
       operationId: aceptarInvitacion

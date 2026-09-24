@@ -96,7 +96,7 @@ try:
     permisos = set(esquemas["equipo.json"]["$defs"]["permiso"]["enum"]) | {"duena"}
     sin_permiso = [f"{o['operationId']}" for p, item in api["paths"].items() for m, o in item.items() if m in METODOS
                    and any("administrar" in (s.get("mandato") or []) for s in o.get("security", []))
-                   and o["operationId"] not in ("crearComercio", "aceptarInvitacion")
+                   and o["operationId"] not in ("crearComercio", "verInvitacion", "aceptarInvitacion")
                    and not (isinstance(o.get("x-permiso-equipo"), list) and set(o["x-permiso-equipo"]) <= permisos
                             and ("duena" not in o["x-permiso-equipo"] or o["x-permiso-equipo"] == ["duena"]))]
     if sin_permiso:

@@ -57,6 +57,7 @@ dueña o miembro con 'equipo'                 nodo                       persona
 
 - **Un solo uso, con vencimiento.** A las 72 horas si no se dice otra cosa, nunca más de 7 días. El código tiene al menos 128 bits de azar y el nodo guarda solo su hash.
 - **El código se ve una vez.** Viene en la respuesta de `invitarAlEquipo` y nunca más, ni para quien lo creó. `enlace` es el mismo código listo para un QR: `vereda://equipo?nodo=<dominio>&codigo=<codigo>`. La app lo abre y llama a `aceptarInvitacion` en ese nodo. El nodo no dibuja pantallas: no hay página de invitación.
+- **Se puede mirar antes de aceptar.** `verInvitacion` (`GET /equipo/invitaciones/{codigo}`) devuelve a qué comercio (`comercio`, `comercio_nombre`), con qué rol y qué permisos invita, y cuándo vence, sin consumirla. Un código que ya no sirve responde 410 `invitacion_invalida`, igual que al aceptar. El nodo no escribe el código en sus registros.
 - **Lo acepta quien tenga el código.** Por eso se comparte en mano o por mensaje, y se anula con `revocarInvitacion` si se mandó a quien no era. Quien acepta entra con su identidad, la de su sesión.
 - **Solo se da lo que uno tiene.** Un miembro con `equipo` y `pedidos` invita con `pedidos`, no con `catalogo`: 403 `sin_permiso`, con `detalle.falta`. La dueña da cualquiera.
 
