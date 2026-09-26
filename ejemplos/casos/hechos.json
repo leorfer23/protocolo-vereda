@@ -1,0 +1,31 @@
+{
+  "$comentario": "Los hechos del comprador (docs/hechos-del-comprador.md): conteos con reglas públicas, nunca un puntaje.",
+  "esquema": "usuario.json#/$defs/hechos",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Lo que ve el comprador en GET /yo/hechos: cuenta de hace 3 días, sin pedidos cerrados todavía.",
+      "doc": { "alta": "2026-09-22", "antiguedad_dias": 3, "entregados": 0, "no_retirado": 0, "no_recibido": 0, "cancelados_despues_de_aceptar": 0, "contacto_confirmado": false }
+    },
+    {
+      "espera": "valido",
+      "porque": "Lo que ve el comercio en partes.usuario.hechos: 41 entregados, uno sin retirar con su descargo, y los tres campos del pedido.",
+      "doc": { "alta": "2024-08-10", "antiguedad_dias": 776, "entregados": 41, "no_retirado": 1, "no_recibido": 0, "descargos": 1, "cancelados_despues_de_aceptar": 0, "transferencias_revertidas": 0, "contacto_confirmado": true, "entregados_con_el_comercio": 12, "primer_pedido_con_el_comercio": false, "por_mandato": true }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Hechos, no puntajes: un 'riesgo' no entra.",
+      "doc": { "alta": "2026-09-22", "antiguedad_dias": 3, "entregados": 0, "no_retirado": 0, "no_recibido": 0, "cancelados_despues_de_aceptar": 0, "contacto_confirmado": false, "riesgo": "alto" }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin 'entregados' no es un hecho completo.",
+      "doc": { "alta": "2026-09-22", "antiguedad_dias": 3, "no_retirado": 0, "no_recibido": 0, "cancelados_despues_de_aceptar": 0, "contacto_confirmado": false }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un conteo no es negativo.",
+      "doc": { "alta": "2026-09-22", "antiguedad_dias": 3, "entregados": 0, "no_retirado": -1, "no_recibido": 0, "cancelados_despues_de_aceptar": 0, "contacto_confirmado": false }
+    }
+  ]
+}

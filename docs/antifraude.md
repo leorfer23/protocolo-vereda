@@ -139,7 +139,7 @@ necesita un servicio pago, una cuenta nueva ni un verificador.
   Si hay algo para mirar: "1 sin retirar", "1 transferencia revertida", "pedido hecho por su agente".
   Nunca un número de riesgo ni un color de alarma por defecto.
 - **Protocolo:** `pedido.partes.usuario.hechos` (calculado por el nodo, con reglas públicas en
-  `docs/antifraude.md`): antigüedad de la cuenta, entregados (total y con este comercio), sin retirar
+  `docs/hechos-del-comprador.md`): antigüedad de la cuenta, entregados (total y con este comercio), sin retirar
   o no recibidos (S5), cancelados por él después de aceptado, transferencias revertidas (S2),
   contacto confirmado sí/no, hecho por mandato sí/no. Todo es un conteo de pedidos que el comprador
   mismo puede ver en `GET /yo/hechos`, igual que los ve el comercio.
