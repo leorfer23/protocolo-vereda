@@ -1008,7 +1008,7 @@ paths:
         (docs/ranking-y-despacho.md).
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       x-permiso-equipo: [pedidos]
-      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody:
         required: true
         content: { application/json: { schema: { type: object, required: [motivo], properties: { motivo: { type: string, enum: [no_retirado, no_recibido] }, ubicacion: { $ref: "esquemas/comunes.json#/$defs/punto", description: "Dónde está quien lo marca. Obligatoria para el repartidor." }, firma: { $ref: "#/components/schemas/FirmaNoVino" } } } } }
@@ -1036,7 +1036,7 @@ paths:
         Queda en `no_vino.descargo` y el nodo publica `pedido.descargo` al comercio y, si hubo, al
         repartidor.
       security: [ { sesion: [] } ]
-      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { texto: { type: string, minLength: 1, maxLength: 500 }, ubicacion: { $ref: "esquemas/comunes.json#/$defs/punto" }, firma: { $ref: "#/components/schemas/FirmaDescargo" } } } } } }
       responses:
         "201": { description: "El pedido con no_vino.descargo", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
