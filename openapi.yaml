@@ -1195,7 +1195,9 @@ paths:
         `nunca` el código es opcional. La foto la sube quien entrega con `POST /medios?pedido=<id>`
         (privada, solo para las partes). Si el nodo no anuncia `endpoints.medios` (el operador la
         apagó después de congelada la regla), la foto deja de ser obligatoria: se entrega igual y
-        `sin_codigo` queda sin `foto`. Una entrega nunca se traba por eso. Un código válido (de entrega o de retiro) deja
+        `sin_codigo` queda sin `foto`. Una entrega nunca se traba por eso. Esto es solo con envío:
+        en retiro, agotados los intentos, sigue haciendo falta `foto`, con o sin fotos en el nodo;
+        si no, quien busca podría equivocarse a propósito para saltear el código. Un código válido (de entrega o de retiro) deja
         `firmas.recepcion`, firmada por el nodo.
 
         Cada código admite 5 intentos equivocados por pedido. Uno equivocado responde 422
@@ -1206,7 +1208,7 @@ paths:
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri, description: "La foto de la entrega, idealmente la URL que devolvió `POST /medios?pedido=<id>`. Obligatoria si la regla pedía código y no vino, o si los intentos se agotaron, salvo que el nodo no aloje fotos: queda en 'sin_codigo'." }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro mientras queden intentos. Si no coincide, 422 codigo_retiro_invalido." }, codigo_entrega: { type: string, description: "El código que dijo el comprador, en pedidos con envío. Si no coincide, 422 codigo_entrega_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri, description: "La foto de la entrega, idealmente la URL que devolvió `POST /medios?pedido=<id>`. Obligatoria si la regla pedía código y no vino, o si los intentos se agotaron, salvo con envío en un nodo que no aloja fotos: queda en 'sin_codigo'. En retiro con los intentos agotados es obligatoria siempre." }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro mientras queden intentos. Si no coincide, 422 codigo_retiro_invalido." }, codigo_entrega: { type: string, description: "El código que dijo el comprador, en pedidos con envío. Si no coincide, 422 codigo_entrega_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
       responses:
         "200": { description: "Pedido entregado, con firmas.entrega, y firmas.recepcion si vino el código o sin_codigo si faltó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "422": { description: "codigo_retiro_invalido, codigo_entrega_invalido (con detalle.intentos_restantes), codigo_entrega_requerido, codigo_agotado, cobro_en_mano_sin_confirmar, mayoria_edad_no_verificada, firma_requerida, firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }

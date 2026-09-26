@@ -476,7 +476,8 @@ entregan sin foto (tabla de abajo): la regla pide una prueba, nunca traba una en
 | La regla es `nunca` y no vino código | Entrega como siempre, sin `sin_codigo` |
 | `codigo_entrega` no coincide | 422 `codigo_entrega_invalido` con `detalle.intentos_restantes`; el intento cuenta |
 | Ya hubo 5 intentos equivocados | Cualquier código responde 422 `codigo_agotado`; con `foto` entrega y deja `sin_codigo: {motivo: intentos_agotados, foto}` |
-| El nodo no aloja fotos (sin `endpoints.medios`) y no vino código | Entrega igual y deja `sin_codigo` sin `foto` |
+| Con envío, el nodo no aloja fotos (sin `endpoints.medios`) y no vino código | Entrega igual y deja `sin_codigo` sin `foto` |
+| En retiro, intentos agotados y sin `foto`, aloje fotos el nodo o no | 422 `codigo_agotado`: agotar los intentos no saltea el código |
 
 Si el comprador no está (lo deja en portería, con un vecino), se entrega con foto, como hoy. La
 foto la sube quien entrega con `POST /medios?pedido=<id>` y queda privada, solo para las partes del
