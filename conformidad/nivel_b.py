@@ -249,6 +249,7 @@ class NivelB:
             self.casos.append(_fallo(cat, "marcarPedidoListo", "marcar 'listo' con los ítems resueltos responde 200", r_listo.motivo or f"estado {r_listo.estado}"))
             return pedido_id
         self.casos.append(_ok(cat, "marcarPedidoListo", "marcar 'listo' con los ítems resueltos responde 200"))
+        self._no_vino_antes_de_plazo(pedido_id)
 
         r_entrega_mal = cliente.solicitud(
             "POST", f"{self.base_v1}/pedidos/{pedido_id}/entregar", headers=self._cabecera(),
@@ -279,7 +280,31 @@ class NivelB:
             return pedido_id
         self.casos.append(_ok(cat, "entregarPedido", "entregar con el código correcto responde 200"))
         self._recepcion_firmada(cat, pedido_id)
+        self._descargo_sin_no_vino(pedido_id)
         return pedido_id
+
+    # "no vino" (docs/carrito-y-reserva.md): recién listo, la hora prometida
+    # (eta a 25 min) más el margen de 30 min todavía no pasó, así que marcar
+    # no_retirado responde 409 plazo_no_cumplido con detalle.desde y el pedido
+    # no se mueve. Lo dispara una persona, nunca antes del plazo.
+    def _no_vino_antes_de_plazo(self, pedido_id):
+        cat = "no_vino"
+        desc = "marcar no_retirado antes de la hora prometida más 30 min responde 409 plazo_no_cumplido con detalle.desde"
+        r = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/no-vino", headers=self._cabecera(), json_body={"motivo": "no_retirado"}, timeout=self.timeout)
+        cuerpo = r.cuerpo if isinstance(r.cuerpo, dict) else {}
+        desde = (cuerpo.get("detalle") or {}).get("desde")
+        self.casos.append(_ok(cat, "marcarNoVino", desc) if r.ok and r.estado == 409 and cuerpo.get("codigo") == "plazo_no_cumplido" and desde
+                          else _fallo(cat, "marcarNoVino", desc, f"llegó {r.estado} {cuerpo.get('codigo') or r.motivo}, detalle.desde={desde!r}"))
+
+    # el descargo solo existe al lado de un "no vino": en un pedido entregado
+    # responde 409 sin_no_vino y no guarda nada.
+    def _descargo_sin_no_vino(self, pedido_id):
+        cat = "no_vino"
+        desc = "dejar un descargo en un pedido entregado responde 409 sin_no_vino"
+        r = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/descargo", headers=self._cabecera(), json_body={"texto": "prueba de conformidad"}, timeout=self.timeout)
+        codigo = r.cuerpo.get("codigo") if isinstance(r.cuerpo, dict) else None
+        self.casos.append(_ok(cat, "dejarDescargo", desc) if r.ok and r.estado == 409 and codigo == "sin_no_vino"
+                          else _fallo(cat, "dejarDescargo", desc, f"llegó {r.estado} {codigo or r.motivo}"))
 
     # tope de intentos del código (docs/repartidores.md, punto m): el primer
     # intento equivocado dice que quedan 4 de 5, en número, para que la app

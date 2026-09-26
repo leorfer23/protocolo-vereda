@@ -18,6 +18,7 @@ def clave(etiqueta):
 
 ACTORES = {
     "marta@vereda.ar": "marta",
+    "juan@vereda.ar": "juan",
     "lahuerta@nodo.rosario.coop": "lahuerta",
     "vereda.ar": "nodo-vereda",
     "nodo.rosario.coop": "nodo-rosario",
@@ -181,6 +182,32 @@ v_rendicion = vector("rendicion-rendida",
     "Marta, repartidora, cobró en la puerta los productos en efectivo y le da al comercio lo suyo después de entregar. Firma con la clave de su teléfono y manda {monto, firma} en POST /pedidos/{id}/rendicion; el nodo arma este objeto con la acción de la ruta, el id del pedido, la identidad de la sesión, el monto y firma.instante, lo verifica y lo guarda entero en pedido.rendicion.constancias. La 'recibida' del comercio es igual, con su identidad y su clave (docs/repartidores.md, punto l).",
     rendicion, "firma", "marta@vereda.ar", TS, "pedido.json#/$defs/constancia_rendicion")
 
+# --- 5d. No vino: el repartidor llegó y nadie atendió ---
+no_vino = {
+    "accion": "no_vino",
+    "motivo": "no_recibido",
+    "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+    "por": "marta@vereda.ar",
+    "rol": "repartidor",
+    "ubicacion": {"lat": -34.6037, "lng": -58.3816},
+    "instante": TS,
+}
+v_no_vino = vector("no-vino-no-recibido",
+    "Marta, repartidora, llegó a la puerta y nadie atendió. Pasados los 10 minutos del margen público, marca 'no_recibido' desde donde está: firma con la clave de su teléfono y manda {motivo, ubicacion, firma} en POST /pedidos/{id}/no-vino. El nodo arma este objeto con el motivo y la ubicación del cuerpo, el id del pedido, la identidad de la sesión, su rol en el pedido y firma.instante, lo verifica y lo guarda en pedido.no_vino.constancia (docs/carrito-y-reserva.md, \"No vino\").",
+    no_vino, "firma", "marta@vereda.ar", TS, "pedido.json#/$defs/constancia_no_vino")
+
+# --- 5e. Descargo: la versión del comprador al lado del no vino ---
+descargo = {
+    "accion": "descargo",
+    "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+    "usuario": "juan@vereda.ar",
+    "texto": "Estuve en casa toda la tarde y el timbre anda.",
+    "instante": TS,
+}
+v_descargo = vector("descargo-yo-si-fui",
+    "Juan ve que su pedido quedó 'no_recibido' y deja su versión: firma con la clave de su teléfono y manda {texto, firma} en POST /pedidos/{id}/descargo. El nodo arma este objeto con el id del pedido, la identidad de la sesión, el texto y firma.instante, lo verifica y lo guarda en pedido.no_vino.descargo, al lado de la constancia de Marta. Nadie arbitra (docs/carrito-y-reserva.md, \"No vino\").",
+    descargo, "firma", "juan@vereda.ar", TS, "pedido.json#/$defs/descargo")
+
 # --- 6. Casos JCS sin firma: donde las implementaciones se separan ---
 CASOS = [
     ("orden-de-claves", "Las claves se ordenan por sus unidades de código UTF-16, no por alfabeto ni por orden de aparición.",
@@ -306,7 +333,7 @@ doc = {
         {"actor": "marta@vereda.ar (clave nueva del vector de rotación)", "etiqueta_semilla": "marta-clave-2",
          "semilla_sha256_de": "vereda:vector:marta-clave-2", "semilla_hex": semilla("marta-clave-2").hex(), "clave_publica": pub_nueva},
     ],
-    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_recepcion, v_rendicion],
+    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_recepcion, v_rendicion, v_no_vino, v_descargo],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
     "firma_fresca": firma_fresca,

@@ -1,0 +1,66 @@
+{
+  "$comentario": "La constancia de 'no vino' que guarda el pedido (docs/carrito-y-reserva.md, 'No vino'): firmada por quien la marcó, con el descargo del comprador al lado si lo dejó.",
+  "esquema": "pedido.json#/$defs/no_vino",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "El comercio marca 'no_retirado' pasados los 30 minutos del margen, desde su teléfono.",
+      "doc": {
+        "constancia": { "accion": "no_vino", "motivo": "no_retirado", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "por": "ana@vereda.ar", "rol": "comercio", "instante": "2026-09-25T21:45:00Z", "firma": { "firmante": "ana@vereda.ar", "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo", "valor": "AAAA", "instante": "2026-09-25T21:45:00Z" } },
+        "desde": "2026-09-25T21:40:00Z"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El repartidor marca 'no_recibido' con su ubicación, y el comprador dejó su versión: quedan las dos.",
+      "doc": {
+        "constancia": { "accion": "no_vino", "motivo": "no_recibido", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "por": "marta@vereda.ar", "rol": "repartidor", "ubicacion": { "lat": -34.6037, "lng": -58.3816 }, "instante": "2026-09-25T21:45:00Z", "firma": { "firmante": "marta@vereda.ar", "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo", "valor": "AAAA", "instante": "2026-09-25T21:45:00Z" } },
+        "desde": "2026-09-25T21:40:00Z",
+        "distancia_destino_m": 18,
+        "descargo": { "accion": "descargo", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "usuario": "juan@vereda.ar", "texto": "Estuve en casa toda la tarde y el timbre anda.", "instante": "2026-09-25T22:00:00Z", "firma": { "firmante": "juan@vereda.ar", "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo", "valor": "AAAA", "instante": "2026-09-25T22:00:00Z" } }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Lo marcó el agente del comercio con mandato: sin firma, con mandato_id.",
+      "doc": {
+        "constancia": { "accion": "no_vino", "motivo": "no_retirado", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "por": "ana@vereda.ar", "rol": "comercio", "instante": "2026-09-25T21:45:00Z", "mandato_id": "01926b3a-7c4e-7000-8000-0000000000aa" },
+        "desde": "2026-09-25T21:40:00Z"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El repartidor sin ubicación: su evidencia de que llegó a la puerta es obligatoria.",
+      "doc": {
+        "constancia": { "accion": "no_vino", "motivo": "no_recibido", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "por": "marta@vereda.ar", "rol": "repartidor", "instante": "2026-09-25T21:45:00Z" },
+        "desde": "2026-09-25T21:40:00Z"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El repartidor no marca 'no_retirado': el retiro es entre el comprador y el comercio.",
+      "doc": {
+        "constancia": { "accion": "no_vino", "motivo": "no_retirado", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "por": "marta@vereda.ar", "rol": "repartidor", "ubicacion": { "lat": -34.6037, "lng": -58.3816 }, "instante": "2026-09-25T21:45:00Z" },
+        "desde": "2026-09-25T21:40:00Z"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un descargo sin firma: es la palabra del comprador y la firma él.",
+      "doc": {
+        "constancia": { "accion": "no_vino", "motivo": "no_retirado", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "por": "ana@vereda.ar", "rol": "comercio", "instante": "2026-09-25T21:45:00Z" },
+        "desde": "2026-09-25T21:40:00Z",
+        "descargo": { "accion": "descargo", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "usuario": "juan@vereda.ar", "instante": "2026-09-25T22:00:00Z" }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin veredicto ni puntaje: la constancia es un hecho, nadie arbitra.",
+      "doc": {
+        "constancia": { "accion": "no_vino", "motivo": "no_retirado", "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd", "por": "ana@vereda.ar", "rol": "comercio", "instante": "2026-09-25T21:45:00Z" },
+        "desde": "2026-09-25T21:40:00Z",
+        "veredicto": "comprador_culpable"
+      }
+    }
+  ]
+}

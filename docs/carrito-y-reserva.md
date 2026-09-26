@@ -74,7 +74,51 @@ Vereda nunca maneja plata: con `metodo: transferencia` la plata va del comprador
 - Con modalidad `retiro` no hay viaje ni repartidor: de `listo` el pedido pasa a `entregado`.
 - El pedido lleva un `codigo_retiro` que ve solo el usuario. Al pasar a buscar se lo dice al comercio, que lo envía en `entregar` y firma la entrega. Sin código válido no hay `entregado`, y sin `entregado` no hay reseña. Admite 5 intentos equivocados; agotados, el comercio entrega con foto y el pedido queda `sin_codigo` (`docs/repartidores.md`, punto m). Con código válido, el nodo firma `firmas.recepcion`.
 - Retiro con efectivo es pagar en el mostrador: el comercio envía el código y `cobrado_en_mano` en la misma llamada.
-- Si nadie pasa a buscar, el comercio cancela con `no_retirado` según su política de cancelación publicada.
+- Si nadie pasa a buscar, el comercio lo cierra con `no_retirado` (ver "No vino").
+
+## No vino
+
+Cuando el comprador no aparece, el pedido no queda colgado reteniendo stock: quien esperaba lo
+cierra, con una constancia firmada, y el comprador puede dejar su versión al lado. Nadie arbitra.
+
+- **Lo dispara una persona, nunca un reloj.** El nodo no cierra nada solo por "no vino": así nadie
+  queda marcado por un timeout del nodo. Lo marca el comercio, o el repartidor, con
+  `POST /pedidos/{id}/no-vino` (`marcarNoVino`).
+- **`no_retirado`**: el comercio, en modalidad `retiro`, con el pedido `listo`.
+- **`no_recibido`**: en un pedido con envío, el comercio o el repartidor del pedido, con el pedido
+  `asignado` o `en_camino` (o `listo`, si lo lleva el propio comercio). El repartidor que llegó y
+  nadie atiende lo marca desde la puerta: su ubicación va en la constancia firmada, es su
+  evidencia, y el nodo anota a cuántos metros de la dirección estaba (`distancia_destino_m`, un
+  dato, no una condición). Después vuelve con el pedido.
+- **Plazo mínimo público.** No antes de la hora prometida más un margen igual para todos. La hora
+  prometida es la mayor entre `eta` y `programado_para` y, en retiro, el paso a `listo`: nadie
+  queda "no vino" por un pedido que salió tarde. El margen es de **30 minutos** para `no_retirado`
+  y **10 minutos** para `no_recibido`. Un nodo puede publicar márgenes más largos en `no_vino` de
+  `/.well-known/vereda.json`, nunca más cortos. Antes, `409 plazo_no_cumplido` con `detalle.desde`.
+  El pedido guarda ese instante en `no_vino.desde`, así cualquiera comprueba que se respetó.
+- **Firmado por quien lo marca**, sobre `pedido.json#/$defs/constancia_no_vino`, igual que el
+  traspaso del repartidor (`docs/repartidores.md`, punto j): con la clave en el teléfono la manda
+  él; con la clave custodiada, firma el nodo por él; por mandato, la constancia queda sin firma y
+  con `mandato_id`.
+- **Cierra el pedido y libera lo reservado.** Pasa a `cancelado` con `motivo_codigo` igual al motivo,
+  se liberan el stock y los cupos, y los cobros en mano quedan sin cobrar. Sale como
+  `pedido.cancelado`, con la constancia en `no_vino`.
+- **El descargo del comprador.** En su pedido ve el motivo y un "Yo sí fui": con
+  `POST /pedidos/{id}/descargo` (`dejarDescargo`) deja su versión firmada, con un texto y una
+  ubicación optativos. Una sola vez; no reabre el pedido ni borra la constancia. Las dos quedan a la
+  vista de las tres partes, y el nodo avisa con `pedido.descargo`.
+- **No es un castigo.** Un "no vino" no bloquea a nadie ni baja a nadie en ningún orden. Es un hecho
+  que el comercio puede mirar antes de aceptar el próximo pedido de esa persona. Tampoco le cuesta
+  al comercio: no entra en su término de cumplimiento (`docs/ranking-y-despacho.md`).
+
+## Cancelar
+
+- El comprador cancela según la política de cancelación publicada por el comercio
+  (`politica_cancelacion`), y queda `cancelado_por_usuario`.
+- El comercio también puede cancelar, y queda `cancelado_por_comercio`, con la persona que lo hizo
+  en `actor`: el historial dice quién canceló. La política publicada es la del comprador y no se le
+  aplica al comercio; cancelar un pedido que ya aceptó sí cuenta en su término de cumplimiento.
+  Si canceló porque el comprador no vino, es `marcarNoVino`, no cancelar.
 
 ## Pedido grupal
 

@@ -963,10 +963,85 @@ paths:
       operationId: cancelarPedido
       tags: [pedidos]
       summary: Cancelar según la política publicada por el comercio
+      description: |
+        Lo cancela el comprador o el comercio, y el historial dice quién: `motivo_codigo`
+        `cancelado_por_usuario` si fue el comprador, `cancelado_por_comercio` si fue el comercio
+        (la persona que lo hizo, dueña o miembro del equipo, queda en `actor`). La política de
+        cancelación publicada es la del comprador: al comercio no se le aplica, pero cancelar un
+        pedido que ya aceptó sí cuenta en su término de cumplimiento (docs/ranking-y-despacho.md).
+        Para cerrar un pedido porque el comprador no vino, el comercio usa `marcarNoVino`, no
+        esta operación.
       security: [ { sesion: [] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { motivo: { type: string } } } } } }
       responses: { "200": { description: "Cancelado: el pedido como quedó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }, "409": { $ref: "#/components/responses/Error" } }
+  /pedidos/{id}/no-vino:
+    post:
+      operationId: marcarNoVino
+      tags: [pedidos]
+      summary: "Comercio o repartidor: el comprador no vino. Cierra el pedido y libera lo reservado"
+      description: |
+        Lo dispara una persona, nunca un reloj del nodo (docs/carrito-y-reserva.md, "No vino").
+
+        - `no_retirado`: el comercio, en modalidad `retiro`, con el pedido `listo`.
+        - `no_recibido`: en pedidos con envío, el comercio o el repartidor del pedido, con el pedido
+          `asignado` o `en_camino`, o `listo` si lo lleva el comercio (`asignacion.modo: comercio`).
+          El repartidor manda `ubicacion`, que queda firmada como su evidencia; sin ella, 422
+          `ubicacion_requerida`.
+
+        No antes de la hora prometida (la mayor entre `eta` y `programado_para`, y en retiro
+        también el paso a `listo`) más el margen público: 30 minutos para `no_retirado`, 10 para
+        `no_recibido`. Antes responde 409 `plazo_no_cumplido`, con `detalle.desde`: el instante
+        desde el que se puede. Un motivo que no corresponde a la modalidad o a quien lo marca es
+        422 `motivo_no_corresponde`. El nodo comprueba estado, rol, motivo y plazo antes que la
+        firma.
+
+        La firma es la de quien lo marca sobre `pedido.json#/$defs/constancia_no_vino`. Con la
+        clave en el teléfono la manda en `firma`; si el nodo custodia la clave y no viene, firma el
+        nodo. Con sesión y custodia propia, sin `firma` responde 422 `firma_requerida`. Por
+        mandato, un agente no firma por la persona: la constancia queda sin firma y con
+        `mandato_id`.
+
+        El pedido pasa a `cancelado` con `motivo_codigo` igual al motivo, guarda la constancia en
+        `no_vino`, libera el stock y los cupos, y el nodo publica `pedido.cancelado`. Los cobros
+        en mano quedan sin cobrar. No cuenta en el término de cumplimiento del comercio
+        (docs/ranking-y-despacho.md).
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [pedidos]
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [motivo], properties: { motivo: { type: string, enum: [no_retirado, no_recibido] }, ubicacion: { $ref: "esquemas/comunes.json#/$defs/punto", description: "Dónde está quien lo marca. Obligatoria para el repartidor." }, firma: { $ref: "#/components/schemas/FirmaNoVino" } } } } }
+      responses:
+        "200": { description: "Cerrado: el pedido como quedó, con no_vino", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "403": { description: "no_es_tu_turno: quien lo marca no es el comercio ni el repartidor del pedido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "transicion_invalida (el pedido no está donde tiene que estar) o plazo_no_cumplido (con detalle.desde)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "motivo_no_corresponde, ubicacion_requerida, firma_requerida, firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /pedidos/{id}/descargo:
+    post:
+      operationId: dejarDescargo
+      tags: [pedidos]
+      summary: "Comprador: 'Yo sí fui'. Su versión firmada al lado del 'no vino'"
+      description: |
+        Solo en un pedido cerrado como `no_retirado` o `no_recibido`, y una sola vez: otra da 409
+        `descargo_existente`; en cualquier otro pedido, 409 `sin_no_vino`. No reabre el pedido ni
+        borra la constancia: quedan las dos, y nadie arbitra (docs/carrito-y-reserva.md, "No
+        vino").
+
+        La firma es la del comprador sobre `pedido.json#/$defs/descargo`, como en `marcarNoVino`:
+        con la clave en el teléfono la manda en `firma`; si el nodo custodia la clave y no viene,
+        firma el nodo; con custodia propia y sin `firma`, 422 `firma_requerida`. No hay versión
+        por mandato: es la palabra de la persona.
+
+        Queda en `no_vino.descargo` y el nodo publica `pedido.descargo` al comercio y, si hubo, al
+        repartidor.
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { texto: { type: string, minLength: 1, maxLength: 500 }, ubicacion: { $ref: "esquemas/comunes.json#/$defs/punto" }, firma: { $ref: "#/components/schemas/FirmaDescargo" } } } } } }
+      responses:
+        "201": { description: "El pedido con no_vino.descargo", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "409": { description: "sin_no_vino o descargo_existente", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "firma_requerida, firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /pedidos/{id}/propina:
     post:
       operationId: agregarPropina
@@ -1898,6 +1973,7 @@ components:
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
         sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
         topes: { $ref: "#/components/schemas/Topes" }
+        no_vino: { type: object, description: "Los márgenes públicos de marcarNoVino, en minutos después de la hora prometida (docs/carrito-y-reserva.md, \"No vino\"). Los del protocolo son 30 y 10; un nodo puede publicar más, nunca menos. Ausente: los del protocolo.", additionalProperties: false, properties: { no_retirado_min: { type: integer, minimum: 30 }, no_recibido_min: { type: integer, minimum: 10 } } }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
     Topes:
       type: object
@@ -2018,6 +2094,23 @@ components:
         pasos de docs/claves-y-firmas.md contra el historial del repartidor. `firmante` distinto de
         quien actúa, o `instante` a más de 5 minutos del reloj del nodo: 422 `firma_invalida`.
         Vector: `ejemplos/vectores-firma.json` → `traspaso-entrega`.
+      allOf: [ { $ref: "esquemas/comunes.json#/$defs/firma" } ]
+    FirmaNoVino:
+      description: |
+        La firma de quien marca que el comprador no vino, cuando la clave vive en su teléfono:
+        Ed25519 sobre el JCS de `pedido.json#/$defs/constancia_no_vino`, `{accion: "no_vino",
+        motivo, pedido_id, por, rol, ubicacion?, instante}`, con `por` = `firmante` e `instante` =
+        el de la firma. El nodo la rearma con el motivo y la ubicación del cuerpo, el id del
+        pedido, la identidad de la sesión y el rol que tiene en el pedido. `firmante` distinto de
+        quien actúa, o `instante` a más de 5 minutos del reloj del nodo: 422 `firma_invalida`.
+        Vector: `ejemplos/vectores-firma.json` → `no-vino-no-recibido`.
+      allOf: [ { $ref: "esquemas/comunes.json#/$defs/firma" } ]
+    FirmaDescargo:
+      description: |
+        La firma del comprador sobre el JCS de `pedido.json#/$defs/descargo`, `{accion:
+        "descargo", pedido_id, usuario, texto?, ubicacion?, instante}`, con `usuario` = `firmante`
+        e `instante` = el de la firma. Mismas reglas que `FirmaNoVino`. Vector:
+        `ejemplos/vectores-firma.json` → `descargo-yo-si-fui`.
       allOf: [ { $ref: "esquemas/comunes.json#/$defs/firma" } ]
     AporteComercio:
       type: object

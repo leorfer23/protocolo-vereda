@@ -62,7 +62,7 @@
           "instante": { "$ref": "comunes.json#/$defs/instante" },
           "actor": { "$ref": "comunes.json#/$defs/identidad", "description": "Quien hizo la transición. Del lado del comercio es la persona que la hizo, la dueña o un miembro de su equipo, no la identidad del comercio: así queda a nombre de quien aceptó, preparó o entregó (docs/equipo.md). Si la hizo un agente, la del otorgante del mandato." },
           "motivo": { "type": "string" },
-          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado", "nodo_no_disponible", "sin_repartidor"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo." }
+          "motivo_codigo": { "type": "string", "pattern": "^[a-z_]+$", "examples": ["pago_vencido", "pago_fallido", "cancelado_por_usuario", "cancelado_por_comercio", "rechazado_por_comercio", "sin_respuesta_del_comercio", "no_retirado", "no_recibido", "nodo_no_disponible", "sin_repartidor"], "description": "Para que un agente sepa por qué y qué puede hacer: tras 'pago_vencido' puede confirmar el carrito de nuevo. Una cancelación dice quién canceló: 'cancelado_por_usuario' si fue el comprador, 'cancelado_por_comercio' si fue el comercio. 'no_retirado' y 'no_recibido' cierran el pedido con la constancia de 'no_vino' (docs/carrito-y-reserva.md, \"No vino\")." }
         }
       }
     },
@@ -122,6 +122,7 @@
     "bultos": { "type": "integer", "minimum": 1 },
     "peso_estimado_kg": { "type": "number", "minimum": 0 },
     "rendicion": { "$ref": "#/$defs/rendicion" },
+    "no_vino": { "$ref": "#/$defs/no_vino" },
     "firmas": {
       "type": "object",
       "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; retiro y entrega por el repartidor, sobre '#/$defs/traspaso'; en modalidad 'retiro', entrega por el comercio, con el código del comprador como prueba; recepción, por el nodo, cuando quien entregó presentó el código del comprador.",
@@ -224,6 +225,52 @@
         "entrego": { "$ref": "comunes.json#/$defs/identidad" },
         "instante": { "$ref": "comunes.json#/$defs/instante" },
         "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Del nodo, fuera del JCS, como toda firma." }
+      },
+      "additionalProperties": false
+    },
+    "no_vino": {
+      "type": "object",
+      "description": "Lo escribe el nodo cuando el pedido se cerró como 'no_retirado' o 'no_recibido' (docs/carrito-y-reserva.md, \"No vino\"). Es un hecho firmado por quien lo marcó, con la versión del comprador al lado si la dejó: nadie arbitra. Lo ven las tres partes del pedido. Ausente en cualquier otro pedido.",
+      "required": ["constancia", "desde"],
+      "properties": {
+        "constancia": { "$ref": "#/$defs/constancia_no_vino" },
+        "desde": { "$ref": "comunes.json#/$defs/instante", "description": "Desde cuándo se podía marcar: la hora prometida más el margen público (30 min para 'no_retirado', 10 min para 'no_recibido'). Cualquiera comprueba que 'constancia.instante' no es anterior." },
+        "distancia_destino_m": { "type": "integer", "minimum": 0, "description": "Solo con 'constancia.ubicacion': a cuántos metros de la dirección de entrega estaba quien lo marcó, en línea recta. La calcula el nodo; es un dato, no una condición." },
+        "descargo": { "$ref": "#/$defs/descargo" }
+      },
+      "additionalProperties": false
+    },
+    "constancia_no_vino": {
+      "type": "object",
+      "description": "Lo que firma quien marca que el comprador no vino a retirar ('no_retirado', el comercio) o no recibió en la puerta ('no_recibido', el comercio o el repartidor del pedido). Todo sale del pedido y de la firma: 'pedido_id' es el id, 'por' es 'firma.firmante' e 'instante' es 'firma.instante'. Marcado por un agente con mandato, va sin 'firma' y con 'mandato_id': un agente no firma por la persona.",
+      "required": ["accion", "motivo", "pedido_id", "por", "rol", "instante"],
+      "properties": {
+        "accion": { "const": "no_vino" },
+        "motivo": { "type": "string", "enum": ["no_retirado", "no_recibido"] },
+        "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+        "por": { "$ref": "comunes.json#/$defs/identidad", "description": "La persona que lo marcó: la dueña del comercio o un miembro de su equipo, o el repartidor." },
+        "rol": { "type": "string", "enum": ["comercio", "repartidor"] },
+        "ubicacion": { "$ref": "comunes.json#/$defs/punto", "description": "Dónde estaba al marcarlo. Obligatoria para el repartidor: es su evidencia de que llegó a la puerta. Optativa para el comercio." },
+        "instante": { "$ref": "comunes.json#/$defs/instante" },
+        "mandato_id": { "$ref": "comunes.json#/$defs/id", "description": "Solo si lo marcó un agente con mandato. Entonces no hay 'firma'." },
+        "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Fuera del JCS, como toda firma." }
+      },
+      "if": { "properties": { "rol": { "const": "repartidor" } } },
+      "then": { "required": ["ubicacion"], "properties": { "motivo": { "const": "no_recibido" } } },
+      "additionalProperties": false
+    },
+    "descargo": {
+      "type": "object",
+      "description": "La versión del comprador ('Yo sí fui'), firmada por él, al lado de la constancia de 'no_vino'. Una sola por pedido; no se edita ni se borra, y no reabre el pedido. Todo sale del pedido y de la firma: 'pedido_id' es el id, 'usuario' es 'firma.firmante' e 'instante' es 'firma.instante'.",
+      "required": ["accion", "pedido_id", "usuario", "instante", "firma"],
+      "properties": {
+        "accion": { "const": "descargo" },
+        "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+        "usuario": { "$ref": "comunes.json#/$defs/identidad" },
+        "texto": { "type": "string", "minLength": 1, "maxLength": 500, "description": "Lo que quiera contar: 'Fui a las 21:10 y estaba cerrado'. Optativo: sin texto, el descargo dice 'Yo sí fui'." },
+        "ubicacion": { "$ref": "comunes.json#/$defs/punto", "description": "Optativa: dónde estaba al dejarlo, si quiere sumarla." },
+        "instante": { "$ref": "comunes.json#/$defs/instante" },
+        "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Fuera del JCS, como toda firma." }
       },
       "additionalProperties": false
     },

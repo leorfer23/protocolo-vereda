@@ -22,6 +22,13 @@
       "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I"
     },
     {
+      "actor": "juan@vereda.ar",
+      "etiqueta_semilla": "juan",
+      "semilla_sha256_de": "vereda:vector:juan",
+      "semilla_hex": "7200c8a60cf9c37d052ac08f843316df033468f82d6d15f3e37d2694b046e4c4",
+      "clave_publica": "CV_Ga-6OrnByqEtccMzK6dh_8Eww5DI3PE2PGBZntWY"
+    },
+    {
       "actor": "lahuerta@nodo.rosario.coop",
       "etiqueta_semilla": "lahuerta",
       "semilla_sha256_de": "vereda:vector:lahuerta",
@@ -390,6 +397,74 @@
           "firmante": "marta@vereda.ar",
           "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
           "valor": "JBnonsWuAH-ln9SvaVJWkYneri-B0yL1out52fHROgjGfltAQAwPiA6rclVRU9eyMFQRew2aH83H6h3Vy-fhDw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "nombre": "no-vino-no-recibido",
+      "descripcion": "Marta, repartidora, llegó a la puerta y nadie atendió. Pasados los 10 minutos del margen público, marca 'no_recibido' desde donde está: firma con la clave de su teléfono y manda {motivo, ubicacion, firma} en POST /pedidos/{id}/no-vino. El nodo arma este objeto con el motivo y la ubicación del cuerpo, el id del pedido, la identidad de la sesión, su rol en el pedido y firma.instante, lo verifica y lo guarda en pedido.no_vino.constancia (docs/carrito-y-reserva.md, \"No vino\").",
+      "esquema": "pedido.json#/$defs/constancia_no_vino",
+      "objeto_sin_firma": {
+        "accion": "no_vino",
+        "motivo": "no_recibido",
+        "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+        "por": "marta@vereda.ar",
+        "rol": "repartidor",
+        "ubicacion": {
+          "lat": -34.6037,
+          "lng": -58.3816
+        },
+        "instante": "2026-09-21T15:04:05-03:00"
+      },
+      "jcs_utf8_hex": "7b22616363696f6e223a226e6f5f76696e6f222c22696e7374616e7465223a22323032362d30392d32315431353a30343a30352d30333a3030222c226d6f7469766f223a226e6f5f726563696269646f222c2270656469646f5f6964223a2230313932366233612d376334652d373030302d383030302d303030303030303061626364222c22706f72223a226d61727461407665726564612e6172222c22726f6c223a2272657061727469646f72222c22756269636163696f6e223a7b226c6174223a2d33342e363033372c226c6e67223a2d35382e333831367d7d",
+      "jcs_sha256_hex": "bceeb172605670a493d4f6a31ece2bedced493592f967dc64bac9f5ea7e927a6",
+      "jcs_bytes": 220,
+      "campo_firma": "firma",
+      "objeto_firmado": {
+        "accion": "no_vino",
+        "motivo": "no_recibido",
+        "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+        "por": "marta@vereda.ar",
+        "rol": "repartidor",
+        "ubicacion": {
+          "lat": -34.6037,
+          "lng": -58.3816
+        },
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "bfz0IyqbcLN7H5sLh6Z07LhQIYSA8Dd8W7L1GKIIJSbngeqMvyWSaqnxMbnby4rEW77SdZ45y5yrka5ty81uAQ",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "nombre": "descargo-yo-si-fui",
+      "descripcion": "Juan ve que su pedido quedó 'no_recibido' y deja su versión: firma con la clave de su teléfono y manda {texto, firma} en POST /pedidos/{id}/descargo. El nodo arma este objeto con el id del pedido, la identidad de la sesión, el texto y firma.instante, lo verifica y lo guarda en pedido.no_vino.descargo, al lado de la constancia de Marta. Nadie arbitra (docs/carrito-y-reserva.md, \"No vino\").",
+      "esquema": "pedido.json#/$defs/descargo",
+      "objeto_sin_firma": {
+        "accion": "descargo",
+        "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+        "usuario": "juan@vereda.ar",
+        "texto": "Estuve en casa toda la tarde y el timbre anda.",
+        "instante": "2026-09-21T15:04:05-03:00"
+      },
+      "jcs_utf8_hex": "7b22616363696f6e223a22646573636172676f222c22696e7374616e7465223a22323032362d30392d32315431353a30343a30352d30333a3030222c2270656469646f5f6964223a2230313932366233612d376334652d373030302d383030302d303030303030303061626364222c22746578746f223a2245737475766520656e206361736120746f6461206c61207461726465207920656c2074696d62726520616e64612e222c227573756172696f223a226a75616e407665726564612e6172227d",
+      "jcs_sha256_hex": "c34439000b5c67cf51ca208825ecb5b3ff0bcc4e03d8070df5f953d77c00b570",
+      "jcs_bytes": 195,
+      "campo_firma": "firma",
+      "objeto_firmado": {
+        "accion": "descargo",
+        "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+        "usuario": "juan@vereda.ar",
+        "texto": "Estuve en casa toda la tarde y el timbre anda.",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "juan@vereda.ar",
+          "clave_publica": "CV_Ga-6OrnByqEtccMzK6dh_8Eww5DI3PE2PGBZntWY",
+          "valor": "NAPAZbUDnh9NzNfDAAYPwCtYgF7oZ-ARrd7M-7FZhBB7-tSWSl3sM9vmecACHCr1BWTXa5Yq_0YmHNymz7uwAg",
           "instante": "2026-09-21T15:04:05-03:00"
         }
       }
