@@ -461,6 +461,11 @@ dígitos que genera el nodo al crear el pedido. Lo ve únicamente el comprador, 
 La regla vigente al crear el pedido se congela en `pedido.modalidad.codigo_entrega`: cambiarla
 después no toca los pedidos en curso. Con el default nada cambia para nadie.
 
+`siempre` y `solo_efectivo` solo se pueden elegir en un nodo que aloja fotos (`endpoints.medios`):
+si no, quien entrega no tendría dónde subir la foto del comprador ausente, y la ficha responde 422
+`codigo_entrega_sin_medios`. Si el operador apaga la subida con pedidos en curso, esos pedidos se
+entregan sin foto (tabla de abajo): la regla pide una prueba, nunca traba una entrega.
+
 **Qué hace el nodo en `POST /pedidos/{id}/entregar`.**
 
 | Caso | Respuesta |
@@ -471,8 +476,11 @@ después no toca los pedidos en curso. Con el default nada cambia para nadie.
 | La regla es `nunca` y no vino código | Entrega como siempre, sin `sin_codigo` |
 | `codigo_entrega` no coincide | 422 `codigo_entrega_invalido` con `detalle.intentos_restantes`; el intento cuenta |
 | Ya hubo 5 intentos equivocados | Cualquier código responde 422 `codigo_agotado`; con `foto` entrega y deja `sin_codigo: {motivo: intentos_agotados, foto}` |
+| El nodo no aloja fotos (sin `endpoints.medios`) y no vino código | Entrega igual y deja `sin_codigo` sin `foto` |
 
-Si el comprador no está (lo deja en portería, con un vecino), se entrega con foto, como hoy. No es
+Si el comprador no está (lo deja en portería, con un vecino), se entrega con foto, como hoy. La
+foto la sube quien entrega con `POST /medios?pedido=<id>` y queda privada, solo para las partes del
+pedido (`docs/medios.md`, "La foto de la entrega"). No es
 un bloqueo ni una sanción: `sin_codigo` queda a la vista del comprador, del comercio y del
 repartidor, y cada uno saca su conclusión: es un hecho registrado, no un juicio del nodo.
 

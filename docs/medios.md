@@ -54,6 +54,26 @@ Una dueña de local no tiene un hosting donde dejar sus fotos. Por eso un nodo *
 | No es una imagen de `tipos` | 415 | `tipo_no_admitido` |
 | El comercio ya tiene `maximo_por_comercio` fotos | 409 | `tope_de_medios_alcanzado` |
 
+## La foto de la entrega
+
+Cuando el comercio pide el código de entrega y el comprador no está (lo deja en portería, con un vecino), se entrega con foto y el pedido queda `sin_codigo` (`docs/repartidores.md`, punto m). Quien entrega sube esa foto al mismo lugar, con otras reglas, porque no es una foto para mostrar: es una prueba entre las partes de un pedido.
+
+- **Quién sube.** Solo quien lleva el pedido, con `POST /medios?pedido=<id>`: el repartidor asignado mientras el pedido está `en_camino` (con su sesión, o su agente con `repartir`), o el comercio que lo entrega él mismo (retiro, o `asignacion.modo: comercio`) con el pedido `listo` (el dueño, su equipo con el permiso `pedidos`, o su agente con `administrar`). Otra parte del pedido recibe `403 no_es_el_repartidor` y quien no es parte `404 no_encontrado`, como al leer el pedido; un pedido en otro estado, `409 transicion_invalida`.
+- **Las mismas fotos.** JPEG o PNG, hasta `limite_bytes`, sin EXIF ni ubicación: el nodo los borra igual que en las del comercio. La ubicación del repartidor en la puerta ya queda en su constancia firmada cuando corresponde; la foto no la repite.
+- **Hasta 3 por pedido.** Fotos distintas; la misma dos veces devuelve la misma URL. La cuarta, `409 tope_de_medios_alcanzado` con `detalle.maximo_por_pedido`. No cuentan para `maximo_por_comercio`.
+- **Privada.** La URL que devuelve (`GET /pedidos/{id}/fotos/{nombre}`, `verFotoEntrega`) la ven solo las partes del pedido con su token: el comprador, el comercio y el repartidor, y sus agentes. No se publica, no se federa y no se cachea en público. Va en `entregarPedido.foto` y queda en `pedido.sin_codigo.foto`.
+- **Dura lo que duran los datos del pedido.** Se borra junto con la dirección y el nombre del comprador, a los `datos.retencion_dias` del comercio (90 por defecto, `docs/datos-y-privacidad.md`). Las que se subieron y no se usaron, también.
+- **Por MCP.** El agente del repartidor (o del comercio que lleva él) la sube con `foto_entrega_subir` y manda la `url` en `viaje_entregar` o `pedido_entregar`.
+
+**Si el nodo no aloja fotos.** Sin `endpoints.medios`, quien entrega no tiene dónde subir la foto. Por eso un comercio no puede elegir `codigo_entrega` `siempre` ni `solo_efectivo` en ese nodo (`422 codigo_entrega_sin_medios` al crear o editar la ficha). Si el operador apaga la subida con pedidos en curso que ya congelaron esa regla, la foto deja de ser obligatoria: el pedido se entrega igual y queda `sin_codigo` sin `foto`. Una entrega nunca se traba porque falte dónde subir una foto.
+
+| Qué pasa, con `pedido` | Estado | Código |
+| --- | --- | --- |
+| Vinieron `comercio` y `pedido`, o ninguno | 400 | `parametro_invalido` |
+| No es quien lleva el pedido | 403 | `no_es_el_repartidor` |
+| El pedido no está en camino a entregarse | 409 | `transicion_invalida` |
+| El pedido ya tiene 3 fotos | 409 | `tope_de_medios_alcanzado` |
+
 ## Lo que cuesta al nodo
 
 Un nodo lo corre cualquiera en su propio servidor, y el video es lo más caro de servir. Por eso:

@@ -53,6 +53,6 @@
       }
     },
     "tiempo_maximo_en_camino_min": { "type": "integer", "minimum": 5 },
-    "codigo_entrega": { "type": "string", "enum": ["siempre", "solo_efectivo", "nunca"], "default": "nunca", "description": "Regla pública del comercio para las modalidades con envío: cuándo quien entrega tiene que pedirle al comprador su 'codigo_entrega'. 'siempre'; 'solo_efectivo', si quien entrega cobra algo en mano; 'nunca' (default), como hasta ahora. Se congela en 'pedido.modalidad.codigo_entrega' al crear el pedido. Si se exige y el comprador no está, igual se entrega con foto y queda 'sin_codigo' a la vista: la regla pide una prueba, no bloquea la entrega (docs/repartidores.md, punto m). En 'retiro' no aplica: ahí el código de retiro se pide siempre." }
+    "codigo_entrega": { "type": "string", "enum": ["siempre", "solo_efectivo", "nunca"], "default": "nunca", "description": "Regla pública del comercio para las modalidades con envío: cuándo quien entrega tiene que pedirle al comprador su 'codigo_entrega'. 'siempre'; 'solo_efectivo', si quien entrega cobra algo en mano; 'nunca' (default), como hasta ahora. Se congela en 'pedido.modalidad.codigo_entrega' al crear el pedido. Si se exige y el comprador no está, igual se entrega con foto y queda 'sin_codigo' a la vista: la regla pide una prueba, no bloquea la entrega (docs/repartidores.md, punto m). 'siempre' y 'solo_efectivo' piden que el nodo aloje fotos ('endpoints.medios'); si no, el nodo los rechaza con 422 codigo_entrega_sin_medios. En 'retiro' no aplica: ahí el código de retiro se pide siempre." }
   }
 }

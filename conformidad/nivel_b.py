@@ -251,6 +251,7 @@ class NivelB:
             return pedido_id
         self.casos.append(_ok(cat, "marcarPedidoListo", "marcar 'listo' con los ítems resueltos responde 200"))
         self._no_vino_antes_de_plazo(pedido_id)
+        self._foto_entrega(pedido_id, entregado=False)
 
         r_entrega_mal = cliente.solicitud(
             "POST", f"{self.base_v1}/pedidos/{pedido_id}/entregar", headers=self._cabecera(),
@@ -282,8 +283,65 @@ class NivelB:
         self.casos.append(_ok(cat, "entregarPedido", "entregar con el código correcto responde 200"))
         self._recepcion_firmada(cat, pedido_id)
         self._descargo_sin_no_vino(pedido_id)
+        self._foto_entrega(pedido_id, entregado=True)
         self._revertir_sin_transferencia(pedido_id)
         return pedido_id
+
+    # foto de la entrega (docs/medios.md, "La foto de la entrega"): solo si el
+    # nodo anuncia endpoints.medios. En retiro entrega el comercio, que es la
+    # sesión de prueba: con el pedido listo sube la foto con ?pedido=, la URL la
+    # sirve solo con token y sin EXIF; ya entregado, subir otra es 409.
+    def _foto_entrega(self, pedido_id, entregado):
+        cat, opid = "medios", "subirMedio"
+        r = cliente.get(self.origen + "/.well-known/vereda.json", timeout=self.timeout)
+        endpoint = ((r.cuerpo or {}).get("endpoints") or {}).get("medios") if r.ok and isinstance(r.cuerpo, dict) else None
+        if not endpoint:
+            if not entregado:
+                self.casos.append(_omitido(cat, opid, "la foto de la entrega (docs/medios.md)", "el nodo no publica endpoints.medios: es opcional"))
+            return
+
+        def subir(consulta):
+            h = {"Content-Type": "image/jpeg", **self._cabecera()}
+            return cliente.solicitud_cruda("POST", f"{endpoint}?{consulta}", headers=h, cuerpo=self.JPEG_CON_EXIF, timeout=self.timeout)
+
+        if entregado:
+            desc = "con el pedido ya entregado, subir la foto de la entrega responde 409 transicion_invalida"
+            r = subir(f"pedido={pedido_id}")
+            codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+            self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 409 and codigo == "transicion_invalida"
+                              else _fallo(cat, opid, desc, r.motivo or f"llegó {r.estado} {codigo}"))
+            return
+
+        desc = "con comercio y pedido a la vez, subirMedio responde 400 parametro_invalido"
+        comercio = self._comercio_de_la_oferta("01920000-0000-7000-8000-0000000000b1") or {}
+        r = subir(f"pedido={pedido_id}&comercio={comercio.get('id', '')}")
+        self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 400 else _fallo(cat, opid, desc, r.motivo or f"esperaba 400, llegó {r.estado}"))
+
+        desc = "quien entrega sube la foto de la entrega con ?pedido= (201) y la URL la sirve solo con token, sin EXIF"
+        r = subir(f"pedido={pedido_id}")
+        if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}: {str(r.cuerpo)[:200]}"))
+            return
+        caso = self._chequear_esquema(opid, "la foto de la entrega cumple MedioSubido", "/medios", "post", r.cuerpo, "201")
+        if caso:
+            self.casos.append(caso)
+        url = r.cuerpo.get("url", "")
+        try:
+            con = requests.get(url, headers=self._cabecera(), timeout=self.timeout)
+            sin = requests.get(url, timeout=self.timeout)
+        except requests.RequestException as e:
+            self.casos.append(_fallo(cat, "verFotoEntrega", desc, str(e)[:120]))
+            return
+        if con.status_code != 200 or not con.content.startswith(b"\xff\xd8"):
+            self.casos.append(_fallo(cat, "verFotoEntrega", desc, f"GET {url} con token respondió {con.status_code}"))
+        elif b"Exif" in con.content or b"VeredaConformidad" in con.content:
+            self.casos.append(_fallo(cat, "verFotoEntrega", desc, "la foto servida conserva el EXIF (cámara y ubicación)"))
+        elif sin.status_code == 200:
+            self.casos.append(_fallo(cat, "verFotoEntrega", desc, "sin token la foto se sirve igual: tiene que ser privada"))
+        elif "public" in con.headers.get("Cache-Control", ""):
+            self.casos.append(_fallo(cat, "verFotoEntrega", desc, f"Cache-Control {con.headers.get('Cache-Control')!r}: tiene que ser private"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
 
     # "no vino" (docs/carrito-y-reserva.md): recién listo, la hora prometida
     # (eta a 25 min) más el margen de 30 min todavía no pasó, así que marcar

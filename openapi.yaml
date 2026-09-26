@@ -235,6 +235,11 @@ paths:
         cuando el comercio verifica CUIT, foto geolocalizada y cuenta de cobro; no es una
         habilitación y no hace falta para vender. La reputación se construye solo con reseñas
         firmadas de pedidos entregados.
+
+        Una modalidad con envío con `codigo_entrega` `siempre` o `solo_efectivo` pide que el nodo
+        aloje la foto de la entrega (`endpoints.medios`): sin eso quien entrega no tiene dónde
+        subirla, y la regla responde 422 `codigo_entrega_sin_medios` (docs/repartidores.md,
+        punto m). `nunca` vale siempre.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
       responses:
@@ -265,6 +270,11 @@ paths:
 
         Cambiar `privado.cuenta_cobro` pide firma fresca de quien la cambia (docs/acceso.md, punto 7);
         el resto de la ficha no.
+
+        Una modalidad con envío con `codigo_entrega` `siempre` o `solo_efectivo` pide que el nodo
+        aloje la foto de la entrega (`endpoints.medios`): sin eso quien entrega no tiene dónde
+        subirla, y la regla responde 422 `codigo_entrega_sin_medios` (docs/repartidores.md,
+        punto m). `nunca` vale siempre.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [datos]
       x-firma-fresca: si cambia privado.cuenta_cobro
@@ -577,25 +587,40 @@ paths:
   /medios:
     post:
       operationId: subirMedio
-      tags: [mi-comercio]
-      summary: "Opcional: subir una foto de un comercio al nodo y recibir su URL"
+      tags: [mi-comercio, pedidos]
+      summary: "Opcional: subir una foto de un comercio, o la de la entrega de un pedido, al nodo y recibir su URL"
       description: |
         Solo si el nodo publica `endpoints.medios` en /.well-known/vereda.json; si no, o si el
         operador la apagó, 501 `no_implementado` y las fotos van por URL, como siempre
-        (docs/medios.md). Solo el dueño del comercio, o un agente con su mandato `administrar`.
+        (docs/medios.md). Va uno solo de `comercio` o `pedido`; los dos o ninguno, 400
+        `parametro_invalido`.
+
+        - `comercio`: una foto del comercio. Solo el dueño (o su equipo con `catalogo` o `datos`),
+          o un agente con su mandato `administrar`. La URL es pública, pero no se publica sola: el comercio la pone en
+          `imagenes` con `editarComercio` o `editarOferta`. Cuenta para `maximo_por_comercio`.
+        - `pedido`: la foto de la entrega, para `entregarPedido.foto` (docs/repartidores.md,
+          punto m). Solo quien lleva el pedido: el repartidor asignado con el pedido `en_camino`
+          (su sesión, o su agente con `repartir`), o el comercio que lo entrega él mismo
+          (retiro, o `asignacion.modo: comercio`) con el pedido `listo` (dueño,
+          equipo con permiso `pedidos`, o agente con `administrar`). Otra parte del pedido, 403
+          `no_es_el_repartidor`, y quien no es parte, 404 `no_encontrado`; en otro estado, 409 `transicion_invalida`. Hasta 3 fotos
+          distintas por pedido (409 `tope_de_medios_alcanzado` con `detalle.maximo_por_pedido`),
+          aparte de `maximo_por_comercio`. La URL es privada: la sirve `verFotoEntrega`, solo a
+          las partes del pedido, y se borra con los datos personales del pedido
+          (docs/datos-y-privacidad.md).
 
         El cuerpo es el archivo tal cual, con su `Content-Type`. El nodo mira los bytes, no la
         cabecera: lo que no es una imagen de `medios.tipos` que se pueda decodificar responde 415
         `tipo_no_admitido`. Antes de guardarla le borra todos los metadatos (EXIF, ubicación,
         cámara, XMP): lo que sirve no dice dónde ni con qué se sacó. Subir la misma foto dos veces
-        devuelve la misma URL y cuenta una sola vez para `maximo_por_comercio`.
+        devuelve la misma URL y cuenta una sola vez para el tope.
 
-        La URL no se publica sola: el comercio la pone en `imagenes` con `editarComercio` o
-        `editarOferta`. Video no se sube: sigue por URL.
-      security: [ { sesion: [] }, { mandato: [administrar] } ]
-      x-permiso-equipo: [catalogo, datos]
+        Video no se sube: sigue por URL.
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [catalogo, datos, pedidos]
       parameters:
-        - { name: comercio, in: query, required: true, description: "El id del comercio (el de las rutas /comercios/{id}).", schema: { type: string } }
+        - { name: comercio, in: query, required: false, description: "El id del comercio (el de las rutas /comercios/{id}), para una foto del comercio.", schema: { type: string } }
+        - { name: pedido, in: query, required: false, description: "El id del pedido, para la foto de su entrega.", schema: { type: string } }
       requestBody:
         required: true
         content:
@@ -603,10 +628,11 @@ paths:
           image/png: { schema: { type: string, contentMediaType: image/png } }
       responses:
         "201": { description: Guardada, content: { application/json: { schema: { $ref: "#/components/schemas/MedioSubido" } } } }
+        "400": { description: "Falta `comercio` o `pedido`, o vinieron los dos (parametro_invalido)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "401": { $ref: "#/components/responses/Error" }
-        "403": { $ref: "#/components/responses/NoEsElDueno" }
-        "404": { description: "No existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
-        "409": { description: "El comercio ya tiene `maximo_por_comercio` fotos guardadas (tope_de_medios_alcanzado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "403": { description: "Con `comercio`: no lo administra (no_es_el_dueno, o sin_permiso en el equipo). Con `pedido`: es parte pero no quien lo lleva (no_es_el_repartidor)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "404": { description: "No existe ese comercio, o ese pedido para quien pide: no es parte (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "Ya tiene `maximo_por_comercio` fotos, o el pedido ya tiene 3 (tope_de_medios_alcanzado); o el pedido no está en camino a entregarse (transicion_invalida)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "413": { description: "Pesa más que `limite_bytes` (medio_muy_grande). `detalle.limite_bytes` dice cuánto acepta", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "415": { description: "No es una imagen de `medios.tipos` que se pueda decodificar (tipo_no_admitido). `detalle.tipos` dice cuáles acepta", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "429": { $ref: "#/components/responses/Reintentar" }
@@ -1166,7 +1192,10 @@ paths:
         regla congelada `modalidad.codigo_entrega` lo pide (`siempre`, o `solo_efectivo` con
         cobro en mano) y no viene, hace falta `foto`: se entrega igual y el pedido queda con
         `sin_codigo` (`no_lo_dio`). Sin código ni foto, 422 `codigo_entrega_requerido`. Con
-        `nunca` el código es opcional. Un código válido (de entrega o de retiro) deja
+        `nunca` el código es opcional. La foto la sube quien entrega con `POST /medios?pedido=<id>`
+        (privada, solo para las partes). Si el nodo no anuncia `endpoints.medios` (el operador la
+        apagó después de congelada la regla), la foto deja de ser obligatoria: se entrega igual y
+        `sin_codigo` queda sin `foto`. Una entrega nunca se traba por eso. Un código válido (de entrega o de retiro) deja
         `firmas.recepcion`, firmada por el nodo.
 
         Cada código admite 5 intentos equivocados por pedido. Uno equivocado responde 422
@@ -1177,10 +1206,32 @@ paths:
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri, description: "La foto de la entrega. Obligatoria si la regla pedía código y no vino, o si los intentos se agotaron: queda en 'sin_codigo'." }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro mientras queden intentos. Si no coincide, 422 codigo_retiro_invalido." }, codigo_entrega: { type: string, description: "El código que dijo el comprador, en pedidos con envío. Si no coincide, 422 codigo_entrega_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { mayoria_edad_verificada: { type: boolean }, foto: { type: string, format: uri, description: "La foto de la entrega, idealmente la URL que devolvió `POST /medios?pedido=<id>`. Obligatoria si la regla pedía código y no vino, o si los intentos se agotaron, salvo que el nodo no aloje fotos: queda en 'sin_codigo'." }, codigo_retiro: { type: string, description: "Obligatorio en modalidad retiro mientras queden intentos. Si no coincide, 422 codigo_retiro_invalido." }, codigo_entrega: { type: string, description: "El código que dijo el comprador, en pedidos con envío. Si no coincide, 422 codigo_entrega_invalido." }, cobrado_en_mano: { type: boolean, description: "Obligatorio si hay pagos en_mano. Pasa a confirmado todos los que cobra quien entrega: productos y envío en efectivo, y la propina en mano." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
       responses:
         "200": { description: "Pedido entregado, con firmas.entrega, y firmas.recepcion si vino el código o sin_codigo si faltó", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "422": { description: "codigo_retiro_invalido, codigo_entrega_invalido (con detalle.intentos_restantes), codigo_entrega_requerido, codigo_agotado, cobro_en_mano_sin_confirmar, mayoria_edad_no_verificada, firma_requerida, firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /pedidos/{id}/fotos/{nombre}:
+    get:
+      operationId: verFotoEntrega
+      tags: [pedidos]
+      summary: "La foto de la entrega de un pedido, solo para sus partes"
+      description: |
+        Sirve una foto subida con `POST /medios?pedido=<id>` (docs/medios.md, "La foto de la
+        entrega"): es la URL que devolvió `subirMedio`, y la que va en `entregarPedido.foto` y en
+        `pedido.sin_codigo.foto`. No es pública como las fotos de un comercio: la ven solo las
+        partes del pedido (el comprador y su agente con `leer`, el comercio con su equipo y su
+        agente con `administrar`, el repartidor y su agente con `repartir`), con su token. Nunca se
+        federa ni se cachea en público (`Cache-Control: private`). Cumplido el plazo de retención
+        del pedido, se borra y responde 404.
+      security: [ { sesion: [] }, { mandato: [leer] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [pedidos]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+        - { name: nombre, in: path, required: true, description: "El nombre del archivo, tal como vino en la URL.", schema: { type: string, pattern: "^[0-9a-f]{64}\\.(jpg|png)$" } }
+      responses:
+        "200": { description: "La foto, sin metadatos", content: { image/jpeg: { schema: { type: string, contentMediaType: image/jpeg } }, image/png: { schema: { type: string, contentMediaType: image/png } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { description: "No existe esa foto en ese pedido, ya se borró por retención, o quien pide no es parte del pedido (no_encontrado), como en verPedido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /pedidos/{id}/transferencia:
     post:
       operationId: declararTransferencia
@@ -2054,7 +2105,7 @@ components:
         claves: { $ref: "esquemas/comunes.json#/$defs/claves" }
         operador: { type: string }
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
-        endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string }, medios: { type: string, format: uri, description: "Dónde se suben las fotos de un comercio (subirMedio). Ausente si el operador no ofrece alojarlas: entonces van por URL (docs/medios.md)." } } }
+        endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string }, medios: { type: string, format: uri, description: "Dónde se suben las fotos de un comercio y la de la entrega de un pedido (subirMedio). Ausente si el operador no ofrece alojarlas: entonces van por URL, y ningún comercio puede exigir el código de entrega (docs/medios.md)." } } }
         medios: { $ref: "#/components/schemas/CapacidadMedios" }
         push: { $ref: "#/components/schemas/CapacidadPush" }
         cobradores: { $ref: "#/components/schemas/CapacidadCobradores" }
@@ -2155,7 +2206,7 @@ components:
       required: [url, tipo, bytes]
       additionalProperties: false
       properties:
-        url: { type: string, format: uri, description: "Pública y estable. Va tal cual en `imagenes[].url` de la ficha o de una oferta, o en el `poster` de un clip." }
+        url: { type: string, format: uri, description: "Estable. La de un comercio es pública y va tal cual en `imagenes[].url` de la ficha o de una oferta, o en el `poster` de un clip. La de un pedido es privada (`verFotoEntrega`, solo sus partes) y va en `entregarPedido.foto`." }
         tipo: { type: string, enum: [image/jpeg, image/png] }
         bytes: { type: integer, minimum: 1, description: "Lo que pesa el archivo que sirve el nodo, ya sin metadatos." }
         ancho: { type: integer, minimum: 1 }
