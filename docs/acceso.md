@@ -190,7 +190,13 @@ Recomendación (no obligación) por plataforma:
   exportar, y lo que no se puede exportar no se puede respaldar: por eso el Keystore envuelve
   la semilla en vez de tenerla.
 - **Web.** IndexedDB `vereda`, almacén `claves`, `keyPath: "identidad"`, filas
-  `{ identidad, clave_publica, privada, creada }` con `privada` como `Uint8Array` de 32 bytes;
+  `{ identidad, clave_publica, llave?, privada?, creada }`. `llave` es un `CryptoKey` Ed25519
+  **no extraíble** (WebCrypto): firma, pero ni un script ajeno en la página puede leerlo.
+  `privada` es la semilla como `Uint8Array` de 32 bytes y queda solo hasta que la persona guarda
+  su respaldo con frase (§4); después, otro respaldo es rotar la clave, no volver a exportar
+  esta. Un navegador sin Ed25519 en WebCrypto no tiene `llave` y guarda `privada`, que es lo
+  único que firma. Una fila vieja con solo `privada` se lee igual: se le suma la `llave` y la
+  semilla queda hasta el próximo respaldo.
   `localStorage["vereda.identidad"]` la identidad activa y `localStorage["vereda.sesion"]` el
   token. Es lo que implementa el SDK web del nodo de referencia; un cliente web que quiera
   convivir con él usa los mismos lugares. `identidad` es `""` hasta que el nodo la acuña.
