@@ -169,7 +169,7 @@
     },
     {
       "name": "equipo_invitar",
-      "description": "Invita a alguien al equipo del comercio con un rol y sus permisos (POST /comercios/{id}/equipo/invitaciones). Devuelve un código y un enlace vereda://equipo?… que se ven una sola vez: pasáselos a la persona para que los comparta en mano o por mensaje, nunca en público. Solo se dan permisos que la persona que te mandó tiene. El rol es libre ('encargado', 'atención', 'catálogo'); lo que habilita son los permisos. Ej: 'invitá a Sofi para atender pedidos', 'sumá un encargado con todo menos números'. Requiere scope 'administrar' y el permiso 'equipo'.",
+      "description": "Invita a alguien al equipo del comercio con un rol y sus permisos (POST /comercios/{id}/equipo/invitaciones). Devuelve un código y un enlace vereda://equipo?… que se ven una sola vez: pasáselos a la persona para que los comparta en mano o por mensaje, nunca en público. Solo se dan permisos que la persona que te mandó tiene. El rol es libre ('encargado', 'atención', 'catálogo'); lo que habilita son los permisos. Ej: 'invitá a Sofi para atender pedidos', 'sumá un encargado con todo menos números'. Requiere scope 'administrar' y el permiso 'equipo'. Si el nodo exige firma fresca (acceso.firma_fresca en /.well-known), no la podés hacer vos: pedile a la persona que la haga desde la app (docs/acceso.md, punto 7).",
       "inputSchema": {"type": "object", "required": ["comercio_id", "rol", "permisos"], "properties": {"comercio_id": {"type": "string"}, "rol": {"type": "string", "maxLength": 40}, "permisos": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["pedidos", "catalogo", "numeros", "datos", "equipo"]}}, "vence_en_horas": {"type": "integer", "minimum": 1, "maximum": 168, "default": 72}}}
     },
     {
@@ -179,17 +179,17 @@
     },
     {
       "name": "equipo_cambiar",
-      "description": "Cambia el rol o los permisos de un miembro del equipo (PATCH /comercios/{id}/equipo/{identidad}), o anula una invitación pendiente con 'invitacion_id'. Rige desde su próxima acción. A la dueña no se la cambia. Ej: 'dale a Lucas acceso a los números', 'que Sofi ya no toque la carta', 'anulá la invitación de ayer'. Requiere scope 'administrar' y el permiso 'equipo'.",
+      "description": "Cambia el rol o los permisos de un miembro del equipo (PATCH /comercios/{id}/equipo/{identidad}), o anula una invitación pendiente con 'invitacion_id'. Rige desde su próxima acción. A la dueña no se la cambia. Ej: 'dale a Lucas acceso a los números', 'que Sofi ya no toque la carta', 'anulá la invitación de ayer'. Requiere scope 'administrar' y el permiso 'equipo'. Si el nodo exige firma fresca (acceso.firma_fresca en /.well-known), no la podés hacer vos: pedile a la persona que la haga desde la app (docs/acceso.md, punto 7).",
       "inputSchema": {"type": "object", "required": ["comercio_id"], "properties": {"comercio_id": {"type": "string"}, "identidad": {"type": "string", "description": "El miembro, actor@nodo."}, "rol": {"type": "string", "maxLength": 40}, "permisos": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["pedidos", "catalogo", "numeros", "datos", "equipo"]}}, "invitacion_id": {"type": "string", "description": "Para anular una invitación pendiente en vez de cambiar a un miembro."}}}
     },
     {
       "name": "equipo_sacar",
-      "description": "Saca a alguien del equipo del comercio, o saca a la persona misma si se quiere ir (DELETE /comercios/{id}/equipo/{identidad}). Pierde el acceso en el acto, y también los agentes a los que les dio mandato. Lo que hizo queda a su nombre. A la dueña no se la saca. Preguntale a la persona antes. Ej: 'sacá a Lucas del equipo', 'me voy del equipo de la panadería'. Requiere scope 'administrar' y el permiso 'equipo', salvo para irse uno mismo.",
+      "description": "Saca a alguien del equipo del comercio, o saca a la persona misma si se quiere ir (DELETE /comercios/{id}/equipo/{identidad}). Pierde el acceso en el acto, y también los agentes a los que les dio mandato. Lo que hizo queda a su nombre. A la dueña no se la saca. Preguntale a la persona antes. Ej: 'sacá a Lucas del equipo', 'me voy del equipo de la panadería'. Requiere scope 'administrar' y el permiso 'equipo', salvo para irse uno mismo. Si el nodo exige firma fresca (acceso.firma_fresca en /.well-known), no la podés hacer vos: pedile a la persona que la haga desde la app (docs/acceso.md, punto 7).",
       "inputSchema": {"type": "object", "required": ["comercio_id", "identidad"], "properties": {"comercio_id": {"type": "string"}, "identidad": {"type": "string", "description": "El miembro, actor@nodo."}}}
     },
     {
       "name": "comercio_editar",
-      "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. También abre o cierra ya, pisando los horarios, con 'apertura_manual' ({abierto, hasta?}; null la quita). Ej: 'cerramos los lunes', 'cerrá hasta las 18', 'hoy abrimos aunque sea feriado', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Requiere scope 'administrar'.",
+      "description": "Cambia la ficha del comercio propio: horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. También abre o cierra ya, pisando los horarios, con 'apertura_manual' ({abierto, hasta?}; null la quita). Ej: 'cerramos los lunes', 'cerrá hasta las 18', 'hoy abrimos aunque sea feriado', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Cambiar la cuenta de cobro (privado.cuenta_cobro) pide firma fresca de la persona: si el nodo la exige, eso no lo podés hacer vos, pedile que lo haga desde la app (docs/acceso.md, punto 7). Requiere scope 'administrar'.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -570,7 +570,7 @@
     },
     {
       "name": "exportar_comercio",
-      "description": "Se lleva todo lo del comercio en un documento firmado por el nodo: ficha, catálogo, promociones, stock, pedidos, reseñas recibidas y métricas. Sirve para mudarse a otro nodo, tener respaldo o cargarlo en el sistema propio. Lo que se haga con esos datos afuera es responsabilidad del comercio. Requiere scope 'administrar'.",
+      "description": "Se lleva todo lo del comercio en un documento firmado por el nodo: ficha, catálogo, promociones, stock, pedidos, reseñas recibidas y métricas. Sirve para mudarse a otro nodo, tener respaldo o cargarlo en el sistema propio. Lo que se haga con esos datos afuera es responsabilidad del comercio. Requiere scope 'administrar'. Si el nodo exige firma fresca (acceso.firma_fresca en /.well-known), no la podés hacer vos: pedile a la persona que la haga desde la app (docs/acceso.md, punto 7).",
       "inputSchema": {
         "type": "object",
         "required": [

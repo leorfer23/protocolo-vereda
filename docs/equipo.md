@@ -81,6 +81,7 @@ Para una operación sobre un comercio, el nodo resuelve:
 2. Si es miembro y tiene alguno de los permisos de `x-permiso-equipo` de la operación: sigue.
 3. Si es miembro sin ese permiso: 403 `sin_permiso`, con `detalle.falta`.
 4. Si no es ni una cosa ni la otra: 403 `no_es_el_dueno`, como siempre.
+5. Si la operación pide firma fresca (invitar, cambiar, sacar a otro, la cuenta de cobro, exportar) y no viene una válida: 403 `firma_fresca_requerida` (`docs/acceso.md`, punto 7). Un agente no la puede dar: esas quedan para la persona.
 
 Un comercio sin equipo se comporta exactamente como antes: la dueña sola. Un nodo que no implementa equipos responde `501 no_implementado` en las rutas de equipo y sigue siendo conforme en todo lo demás.
 
@@ -92,6 +93,7 @@ Un comercio sin equipo se comporta exactamente como antes: la dueña sola. Un no
 | Está en el equipo pero le falta el permiso, quiere dar uno que no tiene, o quiere tocar a la dueña | 403 | `sin_permiso` |
 | El código no existe, ya se usó, se anuló o venció (sin decir cuál) | 410 | `invitacion_invalida` |
 | Quien acepta ya es la dueña o miembro | 409 | `ya_es_miembro` |
+| Invitar, cambiar o sacar a otro sin firma fresca válida, si el nodo la exige | 403 | `firma_fresca_requerida` |
 | Rol vacío o de más de 40 caracteres, permisos vacíos o desconocidos | 422 | `documento_invalido` |
 
 ## Privacidad

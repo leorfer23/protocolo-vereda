@@ -83,7 +83,7 @@ se reproduce: CryptoKit en iOS firma Ed25519 con azar, y su firma, distinta, val
 - El token va en `Authorization: Bearer <token>` en todo `/v1`.
 
 **Renovar.** `POST /acceso/renovar` con la sesión. Devuelve `{ token, vence }` y el token
-viejo deja de valer en el mismo momento.
+viejo deja de valer en el mismo momento: es la misma sesión con otro token (punto 6).
 
 **Cerrar.** `DELETE /acceso/sesion` con la sesión. `204`, y el token deja de valer. La clave
 se queda en el dispositivo.
@@ -265,6 +265,117 @@ reputación está la mudanza (`docs/federacion.md` → Mudanza): el paquete firm
 `GET /v1/yo/exportar` y la declaración de mudanza que firma la clave de la persona. Con
 custodia propia la clave no cambia en la mudanza; con custodia del nodo, el nodo nuevo rota
 al importar.
+
+## 6. Dónde está abierta tu cuenta
+
+Cada canje (punto 1 o punto 2) abre una **sesión**: un token por dispositivo. La persona las
+ve y las cierra sin depender de nadie.
+
+- **`GET /v1/yo/sesiones`** lista las vigentes (`esquemas/acceso.json#/$defs/sesion_abierta`):
+  `id`, `etiqueta`, `creada`, `ultimo_uso`, `vence`, `forma` (`clave` o `codigo`) y
+  `actual: true` en la que hace el pedido. Nunca el token, ni nada que permita rearmarlo.
+- **`DELETE /v1/yo/sesiones/{id}`** cierra una. **`DELETE /v1/yo/sesiones`** cierra todas menos
+  la actual ("Cerrar las otras") y dice cuántas cerró.
+- **`etiqueta`** la declara la app al abrir la sesión (`etiqueta` en `POST /acceso/sesion` o en
+  el canje de código): "iPhone de Marta". El nodo no la adivina ni lee el `User-Agent` para
+  inventar una: si no viene, la sesión va sin etiqueta y la app muestra `creada` y `forma`.
+- **Renovar no abre una sesión nueva.** El token cambia; el `id` y `creada` quedan.
+- **`sesion.abierta`** le llega a la persona (en todas sus sesiones) cada vez que se abre una, con `datos: {id, etiqueta?, forma}`. Es el aviso "se abrió
+  tu cuenta en un dispositivo nuevo". `mandato.otorgado` le llega igual.
+
+Todo esto es de la persona: un token de mandato recibe `403`, y no hay herramienta MCP. Las
+sesiones de alguien no son asunto de su agente.
+
+**Qué las cierra todas.** Rotar la clave (`POST /v1/yo/claves/rotar`) y declararla
+comprometida (`POST /v1/yo/claves/comprometida`) cierran **todas** las sesiones de la
+identidad, también la que hizo el pedido, en la misma transacción que el cambio de clave. Si
+no, un ladrón con un token seguiría adentro 30 días después de que la persona rotó. Con
+custodia propia la app vuelve a entrar al toque con la clave nueva (punto 1); con custodia
+del nodo, con un código. Lo mismo hace un reclamo de propiedad resuelto.
+
+## 7. Firma fresca para lo que importa
+
+Un token robado (de un teléfono sin bloqueo, de un `localStorage` leído por un script) no
+alcanza para lo que no tiene vuelta atrás. Estas operaciones piden, **además del token**, una
+firma de la clave activa de la persona hecha hace menos de 5 minutos:
+
+| Operación | Cuándo |
+| --- | --- |
+| `editarComercio` | Si cambia `privado.cuenta_cobro` (a dónde transfieren los compradores) |
+| `rotarClave`, `declararClaveComprometida` | Siempre |
+| `invitarAlEquipo`, `cambiarMiembro` | Siempre |
+| `sacarDelEquipo` | Si saca a otro. Irse uno mismo, no |
+| `otorgarMandato` | Siempre |
+| `exportarCuenta`, `exportarComercio` | Siempre |
+
+`openapi.yaml` las marca con `x-firma-fresca`, y `validar.py` exige que declaren las cabeceras.
+
+**La cabecera.** Es una firma HTTP RFC 9421, el mismo mecanismo que firma entre nodos, con
+otra etiqueta y otros componentes:
+
+```
+Content-Digest: sha-256=:<SHA-256 del cuerpo crudo, base64 estándar>:
+Signature-Input: fresca=("@method" "@path" "@query" "content-digest");created=1790000000;keyid="<clave activa>";alg="ed25519";tag="vereda-fresca"
+Signature: fresca=:<Ed25519 de la base de firma, base64 estándar>:
+```
+
+- La etiqueta es `fresca`, y los componentes van esos cuatro y en ese orden. `@path` y
+  `@query` en vez de `@target-uri`: la firma sobrevive a un proxy que cambia el host (el
+  worker de la webapp), y la clave ya ata la firma a la persona.
+- `content-digest` cubre el cuerpo (RFC 9530). Sin cuerpo (`GET /yo/exportar`, un `DELETE`),
+  el SHA-256 de cero bytes. Sin query, `@query` es `?`.
+- `keyid` es la clave pública **activa** del historial de la persona, en base64url como en el
+  resto del protocolo. `tag="vereda-fresca"` impide que una firma hecha para otra cosa sirva
+  acá.
+- `created` a menos de `acceso.firma_fresca.ventana_segundos` (300, nunca más) de la hora del
+  nodo, para atrás o para adelante.
+
+Los bytes exactos, en `ejemplos/vectores-firma.json` → `firma_fresca`. En el teléfono, la app
+pide Face ID, huella o el código del equipo antes de firmar: es el único paso que la persona
+ve.
+
+**Qué verifica el nodo.** La etiqueta, los componentes y el tag; el `Content-Digest` contra el
+cuerpo; `created` dentro de la ventana; que `keyid` sea la clave `activa` del dueño de la
+sesión; y la firma. Una firma presente que falla rechaza siempre, aunque el nodo esté en fase
+de gracia. El motivo va en `detalle.motivo`:
+
+| Qué pasó | `detalle.motivo` |
+| --- | --- |
+| No vino firma | `falta` |
+| `created` fuera de la ventana | `vencida` |
+| Cabeceras mal formadas, digest que no coincide o firma que no verifica | `invalida` |
+| `keyid` no es la clave activa de quien llama | `clave_no_activa` |
+| Custodia del nodo y la sesión no es reciente | `sesion_no_reciente` |
+
+Todos responden `403 firma_fresca_requerida`. La persona está autenticada; lo que falta es la
+prueba de que es ella, ahora.
+
+**Con custodia del nodo** el dispositivo no tiene la clave y no puede firmar. En su lugar vale
+una sesión abierta hace menos de `ventana_segundos`: la app le pide a la persona que vuelva a
+entrar con un código y hace la operación con esa sesión.
+
+**Por mandato.** Un agente no tiene la clave de la persona, así que no puede hacer estas
+operaciones. Es a propósito: son las que una persona no quiere que haga nadie más. El agente
+le dice que la haga ella desde la app.
+
+**Declarar la clave comprometida también la pide**, firmada con la clave activa, que es
+justamente la que se declara. Parece raro y es lo que protege: sin eso, un token robado
+alcanzaba para instalar una clave del ladrón como la nueva activa, y la cuenta era suya. La
+persona legítima siempre puede firmar, con la clave de su dispositivo o restaurada de su
+respaldo (punto 5). Si el ladrón también tiene la clave, puede lo mismo que ella: por eso
+existen el respaldo y el aviso `sesion.abierta`.
+
+**Fase de gracia.** Las apps publicadas antes de esta regla no firman. El nodo anuncia qué
+hace en `acceso.firma_fresca` de `/.well-known/vereda.json`:
+
+```json
+{ "acceso": { "custodia_propia": true, "firma_fresca": { "exigida": false, "ventana_segundos": 300 } } }
+```
+
+Con `exigida: false` el nodo verifica la firma si viene y rechaza una mala, pero acepta la
+operación sin ella. Cuando pasa a `exigida: true` lo anuncia antes con `exigida_desde`. Un
+nodo que no publica `firma_fresca` no la verifica ni la exige. Una app nueva firma siempre,
+exija o no el nodo.
 
 ## Lo que un nodo no hace
 

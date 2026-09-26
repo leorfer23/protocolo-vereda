@@ -26,7 +26,7 @@ import requests
 
 from jsonschema import Draft202012Validator
 
-from . import acceso, cliente
+from . import acceso, cliente, rfc9421
 from . import openapi_info as oi
 from .nivel_a import Caso, NivelA, _fallo, _ok, _omitido
 from .oraculo import cargar as cargar_esquemas
@@ -123,6 +123,7 @@ class NivelB:
         self._videos()
         self._medios(capacidades)
         self._dispositivos()
+        self._sesiones(capacidades)
         self._equipo(capacidades)
         self._topes()
         if self.mandato:
@@ -1152,6 +1153,89 @@ class NivelB:
     # de /acceso entra al equipo solo con 'pedidos'. Se prueba lo que no puede
     # fallar: entra con su clave, puede lo suyo y nada más, y sacarla corta ya.
     # notificaciones push (docs/notificaciones-push.md): opcional ---------------
+    def _sesiones(self, capacidades):
+        """Sesiones a la vista y firma fresca (docs/acceso.md, puntos 6 y 7), con
+        una identidad nueva que entra dos veces con la misma clave."""
+        cat = "sesiones"
+        if capacidades.get("custodia_propia") is not True:
+            self.casos.append(_omitido(cat, "listarSesiones", "sesiones de la persona", "el nodo no publica acceso.custodia_propia: true"))
+            return
+        prueba = acceso.Acceso(self.origen, api=self.api, registry=self.registry, timeout=self.timeout)
+        clave = acceso.Clave()
+        d = prueba._desafio(clave)
+        r = prueba._canje(clave, d, etiqueta="conformidad A") if d else None
+        uno = (r.cuerpo or {}).get("token") if r and r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) else None
+        dos = (prueba._entrar(clave) or {}).get("token") if uno else None
+        if not uno or not dos:
+            self.casos.append(_omitido(cat, "listarSesiones", "sesiones de la persona", "no se pudieron abrir dos sesiones por /acceso"))
+            return
+        base = self.base_v1 + "/yo/sesiones"
+        con = lambda token: {"Authorization": f"Bearer {token}"}
+
+        opid, desc = "listarSesiones", "lista las dos sesiones, una sola con actual: true y con la etiqueta declarada, sin el token"
+        r = cliente.solicitud("GET", base, headers=con(uno), timeout=self.timeout)
+        lista = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, list) else None
+        actuales = [x for x in lista or [] if isinstance(x, dict) and x.get("actual") is True]
+        if lista is None:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200 con un array, llegó {r.estado}"))
+            return
+        if len(lista) != 2 or len(actuales) != 1 or actuales[0].get("etiqueta") != "conformidad A":
+            self.casos.append(_fallo(cat, opid, desc, f"llegaron {len(lista)} sesiones, {len(actuales)} actuales: {lista}"))
+            return
+        if uno in str(lista) or dos in str(lista):
+            self.casos.append(_fallo(cat, opid, desc, "la lista trae un token"))
+        else:
+            self.casos.append(self._chequear_esquema(opid, desc, "/yo/sesiones", "get", lista) or _ok(cat, opid, desc))
+
+        if self.mandato:
+            desc = "un token de mandato no ve las sesiones (403)"
+            r = cliente.solicitud("GET", base, headers=self._cabecera(mandato=True), timeout=self.timeout)
+            self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 403 else _fallo(cat, opid, desc, r.motivo or f"esperaba 403, llegó {r.estado}"))
+
+        fresca = capacidades.get("firma_fresca") if isinstance(capacidades.get("firma_fresca"), dict) else None
+        opid = "exportarCuenta"
+        if not fresca:
+            self.casos.append(_omitido(cat, opid, "firma fresca en exportarCuenta", "el nodo no publica acceso.firma_fresca"))
+        else:
+            url = self.base_v1 + "/yo/exportar"
+            path = "/v1/yo/exportar"
+            otra = acceso.Clave()
+            desc = "una firma fresca de otra clave responde 403 firma_fresca_requerida, aun en fase de gracia"
+            r = cliente.solicitud("GET", url, headers={**con(uno), **rfc9421.firma_fresca(metodo="GET", path=path, clave_privada=otra.privada, keyid=otra.publica)}, timeout=self.timeout)
+            codigo = (r.cuerpo or {}).get("codigo") if r.ok and isinstance(r.cuerpo, dict) else None
+            self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 403 and codigo == "firma_fresca_requerida" else _fallo(cat, opid, desc, r.motivo or f"esperaba 403 firma_fresca_requerida, llegó {r.estado} {codigo}"))
+            desc = "una firma fresca vencida responde 403 firma_fresca_requerida"
+            r = cliente.solicitud("GET", url, headers={**con(uno), **rfc9421.firma_fresca(metodo="GET", path=path, clave_privada=clave.privada, keyid=clave.publica, created=int(time.time()) - 3600)}, timeout=self.timeout)
+            codigo = (r.cuerpo or {}).get("codigo") if r.ok and isinstance(r.cuerpo, dict) else None
+            self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 403 and codigo == "firma_fresca_requerida" else _fallo(cat, opid, desc, r.motivo or f"esperaba 403 firma_fresca_requerida, llegó {r.estado} {codigo}"))
+            desc = "con la firma fresca de la clave activa, exportar responde 200"
+            r = cliente.solicitud("GET", url, headers={**con(uno), **rfc9421.firma_fresca(metodo="GET", path=path, clave_privada=clave.privada, keyid=clave.publica)}, timeout=self.timeout)
+            self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 200 else _fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            if fresca.get("exigida") is True:
+                desc = "el nodo la exige: sin firma fresca responde 403 firma_fresca_requerida"
+                r = cliente.solicitud("GET", url, headers=con(uno), timeout=self.timeout)
+                codigo = (r.cuerpo or {}).get("codigo") if r.ok and isinstance(r.cuerpo, dict) else None
+                self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 403 and codigo == "firma_fresca_requerida" else _fallo(cat, opid, desc, r.motivo or f"esperaba 403, llegó {r.estado} {codigo}"))
+
+        opid, desc = "cerrarOtrasSesiones", "cerrar las otras deja afuera a la segunda sesión y no a la actual"
+        r = cliente.solicitud("DELETE", base, headers=con(uno), timeout=self.timeout)
+        cerradas = (r.cuerpo or {}).get("cerradas") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        y_uno, y_dos = prueba._yo(uno), prueba._yo(dos)
+        if cerradas != 1 or not (y_dos.ok and y_dos.estado == 401) or not (y_uno.ok and y_uno.estado == 200):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"cerradas={cerradas}, /yo con la otra {y_dos.estado}, con la actual {y_uno.estado}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        opid, desc = "cerrarSesionPorId", "cerrar la propia por id responde 204, el token deja de valer y cerrarla otra vez responde 404"
+        url = f"{base}/{actuales[0].get('id')}"
+        r = cliente.solicitud("DELETE", url, headers=con(uno), timeout=self.timeout)
+        y_uno = prueba._yo(uno)
+        otra_vez = cliente.solicitud("DELETE", url, headers=con(self.sesion), timeout=self.timeout)
+        if not (r.ok and r.estado == 204) or not (y_uno.ok and y_uno.estado == 401) or not (otra_vez.ok and otra_vez.estado == 404):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"cerrar {r.estado}, /yo después {y_uno.estado}, otra vez {otra_vez.estado}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
     def _dispositivos(self):
         cat, opid = "push", "registrarDispositivo"
         r = cliente.get(self.origen + "/.well-known/vereda.json", timeout=self.timeout)

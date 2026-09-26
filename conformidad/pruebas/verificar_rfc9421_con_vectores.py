@@ -66,7 +66,20 @@ def main():
         publica.verify(base64.b64decode(valor.split("=", 1)[1].strip(":")), base.encode())
     print("✓ la firma generada y la publicada verifican contra keyid sobre la base de firma")
 
-    print("\nconformidad.rfc9421 reproduce el request RFC 9421 publicado en ejemplos/vectores-firma.json.")
+    f = V["firma_fresca"]
+    marta_privada, marta_publica = vectores.clave_privada_de(V, "marta@vereda.ar")
+    assert marta_publica == f["keyid"], "el vector firma_fresca está firmado con otra clave que la de marta"
+    fresca = rfc9421.firma_fresca(metodo=f["metodo"], path=f["path"], query=f["query"].lstrip("?"),
+                                  cuerpo=bytes.fromhex(f["cuerpo_utf8_hex"]), clave_privada=marta_privada,
+                                  keyid=f["keyid"], created=f["created"])
+    for nombre in ("Content-Digest", "Signature-Input"):
+        assert fresca[nombre] == f["cabeceras"][nombre], f"firma fresca: cabecera {nombre} no coincide"
+    publica = Ed25519PublicKey.from_public_bytes(base64.urlsafe_b64decode(f["keyid"] + "=" * (-len(f["keyid"]) % 4)))
+    for valor in (fresca["Signature"], f["cabeceras"]["Signature"]):
+        publica.verify(base64.b64decode(valor.split("=", 1)[1].strip(":")), f["base_de_firma"].encode())
+    print("✓ la firma fresca reproduce Content-Digest y Signature-Input, y las dos firmas verifican")
+
+    print("\nconformidad.rfc9421 reproduce el request RFC 9421 y la firma fresca publicados en ejemplos/vectores-firma.json.")
 
 
 if __name__ == "__main__":

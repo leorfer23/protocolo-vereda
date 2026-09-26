@@ -42,7 +42,8 @@ Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave
 | `grupo.participante_unido`, `grupo.cerrado`, `grupo.pedido_generado`, `grupo.participante_no_pago` | Pedidos grupales |
 | `cotizacion.solicitada`, `cotizacion.presupuestada`, `cotizacion.aceptada`, `cotizacion.vencida` | Cotizaciones |
 | `mensaje.nuevo` | Chat |
-| `mandato.otorgado`, `mandato.revocado`, `mandato.requiere_confirmacion`, `mandato.confirmado` | Agentes |
+| `mandato.otorgado`, `mandato.revocado`, `mandato.requiere_confirmacion`, `mandato.confirmado` | Agentes. `mandato.otorgado` le llega también al otorgante en todas sus sesiones: si no lo dio él, lo ve |
+| `sesion.abierta` | Se abrió una sesión de la persona (`docs/acceso.md`, punto 6), con `datos: {id, etiqueta?, forma}`. Solo a ella, nunca a un agente ni a otro actor |
 | `oferta.stock_cambiado`, `oferta.precio_cambiado` | Catálogo (público) |
 | `comercio.abierto`, `comercio.cerrado` | Cambió `abierto_ahora` del comercio: empezó o terminó una franja de `horarios`, o el comercio lo pisó con `apertura_manual` (público) |
 | `vinculacion.verificada`, `vinculacion.caida`, `vinculacion.vencida` | Una vinculación cambió de estado al comprobarse (`docs/identidad-y-verificacion.md`). Público |

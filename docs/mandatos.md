@@ -1,6 +1,6 @@
 # Mandatos: qué hizo tu agente
 
-Un agente no entra por `/acceso`: actúa con un mandato que la persona le otorga desde su sesión (`esquemas/mandato.json`, `POST /mandatos`). El mandato dice qué puede hacer y con qué topes, y se revoca en un toque. Esta página cubre la otra mitad: que la persona pueda ver, después, qué hizo el agente con ese permiso.
+Un agente no entra por `/acceso`: actúa con un mandato que la persona le otorga desde su sesión (`esquemas/mandato.json`, `POST /mandatos`). El mandato dice qué puede hacer y con qué topes, y se revoca en un toque. Otorgarlo pide firma fresca de la persona, y el nodo le avisa con `mandato.otorgado` en todas sus sesiones (`docs/acceso.md`, puntos 6 y 7): un token robado no alcanza para darle la cuenta a un agente ajeno. Esta página cubre la otra mitad: que la persona pueda ver, después, qué hizo el agente con ese permiso.
 
 ## La actividad
 
