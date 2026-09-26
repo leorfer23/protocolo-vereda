@@ -1203,6 +1203,8 @@ paths:
         Solo el destinatario del pago que dice `concepto`: el comercio para `productos` (y el
         pedido pasa a pagado), el repartidor para `envio` y `propina_repartidor`. Cualquier otro
         recibe 403 no_es_el_destinatario. Es el único que puede: es el único que ve su cuenta.
+        Lo que tiene que buscar en su cuenta es `monto_a_transferir` del pago, con los centavos
+        únicos ya descontados.
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
