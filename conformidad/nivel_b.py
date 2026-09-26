@@ -130,10 +130,12 @@ class NivelB:
         self._equipo(capacidades)
         self._topes()
         if self.mandato:
+            # rotarClave cierra todas las sesiones del actor (docs/acceso.md §6).
+            # Actividad y revocación necesitan la sesión de prueba: van antes.
             self._mandato_tope()
-            self._rotar_clave_no_por_mandato()
             self._actividad_mandato()
             self._revocacion_mandato()
+            self._rotar_clave_no_por_mandato()
         else:
             self.casos.append(_omitido("mandato", "confirmarCarrito", "tope del mandato por período (fuera_de_mandato)", "no se pasó --mandato"))
             self.casos.append(_omitido("mandato", "verActividadDeMandato", "la persona ve qué escribió su agente con el mandato", "no se pasó --mandato"))
@@ -701,8 +703,13 @@ class NivelB:
                 if caso:
                     self.casos.append(caso)
                 comercio = p.get("comercio") or {}
-                if usuario_de(p) != {"identidad": compradora, "nombre": nombre}:
+                # identidad + nombre; hechos puede venir (docs/hechos-del-comprador.md)
+                # y lo cubre _hechos — acá no se exige igualdad exacta del objeto.
+                u = usuario_de(p)
+                if u.get("identidad") != compradora or u.get("nombre") != nombre:
                     self.casos.append(_fallo(cat, opid, desc, f"partes.usuario es {usuario_de(p)}"))
+                elif set(u) - {"identidad", "nombre", "hechos"}:
+                    self.casos.append(_fallo(cat, opid, desc, f"partes.usuario trae campos de más: {usuario_de(p)}"))
                 elif comercio.get("identidad") != r.cuerpo.get("comercio") or not comercio.get("nombre"):
                     self.casos.append(_fallo(cat, opid, desc, f"partes.comercio es {comercio}"))
                 else:
