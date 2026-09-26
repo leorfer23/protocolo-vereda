@@ -180,9 +180,11 @@ Activar, ver consumo del mes, tope, y cómo se paga (transferencia al operador d
 
 | Opción | Idea |
 | --- | --- |
-| **A — pantalla** | Prendida/apagada, consumo, barra vs tope, “Cómo se paga”, cambiar tope. |
-| **B — hoja** | Desde Vos: resumen corto + “Activar · tope USD 5”. |
+| **A — pantalla** | Prendida/apagada, consumo ≈ **USD 0,11** (≈ $170) de un tope **USD 2** (≈ $3.100), “Cómo se paga”, cambiar tope. |
+| **B — hoja** | Desde Vos: resumen corto + “Activar · tope USD 2”. |
 | **C — mínimo** | Solo toggle + link a conectar tu agente gratis. |
+
+Los montos del mockup siguen §4 (comercio activo ~USD 0,09/mes): **USD 0,11 de un tope de USD 2**, no dólares enteros.
 
 ![A · pantalla](mockups/tu-ia-a.png)
 
@@ -190,9 +192,9 @@ Activar, ver consumo del mes, tope, y cómo se paga (transferencia al operador d
 
 ![C · mínimo](mockups/tu-ia-c.png)
 
-**Recomiendo A** para el piloto de 5 comercios: hay que entender el costo. B como atajo desde Vos. C es demasiado opaco para la primera vez.
+**Recomiendo A** para el piloto de 5 comercios: hay que ver que el costo es de centavos. B como atajo desde Vos. C es demasiado opaco para la primera vez.
 
-Copy clave (para todas las opciones): *“No es comisión: es lo que cuesta el modelo.”* Nunca digas “nodo”, “tokens” ni “API” de cara a la persona.
+Copy clave (para todas las opciones): *“No es comisión: es lo que cuesta el modelo.”* / *“casi gratis: pagás lo que gasta el modelo.”* Nunca digas “nodo”, “tokens” ni “API” de cara a la persona.
 
 ---
 
