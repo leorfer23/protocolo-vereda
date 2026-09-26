@@ -336,6 +336,35 @@
           },
           "ajuste_centavos": -37,
           "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "La copia del comercio de esa misma transferencia: sin 'instrucciones' (son de quien paga), con 'monto_a_transferir' para reconocerla en su cuenta.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
         }
       }
     },
@@ -366,6 +395,30 @@
           },
           "ajuste_centavos": 37,
           "referencia": "Vereda 7K2Q"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'monto_a_transferir' es solo de una transferencia.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "efectivo",
+        "estado": "en_mano",
+        "monto_a_transferir": {
+          "centavos": 1250000,
+          "moneda": "ARS"
         }
       }
     },

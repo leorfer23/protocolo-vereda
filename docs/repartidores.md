@@ -123,7 +123,8 @@ o público, nunca otro.
   `cobrado_en_mano` en `POST /pedidos/{id}/retirar`.
 - **Transferencia.** El pago nace `pendiente` cuando el repartidor acepta, con `instrucciones` que
   llevan el alias de `repartidor.privado.cobro`. Las ve únicamente quien paga y solo mientras el
-  viaje está activo. Los pasos son los mismos que con el comercio: quien pagó avisa
+  viaje está activo. El monto exacto, con los centavos únicos, lo ve también el repartidor en
+  `pago.monto_a_transferir`, para reconocer la transferencia en su cuenta. Los pasos son los mismos que con el comercio: quien pagó avisa
   `POST /pedidos/{id}/transferencia` con `concepto: envio`, y el repartidor, que es el único que ve
   su cuenta, confirma `POST /pedidos/{id}/transferencia/confirmar` con `concepto: envio`
   (herramienta `cobro_confirmar`). Cualquier otro que intente confirmar recibe 403
