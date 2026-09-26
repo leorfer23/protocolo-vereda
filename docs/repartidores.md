@@ -242,6 +242,7 @@ herramienta por operación, en `mcp/herramientas.json`:
 | `viaje_entregar` | `POST /pedidos/{id}/entregar` (`entregarPedido`) |
 | `cobro_confirmar` | `POST /pedidos/{id}/transferencia/confirmar` (`confirmarTransferencia`) |
 | `rendicion_declarar` | `POST /pedidos/{id}/rendicion` (`declararRendicion`) |
+| `viaje_no_recibido` | `POST /pedidos/{id}/no-vino` con `no_recibido` (`marcarNoVino`) |
 | `mis_viajes` | `GET /repartidor/viajes` (`listarMisViajes`) |
 | `mis_ganancias` | `GET /repartidor/ganancias` (`verMisGanancias`) |
 
@@ -473,6 +474,10 @@ después no toca los pedidos en curso. Con el default nada cambia para nadie.
 Si el comprador no está (lo deja en portería, con un vecino), se entrega con foto, como hoy. No es
 un bloqueo ni una sanción: `sin_codigo` queda a la vista del comprador, del comercio y del
 repartidor, y cada uno saca su conclusión: es un hecho registrado, no un juicio del nodo.
+
+Si no hay nadie a quien dejárselo, el repartidor no entrega: pasados 10 minutos de la hora prometida
+marca `no_recibido` desde la puerta, con su ubicación firmada, y vuelve con el pedido al comercio
+(`docs/carrito-y-reserva.md`, "No vino").
 
 **Tope de intentos.** Cinco equivocados por pedido, para `codigo_entrega` y para `codigo_retiro`: con
 cuatro dígitos, sin tope, el código se adivina probando. Cada intento equivocado cuenta aunque

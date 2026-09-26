@@ -456,6 +456,11 @@
       }
     },
     {
+      "name": "pedido_no_vino",
+      "description": "El comercio marca que el comprador no vino: 'no_retirado' si no pasó a buscar un pedido de retiro que está listo, 'no_recibido' si lo llevaba el comercio y nadie atendió. Cierra el pedido y libera el stock. Solo pasada la hora prometida más el margen público (30 min para retiro, 10 para envío); antes responde 409 plazo_no_cumplido con detalle.desde. Preguntale siempre a la persona del comercio antes: queda a la vista del comprador, que puede dejar su versión. Por mandato la constancia queda sin firma. No cuenta en el ranking del comercio. Requiere scope 'administrar'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "motivo"], "properties": {"pedido_id": {"type": "string"}, "motivo": {"type": "string", "enum": ["no_retirado", "no_recibido"]}}}
+    },
+    {
       "name": "pedido_item_resolver",
       "description": "El comercio resuelve un ítem del pedido mientras lo arma: confirmado (lo tiene), sustituido (propone un reemplazo, que la persona acepta o rechaza), faltante (no lo tiene) o pesado (con la cantidad real, para los pesables). El primer ítem resuelto pasa el pedido de 'aceptado' a 'preparando'. pedido_listo exige todos resueltos. Ej: 'la muzza está, el tomate pesó 1,43 kg, no hay palta'. Requiere scope 'administrar'.",
       "inputSchema": {
@@ -693,6 +698,11 @@
       "name": "viaje_entregar",
       "description": "Marca entregado un pedido del viaje y firma la entrega. Si hay pagos en efectivo (productos, envío o propina), marcá cobrado_en_mano; si hay alcohol, que se verificó la mayoría de edad. Pedile a la persona el código de entrega que le dio el comprador y mandalo en codigo_entrega: deja la recepción firmada. Si la regla del comercio lo pide y el comprador no está, mandá la foto sin código: se entrega igual y queda 'sin_codigo'. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "codigo_entrega": {"type": "string", "description": "Los 4 dígitos que dijo el comprador. Uno equivocado responde 422 con los intentos que quedan (5 en total); agotados, solo con foto."}, "cobrado_en_mano": {"type": "boolean"}, "mayoria_edad_verificada": {"type": "boolean"}, "foto": {"type": "string", "format": "uri", "description": "La foto de la entrega. Obligatoria si la regla pedía código y no vino, o si se agotaron los intentos."}}}
+    },
+    {
+      "name": "viaje_no_recibido",
+      "description": "El repartidor llegó a la puerta y nadie atendió: marca 'no_recibido' desde donde está y vuelve con el pedido. Su ubicación queda en la constancia como evidencia, así que mandá la actual. Solo pasados 10 minutos de la hora prometida; antes responde 409 plazo_no_cumplido con detalle.desde. Por mandato la constancia queda sin firma. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "lat", "lng"], "properties": {"pedido_id": {"type": "string"}, "lat": {"type": "number"}, "lng": {"type": "number"}}}
     },
     {
       "name": "cobro_confirmar",

@@ -51,6 +51,17 @@
         "pedidos_entregados": { "type": "integer", "minimum": 0 },
         "pedidos_aceptados": { "type": "integer", "minimum": 0 },
         "pedidos_rechazados": { "type": "integer", "minimum": 0 },
+        "cumplimiento": {
+          "type": "object",
+          "description": "Las tres cuentas del término de cumplimiento del ranking por defecto, para que cualquiera lo recalcule: entregados / (aceptados_propios + rechazados_con_historial), 0 sin denominador (docs/ranking-y-despacho.md). 'pedidos_aceptados' y 'pedidos_rechazados' son los conteos crudos; estos dejan afuera lo que hizo el comprador.",
+          "required": ["entregados", "aceptados_propios", "rechazados_con_historial"],
+          "properties": {
+            "entregados": { "type": "integer", "minimum": 0 },
+            "aceptados_propios": { "type": "integer", "minimum": 0, "description": "Aceptados, menos los cerrados con no_retirado, no_recibido, pago_vencido o cancelado_por_usuario." },
+            "rechazados_con_historial": { "type": "integer", "minimum": 0, "description": "Rechazados o sin respuesta del comercio cuyo comprador ya tenía un pedido entregado en el nodo al crearlo." }
+          },
+          "additionalProperties": false
+        },
         "desde": { "type": "string", "format": "date" }
       }
     },

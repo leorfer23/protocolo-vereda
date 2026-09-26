@@ -5,14 +5,49 @@ Ninguno tiene posiciones pagas, destacados ni criterios ocultos. Cambiarlos requ
 ## Ranking por defecto
 
 ```
-score = 0.5 · 1/(1 + d/2km) + 0.35 · p_min/p + 0.15 · entregados/(aceptados + rechazados)
+score = 0.5 · 1/(1 + d/2km) + 0.35 · p_min/p + 0.15 · cumplimiento
 ```
 
 `d` distancia en línea recta, `p` precio del ítem o ticket promedio, `p_min` el menor entre candidatos. El usuario o agente puede ordenar por cualquier criterio solo (`orden=distancia|precio|reputacion`); esta fórmula es solo el default.
 
 La misma fórmula ordena el feed en video (`GET /buscar?con_video=true`, `docs/medios.md`): tener video no suma puntos, solo filtra. Con paginado, `p_min` se calcula sobre todo el conjunto de la consulta y no sobre cada página, así una página no cambia el orden de la anterior.
 
-El tercer término —`entregados/(aceptados + rechazados)`— es cumplimiento, no opinión: mide si el comercio entrega lo que acepta. Las reseñas no entran en el ranking por defecto; entran cuando se pide `orden=reputacion`.
+El tercer término es cumplimiento, no opinión: mide si el comercio entrega lo que acepta y si
+atiende a quien le compra. Las reseñas no entran en el ranking por defecto; entran cuando se pide
+`orden=reputacion`.
+
+## Término de cumplimiento
+
+```
+cumplimiento = entregados / (aceptados_propios + rechazados_con_historial)
+```
+
+Todo se cuenta sobre los pedidos del comercio en el nodo, con lo que dice su historial
+(`pedido.historial`, `motivo_codigo`):
+
+- **`entregados`**: pedidos que llegaron a `entregado`.
+- **`aceptados_propios`**: pedidos que el comercio aceptó (pasaron por `aceptado`), **menos** los que
+  se cerraron por algo que hizo o dejó de hacer el comprador: `no_retirado`, `no_recibido`,
+  `pago_vencido` y `cancelado_por_usuario`. Los demás cancelados después de aceptar sí cuentan:
+  `cancelado_por_comercio`, `sin_repartidor` y cualquier otro.
+- **`rechazados_con_historial`**: pedidos cerrados con `rechazado_por_comercio` o
+  `sin_respuesta_del_comercio` **cuyo comprador ya tenía al menos un pedido `entregado` en el nodo**,
+  en cualquier comercio, en el instante en que creó ese pedido.
+- Sin pedidos que contar (denominador 0), el término vale 0.
+
+Por qué así:
+
+- **Inundar a un rival no lo baja.** Un pedido que el comprador abandona (no vino, no pagó, lo
+  canceló) no dice nada del comercio. Y un rechazo solo cuenta si el comprador tiene historia: las
+  identidades recién hechas de una inundación pesan 0, mientras que dejar sin respuesta a quien
+  compra de verdad sigue costando. Fabricar compradores con un pedido entregado cada uno cuesta
+  pedidos reales, pagados y entregados.
+- **Es determinista y recalculable.** Son conteos sobre el historial de pedidos, sin pesos por caso
+  ni excepciones que decida alguien. Otro nodo o un auditor con los mismos pedidos llega al mismo
+  número. "Tenía un pedido entregado" se mira en el instante de creación del pedido, así el término
+  de hoy no cambia por lo que ese comprador haga mañana.
+- **No esconde nada.** Un pedido que no cuenta acá sigue en el historial, con su motivo, a la vista
+  de las partes (`docs/carrito-y-reserva.md`, "No vino").
 
 ## Orden por reputación
 
