@@ -124,6 +124,7 @@ class NivelB:
         self._medios(capacidades)
         self._dispositivos()
         self._equipo(capacidades)
+        self._topes()
         if self.mandato:
             self._mandato_tope()
             self._rotar_clave_no_por_mandato()
@@ -184,9 +185,7 @@ class NivelB:
             return None
         self.casos.append(_ok(cat, "elegirModalidadCarrito", "elegir modalidad 'retiro' responde 200"))
 
-        r_conf = cliente.solicitud(
-            "POST", f"{self.base_v1}/carritos/{carrito_id}/confirmar", headers={**self._cabecera(), **self._idem()}, json_body={}, timeout=self.timeout
-        )
+        r_conf = self._confirmar(carrito_id, {})
         if not r_conf.ok or r_conf.estado != 201:
             self.casos.append(_fallo(cat, "confirmarCarrito", "confirmar el carrito crea el pedido (201)", r_conf.motivo or f"estado {r_conf.estado}"))
             return None
@@ -670,7 +669,7 @@ class NivelB:
             if not r.ok or r.estado != 200:
                 self.casos.append(_fallo(cat, opid, desc, r.motivo or f"{metodo} /carritos/{{id}}/{ruta} respondió {r.estado}"))
                 return
-        r = cliente.solicitud("POST", f"{self.base_v1}/carritos/{carrito_id}/confirmar", headers={**self._cabecera(), **self._idem()}, json_body={}, timeout=self.timeout)
+        r = self._confirmar(carrito_id, {})
         codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
         if not r.ok:
             self.casos.append(_fallo(cat, opid, desc, r.motivo))
@@ -795,6 +794,68 @@ class NivelB:
             self.casos.append(caso or _ok("viajes", opid, desc))
 
     # el comprador elige cómo paga, entre los medios que acepta el comercio --
+    def _topes(self):
+        """Tope de pedidos sin pagar (docs/topes.md): una identidad nueva confirma
+        hasta el tope que publica el nodo y el siguiente es 429 tope_alcanzado, con
+        Retry-After, detalle.tope y los pedidos a pagar o cancelar. No crea nada."""
+        cat, opid = "topes", "confirmarCarrito"
+        desc = "pasar el tope de pedidos sin pagar responde 429 tope_alcanzado con Retry-After y no crea el pedido"
+        r = cliente.solicitud("GET", self.origen + "/.well-known/vereda.json", timeout=self.timeout)
+        topes = (r.cuerpo or {}).get("topes") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        maximo = (topes or {}).get("pedidos_sin_pagar_por_identidad")
+        if not isinstance(maximo, int) or maximo < 1:
+            self.casos.append(_omitido(cat, opid, desc, "el nodo no publica topes.pedidos_sin_pagar_por_identidad en /.well-known/vereda.json"))
+            return
+        if maximo > 10:
+            self.casos.append(_omitido(cat, opid, desc, f"el tope es {maximo}: la suite no abre tantos pedidos"))
+            return
+        token = self._sesion_nueva()
+        if not token:
+            self.casos.append(_omitido(cat, opid, desc, "no se pudo abrir una sesión nueva por /acceso"))
+            return
+        sesion_prueba, self.sesion = self.sesion, token
+        creados, r, pasados = [], None, 0
+        try:
+            while len(creados) <= maximo and pasados < 3:
+                cid = self._carrito_con("01920000-0000-7000-8000-0000000000b1", {"tipo": "retiro"})
+                if not cid:
+                    break
+                r = self._confirmar(cid, {}, respetar_topes=False)
+                tope = _tope_alcanzado(r)
+                if tope and tope.get("tope") == "pedidos_por_minuto_por_identidad":
+                    pasados += 1
+                    time.sleep(_espera(r))
+                    r = self._confirmar(cid, {}, respetar_topes=False)
+                if r.ok and r.estado == 201 and isinstance(r.cuerpo, dict) and r.cuerpo.get("id"):
+                    creados.append(r.cuerpo["id"])
+                    continue
+                break
+        finally:
+            self.sesion = sesion_prueba
+            for pid in creados:
+                cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pid}/cancelar", headers={"Authorization": f"Bearer {token}"}, json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+        if len(creados) < maximo:
+            self.casos.append(_omitido(cat, opid, desc, f"la identidad nueva confirmó {len(creados)} de {maximo} pedidos de la oferta de prueba antes del tope"))
+            return
+        tope = _tope_alcanzado(r)
+        if len(creados) > maximo or tope is None:
+            self.casos.append(_fallo(cat, opid, desc, f"con {maximo} pedidos sin pagar, el siguiente respondió {r.estado if r else 'nada'} {((r.cuerpo or {}) if r and isinstance(r.cuerpo, dict) else {}).get('codigo', '')}".strip()))
+            return
+        motivos = []
+        try:
+            if int((r.cabeceras or {}).get("Retry-After") or 0) < 1:
+                motivos.append("sin Retry-After en segundos")
+        except ValueError:
+            motivos.append("Retry-After no es un número de segundos")
+        if tope.get("tope") != "pedidos_sin_pagar_por_identidad" or tope.get("maximo") != maximo:
+            motivos.append(f"detalle {tope}, se esperaba tope pedidos_sin_pagar_por_identidad y maximo {maximo}")
+        if sorted(tope.get("pedidos") or []) != sorted(creados):
+            motivos.append("detalle.pedidos no son los pedidos sin pagar de la identidad")
+        caso = self._chequear_esquema(opid, "el 429 tope_alcanzado cumple esquemas/error.json", "/carritos/{id}/confirmar", "post", r.cuerpo, "429")
+        if caso:
+            self.casos.append(caso)
+        self.casos.append(_fallo(cat, opid, desc, "; ".join(motivos)) if motivos else _ok(cat, opid, desc))
+
     def _comercio_de_la_oferta(self, oferta_id):
         r = cliente.solicitud("GET", f"{self.base_v1}/ofertas/{oferta_id}", timeout=self.timeout)
         comercio_id = (r.cuerpo or {}).get("comercio_id") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
@@ -817,8 +878,24 @@ class NivelB:
             return None
         return cid
 
-    def _confirmar(self, cid, cuerpo):
-        return cliente.solicitud("POST", f"{self.base_v1}/carritos/{cid}/confirmar", headers={**self._cabecera(), **self._idem()}, json_body=cuerpo, timeout=self.timeout)
+    def _confirmar(self, cid, cuerpo, cabecera=None, respetar_topes=True):
+        """confirmarCarrito. La suite confirma muchos pedidos seguidos con la misma
+        identidad, así que respeta los topes públicos (docs/topes.md): ante un 429
+        tope_alcanzado por minuto espera Retry-After y reintenta una vez; por
+        pedidos sin pagar cancela los que lista detalle.pedidos (son de la
+        identidad de prueba) y reintenta."""
+        cabecera = cabecera or self._cabecera()
+        url = f"{self.base_v1}/carritos/{cid}/confirmar"
+        r = cliente.solicitud("POST", url, headers={**cabecera, **self._idem()}, json_body=cuerpo, timeout=self.timeout)
+        tope = _tope_alcanzado(r)
+        if not respetar_topes or not tope:
+            return r
+        if tope.get("tope") == "pedidos_sin_pagar_por_identidad":
+            for pid in tope.get("pedidos") or []:
+                cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pid}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+        else:
+            time.sleep(_espera(r))
+        return cliente.solicitud("POST", url, headers={**cabecera, **self._idem()}, json_body=cuerpo, timeout=self.timeout)
 
     def _metodo_pago(self):
         cat, opid = "metodo_pago", "confirmarCarrito"
@@ -1610,7 +1687,7 @@ class NivelB:
             cid = (r.cuerpo or {}).get("id")
             cliente.solicitud("POST", f"{self.base_v1}/carritos/{cid}/items", headers=self._cabecera(mandato=True), json_body={"oferta_id": oferta_id, "cantidad": {"valor": 1, "unidad": "unidad"}}, timeout=self.timeout)
             cliente.solicitud("PUT", f"{self.base_v1}/carritos/{cid}/modalidad", headers=self._cabecera(mandato=True), json_body={"tipo": "retiro"}, timeout=self.timeout)
-            r_conf = cliente.solicitud("POST", f"{self.base_v1}/carritos/{cid}/confirmar", headers={**self._cabecera(mandato=True), **self._idem()}, json_body={}, timeout=self.timeout)
+            r_conf = self._confirmar(cid, {}, cabecera=self._cabecera(mandato=True))
             return cid, r_conf
 
         _cid1, r1 = _carrito_confirmado_por_mandato("01920000-0000-7000-8000-0000000000b1")  # barata: dentro del tope
@@ -1726,6 +1803,22 @@ class NivelB:
             self.casos.append(_ok(cat, opid, desc_uso))
         else:
             self.casos.append(_fallo(cat, opid, desc_uso, f"esperaba 401, llegó {r_uso.estado} -- el mandato revocado todavía funciona"))
+
+
+def _tope_alcanzado(r) -> Optional[dict]:
+    """El detalle de un 429 tope_alcanzado (docs/topes.md), o None."""
+    if not (r and r.ok and r.estado == 429 and isinstance(r.cuerpo, dict) and r.cuerpo.get("codigo") == "tope_alcanzado"):
+        return None
+    detalle = r.cuerpo.get("detalle")
+    return detalle if isinstance(detalle, dict) else {}
+
+
+def _espera(r, maximo=65) -> int:
+    try:
+        espera = int((r.cabeceras or {}).get("Retry-After") or 60)
+    except ValueError:
+        espera = 60
+    return min(max(espera, 1), maximo)
 
 
 def correr(origen, **kwargs) -> List[Caso]:

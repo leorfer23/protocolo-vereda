@@ -100,7 +100,7 @@ lo decide cada nodo (30 días en el de referencia) y lo dice `vence`.
 | La firma no verifica | `401 firma_invalida` |
 | La clave está `retirada` en el historial del actor | `401 clave_rotada` |
 | La clave está `comprometida` | `401 clave_comprometida` |
-| Demasiados pedidos | `429` con `Retry-After` |
+| Demasiados pedidos desde la misma IP (`topes.acceso_por_minuto_por_ip`, `docs/topes.md`) | `429 tope_alcanzado` con `Retry-After` |
 
 Una firma que no verifica **no gasta** el desafío: un error no obliga a pedir otro. Una que
 verifica lo gasta antes de emitir el token, de forma atómica: dos canjes simultáneos del mismo

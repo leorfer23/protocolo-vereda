@@ -377,6 +377,78 @@
         },
         "acumulable": true
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Promo de primera compra que el comercio reserva a quien confirmó un contacto y ya recibió un pedido en la red (docs/topes.md).",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000090",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "20 % en tu primera compra",
+        "tipo": "descuento",
+        "descuento": {
+          "descuento_pct": 10
+        },
+        "condiciones": {
+          "primera_compra": true,
+          "primera_compra_requisitos": {
+            "contacto_confirmado": true,
+            "entregados_en_la_red_minimo": 1
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "primera_compra_requisitos sin primera_compra: true no tiene a qué aplicarse.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000090",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "20 % en tu primera compra",
+        "tipo": "descuento",
+        "descuento": {
+          "descuento_pct": 10
+        },
+        "condiciones": {
+          "primera_compra_requisitos": {
+            "contacto_confirmado": true
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Solo hechos verificables y públicos: no hay requisito por puntaje.",
+      "doc": {
+        "id": "01926b3a-7777-7000-8000-000000000090",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T09:00:00-03:00",
+        "actualizado": "2026-09-21T09:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000005",
+        "activa": true,
+        "nombre": "20 % en tu primera compra",
+        "tipo": "descuento",
+        "descuento": {
+          "descuento_pct": 10
+        },
+        "condiciones": {
+          "primera_compra": true,
+          "primera_compra_requisitos": {
+            "puntaje_minimo": 50
+          }
+        }
+      }
     }
   ]
 }

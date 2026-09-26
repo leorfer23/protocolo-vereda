@@ -855,7 +855,8 @@ paths:
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado); el carrito queda no_disponible. O el comercio está cerrado (comercio_cerrado): sin `programado_para`, porque `abierto_ahora` es false; programado, porque sus `horarios` no cubren ese instante. En los dos casos no se crea el pedido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "410": { $ref: "#/components/responses/CarritoVencido" }
-        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada). O un metodo_pago que el comercio no acepta: efectivo_no_disponible si es efectivo, medio_no_disponible si es otro (transferencia o tarjeta), los dos con detalle.medios_cobro, los que sí acepta. O efectivo que el comprador no puede usar con las condiciones del comercio (efectivo_no_disponible). O paga_con_centavos menor que lo que paga en mano (paga_con_insuficiente).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { $ref: "#/components/responses/TopeAlcanzado" }
+        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada). O un metodo_pago que el comercio no acepta: efectivo_no_disponible si es efectivo, medio_no_disponible si es otro (transferencia o tarjeta), los dos con detalle.medios_cobro, los que sí acepta. O efectivo o transferencia que el comprador no puede usar con los requisitos del comercio (efectivo_no_disponible, medio_no_disponible), con detalle.requisito y detalle.medios_cobro: los que sí puede usar. O paga_con_centavos menor que lo que paga en mano (paga_con_insuficiente).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /pedidos/{id}:
     get:
@@ -1233,7 +1234,9 @@ paths:
       description: Texto libre o estructurado (propuesta / aceptar / rechazar). Un agente de voz entra por acá con origen voz_transcripta.
       security: [ { sesion: [] }, { mandato: [hablar] } ]
       requestBody: { content: { application/json: { schema: { $ref: "esquemas/mensaje.json" } } } }
-      responses: { "201": { description: Enviado, content: { application/json: { schema: { $ref: "esquemas/mensaje.json" } } } } }
+      responses:
+        "201": { description: Enviado, content: { application/json: { schema: { $ref: "esquemas/mensaje.json" } } } }
+        "429": { $ref: "#/components/responses/TopeAlcanzado" }
     get:
       operationId: listarMensajes
       tags: [mensajes]
@@ -1678,6 +1681,7 @@ components:
   responses:
     Error: { description: Error, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     Reintentar: { description: "Ahora no. El emisor reintenta, respetando Retry-After si viene.", headers: { Retry-After: { schema: { type: integer }, description: Segundos } } }
+    TopeAlcanzado: { description: "Pasó uno de los topes iguales para todos que el nodo publica en `topes` de /.well-known/vereda.json (docs/topes.md). Código tope_alcanzado, con `detalle` según esquemas/error.json#/$defs/detalle_tope y `mensaje` en palabras para la persona. Retry-After: los segundos hasta que el tope deja pasar de nuevo. No se creó nada.", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 }, description: Segundos } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     CarritoVencido: { description: "El carrito venció (24 h sin cambios). Código carrito_vencido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     NoEsElDueno: { description: "No administra el comercio: no es la dueña ni está en su equipo (código no_es_el_dueno), o el mandato no trae el scope 'administrar'. Si está en el equipo pero le falta el permiso de la operación, el código es sin_permiso (docs/equipo.md).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinPermiso: { description: "Está en el equipo pero le falta el permiso que pide la operación (código sin_permiso, con `detalle.falta`: el permiso que falta), o quiere cambiar o sacar a la dueña. Quien no está en el equipo recibe no_es_el_dueno, como siempre.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
@@ -1712,7 +1716,17 @@ components:
         acceso: { $ref: "esquemas/acceso.json#/$defs/capacidades", description: "Cómo se entra a este nodo (docs/acceso.md). Una app que habla con cualquier nodo mira esto antes de ofrecer la entrada." }
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
         sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
+        topes: { $ref: "#/components/schemas/Topes" }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
+    Topes:
+      type: object
+      description: "Topes iguales para todos, contra la inundación de pedidos y las granjas de identidades (docs/topes.md). Un nodo que aplica un tope lo publica acá, con su valor; aplicar uno que no publica no es conforme. Pasarlo es 429 tope_alcanzado con Retry-After. Nadie decide a quién se le aplica: vale igual para cualquier identidad."
+      additionalProperties: false
+      properties:
+        pedidos_sin_pagar_por_identidad: { type: integer, minimum: 1, description: "Pedidos de una misma persona en estado `creado` a la vez, en cualquier comercio del nodo: los que reservan sin haber pagado (esperan la transferencia, o la aceptación si son en efectivo). El default del protocolo es 3." }
+        pedidos_por_minuto_por_identidad: { type: integer, minimum: 1, description: "Pedidos que una misma persona puede confirmar por minuto, con su sesión o con cualquiera de sus mandatos. Ventana fija de 60 s." }
+        mensajes_por_minuto_por_pedido: { type: integer, minimum: 1, description: "Mensajes que una misma identidad puede mandar por minuto en el contexto de un mismo pedido. Se cuenta por quien escribe, para que el que inunda no calle al otro. Ventana fija de 60 s." }
+        acceso_por_minuto_por_ip: { type: integer, minimum: 1, description: "Pedidos a /acceso por minuto desde una misma IP: lo que frena fabricar identidades en serie. Es el único tope por IP; los demás son por identidad, porque detrás de una misma IP (un CGNAT móvil, un edificio) hay mucha gente." }
     CapacidadPush:
       type: object
       description: "Presente solo si el nodo manda notificaciones push (docs/notificaciones-push.md). Ausente: registrarDispositivo responde 501 y la app no pide el permiso."

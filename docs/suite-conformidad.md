@@ -201,6 +201,12 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   (`204`) y desde la llamada siguiente la bandeja le da `403 no_es_el_dueno` y el comercio ya
   no está en su lista. El techo del agente de un miembro no se prueba acá: pide un mandato de
   una identidad de la suite.
+- Topes públicos (`docs/topes.md`), solo si el nodo publica `topes.pedidos_sin_pagar_por_identidad`
+  (hasta 10). Una identidad nueva confirma tantos pedidos como el tope y el siguiente da `429
+  tope_alcanzado` con `Retry-After`, `detalle.tope`, `detalle.maximo` y en `detalle.pedidos`
+  exactamente los que abrió; después los cancela. El resto del nivel B respeta los topes:
+  ante un `429 tope_alcanzado` espera `Retry-After` o cancela los pedidos sin pagar de la
+  identidad de prueba, y reintenta una vez.
 - Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
   que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella
