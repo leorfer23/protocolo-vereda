@@ -10,29 +10,68 @@
       "description": "Versión del contrato de widgets. Un tipo nuevo en una versión mayor no rompe clientes viejos: lo ignoran."
     },
     "widget": {
-      "description": "Un widget. Discriminado por 'tipo'. Un tipo no soportado: el cliente lo saltea.",
+      "description": "Un widget. Discriminado por 'tipo': si es uno de los conocidos, se valida estricto; si no, cae en 'desconocido' (additionalProperties libre) y el cliente lo saltea.",
       "oneOf": [
-        { "$ref": "#/$defs/elegir_categoria" },
-        { "$ref": "#/$defs/productos" },
-        { "$ref": "#/$defs/producto" },
-        { "$ref": "#/$defs/carrito" },
-        { "$ref": "#/$defs/checkout" },
-        { "$ref": "#/$defs/recomendacion" },
-        { "$ref": "#/$defs/comercio" }
+        {
+          "$ref": "#/$defs/elegir_categoria"
+        },
+        {
+          "$ref": "#/$defs/productos"
+        },
+        {
+          "$ref": "#/$defs/producto"
+        },
+        {
+          "$ref": "#/$defs/carrito"
+        },
+        {
+          "$ref": "#/$defs/checkout"
+        },
+        {
+          "$ref": "#/$defs/recomendacion"
+        },
+        {
+          "$ref": "#/$defs/comercio"
+        },
+        {
+          "$ref": "#/$defs/desconocido"
+        }
       ]
     },
     "tarjeta_producto": {
       "type": "object",
-      "required": ["oferta_id", "nombre", "precio"],
+      "required": [
+        "oferta_id",
+        "nombre",
+        "precio"
+      ],
       "additionalProperties": false,
       "properties": {
-        "oferta_id": { "type": "string" },
-        "comercio_id": { "type": "string" },
-        "nombre": { "type": "string", "maxLength": 120 },
-        "descripcion": { "type": "string", "maxLength": 500 },
-        "precio": { "$ref": "comunes.json#/$defs/monto" },
-        "imagen": { "type": "string", "format": "uri" },
-        "unidad": { "type": "string", "maxLength": 40 },
+        "oferta_id": {
+          "type": "string"
+        },
+        "comercio_id": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "descripcion": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "precio": {
+          "$ref": "comunes.json#/$defs/monto"
+        },
+        "imagen": {
+          "type": "string",
+          "format": "uri"
+        },
+        "unidad": {
+          "type": "string",
+          "maxLength": 40
+        },
         "agregar": {
           "type": "boolean",
           "default": true,
@@ -42,25 +81,51 @@
     },
     "elegir_categoria": {
       "type": "object",
-      "required": ["tipo", "version", "opciones"],
+      "required": [
+        "tipo",
+        "version",
+        "opciones"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "const": "elegir_categoria" },
-        "version": { "$ref": "#/$defs/version" },
-        "id": { "type": "string", "maxLength": 64 },
-        "titulo": { "type": "string", "maxLength": 80 },
+        "tipo": {
+          "const": "elegir_categoria"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80
+        },
         "opciones": {
           "type": "array",
           "minItems": 1,
           "maxItems": 20,
           "items": {
             "type": "object",
-            "required": ["id", "etiqueta"],
+            "required": [
+              "id",
+              "etiqueta"
+            ],
             "additionalProperties": false,
             "properties": {
-              "id": { "type": "string", "maxLength": 64 },
-              "etiqueta": { "type": "string", "maxLength": 80 },
-              "icono": { "type": "string", "maxLength": 40 }
+              "id": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "etiqueta": {
+                "type": "string",
+                "maxLength": 80
+              },
+              "icono": {
+                "type": "string",
+                "maxLength": 40
+              }
             }
           }
         }
@@ -68,139 +133,366 @@
     },
     "productos": {
       "type": "object",
-      "required": ["tipo", "version", "items"],
+      "required": [
+        "tipo",
+        "version",
+        "items"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "const": "productos" },
-        "version": { "$ref": "#/$defs/version" },
-        "id": { "type": "string", "maxLength": 64 },
-        "titulo": { "type": "string", "maxLength": 80 },
-        "items": { "type": "array", "minItems": 1, "maxItems": 30, "items": { "$ref": "#/$defs/tarjeta_producto" } }
+        "tipo": {
+          "const": "productos"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "items": {
+            "$ref": "#/$defs/tarjeta_producto"
+          }
+        }
       }
     },
     "producto": {
       "type": "object",
-      "required": ["tipo", "version", "item"],
+      "required": [
+        "tipo",
+        "version",
+        "item"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "const": "producto" },
-        "version": { "$ref": "#/$defs/version" },
-        "id": { "type": "string", "maxLength": 64 },
-        "item": { "$ref": "#/$defs/tarjeta_producto" }
+        "tipo": {
+          "const": "producto"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "item": {
+          "$ref": "#/$defs/tarjeta_producto"
+        }
       }
     },
     "carrito": {
       "type": "object",
-      "required": ["tipo", "version", "items", "total"],
+      "required": [
+        "tipo",
+        "version",
+        "items",
+        "total"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "const": "carrito" },
-        "version": { "$ref": "#/$defs/version" },
-        "id": { "type": "string", "maxLength": 64 },
-        "carrito_id": { "type": "string" },
-        "comercio_id": { "type": "string" },
-        "comercio_nombre": { "type": "string" },
+        "tipo": {
+          "const": "carrito"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "carrito_id": {
+          "type": "string"
+        },
+        "comercio_id": {
+          "type": "string"
+        },
+        "comercio_nombre": {
+          "type": "string"
+        },
         "items": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
-            "required": ["oferta_id", "nombre", "cantidad", "subtotal"],
+            "required": [
+              "oferta_id",
+              "nombre",
+              "cantidad",
+              "subtotal"
+            ],
             "additionalProperties": false,
             "properties": {
-              "oferta_id": { "type": "string" },
-              "nombre": { "type": "string" },
-              "cantidad": { "type": "object", "required": ["valor", "unidad"], "properties": { "valor": { "type": "number" }, "unidad": { "type": "string" } } },
-              "subtotal": { "$ref": "comunes.json#/$defs/monto" }
+              "oferta_id": {
+                "type": "string"
+              },
+              "nombre": {
+                "type": "string"
+              },
+              "cantidad": {
+                "type": "object",
+                "required": [
+                  "valor",
+                  "unidad"
+                ],
+                "properties": {
+                  "valor": {
+                    "type": "number"
+                  },
+                  "unidad": {
+                    "type": "string"
+                  }
+                }
+              },
+              "subtotal": {
+                "$ref": "comunes.json#/$defs/monto"
+              }
             }
           }
         },
-        "total": { "$ref": "comunes.json#/$defs/monto" }
+        "total": {
+          "$ref": "comunes.json#/$defs/monto"
+        }
       }
     },
     "checkout": {
       "type": "object",
-      "required": ["tipo", "version", "medios", "total"],
+      "required": [
+        "tipo",
+        "version",
+        "medios",
+        "total"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "const": "checkout" },
-        "version": { "$ref": "#/$defs/version" },
-        "id": { "type": "string", "maxLength": 64 },
-        "carrito_id": { "type": "string" },
-        "comercio_id": { "type": "string" },
+        "tipo": {
+          "const": "checkout"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "carrito_id": {
+          "type": "string"
+        },
+        "comercio_id": {
+          "type": "string"
+        },
         "medios": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "type": "string", "enum": ["efectivo", "transferencia"] },
+          "items": {
+            "type": "string",
+            "enum": [
+              "efectivo",
+              "transferencia"
+            ]
+          },
           "description": "Solo medios del comercio. Nunca cobro por Vereda."
         },
-        "total": { "$ref": "comunes.json#/$defs/monto" },
-        "nota": { "type": "string", "maxLength": 200 }
+        "total": {
+          "$ref": "comunes.json#/$defs/monto"
+        },
+        "nota": {
+          "type": "string",
+          "maxLength": 200
+        }
       }
     },
     "recomendacion": {
       "type": "object",
-      "required": ["tipo", "version", "texto"],
+      "required": [
+        "tipo",
+        "version",
+        "texto"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "const": "recomendacion" },
-        "version": { "$ref": "#/$defs/version" },
-        "id": { "type": "string", "maxLength": 64 },
-        "texto": { "type": "string", "minLength": 1, "maxLength": 500 },
-        "items": { "type": "array", "maxItems": 10, "items": { "$ref": "#/$defs/tarjeta_producto" } }
+        "tipo": {
+          "const": "recomendacion"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "texto": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/tarjeta_producto"
+          }
+        }
       }
     },
     "comercio": {
       "type": "object",
-      "required": ["tipo", "version", "comercio_id", "nombre"],
+      "required": [
+        "tipo",
+        "version",
+        "comercio_id",
+        "nombre"
+      ],
       "additionalProperties": false,
       "properties": {
-        "tipo": { "const": "comercio" },
-        "version": { "$ref": "#/$defs/version" },
-        "id": { "type": "string", "maxLength": 64 },
-        "comercio_id": { "type": "string" },
-        "nombre": { "type": "string", "maxLength": 120 },
-        "descripcion": { "type": "string", "maxLength": 500 },
-        "imagen": { "type": "string", "format": "uri" },
-        "abierto": { "type": "boolean" }
+        "tipo": {
+          "const": "comercio"
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "comercio_id": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "descripcion": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "imagen": {
+          "type": "string",
+          "format": "uri"
+        },
+        "abierto": {
+          "type": "boolean"
+        }
       }
     },
     "mensaje": {
       "type": "object",
-      "required": ["rol"],
+      "required": [
+        "rol"
+      ],
       "additionalProperties": false,
       "properties": {
-        "rol": { "type": "string", "enum": ["usuario", "asistente"] },
-        "texto": { "type": "string", "maxLength": 4000 },
+        "rol": {
+          "type": "string",
+          "enum": [
+            "usuario",
+            "asistente"
+          ]
+        },
+        "texto": {
+          "type": "string",
+          "maxLength": 4000
+        },
         "widgets": {
           "type": "array",
           "maxItems": 10,
-          "items": { "$ref": "#/$defs/widget" }
+          "items": {
+            "$ref": "#/$defs/widget"
+          }
         }
       }
     },
     "pedido_chat": {
       "type": "object",
-      "required": ["mensaje", "lat", "lng"],
+      "required": [
+        "mensaje",
+        "lat",
+        "lng"
+      ],
       "additionalProperties": false,
       "properties": {
-        "mensaje": { "type": "string", "minLength": 1, "maxLength": 2000 },
-        "historial": { "type": "array", "maxItems": 40, "items": { "$ref": "#/$defs/mensaje" } },
-        "lat": { "type": "number" },
-        "lng": { "type": "number" },
-        "comercio_id": { "type": "string" },
-        "carrito_id": { "type": "string" }
+        "mensaje": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "historial": {
+          "type": "array",
+          "maxItems": 40,
+          "items": {
+            "$ref": "#/$defs/mensaje"
+          }
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "comercio_id": {
+          "type": "string"
+        },
+        "carrito_id": {
+          "type": "string"
+        }
       }
     },
     "respuesta_chat": {
       "type": "object",
-      "required": ["mensaje", "consumo"],
+      "required": [
+        "mensaje",
+        "consumo"
+      ],
       "additionalProperties": false,
       "properties": {
-        "mensaje": { "$ref": "#/$defs/mensaje" },
-        "consumo": { "$ref": "ia.json#/$defs/consumo" }
+        "mensaje": {
+          "$ref": "#/$defs/mensaje"
+        },
+        "consumo": {
+          "$ref": "ia.json#/$defs/consumo"
+        }
       }
+    },
+    "desconocido": {
+      "type": "object",
+      "description": "Widget de un tipo que este nodo/cliente todavía no conoce. Tiene que pasar la validación para que el mensaje no se caiga entero: la app lo saltea y, si hay texto, muestra eso (docs/ia/capacidad.md).",
+      "required": [
+        "tipo",
+        "version"
+      ],
+      "properties": {
+        "tipo": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "not": {
+            "enum": [
+              "elegir_categoria",
+              "productos",
+              "producto",
+              "carrito",
+              "checkout",
+              "recomendacion",
+              "comercio"
+            ]
+          },
+          "description": "Cualquier string que no sea uno de los siete tipos conocidos."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Entero ≥ 1. No se fija en 1: un tipo futuro puede traer otra versión."
+        }
+      },
+      "additionalProperties": true
     }
   }
 }
