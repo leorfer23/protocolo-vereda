@@ -46,3 +46,25 @@ def firmar_pedido(*, metodo, url, cuerpo: bytes, vereda_version, clave_privada, 
         "Signature-Input": f"{etiqueta}={params}",
         "Signature": f"{etiqueta}=:{base64.b64encode(firma).decode()}:",
     }
+
+
+COMPONENTES_FRESCA = ("@method", "@path", "@query", "content-digest")
+
+
+def firma_fresca(*, metodo, path, query="", cuerpo: bytes = b"", clave_privada, keyid, created=None):
+    """Cabeceras de la firma fresca de una persona (docs/acceso.md, punto 7):
+    Content-Digest, Signature-Input y Signature con la etiqueta `fresca`.
+    Reproduce `ejemplos/vectores-firma.json#/firma_fresca`."""
+    created = int(time.time()) if created is None else created
+    digest = content_digest(cuerpo)
+    params = (
+        "(" + " ".join(f'"{c}"' for c in COMPONENTES_FRESCA) + ")"
+        f';created={created};keyid="{keyid}";alg="ed25519";tag="vereda-fresca"'
+    )
+    valores = {"@method": metodo.upper(), "@path": path, "@query": "?" + query, "content-digest": digest}
+    base = "\n".join([f'"{c}": {valores[c]}' for c in COMPONENTES_FRESCA] + [f'"@signature-params": {params}'])
+    return {
+        "Content-Digest": digest,
+        "Signature-Input": f"fresca={params}",
+        "Signature": f"fresca=:{base64.b64encode(clave_privada.sign(base.encode())).decode()}:",
+    }

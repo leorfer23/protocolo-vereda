@@ -191,6 +191,14 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   `tipos` la lista. Texto con `Content-Type: image/jpeg` da `415 tipo_no_admitido`, un
   archivo de más de `limite_bytes` da `413 medio_muy_grande`, sin token `401`, y con custodia
   propia otra identidad da `403`. El tope por comercio no se prueba: llenarlo es caro.
+- Sesiones y firma fresca (`docs/acceso.md`, puntos 6 y 7), con custodia propia: una
+  identidad nueva entra dos veces con la misma clave, la primera con `etiqueta`.
+  `GET /yo/sesiones` trae las dos, una sola con `actual: true` y la etiqueta, sin tokens; con
+  mandato, `403`. Si el nodo publica `acceso.firma_fresca`, `GET /yo/exportar` con la firma de
+  otra clave o vencida da `403 firma_fresca_requerida` aun en gracia, con la de la clave activa
+  `200`, y sin firma `403` si `exigida`. `DELETE /yo/sesiones` cierra la otra (`cerradas: 1`,
+  su `/yo` da `401`) y no la actual; cerrar la actual por id da `204`, su token `401`, y
+  cerrarla otra vez `404`.
 - Equipo del comercio (`docs/equipo.md`), con custodia propia; si el nodo responde `501` en
   `verEquipo`, se omite. La dueña lee el equipo (`esquemas/equipo.json`) e invita con
   `pedidos` (`201`, con `codigo` y `enlace`); `exportar` como permiso da `422`. Una identidad

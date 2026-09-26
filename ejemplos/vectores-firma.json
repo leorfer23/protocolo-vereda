@@ -486,5 +486,31 @@
       "Signature": "sig1=:4tBCBI3jQUr8eyvEpuGVJr/ACfHxGF6WwZXIqReJwwpQVCDyf7P4DN7FGJWvLTAggcUDA3BhsGql1sB4rquUBA==:"
     },
     "nota_base64": "Signature y Content-Digest usan base64 estándar con relleno, como manda RFC 9421. Las firmas dentro de los objetos JSON usan base64url sin relleno."
+  },
+  "firma_fresca": {
+    "descripcion": "PATCH /v1/comercios/{id} que cambia privado.cuenta_cobro, firmado por marta@vereda.ar con su clave activa, además del token de sesión. '@query' es '?' porque el pedido no trae query (RFC 9421, 2.2.7). Un GET sin cuerpo lleva el Content-Digest de cero bytes.",
+    "etiqueta_firma": "fresca",
+    "metodo": "PATCH",
+    "path": "/v1/comercios/01926b3c-4d5e-7f00-8a1b-2c3d4e5f6a7b",
+    "query": "?",
+    "cuerpo_utf8_hex": "7b227072697661646f223a7b226375656e74615f636f62726f223a7b22616c696173223a226c616875657274612e7665726475222c22746974756c6172223a224d617274612047c3b36d657a227d7d7d",
+    "componentes": [
+      "@method",
+      "@path",
+      "@query",
+      "content-digest"
+    ],
+    "created": 1790000000,
+    "keyid": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+    "alg": "ed25519",
+    "tag": "vereda-fresca",
+    "base_de_firma": "\"@method\": PATCH\n\"@path\": /v1/comercios/01926b3c-4d5e-7f00-8a1b-2c3d4e5f6a7b\n\"@query\": ?\n\"content-digest\": sha-256=:nbsnViL9Pc1zG9wdR3l1Mf63gLRe7ZZomnOceFShD/w=:\n\"@signature-params\": (\"@method\" \"@path\" \"@query\" \"content-digest\");created=1790000000;keyid=\"7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I\";alg=\"ed25519\";tag=\"vereda-fresca\"",
+    "base_de_firma_hex": "22406d6574686f64223a2050415443480a224070617468223a202f76312f636f6d657263696f732f30313932366233632d346435652d376630302d386131622d3263336434653566366137620a22407175657279223a203f0a22636f6e74656e742d646967657374223a207368612d3235363d3a6e62736e56694c395063317a4739776452336c314d663633674c5265375a5a6f6d6e4f6365465368442f773d3a0a22407369676e61747572652d706172616d73223a202822406d6574686f642220224070617468222022407175657279222022636f6e74656e742d64696765737422293b637265617465643d313739303030303030303b6b657969643d223741534a4f634d45393247456c69722d64546d7270696267477665366a76356f444d63344f637a63763049223b616c673d2265643235353139223b7461673d227665726564612d66726573636122",
+    "content_digest_vacio": "sha-256=:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=:",
+    "cabeceras": {
+      "Content-Digest": "sha-256=:nbsnViL9Pc1zG9wdR3l1Mf63gLRe7ZZomnOceFShD/w=:",
+      "Signature-Input": "fresca=(\"@method\" \"@path\" \"@query\" \"content-digest\");created=1790000000;keyid=\"7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I\";alg=\"ed25519\";tag=\"vereda-fresca\"",
+      "Signature": "fresca=:V8J4sM0yiZ9OgQ50fWYqs/jjWCJ9A9kojR0OYk9HirhZ/OtvEL1sUmordHDS3OAkwzgefx14q0yhbAvFLl4CBg==:"
+    }
   }
 }

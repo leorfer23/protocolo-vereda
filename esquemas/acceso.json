@@ -23,7 +23,39 @@
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/canal" },
           "description": "Canales por los que el nodo manda un código o enlace de acceso (POST /acceso/codigo). Solo para cuentas con custodia del nodo. Vacío o ausente: el nodo no ofrece acceso alternativo."
-        }
+        },
+        "firma_fresca": { "$ref": "#/$defs/firma_fresca" }
+      },
+      "additionalProperties": false
+    },
+    "firma_fresca": {
+      "type": "object",
+      "description": "Cómo pide este nodo la firma fresca en las operaciones sensibles (docs/acceso.md, punto 7). Un nodo que no la publica no la verifica ni la exige.",
+      "required": ["exigida", "ventana_segundos"],
+      "properties": {
+        "exigida": { "type": "boolean", "description": "true: una operación sensible sin firma fresca válida responde 403 firma_fresca_requerida. false: fase de gracia; el nodo verifica la firma si viene (y rechaza una mala) pero acepta la operación sin ella." },
+        "exigida_desde": { "$ref": "comunes.json#/$defs/instante", "description": "Si el nodo va a pasar a exigirla, desde cuándo. Se anuncia antes, para que las apps se actualicen." },
+        "ventana_segundos": { "type": "integer", "minimum": 1, "maximum": 300, "description": "Cuánto puede alejarse 'created' de la hora del nodo, y cuánto vale una sesión recién abierta en lugar de la firma con custodia del nodo. 300 en el nodo de referencia; nunca más." }
+      },
+      "additionalProperties": false
+    },
+    "etiqueta_sesion": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Cómo la persona reconoce este dispositivo en su lista de sesiones ('iPhone de Marta', 'Chrome en la compu del local'). La declara la app al abrir la sesión; el nodo no la adivina ni la verifica."
+    },
+    "sesion_abierta": {
+      "type": "object",
+      "description": "Una sesión abierta de la persona, como la lista GET /yo/sesiones. Nunca trae el token.",
+      "required": ["id", "creada", "ultimo_uso", "vence", "actual"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64, "description": "Opaco. Sirve para cerrarla con DELETE /yo/sesiones/{id}. No se deriva del token ni permite reconstruirlo." },
+        "etiqueta": { "$ref": "#/$defs/etiqueta_sesion" },
+        "creada": { "$ref": "comunes.json#/$defs/instante", "description": "Cuándo se abrió. Renovar conserva la fecha de la original." },
+        "ultimo_uso": { "$ref": "comunes.json#/$defs/instante", "description": "La última vez que se usó, con la precisión que guarde el nodo (el de referencia, al minuto)." },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "forma": { "type": "string", "enum": ["clave", "codigo"], "description": "Cómo se abrió: firmando un desafío con la clave, o con un código por mensaje." },
+        "actual": { "type": "boolean", "description": "true en la sesión con la que se hizo el pedido." }
       },
       "additionalProperties": false
     },
@@ -66,7 +98,8 @@
         "clave_publica": { "$ref": "#/$defs/clave_ed25519" },
         "desafio": { "type": "string", "minLength": 1 },
         "firma": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$", "description": "Ed25519 sobre el JCS de prueba_de_clave, base64url sin relleno." },
-        "nombre": { "type": "string", "maxLength": 80, "description": "El nombre que se muestra. Solo se usa si la clave es nueva en este nodo; volver a entrar no lo pisa. Si falta, la persona queda sin nombre hasta que elija uno con PUT /yo/nombre: el nodo no inventa ninguno." }
+        "nombre": { "type": "string", "maxLength": 80, "description": "El nombre que se muestra. Solo se usa si la clave es nueva en este nodo; volver a entrar no lo pisa. Si falta, la persona queda sin nombre hasta que elija uno con PUT /yo/nombre: el nodo no inventa ninguno." },
+        "etiqueta": { "$ref": "#/$defs/etiqueta_sesion" }
       },
       "additionalProperties": false
     },
@@ -105,7 +138,8 @@
         "canal": { "$ref": "#/$defs/canal" },
         "valor": { "type": "string", "minLength": 3, "maxLength": 254 },
         "codigo": { "type": "string", "minLength": 6, "maxLength": 128, "description": "Los 6 dígitos que llegaron por mensaje, o el código largo que trae el enlace." },
-        "nombre": { "type": "string", "maxLength": 80 }
+        "nombre": { "type": "string", "maxLength": 80 },
+        "etiqueta": { "$ref": "#/$defs/etiqueta_sesion" }
       },
       "additionalProperties": false
     },

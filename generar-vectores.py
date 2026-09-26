@@ -232,6 +232,43 @@ rfc9421 = {
     "nota_base64": "Signature y Content-Digest usan base64 estándar con relleno, como manda RFC 9421. Las firmas dentro de los objetos JSON usan base64url sin relleno.",
 }
 
+# --- 8. Firma fresca: la persona firma una operación sensible con su clave activa (docs/acceso.md, punto 6) ---
+k_marta, pub_marta_ff = clave(ACTORES["marta@vereda.ar"])
+cuerpo_ff = rfc8785.dumps({"privado": {"cuenta_cobro": {"alias": "lahuerta.verdu", "titular": "Marta Gómez"}}})
+digest_ff = "sha-256=:" + base64.b64encode(hashlib.sha256(cuerpo_ff).digest()).decode() + ":"
+created_ff = 1790000000
+path_ff = "/v1/comercios/01926b3c-4d5e-7f00-8a1b-2c3d4e5f6a7b"
+params_ff = ('("@method" "@path" "@query" "content-digest")'
+             f';created={created_ff};keyid="{pub_marta_ff}";alg="ed25519";tag="vereda-fresca"')
+base_ff = "\n".join([
+    '"@method": PATCH',
+    f'"@path": {path_ff}',
+    '"@query": ?',
+    f'"content-digest": {digest_ff}',
+    f'"@signature-params": {params_ff}',
+])
+firma_fresca = {
+    "descripcion": "PATCH /v1/comercios/{id} que cambia privado.cuenta_cobro, firmado por marta@vereda.ar con su clave activa, además del token de sesión. '@query' es '?' porque el pedido no trae query (RFC 9421, 2.2.7). Un GET sin cuerpo lleva el Content-Digest de cero bytes.",
+    "etiqueta_firma": "fresca",
+    "metodo": "PATCH",
+    "path": path_ff,
+    "query": "?",
+    "cuerpo_utf8_hex": cuerpo_ff.hex(),
+    "componentes": ["@method", "@path", "@query", "content-digest"],
+    "created": created_ff,
+    "keyid": pub_marta_ff,
+    "alg": "ed25519",
+    "tag": "vereda-fresca",
+    "base_de_firma": base_ff,
+    "base_de_firma_hex": base_ff.encode().hex(),
+    "content_digest_vacio": "sha-256=:" + base64.b64encode(hashlib.sha256(b"").digest()).decode() + ":",
+    "cabeceras": {
+        "Content-Digest": digest_ff,
+        "Signature-Input": f"fresca={params_ff}",
+        "Signature": "fresca=:" + base64.b64encode(k_marta.sign(base_ff.encode())).decode() + ":",
+    },
+}
+
 doc = {
     "$comentario": "Vectores de prueba de firma del Protocolo Vereda. Una implementación conforme reproduce byte a byte cada JCS, Content-Digest y base de firma, y verifica cada firma contra la clave publicada. Las firmas no se exigen idénticas: Ed25519 con azar (CryptoKit en iOS) da firmas distintas e igual de válidas.",
     "version_esquema": "1.0",
@@ -260,10 +297,11 @@ doc = {
     "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_rendicion],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
+    "firma_fresca": firma_fresca,
 }
 ruta = os.path.join(BASE, "ejemplos", "vectores-firma.json")
 open(ruta, "w").write(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
-print(f"escrito {ruta}: {len(doc['vectores'])} vectores firmados, {len(casos_jcs)} casos JCS, 1 request RFC 9421")
+print(f"escrito {ruta}: {len(doc['vectores'])} vectores firmados, {len(casos_jcs)} casos JCS, 1 request RFC 9421 y 1 firma fresca")
 
 # --- Acceso y respaldo de la clave (docs/acceso.md) ---
 import unicodedata

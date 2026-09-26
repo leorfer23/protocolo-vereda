@@ -104,6 +104,16 @@ try:
         print(f"✗ operaciones con 'administrar' sin un x-permiso-equipo válido: {', '.join(sin_permiso)}")
     else:
         print("✓ toda operación con 'administrar' dice qué permiso del equipo la habilita")
+    # Una operación sensible (docs/acceso.md, punto 6) declara las cabeceras de la
+    # firma fresca y la respuesta que da sin ella.
+    cabeceras_ff = {"#/components/parameters/" + n for n in ("firmaFrescaEntrada", "firmaFresca", "contentDigest")}
+    sin_ff = [o["operationId"] for p, item in api["paths"].items() for m, o in item.items() if m in METODOS and "x-firma-fresca" in o
+              and not (cabeceras_ff <= {x.get("$ref") for x in o.get("parameters", [])} and "403" in o["responses"])]
+    if sin_ff:
+        fallos += 1
+        print(f"✗ operaciones con x-firma-fresca sin sus cabeceras o sin 403: {', '.join(sin_ff)}")
+    else:
+        print("✓ toda operación con firma fresca declara sus cabeceras y su 403")
 except Exception as e:
     fallos += 1
     print(f"✗ openapi.yaml\n    {str(e).splitlines()[0][:200]}")
@@ -196,7 +206,32 @@ def verificar_vectores():
             Ed25519PublicKey.from_public_bytes(desde_b64u(r["keyid"])).verify(base64.b64decode(sig), base.encode())
         except (InvalidSignature, ValueError):
             malos.append("rfc9421: la firma HTTP no verifica")
-    return malos, len(V["vectores"]) + len(V["casos_jcs"]) + 1
+
+    f = V["firma_fresca"]
+    cuerpo = bytes.fromhex(f["cuerpo_utf8_hex"])
+    if f["cabeceras"]["Content-Digest"] != "sha-256=:" + base64.b64encode(hashlib.sha256(cuerpo).digest()).decode() + ":":
+        malos.append("firma_fresca: Content-Digest no corresponde al cuerpo")
+    if f["content_digest_vacio"] != "sha-256=:" + base64.b64encode(hashlib.sha256(b"").digest()).decode() + ":":
+        malos.append("firma_fresca: content_digest_vacio no es el SHA-256 de cero bytes")
+    etiqueta, params = f["cabeceras"]["Signature-Input"].split("=", 1)
+    if etiqueta != "fresca" or not params.startswith('("@method" "@path" "@query" "content-digest");') or 'tag="vereda-fresca"' not in params:
+        malos.append("firma_fresca: Signature-Input no tiene la etiqueta, los componentes o el tag del protocolo")
+    base = "\n".join([
+        '"@method": ' + f["metodo"],
+        '"@path": ' + f["path"],
+        '"@query": ' + f["query"],
+        '"content-digest": ' + f["cabeceras"]["Content-Digest"],
+        '"@signature-params": ' + params,
+    ])
+    if base != f["base_de_firma"] or base.encode().hex() != f["base_de_firma_hex"]:
+        malos.append("firma_fresca: la base de firma no se reconstruye desde las cabeceras")
+    else:
+        try:
+            Ed25519PublicKey.from_public_bytes(desde_b64u(f["keyid"])).verify(
+                base64.b64decode(f["cabeceras"]["Signature"].split("=", 1)[1].strip(":")), base.encode())
+        except (InvalidSignature, ValueError):
+            malos.append("firma_fresca: la firma no verifica contra la clave activa")
+    return malos, len(V["vectores"]) + len(V["casos_jcs"]) + 2
 
 malos, total = verificar_vectores()
 fallos += len(malos)

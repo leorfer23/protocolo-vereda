@@ -68,6 +68,8 @@ Con custodia del nodo, lo hace el nodo. Con custodia propia, la persona genera l
 
 Rotar nunca se puede hacer por mandato. Un agente no toca claves.
 
+Rotar pide firma fresca con la clave que se retira y **cierra todas las sesiones** de la persona, también la que rotó (`docs/acceso.md`, puntos 6 y 7): quien tenía un token viejo queda afuera.
+
 ## Clave comprometida
 
 `POST /yo/claves/comprometida`, con la clave y desde cuándo. La puede declarar el actor, o el nodo si la custodiaba.
@@ -75,6 +77,7 @@ Rotar nunca se puede hacer por mandato. Un agente no toca claves.
 - La clave pasa a `comprometida` y se rota. La nueva no lleva aval: una clave filtrada no puede avalar nada. Responde solo el nodo.
 - Con custodia propia, la persona genera la clave nueva y manda su entrada en `clave`, sin `avalada_por`; el nodo no puede generarla por ella (sería pasarle la custodia sin que la pida) y responde 422 si falta. Con custodia del nodo, la genera el nodo si no viene. Desde ese momento, la nueva es la única que abre sesión (`docs/acceso.md`).
 - Se revocan todos los mandatos activos del actor. La persona los vuelve a otorgar con la clave nueva.
+- Se cierran todas las sesiones del actor, en la misma transacción. Declararla pide firma fresca con la clave activa: un token robado solo no puede instalar una clave nueva (`docs/acceso.md`, punto 7).
 - Una clave `retirada` puede pasar a `comprometida` si la filtración se descubre después.
 - El nodo emite `clave.comprometida`.
 

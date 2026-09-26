@@ -238,9 +238,13 @@ paths:
         que el comercio la cambie o la quite (`"apertura_manual": null`), y con `hasta` en el pasado el
         nodo la ignora y vuelven a mandar los horarios. Si cambia `abierto_ahora`, el nodo emite
         `comercio.abierto` o `comercio.cerrado`.
+
+        Cambiar `privado.cuenta_cobro` pide firma fresca de quien la cambia (docs/acceso.md, punto 7);
+        el resto de la ficha no.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [datos]
-      parameters: [ { $ref: "#/components/parameters/id" } ]
+      x-firma-fresca: si cambia privado.cuenta_cobro
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       requestBody: { required: true, content: { application/json: { schema: { type: object, description: "Los campos a cambiar, con la forma de esquemas/comercio.json." } } } }
       responses:
         "200": { description: Actualizado, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
@@ -537,9 +541,11 @@ paths:
         comercio y se los lleva enteros, para mudarse de nodo, tener respaldo o usarlos en su propio
         sistema. Va firmado con la clave del nodo, así el destino lo verifica. Lo que el comercio
         hace con esos datos fuera del nodo es su responsabilidad, incluida la legal (Ley 25.326).
+        Pide firma fresca de la dueña (docs/acceso.md, punto 7).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [duena]
-      parameters: [ { $ref: "#/components/parameters/id" } ]
+      x-firma-fresca: siempre
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       responses:
         "200": { description: Paquete firmado, content: { application/json: { schema: { $ref: "#/components/schemas/ExportacionComercio" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
@@ -615,10 +621,12 @@ paths:
         tenga el código, con su propia sesión. Solo se pueden dar permisos que uno mismo tiene: un
         miembro con `equipo` y `pedidos` no invita a nadie con `catalogo` (403 `sin_permiso`, con
         `detalle.falta`). La dueña da cualquiera. `codigo` y `enlace` vienen solo en esta
-        respuesta. Vence a las `vence_en_horas` (72 si no viene, 168 como máximo).
+        respuesta. Vence a las `vence_en_horas` (72 si no viene, 168 como máximo). Pide firma fresca
+        de quien invita (docs/acceso.md, punto 7).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [equipo]
-      parameters: [ { $ref: "#/components/parameters/id" } ]
+      x-firma-fresca: siempre
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/nueva_invitacion" } } } }
       responses:
         "201": { description: "Creada, con `codigo` y `enlace`", content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/invitacion" } } } }
@@ -645,10 +653,11 @@ paths:
       description: |
         Con el permiso `equipo`, y solo para dar o sacar permisos que uno mismo tiene. A la dueña
         no se la cambia (403 `sin_permiso`). Uno no se cambia sus propios permisos: se los cambia
-        otro, o se va.
+        otro, o se va. Pide firma fresca de quien cambia (docs/acceso.md, punto 7).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [equipo]
-      parameters: [ { $ref: "#/components/parameters/id" }, { name: identidad, in: path, required: true, schema: { $ref: "esquemas/comunes.json#/$defs/identidad" } } ]
+      x-firma-fresca: siempre
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: identidad, in: path, required: true, schema: { $ref: "esquemas/comunes.json#/$defs/identidad" } }, { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/cambio_de_miembro" } } } }
       responses:
         "200": { description: El miembro como quedó, content: { application/json: { schema: { $ref: "esquemas/equipo.json#/$defs/miembro" } } } }
@@ -665,10 +674,12 @@ paths:
         (docs/identidad-y-verificacion.md). El nodo decide en cada llamada quién administra, así
         que la persona que sale y los mandatos `administrar` que ella otorgó dejan de poder operar
         el comercio desde la llamada siguiente, sin nada que revocar aparte. Lo que hizo mientras
-        estuvo queda a su nombre.
+        estuvo queda a su nombre. Sacar a otro pide firma fresca de quien lo saca (docs/acceso.md,
+        punto 7); irse uno mismo no.
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [equipo]
-      parameters: [ { $ref: "#/components/parameters/id" }, { name: identidad, in: path, required: true, schema: { $ref: "esquemas/comunes.json#/$defs/identidad" } } ]
+      x-firma-fresca: si saca a otro
+      parameters: [ { $ref: "#/components/parameters/id" }, { name: identidad, in: path, required: true, schema: { $ref: "esquemas/comunes.json#/$defs/identidad" } }, { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       responses:
         "204": { description: Fuera del equipo }
         "403": { $ref: "#/components/responses/SinPermiso" }
@@ -1422,7 +1433,7 @@ paths:
 
   /mandatos:
     get: { operationId: listarMandatos, tags: [mandatos], summary: Mis mandatos activos, security: [ { sesion: [] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mandato.json" } } } } } } }
-    post: { operationId: otorgarMandato, tags: [mandatos], summary: Otorgar mandato a un agente (fin del flujo OAuth), security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } }, responses: { "201": { description: "Otorgado. Es la única vez que el nodo muestra el token del agente", content: { application/json: { schema: { allOf: [ { $ref: "esquemas/mandato.json" }, { type: object, required: [token], properties: { token: { type: string, description: "Lo que el agente manda en Authorization: Bearer. No se vuelve a mostrar." } } } ] } } } } } }
+    post: { operationId: otorgarMandato, tags: [mandatos], summary: Otorgar mandato a un agente (fin del flujo OAuth), description: "Pide firma fresca de la persona (docs/acceso.md, punto 7). El nodo le avisa a la persona con `mandato.otorgado`, en todas sus sesiones.", security: [ { sesion: [] } ], x-firma-fresca: siempre, parameters: [ { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } }, responses: { "201": { description: "Otorgado. Es la única vez que el nodo muestra el token del agente", content: { application/json: { schema: { allOf: [ { $ref: "esquemas/mandato.json" }, { type: object, required: [token], properties: { token: { type: string, description: "Lo que el agente manda en Authorization: Bearer. No se vuelve a mostrar." } } } ] } } } }, "403": { $ref: "#/components/responses/FirmaFrescaRequerida" } } }
   /mandatos/{id}/revocar:
     post: { operationId: revocarMandato, tags: [mandatos], summary: Revocar en un toque, security: [ { sesion: [] } ], parameters: [ { $ref: "#/components/parameters/id" } ], responses: { "200": { description: Revocado, content: { application/json: { schema: { $ref: "esquemas/mandato.json" } } } } } }
   /mandatos/{id}/actividad:
@@ -1546,17 +1557,26 @@ paths:
       operationId: rotarClave
       tags: [yo]
       summary: Rotar mi clave. La anterior queda retirada y avala a la nueva. Nunca por mandato
+      description: Pide firma fresca con la clave que se retira (docs/acceso.md, punto 7). Cierra todas las sesiones de la persona, también la que rota; con custodia propia la app vuelve a entrar con la clave nueva.
       security: [ { sesion: [] } ]
+      x-firma-fresca: siempre
+      parameters: [ { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       requestBody: { content: { application/json: { schema: { type: object, description: "Vacío si el nodo custodia la clave. Con custodia propia, la entrada nueva ya avalada.", properties: { clave: { $ref: "esquemas/comunes.json#/$defs/clave" } } } } } }
-      responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "422": { $ref: "#/components/responses/Error" } }
+      responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "403": { $ref: "#/components/responses/FirmaFrescaRequerida" }, "422": { $ref: "#/components/responses/Error" } }
   /yo/claves/comprometida:
     post:
       operationId: declararClaveComprometida
       tags: [yo]
       summary: Declarar comprometida una clave mía desde un instante, y rotar. Nunca por mandato
+      description: |
+        Pide firma fresca con la clave activa (docs/acceso.md, punto 7): un token robado solo no puede
+        instalar una clave nueva. Quien perdió el dispositivo firma con la clave restaurada de su
+        respaldo. Cierra todas las sesiones de la persona y revoca sus mandatos.
       security: [ { sesion: [] } ]
+      x-firma-fresca: siempre
+      parameters: [ { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       requestBody: { content: { application/json: { schema: { type: object, required: [clave_publica, comprometida_desde], properties: { clave_publica: { type: string }, comprometida_desde: { $ref: "esquemas/comunes.json#/$defs/instante" }, clave: { $ref: "esquemas/comunes.json#/$defs/clave", description: "La entrada que la reemplaza, sin aval. Obligatoria con custodia propia; con custodia del nodo, si falta la genera el nodo." } } } } } }
-      responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "422": { $ref: "#/components/responses/Error" } }
+      responses: { "200": { description: Historial actualizado, content: { application/json: { schema: { $ref: "esquemas/comunes.json#/$defs/claves" } } } }, "403": { $ref: "#/components/responses/FirmaFrescaRequerida" }, "422": { $ref: "#/components/responses/Error" } }
   /yo/atestaciones/{id}/consentimiento:
     post:
       operationId: consentirAtestacion
@@ -1591,9 +1611,48 @@ paths:
         "200": { description: Confirmado, content: { application/json: { schema: { $ref: "esquemas/usuario.json" } } } }
         "422": { description: "Código vencido o incorrecto (codigo_de_contacto_invalido)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /yo/exportar:
-    get: { operationId: exportarCuenta, tags: [yo], summary: "Todo lo mío, firmado: identidad, clave, historial, reseñas. Para irme a otro nodo.", security: [ { sesion: [] } ], responses: { "200": { description: Paquete firmado, content: { application/json: { schema: { type: object } } } } } }
+    get: { operationId: exportarCuenta, tags: [yo], summary: "Todo lo mío, firmado: identidad, clave, historial, reseñas. Para irme a otro nodo.", description: "Pide firma fresca (docs/acceso.md, punto 7).", security: [ { sesion: [] } ], x-firma-fresca: siempre, parameters: [ { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ], responses: { "200": { description: Paquete firmado, content: { application/json: { schema: { type: object } } } }, "403": { $ref: "#/components/responses/FirmaFrescaRequerida" } } }
   /yo/borrar:
     post: { operationId: borrarCuenta, tags: [yo], summary: Borrar mi cuenta y datos personales (las reseñas firmadas quedan anonimizadas), security: [ { sesion: [] } ], responses: { "202": { description: "En proceso", content: { application/json: { schema: { type: object, required: [procesar_en], properties: { procesar_en: { $ref: "esquemas/comunes.json#/$defs/instante", description: "Cuándo se borra. Hasta entonces, iniciar sesión lo cancela." } } } } } } } }
+
+  /yo/sesiones:
+    get:
+      operationId: listarSesiones
+      tags: [yo]
+      summary: "Dónde está abierta mi cuenta: cada sesión, desde cuándo y cuándo se usó por última vez. El token no vuelve"
+      description: |
+        Solo con la sesión de la persona: un token de mandato recibe 403. Las sesiones son de ella,
+        no de su agente, y no hay herramienta MCP. La que hace el pedido viene con `actual: true`.
+        Solo las vigentes, de la usada más recientemente a la más vieja (docs/acceso.md, punto 6).
+      security: [ { sesion: [] } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/acceso.json#/$defs/sesion_abierta" } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "Un token de mandato: las sesiones son de la persona", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    delete:
+      operationId: cerrarOtrasSesiones
+      tags: [yo]
+      summary: "Cerrar todas mis sesiones menos esta. Sus tokens dejan de valer en el acto"
+      description: |
+        "Cerrar las otras". La sesión que llama sigue abierta. No toca las claves ni los mandatos:
+        si lo que se filtró es la clave, el camino es declararla comprometida, que además cierra todas.
+      security: [ { sesion: [] } ]
+      responses:
+        "200": { description: Cerradas, content: { application/json: { schema: { type: object, required: [cerradas], properties: { cerradas: { type: integer, minimum: 0, description: Cuántas sesiones se cerraron } } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "Un token de mandato: las sesiones son de la persona", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /yo/sesiones/{id}:
+    delete:
+      operationId: cerrarSesionPorId
+      tags: [yo]
+      summary: "Cerrar una sesión mía: la de otro dispositivo, o esta misma"
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "204": { description: "Sin cuerpo. Cerrada; su token deja de valer en el acto" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "Un token de mandato: las sesiones son de la persona", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "404": { description: "No existe, ya se cerró o es de otra identidad (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /yo/dispositivos:
     get:
@@ -1675,6 +1734,9 @@ components:
     id: { name: id, in: path, required: true, schema: { type: string } }
     idem: { name: Idempotency-Key, in: header, required: true, schema: { type: string }, description: Reintentar nunca duplica }
     ifNoneMatch: { name: If-None-Match, in: header, schema: { type: string }, description: "El ETag de la última respuesta. Si el recurso no cambió, el nodo responde 304 sin cuerpo." }
+    firmaFrescaEntrada: { name: Signature-Input, in: header, schema: { type: string }, example: 'fresca=("@method" "@path" "@query" "content-digest");created=1790000000;keyid="<clave activa, base64url>";alg="ed25519";tag="vereda-fresca"', description: "Firma fresca (docs/acceso.md, punto 7): la etiqueta `fresca`, los cuatro componentes en ese orden, `created` a menos de `acceso.firma_fresca.ventana_segundos` de la hora del nodo, `keyid` la clave activa de la persona, `alg` ed25519 y `tag` vereda-fresca. Vector en ejemplos/vectores-firma.json → firma_fresca." }
+    firmaFresca: { name: Signature, in: header, schema: { type: string }, description: "La firma Ed25519 de la base RFC 9421, `fresca=:<base64 estándar>:`." }
+    contentDigest: { name: Content-Digest, in: header, schema: { type: string }, description: "`sha-256=:<base64 estándar>:` del cuerpo crudo (RFC 9530). Con cuerpo vacío, el SHA-256 de cero bytes. Va con la firma fresca." }
   headers:
     ETag: { description: "Validador de la representación. Toda lectura pública lo lleva.", schema: { type: string } }
     CacheControl: { description: "Siempre `public`: lo público se lee sin token y puede guardarlo cualquier caché intermedia. El tiempo de frescura (`max-age`) lo fija cada nodo; quien necesita el dato al día revalida con `If-None-Match`.", schema: { type: string } }
@@ -1685,6 +1747,7 @@ components:
     CarritoVencido: { description: "El carrito venció (24 h sin cambios). Código carrito_vencido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     NoEsElDueno: { description: "No administra el comercio: no es la dueña ni está en su equipo (código no_es_el_dueno), o el mandato no trae el scope 'administrar'. Si está en el equipo pero le falta el permiso de la operación, el código es sin_permiso (docs/equipo.md).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinPermiso: { description: "Está en el equipo pero le falta el permiso que pide la operación (código sin_permiso, con `detalle.falta`: el permiso que falta), o quiere cambiar o sacar a la dueña. Quien no está en el equipo recibe no_es_el_dueno, como siempre.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    FirmaFrescaRequerida: { description: "Operación sensible sin firma fresca válida (firma_fresca_requerida, con `detalle.motivo`: falta, vencida, invalida, clave_no_activa o sesion_no_reciente). Un token de mandato no alcanza: la firma es de la clave de la persona (docs/acceso.md, punto 7).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinCambios: { description: Sin cambios desde el ETag enviado, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } } }
   securitySchemes:
     sesion: { type: http, scheme: bearer, description: "Token de sesión. Se obtiene en /acceso: firmando un desafío con la clave propia, o con un código por mensaje si el nodo custodia la clave (docs/acceso.md)" }
