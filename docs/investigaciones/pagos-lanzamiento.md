@@ -14,9 +14,9 @@ Los anexos de esta vuelta: [`pagos-lanzamiento/mercado-pago.md`](pagos-lanzamien
 
 Por qué MP y no otro para el 28/9:
 
-- Es el único con **OAuth oficial** (el comercio toca "Conectar" y listo) y **webhook firmado** (HMAC-SHA256 en `x-signature`). Los demás piden pegar credenciales y no firman.
+- Es el único con **OAuth oficial** (el comercio toca "Conectar" y listo; access token de 180 días, refresh token de 6 meses que **rota en cada renovación**, confirmado en la doc) y **webhook firmado** (HMAC-SHA256 en `x-signature` con la clave secreta de la aplicación del operador, 22 s para responder, reintentos cada 15 min). Los demás piden pegar credenciales y no firman.
 - La mayoría de los comercios ya tiene cuenta. El alta en Vereda es un toque, no un formulario.
-- **Fee 0 es omitir `marketplace_fee`**: la preferencia se crea con el token del comercio y es un cobro normal del comercio. Vereda no aparece en la plata en ningún momento (anexo MP, §1).
+- **Fee 0 está en la doc oficial**: en `POST /checkout/preferences`, `marketplace_fee` "default value is 0" y solo se puede mandar si hay un `marketplace` definido, cuyo default es "NONE". El nodo crea la preferencia con el token OAuth del comercio y omite los dos campos: es un cobro normal del comercio y Vereda no aparece en la plata en ningún momento (anexo MP, §1). Lo que en `cobros.md` era (NC) quedó confirmado.
 - El checkout es una URL (`init_point`). Se abre en el navegador, en la webapp o en un `SFSafariViewController`: no hay SDK nativo, no hay datos de tarjeta en el nodo, no hay PCI.
 - Contracargos y devoluciones son entre el comercio y MP. Con fee 0, Vereda no pone plata en ninguna devolución.
 
@@ -39,25 +39,25 @@ Cuatro piezas, en este orden. Todas caben en la spec y en el nodo que ya existen
 3. El comercio autoriza en MP. MP vuelve al nodo (`/pagos/mercado_pago/volver?code&state`, fuera de `/v1`), el nodo canjea el código por `access_token` + `refresh_token` del comercio, los guarda **cifrados** y redirige al portal (`volver_a`).
 4. El portal muestra "Conectado · Juan Pérez (MP)" y "Desconectar" (`DELETE /comercios/{id}/cobrador`). Al conectar, `medios_cobro` suma `tarjeta`; al desconectar, lo saca.
 
-Lo que necesita el operador del nodo, una vez: una **aplicación en "Tus integraciones"** de su cuenta de MP (gratis), con la URL de vuelta y la URL del webhook de su nodo. De ahí salen `client_id`, `client_secret` y la clave secreta del webhook, que van al nodo como variables de entorno (`VEREDA_PAGOS_MP_*`). El nodo publica `cobradores: ["mercado_pago"]` en `/.well-known/vereda.json`; un nodo sin eso responde `501 no_implementado` y las apps no ofrecen la opción. Mismo patrón que `medios`.
+Lo que necesita el operador del nodo, una vez: una **aplicación en "Tus integraciones"** de su cuenta de MP (gratis, sin aprobación ni certificación), con la URL de vuelta (https, estática) y la URL del webhook de su nodo, y los permisos `read`, `write` y `offline_access` (sin este último no hay refresh). De ahí salen `client_id`, `client_secret` y la clave secreta del webhook, que van al nodo como variables de entorno (`VEREDA_PAGOS_MP_*`). El nodo publica `cobradores: ["mercado_pago"]` en `/.well-known/vereda.json`; un nodo sin eso responde `501 no_implementado` y las apps no ofrecen la opción. Mismo patrón que `medios`.
 
 ### 2.2 Checkout por web, con redirección
 
 1. El comprador elige "Tarjeta o Mercado Pago" al confirmar (`metodo_pago: tarjeta`). Solo aparece si el comercio tiene `tarjeta` en `medios_cobro`.
 2. El nodo crea la preferencia de Checkout Pro **con el token del comercio**: `external_reference = pedido_id`, `notification_url` del nodo, `back_urls` de la webapp, `expiration` igual al `vence` del cobro (la `ventana_pago_min` del comercio), **sin `marketplace_fee`**. Devuelve el pago `pendiente` con `link_pago = init_point`, `psp = "mercado_pago"`, `psp_referencia = preference_id`.
 3. La webapp redirige a `link_pago`. El comprador paga en MP (tarjeta, dinero en cuenta, cuotas si el comercio las da).
-4. MP vuelve a `back_urls` (`/pedido/{id}?pago=…`). La webapp muestra el pedido; el estado real llega por el evento, no por la query string.
+4. MP vuelve a `back_urls` (`https://app.protocolovereda.com/pedido/{id}`, con `payment_id`, `status` y `external_reference` en la query; `back_urls` tiene que ser https, `auto_return: approved`). La webapp muestra el pedido; el estado real llega por el evento, no por la query string.
 
 Sin cambio en la app iOS del 28/9: la build que va a revisión sigue con efectivo y transferencia, así que **no hay nueva revisión de App Store**. La app suma tarjeta después, con `SFSafariViewController` y vuelta por `vereda://` (§5).
 
 ### 2.3 Webhook en el nodo y avisos
 
-1. MP manda `POST /pagos/mercado_pago/webhook` (fuera de `/v1`) con `x-signature` y `x-request-id`. El nodo **valida el HMAC** con la clave secreta de la app y responde 200 en menos de 22 s.
+1. MP manda `POST /pagos/mercado_pago/webhook?data.id=…` (fuera de `/v1`) con `x-signature` (`ts=…,v1=…`) y `x-request-id`. El nodo **valida el HMAC-SHA256** del manifiesto `id:[data.id];request-id:[x-request-id];ts:[ts];` con la clave secreta de la app y responde 200 en menos de 22 s. Si no responde, MP reintenta cada 15 min, con intervalos más largos después del tercero.
 2. Nunca confía en el aviso: **re-consulta** `GET /v1/payments/{id}` con el token del comercio y comprueba `external_reference`, `transaction_amount` y `status = approved`.
 3. Llama a `ConfirmarCobro("mercado_pago", referencia)`: el cobro pasa a `confirmado` con `confirmado_por: psp`, el pedido a `pagado`, y salen `pago.confirmado` y `pedido.pagado` como hoy. Un aviso repetido no hace nada (idempotente por `payment_id`).
 4. Los avisos ya existen: el comprador y el comercio los reciben por `GET /eventos` (SSE) y por sus webhooks salientes; el repartidor, cuando el pedido pagado entra en despacho (`viaje.ofrecido`). No hay push APNs/FCM en el nodo hoy (`TODO(avisos)`) y no entra en el MVP.
 5. **Red de seguridad:** el barrido de cada minuto (`Mantener`) re-consulta a MP los cobros `pendiente` con `psp` antes de vencerlos, por si un webhook se perdió. Rechazado o vencido en MP: `fallido` y el pedido se cancela con `pago_vencido`, como cualquier pendiente.
-6. Devoluciones: `POST /v1/payments/{id}/refunds` con el token del comercio, total o parcial, hasta 180 días; queda como cobro `concepto: devolucion`. Contracargos: del comercio con MP; el nodo solo anota `pago.contracargo` si llega el tópico (fuera del MVP).
+6. Devoluciones: `POST /v1/payments/{id}/refunds` con el token del comercio y `X-Idempotency-Key` (obligatorio), total o parcial, hasta 180 días, con saldo del comercio; queda como cobro `concepto: devolucion`. Contracargos: del comercio con MP; el nodo solo anota `pago.contracargo` si llega el tópico (fuera del MVP).
 
 ### 2.4 Conciliación de transferencias por centavos únicos
 
@@ -113,7 +113,7 @@ Una rama por punto, squash, sin apilar (`memory-git`). Estimaciones para un work
 | 7 | vereda-webapp | Comprador: "Tarjeta o Mercado Pago" en el checkout, redirección a `link_pago`, vuelta a `/pedido/:id` con el estado por SSE, "¿Con cuánto pagás?" en efectivo, monto con centavos en la pantalla de transferencia (ya se muestra bien) | 1 (tipos), 4 y 5 (e2e) | M |
 | 8 | vereda-webapp | E2E con el mock y el MP falso (`npm run e2e:mock`): conectar, pagar aprobado, pagar rechazado, vencido; y `e2e:prod-lectura` sin escribir | 5, 6, 7 | S |
 | 9 | vereda-nodo | Conciliación automática de transferencias con la cuenta MP del comercio: barrido que busca transferencias entrantes con el monto exacto de cada pendiente y confirma con `confirmado_por: psp`. **Solo si el anexo de conciliación lo confirma y una transferencia real lo prueba.** | 3 | M |
-| 10 | vereda-app | iOS y Android, versión siguiente: `tarjeta` en `CheckoutModelo` con `SFSafariViewController` / Custom Tabs y vuelta por `vereda://` (iOS) o el App Link (Android); "¿Con cuánto pagás?"; cuenta de cobro y "Cobrar con Mercado Pago" en Datos. **Pantallas y copy los decide Leo** (2-3 opciones antes de abrir). | 1, 4 | M + M |
+| 10 | vereda-app | iOS y Android, versión siguiente: `tarjeta` en `CheckoutModelo` con `SFSafariViewController` / Custom Tabs y vuelta por link universal https (MP exige `back_urls` https: iOS necesita Associated Domains, que hoy no tiene; Android ya tiene el App Link); "¿Con cuánto pagás?"; cuenta de cobro y "Cobrar con Mercado Pago" en Datos. **Pantallas y copy los decide Leo** (2-3 opciones antes de abrir). | 1, 4 | M + M |
 
 Camino crítico para el 28/9: **1 → 3 → 4 → 5 → 8**, con 2, 6 y 7 en paralelo. Son tres días de nodo y dos de webapp si hay dos workers; con uno solo, entran 1-4 y 6-7 y el e2e completo (8) queda para el 29.
 
@@ -127,9 +127,9 @@ Lo que necesita a **Leo** antes de mergear 3 y 4:
 
 ## 5. Riesgos que quedan
 
-- **Refresh token de MP rota en cada uso (NC en doc oficial).** Si el nodo no guarda el nuevo de forma atómica, pierde al comercio y hay que reconectar. El PR 3 lo trata como cierto.
+- **El refresh token de MP rota en cada uso (confirmado en la doc).** Si el nodo no guarda el nuevo de forma atómica, pierde al comercio y hay que reconectar. El PR 3 lo hace en una sola transacción.
 - **Tokens en el nodo.** Un token permite crear cobros y devoluciones en la cuenta del comercio. Cifrado en reposo con clave por variable de entorno, permisos mínimos (`offline_access read write`), revocación desde el portal y aviso al comercio. Hoy el nodo no cifra nada en reposo: es infraestructura nueva y chica.
 - **Webhook con la firma de la app del operador para pagos creados con el token del comercio.** Es lo que la doc describe para marketplaces (anexo MP, §3); se prueba en sandbox antes de mergear el PR 4.
-- **Fee 0 explícito.** La doc dice "si querés cobrar una comisión, definí `marketplace_fee`"; omitirlo es un cobro normal del comercio. No hay una línea que diga "0 permitido" (NC). El nodo lo omite, nunca manda 0.
-- **Legal.** Con fee 0, sin QR propios, sin ordenar transferencias y sin tocar plata, ni el proyecto ni el operador quedarían alcanzados por el BCRA ni la UIF (`cobros/legal.md`). Sigue siendo lectura propia: conviene la opinión escrita de un abogado antes de crecer, no antes del 28.
+- **Costos por provincia.** MP cobra según la provincia del vendedor desde el 2026-03-06 (CABA 6,29 % al momento, PBA y Córdoba 6,60 %; 1,49 % / 1,56 % a 35 días; QR 0,8 % con dinero en cuenta). Es entre el comercio y MP; la app no lo muestra como si fuera de Vereda.
+- **Legal.** MercadoLibre S.R.L. está inscripta en el BCRA como PSPCP y agregador, y su procesadora como adquirente: la adhesión del comercio la hace MP. Con fee 0, sin QR propios, sin ordenar transferencias y sin tocar plata, ni el proyecto ni el operador quedarían alcanzados por el BCRA ni la UIF (`cobros/legal.md`). Sigue siendo lectura propia: conviene la opinión escrita de un abogado antes de crecer, no antes del 28.
 - **Producción sin datos de prueba.** Todo se prueba contra el mock y el MP falso; en prod solo lectura hasta que Leo cargue la app de MP (`memory-qa`).
