@@ -1,0 +1,104 @@
+{
+  "$comentario": "Casos del aviso que el nodo manda por push (docs/notificaciones-push.md).",
+  "esquema": "dispositivo.json#/$defs/aviso",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Pedido nuevo para quien administra el comercio: tipo, dónde abrir y el nombre público del comercio.",
+      "doc": {
+        "titulo": "Pedido nuevo",
+        "cuerpo": "Entró un pedido en Almacén Don Tito.",
+        "datos": {
+          "evento": "01920000-0000-7000-8000-00000000e001",
+          "tipo": "pedido.creado",
+          "rol": "comercio",
+          "entidad": {
+            "tipo": "pedido",
+            "id": "01920000-0000-7000-8000-0000000000b1"
+          },
+          "comercio": "01920000-0000-7000-8000-0000000000c1"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Viaje ofrecido al repartidor, sin comercio.",
+      "doc": {
+        "titulo": "Viaje disponible",
+        "cuerpo": "Tenés un viaje para aceptar.",
+        "datos": {
+          "evento": "01920000-0000-7000-8000-00000000e001",
+          "tipo": "viaje.ofrecido",
+          "rol": "repartidor",
+          "entidad": {
+            "tipo": "viaje",
+            "id": "01920000-0000-7000-8000-0000000000b1"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin datos personales: una dirección en datos no entra.",
+      "doc": {
+        "titulo": "Pedido nuevo",
+        "cuerpo": "Entró un pedido en Almacén Don Tito.",
+        "datos": {
+          "evento": "01920000-0000-7000-8000-00000000e001",
+          "tipo": "pedido.creado",
+          "rol": "comercio",
+          "entidad": {
+            "tipo": "pedido",
+            "id": "01920000-0000-7000-8000-0000000000b1"
+          },
+          "comercio": "01920000-0000-7000-8000-0000000000c1",
+          "direccion": "Av. Siempreviva 742"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un rol que no existe.",
+      "doc": {
+        "titulo": "Pedido nuevo",
+        "cuerpo": "Entró un pedido en Almacén Don Tito.",
+        "datos": {
+          "evento": "01920000-0000-7000-8000-00000000e001",
+          "tipo": "pedido.creado",
+          "rol": "agente",
+          "entidad": {
+            "tipo": "pedido",
+            "id": "01920000-0000-7000-8000-0000000000b1"
+          },
+          "comercio": "01920000-0000-7000-8000-0000000000c1"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Solo pedidos y viajes: un aviso del chat no está en esta versión.",
+      "doc": {
+        "titulo": "Pedido nuevo",
+        "cuerpo": "Entró un pedido en Almacén Don Tito.",
+        "datos": {
+          "evento": "01920000-0000-7000-8000-00000000e001",
+          "tipo": "pedido.creado",
+          "rol": "comercio",
+          "entidad": {
+            "tipo": "mensaje",
+            "id": "01920000-0000-7000-8000-0000000000b1"
+          },
+          "comercio": "01920000-0000-7000-8000-0000000000c1"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin datos no hay a dónde abrir.",
+      "doc": {
+        "titulo": "Pedido nuevo",
+        "cuerpo": "Entró un pedido."
+      }
+    }
+  ]
+}

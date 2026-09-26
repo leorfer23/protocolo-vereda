@@ -1592,6 +1592,47 @@ paths:
   /yo/borrar:
     post: { operationId: borrarCuenta, tags: [yo], summary: Borrar mi cuenta y datos personales (las reseñas firmadas quedan anonimizadas), security: [ { sesion: [] } ], responses: { "202": { description: "En proceso", content: { application/json: { schema: { type: object, required: [procesar_en], properties: { procesar_en: { $ref: "esquemas/comunes.json#/$defs/instante", description: "Cuándo se borra. Hasta entonces, iniciar sesión lo cancela." } } } } } } } }
 
+  /yo/dispositivos:
+    get:
+      operationId: listarDispositivos
+      tags: [yo]
+      summary: "Mis teléfonos registrados para notificaciones push (docs/notificaciones-push.md). El token no vuelve"
+      security: [ { sesion: [] } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, maxItems: 10, items: { $ref: "esquemas/dispositivo.json" } } } } }
+        "501": { description: "Este nodo no manda push (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    post:
+      operationId: registrarDispositivo
+      tags: [yo]
+      summary: "Registrar el token de push de este teléfono, para recibir avisos de mis pedidos y viajes"
+      description: |
+        Opcional: solo si el nodo publica `push` en /.well-known/vereda.json; si no, 501
+        `no_implementado` y la app no pide el permiso. Solo con la sesión de la persona: un agente
+        no recibe push en el teléfono de nadie.
+
+        Idempotente por `plataforma` + `app` + `token`: el mismo devuelve el mismo dispositivo con
+        200, y si estaba registrado a otra identidad pasa a esta. La app lo registra cada vez que el
+        sistema le da un token. Hasta 10 por identidad; el undécimo reemplaza al que hace más tiempo
+        que no se usa. Qué se avisa, a quién y con qué contenido, en docs/notificaciones-push.md.
+      security: [ { sesion: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/dispositivo.json#/$defs/registro" } } } }
+      responses:
+        "200": { description: "Ya estaba registrado: el mismo dispositivo, ahora de esta identidad", content: { application/json: { schema: { $ref: "esquemas/dispositivo.json" } } } }
+        "201": { description: Registrado, content: { application/json: { schema: { $ref: "esquemas/dispositivo.json" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "422": { description: "Cuerpo inválido, o una app que el nodo no sabe avisar (app_no_soportada, con `detalle.apps`: las que sí)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no manda push (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /yo/dispositivos/{id}:
+    delete:
+      operationId: borrarDispositivo
+      tags: [yo]
+      summary: "Dejar de recibir push en este teléfono. La app lo llama al cerrar sesión, antes de tirar el token de sesión"
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "204": { description: "Sin cuerpo. Borrado" }
+        "404": { description: "No existe o es de otra identidad (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
   /eventos:
     get:
       operationId: escucharEventos
@@ -1665,12 +1706,24 @@ components:
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string }, medios: { type: string, format: uri, description: "Dónde se suben las fotos de un comercio (subirMedio). Ausente si el operador no ofrece alojarlas: entonces van por URL (docs/medios.md)." } } }
         medios: { $ref: "#/components/schemas/CapacidadMedios" }
+        push: { $ref: "#/components/schemas/CapacidadPush" }
         cobradores: { $ref: "#/components/schemas/CapacidadCobradores" }
         codigo_fuente: { type: string, format: uri }
         acceso: { $ref: "esquemas/acceso.json#/$defs/capacidades", description: "Cómo se entra a este nodo (docs/acceso.md). Una app que habla con cualquier nodo mira esto antes de ofrecer la entrada." }
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
         sostenimiento: { $ref: "esquemas/sostenimiento.json", description: "Cómo se sostiene el nodo, en público (docs/sostenimiento.md). Lo mismo que GET /sostenimiento." }
         tarifa_envio: { type: array, description: "Pública, por tramo de distancia. La fija la cooperativa de repartidores; la red solo la publica y la aplica (docs/ranking-y-despacho.md).", items: { type: object, required: [hasta_km, monto], properties: { hasta_km: { type: number }, monto: { $ref: "esquemas/comunes.json#/$defs/monto" } } } }
+    CapacidadPush:
+      type: object
+      description: "Presente solo si el nodo manda notificaciones push (docs/notificaciones-push.md). Ausente: registrarDispositivo responde 501 y la app no pide el permiso."
+      required: [apps]
+      additionalProperties: false
+      properties:
+        apps:
+          type: array
+          minItems: 1
+          description: "Las apps que este nodo sabe avisar, cada una por las plataformas que tiene encendidas. Una app que no está acá no pide el permiso."
+          items: { type: object, required: [app, plataformas], additionalProperties: false, properties: { app: { $ref: "esquemas/dispositivo.json#/$defs/app" }, plataformas: { type: array, minItems: 1, uniqueItems: true, items: { $ref: "esquemas/dispositivo.json#/$defs/plataforma" } } } }
     CapacidadMedios:
       type: object
       description: "Presente solo junto a `endpoints.medios`: qué acepta este nodo al subir una foto (docs/medios.md)."

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/dispositivo.json",
+  "title": "Dispositivo para notificaciones push",
+  "description": "Un teléfono de la persona al que el nodo le avisa por push. Lo registra la app con la sesión de la persona (registrarDispositivo). No es público, no se federa y no sale en exportarCuenta. Diseño en docs/notificaciones-push.md.",
+  "type": "object",
+  "required": ["id", "plataforma", "app", "entorno", "registrado_en"],
+  "properties": {
+    "id": { "$ref": "comunes.json#/$defs/id" },
+    "plataforma": { "$ref": "#/$defs/plataforma" },
+    "app": { "$ref": "#/$defs/app" },
+    "entorno": { "$ref": "#/$defs/entorno" },
+    "registrado_en": { "$ref": "comunes.json#/$defs/instante", "description": "La última vez que la app lo registró." },
+    "usado_en": { "$ref": "comunes.json#/$defs/instante", "description": "El último aviso que APNs o FCM aceptaron para este dispositivo. Ausente si todavía no se usó." }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "plataforma": { "type": "string", "enum": ["apns", "fcm"], "description": "apns: iPhone, por Apple. fcm: Android, por Firebase Cloud Messaging." },
+    "app": { "type": "string", "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_-]+)+$", "maxLength": 155, "description": "El bundle id de iOS o el package de Android de la app que recibe el aviso. Qué apps sabe avisar el nodo lo dice push.apps en /.well-known/vereda.json." },
+    "entorno": { "type": "string", "enum": ["produccion", "desarrollo"], "default": "produccion", "description": "Solo cuenta en apns: 'desarrollo' para un build de Xcode, 'produccion' para TestFlight y la App Store. En fcm siempre 'produccion'." },
+    "registro": {
+      "type": "object",
+      "description": "Lo que manda la app en registrarDispositivo.",
+      "required": ["plataforma", "app", "token"],
+      "properties": {
+        "plataforma": { "$ref": "#/$defs/plataforma" },
+        "app": { "$ref": "#/$defs/app" },
+        "token": { "type": "string", "minLength": 1, "maxLength": 4096, "description": "El token que le dio el sistema a la app: el device token de APNs en hexadecimal o el registration token de FCM. No vuelve en ninguna respuesta." },
+        "entorno": { "$ref": "#/$defs/entorno" }
+      },
+      "additionalProperties": false
+    },
+    "aviso": {
+      "type": "object",
+      "description": "Lo que el nodo manda por APNs o FCM (cómo se traduce a cada uno, en docs/notificaciones-push.md). Sin datos personales: ni nombres de personas, ni direcciones, ni teléfonos, ni ítems, ni montos, ni el código de retiro, ni texto del chat.",
+      "required": ["titulo", "cuerpo", "datos"],
+      "properties": {
+        "titulo": { "type": "string", "maxLength": 80 },
+        "cuerpo": { "type": "string", "maxLength": 200, "description": "Puede nombrar al comercio, que es público. A nadie más." },
+        "datos": {
+          "type": "object",
+          "required": ["evento", "tipo", "rol", "entidad"],
+          "properties": {
+            "evento": { "$ref": "comunes.json#/$defs/id", "description": "El id del evento que lo disparó." },
+            "tipo": { "type": "string", "description": "El tipo del evento (docs/eventos.md). Una app que no lo conoce igual muestra el aviso." },
+            "rol": { "type": "string", "enum": ["comprador", "comercio", "repartidor"], "description": "Como quién lo recibe esta persona: decide qué pantalla abre al tocarlo." },
+            "entidad": { "type": "object", "required": ["tipo", "id"], "properties": { "tipo": { "type": "string", "enum": ["pedido", "viaje"] }, "id": { "$ref": "comunes.json#/$defs/id" } }, "additionalProperties": false },
+            "comercio": { "$ref": "comunes.json#/$defs/id", "description": "Solo con rol 'comercio': cuál de los comercios que administra la persona." }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
