@@ -23,11 +23,12 @@ La red es sin permiso y los agentes arman carritos con el alcance `armar`, que n
 
 ## Elegir cómo pagar
 
-El comercio publica qué medios acepta en `medios_cobro`. Si acepta más de uno, el comprador elige al confirmar con `metodo_pago` (`efectivo` o `transferencia`).
+El comercio publica qué medios acepta en `medios_cobro`. Si acepta más de uno, el comprador elige al confirmar con `metodo_pago` (`efectivo`, `transferencia` o `tarjeta`).
 
 - Sin `metodo_pago` elige el comercio: el primero que acepta para esa modalidad, con el efectivo adelante cuando está, porque es el que no necesita a nadie más.
-- Un medio que el comercio no acepta es `422` y no crea el pedido: `efectivo_no_disponible` si pidió efectivo, `medio_no_disponible` si pidió otro. Los dos traen `detalle.medios_cobro`, los que sí acepta, para que la persona elija de nuevo.
+- Un medio que el comercio no acepta es `422` y no crea el pedido: `efectivo_no_disponible` si pidió efectivo, `medio_no_disponible` si pidió otro (transferencia o tarjeta). Los dos traen `detalle.medios_cobro`, los que sí acepta, para que la persona elija de nuevo.
 - Elegir efectivo no saltea las condiciones del comercio (abajo): si no las cumple, también es `422 efectivo_no_disponible`.
+- `tarjeta` solo aparece si el comercio tiene cobrador conectado (`docs/cobro-con-psp.md`): el cobro nace `pendiente` con `link_pago`, `psp`, `psp_referencia` y `vence`.
 - `metodo_envio` es otra cosa: cómo se le paga el envío al repartidor cuando va directo a él (`docs/repartidores.md`).
 
 ## Efectivo
@@ -41,6 +42,16 @@ El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de p
 - **¿Con cuánto pagás?** Al confirmar, el comprador puede decir con qué billete paga (`paga_con_centavos`). Queda en el pago como `paga_con` y lo ven el comercio y el repartidor (también en el viaje, `por_pedido[].paga_con`), para llevar cambio. No es obligatorio; si es menor que lo que paga en mano, `422 paga_con_insuficiente`.
 - Con repartidor, el efectivo lo cobra el repartidor. `reparto` dice cuánto es del comercio y cuánto del envío; cómo se lo rinden entre ellos es asunto de ellos. La red lo muestra y no lo ejecuta, igual que con las devoluciones.
 - Una propina al nodo (`propina_nodo_centavos`) nunca va en efectivo: es una transferencia aparte a la cuenta del nodo, y si no se hace no pasa nada (`docs/sostenimiento.md`).
+
+
+## Tarjeta (cobrador / PSP)
+
+Con `metodo_pago: tarjeta` la plata va del comprador a la cuenta del comercio por el proveedor que el comercio conectó. Vereda no toca la plata ni guarda datos de tarjeta (`docs/cobro-con-psp.md`).
+
+- El cobro nace `pendiente` con `vence` (`ventana_pago_min`), `link_pago` (URL del checkout del proveedor), `psp` y `psp_referencia`.
+- La app redirige a `link_pago`. El estado real llega por el evento (`pago.confirmado`, `pago.fallido`, `pago.vencido`), no por la query de vuelta.
+- Quien confirmó queda en `pago.confirmado_por: psp` (o `comercio` / `repartidor` en los otros medios).
+- Sin `tarjeta` en `medios_cobro` del comercio: `422 medio_no_disponible`.
 
 ## Transferencia directa
 

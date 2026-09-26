@@ -832,7 +832,7 @@ class NivelB:
             self.casos.append(_omitido(cat, opid, "elegir cómo pagar al confirmar (metodo_pago)", "no se pudo armar un carrito con retiro"))
             return
 
-        desc = "un metodo_pago fuera de efectivo/transferencia responde 422 y no crea el pedido"
+        desc = "un metodo_pago fuera de efectivo/transferencia/tarjeta responde 422 y no crea el pedido"
         r = self._confirmar(cid, {"metodo_pago": "cheque"})
         if not r.ok:
             self.casos.append(_fallo(cat, opid, desc, r.motivo))
@@ -864,18 +864,57 @@ class NivelB:
         desc = "confirmar con un metodo_pago que el comercio acepta crea el pedido cobrado por ese medio"
         if not acepta:
             self.casos.append(_omitido(cat, opid, desc, f"el comercio de prueba no acepta efectivo ni transferencia ({medios})"))
-            return
-        r = self._confirmar(cid, {"metodo_pago": acepta[0]})
-        if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
-            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}"))
-            return
-        metodos = [p.get("metodo") for p in r.cuerpo.get("pagos") or [] if p.get("concepto") == "productos"]
-        if metodos and all(m == acepta[0] for m in metodos):
-            self.casos.append(_ok(cat, opid, desc))
         else:
-            self.casos.append(_fallo(cat, opid, desc, f"pidió {acepta[0]!r} y el cobro de los productos salió con {metodos}"))
-        if r.cuerpo.get("id"):
-            cliente.solicitud("POST", f"{self.base_v1}/pedidos/{r.cuerpo['id']}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+            r = self._confirmar(cid, {"metodo_pago": acepta[0]})
+            if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
+                self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}"))
+            else:
+                metodos = [p.get("metodo") for p in r.cuerpo.get("pagos") or [] if p.get("concepto") == "productos"]
+                if metodos and all(m == acepta[0] for m in metodos):
+                    self.casos.append(_ok(cat, opid, desc))
+                else:
+                    self.casos.append(_fallo(cat, opid, desc, f"pidió {acepta[0]!r} y el cobro de los productos salió con {metodos}"))
+                if r.cuerpo.get("id"):
+                    cliente.solicitud("POST", f"{self.base_v1}/pedidos/{r.cuerpo['id']}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+
+        # tarjeta solo si el nodo anuncia cobradores (docs/cobro-con-psp.md)
+        desc = "confirmar con metodo_pago tarjeta crea el pedido pendiente con link_pago cuando el nodo ofrece cobradores"
+        cobradores = None
+        try:
+            wk = cliente.solicitud("GET", f"{self.origen.rstrip('/')}/.well-known/vereda.json", timeout=self.timeout)
+            if wk.ok and wk.estado == 200 and isinstance(wk.cuerpo, dict):
+                cobradores = wk.cuerpo.get("cobradores")
+        except Exception:
+            cobradores = None
+        if not cobradores:
+            self.casos.append(_omitido(cat, opid, desc, "el nodo no publica cobradores en /.well-known/vereda.json"))
+        elif "tarjeta" not in medios:
+            self.casos.append(_omitido(cat, opid, desc, f"el comercio de prueba no tiene tarjeta en medios_cobro ({medios})"))
+        else:
+            cid2 = self._carrito_con(oferta, {"tipo": "retiro"})
+            if not cid2:
+                self.casos.append(_omitido(cat, opid, desc, "no se pudo armar un segundo carrito con retiro para tarjeta"))
+            else:
+                r = self._confirmar(cid2, {"metodo_pago": "tarjeta"})
+                if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
+                    self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}"))
+                else:
+                    pagos = [p for p in r.cuerpo.get("pagos") or [] if p.get("concepto") == "productos"]
+                    ok_tarjeta = (
+                        pagos
+                        and all(p.get("metodo") == "tarjeta" for p in pagos)
+                        and all(p.get("estado") == "pendiente" for p in pagos)
+                        and all(p.get("link_pago") for p in pagos)
+                        and all(p.get("psp") for p in pagos)
+                        and all(p.get("psp_referencia") for p in pagos)
+                        and all(p.get("vence") for p in pagos)
+                    )
+                    if ok_tarjeta:
+                        self.casos.append(_ok(cat, opid, desc))
+                    else:
+                        self.casos.append(_fallo(cat, opid, desc, f"esperaba pendiente+link_pago+psp+psp_referencia+vence, llegó {pagos}"))
+                    if r.cuerpo.get("id"):
+                        cliente.solicitud("POST", f"{self.base_v1}/pedidos/{r.cuerpo['id']}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
 
     # clips del local y del producto (docs/medios.md) -------------------------
     # Con el comercio y la oferta de prueba: el nodo guarda el clip tal cual y lo
