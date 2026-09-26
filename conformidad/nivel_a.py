@@ -24,6 +24,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from jsonschema import Draft202012Validator
 
 from . import cliente
+from . import registro as reg
 from . import openapi_info as oi
 from .oraculo import cargar as cargar_esquemas
 
@@ -146,6 +147,7 @@ class NivelA:
         self.casos = []
         self._bien_conocido()
         self._sostenimiento()
+        self._registro()
         self._calles()
         comercios = self._comercios()
         self._buscar()
@@ -195,6 +197,54 @@ class NivelA:
         caso = self._esquema_o_no_json(opid, "el cuerpo de /sostenimiento cumple esquemas/sostenimiento.json", op, r)
         if caso:
             self.casos.append(caso)
+
+    def _registro(self):
+        # docs/registro.md y docs/claves-y-firmas.md, "Registro público": se
+        # recorre desde la secuencia 1 y se rehace la cadena entera, con las
+        # firmas contra las claves que el nodo publica en su .well-known.
+        opid = "verRegistro"
+        op = self._op("/registro")
+        url = self.base_v1 + "/registro?desde=1"
+        r = self._get(url)
+        if not r.ok:
+            self.casos.append(_fallo("estructura", opid, "GET /registro", r.motivo))
+            return
+        self.casos.append(self._chequear_estructura(opid, "GET /registro", url, r))
+        caso = self._esquema_o_no_json(opid, "el cuerpo de /registro cumple registro.json#/$defs/pagina", op, r)
+        if caso:
+            self.casos.append(caso)
+        if r.estado != 200 or not r.cuerpo_es_json or not isinstance(r.cuerpo, dict) or (caso and caso.resultado == "fallo"):
+            return
+        bien = self._get(self.origen + "/.well-known/vereda.json")
+        claves = {c.get("clave_publica") for c in (bien.cuerpo.get("claves") or [])} if bien.ok and bien.cuerpo_es_json and isinstance(bien.cuerpo, dict) else set()
+        if bien.ok and bien.cuerpo_es_json and isinstance(bien.cuerpo, dict) and bien.cuerpo.get("clave_publica"):
+            claves.add(bien.cuerpo["clave_publica"])
+        desc = "la cadena del registro verifica: secuencias sin huecos, cada 'anterior' es el hash de la previa y cada firma es del nodo"
+        MAX_PAGINAS = 20
+        pagina, errores, anterior, ultima = r.cuerpo, [], reg.CEROS, 0
+        for _ in range(MAX_PAGINAS):
+            e, anterior, ultima = reg.verificar_cadena(pagina.get("entradas", []), anterior, ultima, claves_nodo=claves or None)
+            errores += e
+            if errores or "siguiente" not in pagina:
+                break
+            r = self._get(self.base_v1 + f"/registro?desde={pagina['siguiente']}")
+            if not (r.ok and r.estado == 200 and r.cuerpo_es_json and isinstance(r.cuerpo, dict)):
+                errores.append(f"la página desde {pagina['siguiente']} no respondió 200 con JSON")
+                break
+            pagina = r.cuerpo
+        else:
+            self.casos.append(_omitido("firmas", opid, desc, f"el registro tiene más de {MAX_PAGINAS} páginas; se verificaron hasta la secuencia {ultima}"))
+            return
+        if not claves:
+            errores.append("el .well-known no publica claves contra las que verificar la firma del nodo")
+        if not errores and "siguiente" not in pagina and pagina.get("cabeza") != {"secuencia": ultima, "hash": anterior}:
+            errores.append(f"'cabeza' no es la última entrada recorrida (secuencia {ultima})")
+        if errores:
+            self.casos.append(_fallo("firmas", opid, desc, "; ".join(errores[:5])))
+        elif ultima == 0:
+            self.casos.append(_omitido("firmas", opid, desc, "el registro está vacío: la cabeza es 0 y 64 ceros"))
+        else:
+            self.casos.append(_ok("firmas", opid, desc, {"entradas": ultima, "cabeza": anterior}))
 
     def _calles(self):
         # docs/mapa.md: servir calles es opcional; si el nodo no tiene, 404 con error.json.

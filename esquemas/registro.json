@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/registro.json",
+  "title": "Entrada del registro público",
+  "description": "Un hecho que cambia lo que ven otros, anotado en el registro público del nodo (GET /registro): solo se agrega, nunca se edita ni se borra, y cada entrada lleva el hash de la anterior. Sin datos personales: identidades, pedidos, denuncias y vinculaciones van por referencia opaca ('ref'). Formato de la cadena y de la firma en docs/claves-y-firmas.md, \"Registro público\"; qué se anota y por qué, en docs/registro.md.",
+  "type": "object",
+  "required": ["secuencia", "nodo", "tipo", "instante", "sujetos", "datos", "anterior", "hash", "firma"],
+  "properties": {
+    "secuencia": { "type": "integer", "minimum": 1, "description": "Posición en el registro: 1 la primera, sin huecos. La asigna el nodo al escribir, en la misma transacción que el hecho." },
+    "nodo": { "$ref": "comunes.json#/$defs/dominio", "description": "El nodo que lleva el registro. Es el firmante de 'firma'." },
+    "tipo": { "$ref": "#/$defs/tipo" },
+    "instante": { "$ref": "comunes.json#/$defs/instante", "description": "Cuándo pasó el hecho. No decrece a lo largo del registro." },
+    "sujetos": {
+      "type": "object",
+      "description": "A quién o a qué se refiere, por rol, cada uno como 'ref'. Quien ya conoce la identidad o el id calcula su 'ref' y encuentra sus entradas; quien no, no aprende nada.",
+      "propertyNames": { "enum": ["comercio", "usuario", "repartidor", "actor", "pedido", "denuncia", "denunciado", "suplantado", "vinculacion"] },
+      "additionalProperties": { "$ref": "#/$defs/ref" }
+    },
+    "autor": { "$ref": "#/$defs/ref", "description": "Quién hizo el hecho, como 'ref' de su identidad. Ausente cuando el hecho es del nodo (una vinculación que se cayó al comprobarse, un bloqueo de federación)." },
+    "hecho": { "$ref": "#/$defs/hecho" },
+    "datos": { "type": "object", "description": "Lo mínimo del hecho, según 'tipo'. Nunca montos, textos libres, alias, teléfonos ni valores de vinculaciones." },
+    "anterior": { "$ref": "#/$defs/sha256", "description": "El 'hash' de la entrada con secuencia - 1. En la primera, 64 ceros." },
+    "hash": { "$ref": "#/$defs/sha256", "description": "SHA-256, en hexadecimal minúscula, del JCS de esta entrada sin 'hash' ni 'firma'. Nadie lo escribe: se recalcula." },
+    "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Del nodo ('firmante' es su dominio), sobre los mismos bytes que 'hash'. Se verifica contra las claves de /.well-known/vereda.json." }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    { "if": { "properties": { "tipo": { "const": "comercio.cuenta_cobro_cambiada" } } }, "then": { "required": ["autor"], "properties": { "sujetos": { "required": ["comercio"] }, "datos": { "maxProperties": 0 } } } },
+    { "if": { "properties": { "tipo": { "const": "pago.revertido" } } }, "then": { "required": ["autor"], "properties": { "sujetos": { "required": ["pedido", "comercio"] }, "datos": { "required": ["metodo"], "properties": { "metodo": { "type": "string", "pattern": "^[a-z_]+$" } }, "additionalProperties": false } } } },
+    { "if": { "properties": { "tipo": { "const": "pedido.no_vino" } } }, "then": { "required": ["autor", "hecho"], "properties": { "sujetos": { "required": ["pedido", "comercio", "usuario"] }, "datos": { "required": ["motivo", "rol"], "properties": { "motivo": { "enum": ["no_retirado", "no_recibido"] }, "rol": { "enum": ["comercio", "repartidor"] } }, "additionalProperties": false } } } },
+    { "if": { "properties": { "tipo": { "const": "pedido.descargo" } } }, "then": { "required": ["autor", "hecho"], "properties": { "sujetos": { "required": ["pedido", "usuario"] }, "datos": { "maxProperties": 0 } } } },
+    { "if": { "properties": { "tipo": { "const": "denuncia.recibida" } } }, "then": { "required": ["autor", "hecho"], "properties": { "sujetos": { "required": ["denuncia", "denunciado", "suplantado"] }, "datos": { "required": ["reclama"], "properties": { "reclama": { "$ref": "comunes.json#/$defs/tipo_vinculacion" } }, "additionalProperties": false } } } },
+    { "if": { "properties": { "tipo": { "const": "denuncia.respondida" } } }, "then": { "required": ["autor", "hecho"], "properties": { "sujetos": { "required": ["denuncia", "denunciado"] }, "datos": { "maxProperties": 0 } } } },
+    { "if": { "properties": { "tipo": { "const": "vinculacion.caida" } } }, "then": { "not": { "required": ["autor"] }, "properties": { "sujetos": { "required": ["actor", "vinculacion"] }, "datos": { "required": ["vinculacion_tipo"], "properties": { "vinculacion_tipo": { "$ref": "comunes.json#/$defs/tipo_vinculacion" } }, "additionalProperties": false } } } },
+    { "if": { "properties": { "tipo": { "const": "federacion.bloqueo" } } }, "then": { "not": { "required": ["autor"] }, "properties": { "sujetos": { "maxProperties": 0 }, "datos": { "required": ["nodo_bloqueado", "criterio", "evidencia", "hasta"], "properties": { "nodo_bloqueado": { "$ref": "comunes.json#/$defs/dominio" }, "criterio": { "$ref": "#/$defs/criterio_bloqueo" }, "evidencia": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/sha256" }, "description": "El SHA-256 del JCS de cada objeto firmado por el nodo bloqueado que cumple el criterio. El nodo bloqueado los tiene y los puede comprobar; el que recibió los objetos también." }, "hasta": { "$ref": "comunes.json#/$defs/instante", "description": "Cuándo se levanta solo: 30 días después de la última evidencia." } }, "additionalProperties": false } } } },
+    { "if": { "properties": { "tipo": { "const": "federacion.desbloqueo" } } }, "then": { "not": { "required": ["autor"] }, "properties": { "sujetos": { "maxProperties": 0 }, "datos": { "required": ["nodo_bloqueado", "motivo"], "properties": { "nodo_bloqueado": { "$ref": "comunes.json#/$defs/dominio" }, "motivo": { "const": "vencido" } }, "additionalProperties": false } } } }
+  ],
+  "$defs": {
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "comercio.cuenta_cobro_cambiada",
+        "pago.revertido",
+        "pedido.no_vino",
+        "pedido.descargo",
+        "denuncia.recibida",
+        "denuncia.respondida",
+        "vinculacion.caida",
+        "federacion.bloqueo",
+        "federacion.desbloqueo"
+      ],
+      "description": "Los hechos que cambian lo que ven otros (docs/registro.md). Un nodo que todavía no produce un tipo simplemente no lo anota; no inventa otros."
+    },
+    "ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{22}$",
+      "description": "Referencia opaca: base64url sin relleno de los primeros 16 bytes de SHA-256('vereda:registro:' + valor), donde valor es la identidad (actor@nodo) o el id (UUID) tal cual. Determinista, así quien conoce el valor encuentra sus entradas, y sin sal, así cualquiera la recalcula."
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "hecho": {
+      "type": "object",
+      "description": "Cuando el hecho es un objeto que firmó una persona (la constancia de 'no vino', el descargo, la denuncia, su respuesta): su huella y la firma de su autor, sin 'firmante' (el autor ya está en 'autor', por referencia). Quien tiene el objeto (las partes, o cualquiera si el objeto es público, como una denuncia) comprueba que es el mismo y que lo firmó esa clave, sin que el registro publique su contenido.",
+      "required": ["sha256"],
+      "properties": {
+        "sha256": { "$ref": "#/$defs/sha256", "description": "SHA-256 del JCS del objeto sin los campos que no escribió su autor: los mismos bytes que cubre su firma." },
+        "firma": {
+          "type": "object",
+          "description": "La firma del autor sobre esos bytes. Ausente si lo hizo un agente con mandato sin firma: entonces el registro prueba solo que el nodo lo aceptó.",
+          "required": ["clave_publica", "valor", "instante"],
+          "properties": {
+            "clave_publica": { "type": "string" },
+            "valor": { "type": "string" },
+            "instante": { "$ref": "comunes.json#/$defs/instante" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "criterio_bloqueo": {
+      "type": "string",
+      "enum": ["firma_contradictoria", "resenas_de_pedidos_inexistentes"],
+      "description": "Los únicos motivos por los que un nodo bloquea a otro, automáticos y escritos en docs/federacion.md, \"Lista de bloqueo\"."
+    },
+    "pagina": {
+      "type": "object",
+      "description": "Respuesta de GET /registro: entradas en orden de secuencia, de la más vieja a la más nueva, y la cabeza del registro en el momento de responder.",
+      "required": ["nodo", "entradas", "cabeza"],
+      "properties": {
+        "nodo": { "$ref": "comunes.json#/$defs/dominio" },
+        "entradas": { "type": "array", "items": { "$ref": "#" } },
+        "cabeza": {
+          "type": "object",
+          "description": "La última entrada del registro: su secuencia y su hash. Con el registro vacío, secuencia 0 y 64 ceros.",
+          "required": ["secuencia", "hash"],
+          "properties": { "secuencia": { "type": "integer", "minimum": 0 }, "hash": { "$ref": "#/$defs/sha256" } },
+          "additionalProperties": false
+        },
+        "siguiente": { "type": "integer", "minimum": 1, "description": "El 'desde' de la página que sigue. Ausente cuando esta página llega a la cabeza." }
+      },
+      "additionalProperties": false
+    }
+  }
+}

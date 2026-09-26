@@ -48,6 +48,11 @@
       "inputSchema": { "type": "object", "properties": {} }
     },
     {
+      "name": "ver_registro",
+      "description": "El registro público del nodo: los hechos que cambian lo que ven otros (cambios de cuenta de cobro, pagos revertidos, 'no vino' y su descargo, denuncias y sus respuestas, vinculaciones caídas, bloqueos entre nodos), en orden, firmados por el nodo y encadenados por hash, sin datos personales: identidades y pedidos van como 'ref' opaca. Sirve para auditar que el nodo no reescribe ni esconde hechos. Ej: '¿este nodo bloqueó a otro nodo?', '¿qué registró este nodo hoy?'. Paginado con 'desde' (el 'siguiente' de la página anterior). No requiere mandato.",
+      "inputSchema": { "type": "object", "properties": { "desde": { "type": "integer", "minimum": 1 }, "limite": { "type": "integer", "minimum": 1, "maximum": 500 } } }
+    },
+    {
       "name": "carrito_crear",
       "description": "Empieza un carrito a un comercio, o desde una lista de compras (que se resuelve contra comercios). Requiere scope 'armar'.",
       "inputSchema": { "type": "object", "properties": { "comercio_id": { "type": "string" }, "lista_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "'casa', 'trabajo'; usa las direcciones guardadas del usuario" } } }

@@ -183,6 +183,9 @@ bien: es exactamente lo que quien compra tiene que saber.
 Una persona también queda vinculada a un comercio si confirmó el mismo teléfono o email que su dueño
 (punto 4). Eso solo hace que sus reseñas y atestaciones a ese comercio pesen `0`; no se publica en
 ninguna lista, porque dos personas que comparten un teléfono no tienen por qué contárselo a nadie.
+Sí se publica el motivo en la reseña o atestación que no computa (`senales.vinculo`:
+`comparte_contacto_con_el_dueno`, con `telefono` o `email`, nunca el valor): una marca sin motivo
+sería un juicio que nadie puede comprobar (`docs/resenas.md`).
 
 ### Mismo nombre cerca
 

@@ -308,6 +308,51 @@ firma_fresca = {
     },
 }
 
+# --- 9. Registro público: entradas encadenadas por hash y firmadas por el nodo (docs/claves-y-firmas.md, "Registro público") ---
+CEROS = "0" * 64
+ref = lambda valor: b64u(hashlib.sha256(("vereda:registro:" + valor).encode()).digest()[:16])
+
+def hecho(v):
+    """Huella del objeto que firmó una persona y su firma sin 'firmante': el autor ya va por referencia."""
+    f = v["objeto_firmado"][v["campo_firma"]]
+    return {"sha256": v["jcs_sha256_hex"], "firma": {"clave_publica": f["clave_publica"], "valor": f["valor"], "instante": f["instante"]}}
+
+k_reg, pub_reg = clave(ACTORES["vereda.ar"])
+PEDIDO = no_vino["pedido_id"]
+HECHOS_REGISTRO = [
+    {"tipo": "pedido.no_vino", "instante": TS,
+     "sujetos": {"pedido": ref(PEDIDO), "comercio": ref("lahuerta@vereda.ar"), "usuario": ref("juan@vereda.ar")},
+     "autor": ref("marta@vereda.ar"), "hecho": hecho(v_no_vino), "datos": {"motivo": "no_recibido", "rol": "repartidor"}},
+    {"tipo": "pedido.descargo", "instante": "2026-09-21T15:20:00-03:00",
+     "sujetos": {"pedido": ref(PEDIDO), "usuario": ref("juan@vereda.ar")},
+     "autor": ref("juan@vereda.ar"), "hecho": hecho(v_descargo), "datos": {}},
+    {"tipo": "vinculacion.caida", "instante": "2026-09-22T09:00:00-03:00",
+     "sujetos": {"actor": ref("lahuerta@vereda.ar"), "vinculacion": ref("01926b3a-2222-7000-8000-000000000001")},
+     "datos": {"vinculacion_tipo": "instagram"}},
+    {"tipo": "federacion.bloqueo", "instante": "2026-09-23T12:00:00-03:00", "sujetos": {},
+     "datos": {"nodo_bloqueado": "nodo.ejemplo.invalid", "criterio": "firma_contradictoria",
+               "evidencia": [hashlib.sha256(b"vereda:vector:evento-a").hexdigest(), hashlib.sha256(b"vereda:vector:evento-b").hexdigest()],
+               "hasta": "2026-10-23T12:00:00-03:00"}},
+]
+entradas_registro, anterior = [], CEROS
+for i, h in enumerate(HECHOS_REGISTRO, start=1):
+    cuerpo_e = {"secuencia": i, "nodo": "vereda.ar", **h, "anterior": anterior}
+    jcs_e = rfc8785.dumps(cuerpo_e)
+    anterior = hashlib.sha256(jcs_e).hexdigest()
+    entradas_registro.append({
+        "jcs_utf8_hex": jcs_e.hex(),
+        "entrada": {**cuerpo_e, "hash": anterior,
+                    "firma": {"firmante": "vereda.ar", "clave_publica": pub_reg, "valor": b64u(k_reg.sign(jcs_e)), "instante": h["instante"]}},
+    })
+registro = {
+    "descripcion": "Cuatro entradas del registro público de vereda.ar: un 'no vino' que firmó Marta, el descargo de Juan, una vinculación que se cayó y un bloqueo de federación. Cada una: 'hash' = SHA-256 del JCS de la entrada sin 'hash' ni 'firma'; 'anterior' = el 'hash' de la entrada previa (64 ceros en la primera); 'firma' del nodo sobre esos mismos bytes. 'hecho.sha256' es el jcs_sha256_hex del vector firmado del mismo nombre, y 'hecho.firma' verifica sobre sus bytes. Cada 'ref' es base64url(SHA-256('vereda:registro:' + valor)[:16]).",
+    "refs": {v: ref(v) for v in (PEDIDO, "lahuerta@vereda.ar", "juan@vereda.ar", "marta@vereda.ar", "01926b3a-2222-7000-8000-000000000001")},
+    "hechos": {"pedido.no_vino": v_no_vino["nombre"], "pedido.descargo": v_descargo["nombre"]},
+    "pagina": {"nodo": "vereda.ar", "entradas": [e["entrada"] for e in entradas_registro],
+               "cabeza": {"secuencia": len(entradas_registro), "hash": anterior}},
+    "jcs_utf8_hex": [e["jcs_utf8_hex"] for e in entradas_registro],
+}
+
 doc = {
     "$comentario": "Vectores de prueba de firma del Protocolo Vereda. Una implementación conforme reproduce byte a byte cada JCS, Content-Digest y base de firma, y verifica cada firma contra la clave publicada. Las firmas no se exigen idénticas: Ed25519 con azar (CryptoKit en iOS) da firmas distintas e igual de válidas.",
     "version_esquema": "1.0",
@@ -337,10 +382,11 @@ doc = {
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
     "firma_fresca": firma_fresca,
+    "registro": registro,
 }
 ruta = os.path.join(BASE, "ejemplos", "vectores-firma.json")
 open(ruta, "w").write(json.dumps(doc, indent=2, ensure_ascii=False) + "\n")
-print(f"escrito {ruta}: {len(doc['vectores'])} vectores firmados, {len(casos_jcs)} casos JCS, 1 request RFC 9421 y 1 firma fresca")
+print(f"escrito {ruta}: {len(doc['vectores'])} vectores firmados, {len(casos_jcs)} casos JCS, 1 request RFC 9421, 1 firma fresca y {len(entradas_registro)} entradas de registro")
 
 # --- Acceso y respaldo de la clave (docs/acceso.md) ---
 import unicodedata

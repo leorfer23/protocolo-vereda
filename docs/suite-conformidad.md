@@ -112,6 +112,13 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
    de `/actores/{id}/verificacion` tiene que estar declarada y firmada por ese mismo actor, y
    cada atestación y denuncia pública, por su autor. Las pruebas que viven afuera (DNS, una
    página, un perfil) y la firma del nodo sobre el documento no se rehacen en esta fase.
+   *El registro público* (`GET /registro`, `docs/registro.md`) se recorre desde la secuencia 1,
+   hasta 20 páginas, y se rehace la cadena entera: secuencias sin huecos, cada `hash` recalculado
+   del JCS, cada `anterior` igual al hash de la previa, `instante` que no decrece, la `cabeza` igual
+   a la última entrada, y cada firma del nodo contra las claves de su `/.well-known/vereda.json`.
+   La cuenta es la misma de `validar.py` (`conformidad/registro.py`), y
+   `conformidad/pruebas/verificar_registro_con_vectores.py` prueba que aprueba el vector y rechaza
+   una entrada reescrita. Un registro vacío queda omitido, no aprobado.
 6. *Negativos sin sesión.* Los 74 casos de `ejemplos/casos/*.json` puestos como cuerpo de
    la operación de escritura correspondiente, sin credenciales: se espera `401`, no `422`
    ni `500` — que el nodo pida autenticación antes que validar el cuerpo.

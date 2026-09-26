@@ -159,10 +159,10 @@
     "verificacion": {
       "type": "object",
       "description": "Chequeos automáticos, no una habilitación: un comercio con todo en false vende igual. Ninguno es un sello de Vereda ni de nadie.",
-      "required": ["cuit_verificado", "foto_geolocalizada", "cuenta_cobro_coincide"],
+      "required": ["cuenta_cobro_coincide"],
       "properties": {
-        "cuit_verificado": { "type": "boolean" },
-        "foto_geolocalizada": { "type": "boolean" },
+        "cuit_verificado": { "type": "boolean", "const": false, "deprecated": true, "description": "Obsoleto: ninguna prueba automática y gratuita comprueba un CUIT sin un verificador externo, y el protocolo no tiene verificadores (docs/antifraude.md, S10). Siempre false; el nodo ignora lo que venga en PATCH. Sigue en la respuesta solo para las apps 1.0, que lo esperan; se va en 2.0. Ninguna app lo muestra como sello." },
+        "foto_geolocalizada": { "type": "boolean", "const": false, "deprecated": true, "description": "Obsoleto: la ubicación de una foto la escribe quien la saca y se falsifica sin esfuerzo. Que alguien estuvo en el local lo prueban la vinculación 'local' y sus atestaciones de presencia. Siempre false; el nodo ignora lo que venga. Se va en 2.0. Ninguna app lo muestra como sello." },
         "cuenta_cobro_coincide": { "type": "boolean", "description": "La vinculación 'cuenta_cobro' está 'verificada': compradores que transfirieron dicen que el titular del alias coincide (docs/identidad-y-verificacion.md)." },
         "homonimos_cerca": { "type": "integer", "minimum": 0, "description": "Cuántos comercios no vinculados con el mismo nombre hay a 1.500 m o menos (docs/identidad-y-verificacion.md, punto 3). Lo fija el nodo y lo mantiene al día cuando un comercio cercano se da de alta, cambia de nombre o de lugar, o se vincula. Es para que un listado (buscarComercios) avise 'hay otro con el mismo nombre cerca' sin pedir la verificación de cada resultado; cuáles son, a qué distancia y con qué pruebas está en GET /actores/{identidad}/verificacion (mismo_nombre_cerca). No es una sospecha ni toca el ranking. Ausente: 0." },
         "verificado_en": { "$ref": "comunes.json#/$defs/instante" }

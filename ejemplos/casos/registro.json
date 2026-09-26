@@ -1,0 +1,482 @@
+{
+  "$comentario": "Casos para registro.json (docs/registro.md): qué entra al registro público y qué no. Las entradas válidas salen de ejemplos/vectores-firma.json → registro; las inválidas no se encadenan, solo prueban la forma.",
+  "esquema": "registro.json",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Un 'no vino' que marcó la repartidora: el pedido, el comercio y el comprador por referencia, la huella y la firma de su constancia, y el motivo.",
+      "doc": {
+        "secuencia": 1,
+        "nodo": "vereda.ar",
+        "tipo": "pedido.no_vino",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "sujetos": {
+          "pedido": "jvE4eg3x8-admMIhwem4eQ",
+          "comercio": "YdY7pyZkYwg6GPCD2bW3aA",
+          "usuario": "H4dZBn4VjDnaQ2eLwol9mA"
+        },
+        "autor": "qEoLnUI8M4zdNCA5HUJNTA",
+        "hecho": {
+          "sha256": "bceeb172605670a493d4f6a31ece2bedced493592f967dc64bac9f5ea7e927a6",
+          "firma": {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "valor": "bfz0IyqbcLN7H5sLh6Z07LhQIYSA8Dd8W7L1GKIIJSbngeqMvyWSaqnxMbnby4rEW77SdZ45y5yrka5ty81uAQ",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        },
+        "datos": {
+          "motivo": "no_recibido",
+          "rol": "repartidor"
+        },
+        "anterior": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "c415f3a5383e350d3ff0549364e1683a82698288f85c633c03fef46d72e71b6e",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "UaLNoB7KiI0SG6cNXxnau3Zliq5ao0onI1z-is1SZj_Vgz15kn5Lpa9dERCGa3xrH6b9fpi-0huXv_4yf15BDw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "El descargo del comprador, al lado.",
+      "doc": {
+        "secuencia": 2,
+        "nodo": "vereda.ar",
+        "tipo": "pedido.descargo",
+        "instante": "2026-09-21T15:20:00-03:00",
+        "sujetos": {
+          "pedido": "jvE4eg3x8-admMIhwem4eQ",
+          "usuario": "H4dZBn4VjDnaQ2eLwol9mA"
+        },
+        "autor": "H4dZBn4VjDnaQ2eLwol9mA",
+        "hecho": {
+          "sha256": "c34439000b5c67cf51ca208825ecb5b3ff0bcc4e03d8070df5f953d77c00b570",
+          "firma": {
+            "clave_publica": "CV_Ga-6OrnByqEtccMzK6dh_8Eww5DI3PE2PGBZntWY",
+            "valor": "NAPAZbUDnh9NzNfDAAYPwCtYgF7oZ-ARrd7M-7FZhBB7-tSWSl3sM9vmecACHCr1BWTXa5Yq_0YmHNymz7uwAg",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        },
+        "datos": {},
+        "anterior": "c415f3a5383e350d3ff0549364e1683a82698288f85c633c03fef46d72e71b6e",
+        "hash": "c50b4fddab2b4b41f9f5f03c941c80cd205f114cfd2657a04ccd2af53b9bda7b",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "MXfkIRNpFNrLn9rfnEpleWmyz7Ze73KplhwKNBEnG79Oovhikag1c-g02mZdix9NMRd4fmPS4mjYaDa_djfDCw",
+          "instante": "2026-09-21T15:20:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Una vinculación que se cayó al comprobarse: la anota el nodo, sin autor, y solo dice de qué tipo era, nunca el valor.",
+      "doc": {
+        "secuencia": 3,
+        "nodo": "vereda.ar",
+        "tipo": "vinculacion.caida",
+        "instante": "2026-09-22T09:00:00-03:00",
+        "sujetos": {
+          "actor": "YdY7pyZkYwg6GPCD2bW3aA",
+          "vinculacion": "qMK77H1vcBjXE6b6T5Teng"
+        },
+        "datos": {
+          "vinculacion_tipo": "instagram"
+        },
+        "anterior": "c50b4fddab2b4b41f9f5f03c941c80cd205f114cfd2657a04ccd2af53b9bda7b",
+        "hash": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "Hgj5PBZEsIVq6WGW-qx3HuOP1FMjzqiS3JrMM5dSbd11e5XE0j-CkX7RlP4ZKVmrWB8G2-4vRCK3vFLodyKmDQ",
+          "instante": "2026-09-22T09:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Un bloqueo de federación por un criterio escrito, con la evidencia por huella y el día en que se levanta solo.",
+      "doc": {
+        "secuencia": 4,
+        "nodo": "vereda.ar",
+        "tipo": "federacion.bloqueo",
+        "instante": "2026-09-23T12:00:00-03:00",
+        "sujetos": {},
+        "datos": {
+          "nodo_bloqueado": "nodo.ejemplo.invalid",
+          "criterio": "firma_contradictoria",
+          "evidencia": [
+            "5ea145c3150ff6db1652ee3a1a7d8bbbb9e260046121c594a740b9d3e128c9e5",
+            "add60a069af570e8d03955ae6ab40fe560b179ce9e0877aa35b12a48b1b7b5fc"
+          ],
+          "hasta": "2026-10-23T12:00:00-03:00"
+        },
+        "anterior": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "hash": "3c860f7418c241bb6727b8a892c3061192c814c0424fbbf58185be12bd92ba23",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "e2sKJNkpbnZcP0uAj4E4ORj1A1q34vfQ4I727ExMe2yVOpeZlgeRHMCOhlHJb6h2FHWg0JRNKyb9zLa_37qwAw",
+          "instante": "2026-09-23T12:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Un cambio de cuenta de cobro: el comercio y quién la cambió, sin el alias.",
+      "doc": {
+        "secuencia": 1,
+        "nodo": "vereda.ar",
+        "tipo": "comercio.cuenta_cobro_cambiada",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "sujetos": {
+          "comercio": "YdY7pyZkYwg6GPCD2bW3aA"
+        },
+        "autor": "qEoLnUI8M4zdNCA5HUJNTA",
+        "hecho": {
+          "sha256": "bceeb172605670a493d4f6a31ece2bedced493592f967dc64bac9f5ea7e927a6",
+          "firma": {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "valor": "bfz0IyqbcLN7H5sLh6Z07LhQIYSA8Dd8W7L1GKIIJSbngeqMvyWSaqnxMbnby4rEW77SdZ45y5yrka5ty81uAQ",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        },
+        "datos": {},
+        "anterior": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "c415f3a5383e350d3ff0549364e1683a82698288f85c633c03fef46d72e71b6e",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "UaLNoB7KiI0SG6cNXxnau3Zliq5ao0onI1z-is1SZj_Vgz15kn5Lpa9dERCGa3xrH6b9fpi-0huXv_4yf15BDw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un cambio de cuenta de cobro no publica el alias ni nada más: 'datos' va vacío.",
+      "doc": {
+        "secuencia": 1,
+        "nodo": "vereda.ar",
+        "tipo": "comercio.cuenta_cobro_cambiada",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "sujetos": {
+          "comercio": "YdY7pyZkYwg6GPCD2bW3aA"
+        },
+        "autor": "qEoLnUI8M4zdNCA5HUJNTA",
+        "hecho": {
+          "sha256": "bceeb172605670a493d4f6a31ece2bedced493592f967dc64bac9f5ea7e927a6",
+          "firma": {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "valor": "bfz0IyqbcLN7H5sLh6Z07LhQIYSA8Dd8W7L1GKIIJSbngeqMvyWSaqnxMbnby4rEW77SdZ45y5yrka5ty81uAQ",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        },
+        "datos": {
+          "alias": "lahuerta.verdu"
+        },
+        "anterior": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "c415f3a5383e350d3ff0549364e1683a82698288f85c633c03fef46d72e71b6e",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "UaLNoB7KiI0SG6cNXxnau3Zliq5ao0onI1z-is1SZj_Vgz15kn5Lpa9dERCGa3xrH6b9fpi-0huXv_4yf15BDw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El registro no lleva textos: el descargo se prueba por huella, no se copia.",
+      "doc": {
+        "secuencia": 2,
+        "nodo": "vereda.ar",
+        "tipo": "pedido.descargo",
+        "instante": "2026-09-21T15:20:00-03:00",
+        "sujetos": {
+          "pedido": "jvE4eg3x8-admMIhwem4eQ",
+          "usuario": "H4dZBn4VjDnaQ2eLwol9mA"
+        },
+        "autor": "H4dZBn4VjDnaQ2eLwol9mA",
+        "hecho": {
+          "sha256": "c34439000b5c67cf51ca208825ecb5b3ff0bcc4e03d8070df5f953d77c00b570",
+          "firma": {
+            "clave_publica": "CV_Ga-6OrnByqEtccMzK6dh_8Eww5DI3PE2PGBZntWY",
+            "valor": "NAPAZbUDnh9NzNfDAAYPwCtYgF7oZ-ARrd7M-7FZhBB7-tSWSl3sM9vmecACHCr1BWTXa5Yq_0YmHNymz7uwAg",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        },
+        "datos": {
+          "texto": "Estuve en casa"
+        },
+        "anterior": "c415f3a5383e350d3ff0549364e1683a82698288f85c633c03fef46d72e71b6e",
+        "hash": "c50b4fddab2b4b41f9f5f03c941c80cd205f114cfd2657a04ccd2af53b9bda7b",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "MXfkIRNpFNrLn9rfnEpleWmyz7Ze73KplhwKNBEnG79Oovhikag1c-g02mZdix9NMRd4fmPS4mjYaDa_djfDCw",
+          "instante": "2026-09-21T15:20:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una vinculación caída es un hecho del nodo: no tiene autor.",
+      "doc": {
+        "secuencia": 3,
+        "nodo": "vereda.ar",
+        "tipo": "vinculacion.caida",
+        "instante": "2026-09-22T09:00:00-03:00",
+        "sujetos": {
+          "actor": "YdY7pyZkYwg6GPCD2bW3aA",
+          "vinculacion": "qMK77H1vcBjXE6b6T5Teng"
+        },
+        "datos": {
+          "vinculacion_tipo": "instagram"
+        },
+        "anterior": "c50b4fddab2b4b41f9f5f03c941c80cd205f114cfd2657a04ccd2af53b9bda7b",
+        "hash": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "Hgj5PBZEsIVq6WGW-qx3HuOP1FMjzqiS3JrMM5dSbd11e5XE0j-CkX7RlP4ZKVmrWB8G2-4vRCK3vFLodyKmDQ",
+          "instante": "2026-09-22T09:00:00-03:00"
+        },
+        "autor": "qEoLnUI8M4zdNCA5HUJNTA"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "No hay bloqueo a criterio del operador: solo los criterios escritos en docs/federacion.md.",
+      "doc": {
+        "secuencia": 4,
+        "nodo": "vereda.ar",
+        "tipo": "federacion.bloqueo",
+        "instante": "2026-09-23T12:00:00-03:00",
+        "sujetos": {},
+        "datos": {
+          "nodo_bloqueado": "nodo.ejemplo.invalid",
+          "criterio": "a_criterio_del_operador",
+          "evidencia": [
+            "5ea145c3150ff6db1652ee3a1a7d8bbbb9e260046121c594a740b9d3e128c9e5",
+            "add60a069af570e8d03955ae6ab40fe560b179ce9e0877aa35b12a48b1b7b5fc"
+          ],
+          "hasta": "2026-10-23T12:00:00-03:00"
+        },
+        "anterior": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "hash": "3c860f7418c241bb6727b8a892c3061192c814c0424fbbf58185be12bd92ba23",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "e2sKJNkpbnZcP0uAj4E4ORj1A1q34vfQ4I727ExMe2yVOpeZlgeRHMCOhlHJb6h2FHWg0JRNKyb9zLa_37qwAw",
+          "instante": "2026-09-23T12:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un bloqueo sin evidencia no existe.",
+      "doc": {
+        "secuencia": 4,
+        "nodo": "vereda.ar",
+        "tipo": "federacion.bloqueo",
+        "instante": "2026-09-23T12:00:00-03:00",
+        "sujetos": {},
+        "datos": {
+          "nodo_bloqueado": "nodo.ejemplo.invalid",
+          "criterio": "firma_contradictoria",
+          "evidencia": [],
+          "hasta": "2026-10-23T12:00:00-03:00"
+        },
+        "anterior": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "hash": "3c860f7418c241bb6727b8a892c3061192c814c0424fbbf58185be12bd92ba23",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "e2sKJNkpbnZcP0uAj4E4ORj1A1q34vfQ4I727ExMe2yVOpeZlgeRHMCOhlHJb6h2FHWg0JRNKyb9zLa_37qwAw",
+          "instante": "2026-09-23T12:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un bloqueo siempre dice cuándo se levanta solo.",
+      "doc": {
+        "secuencia": 4,
+        "nodo": "vereda.ar",
+        "tipo": "federacion.bloqueo",
+        "instante": "2026-09-23T12:00:00-03:00",
+        "sujetos": {},
+        "datos": {
+          "nodo_bloqueado": "nodo.ejemplo.invalid",
+          "criterio": "firma_contradictoria",
+          "evidencia": [
+            "5ea145c3150ff6db1652ee3a1a7d8bbbb9e260046121c594a740b9d3e128c9e5",
+            "add60a069af570e8d03955ae6ab40fe560b179ce9e0877aa35b12a48b1b7b5fc"
+          ]
+        },
+        "anterior": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "hash": "3c860f7418c241bb6727b8a892c3061192c814c0424fbbf58185be12bd92ba23",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "e2sKJNkpbnZcP0uAj4E4ORj1A1q34vfQ4I727ExMe2yVOpeZlgeRHMCOhlHJb6h2FHWg0JRNKyb9zLa_37qwAw",
+          "instante": "2026-09-23T12:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Los sujetos van por referencia opaca, nunca la identidad en claro.",
+      "doc": {
+        "secuencia": 1,
+        "nodo": "vereda.ar",
+        "tipo": "pedido.no_vino",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "sujetos": {
+          "pedido": "jvE4eg3x8-admMIhwem4eQ",
+          "comercio": "YdY7pyZkYwg6GPCD2bW3aA",
+          "usuario": "juan@vereda.ar"
+        },
+        "autor": "qEoLnUI8M4zdNCA5HUJNTA",
+        "hecho": {
+          "sha256": "bceeb172605670a493d4f6a31ece2bedced493592f967dc64bac9f5ea7e927a6",
+          "firma": {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "valor": "bfz0IyqbcLN7H5sLh6Z07LhQIYSA8Dd8W7L1GKIIJSbngeqMvyWSaqnxMbnby4rEW77SdZ45y5yrka5ty81uAQ",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        },
+        "datos": {
+          "motivo": "no_recibido",
+          "rol": "repartidor"
+        },
+        "anterior": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "c415f3a5383e350d3ff0549364e1683a82698288f85c633c03fef46d72e71b6e",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "UaLNoB7KiI0SG6cNXxnau3Zliq5ao0onI1z-is1SZj_Vgz15kn5Lpa9dERCGa3xrH6b9fpi-0huXv_4yf15BDw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un 'no vino' sin la huella de la constancia firmada no se puede comprobar.",
+      "doc": {
+        "secuencia": 1,
+        "nodo": "vereda.ar",
+        "tipo": "pedido.no_vino",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "sujetos": {
+          "pedido": "jvE4eg3x8-admMIhwem4eQ",
+          "comercio": "YdY7pyZkYwg6GPCD2bW3aA",
+          "usuario": "H4dZBn4VjDnaQ2eLwol9mA"
+        },
+        "autor": "qEoLnUI8M4zdNCA5HUJNTA",
+        "datos": {
+          "motivo": "no_recibido",
+          "rol": "repartidor"
+        },
+        "anterior": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "c415f3a5383e350d3ff0549364e1683a82698288f85c633c03fef46d72e71b6e",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "UaLNoB7KiI0SG6cNXxnau3Zliq5ao0onI1z-is1SZj_Vgz15kn5Lpa9dERCGa3xrH6b9fpi-0huXv_4yf15BDw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'hash' es hexadecimal en minúscula, 64 caracteres.",
+      "doc": {
+        "secuencia": 1,
+        "nodo": "vereda.ar",
+        "tipo": "pedido.no_vino",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "sujetos": {
+          "pedido": "jvE4eg3x8-admMIhwem4eQ",
+          "comercio": "YdY7pyZkYwg6GPCD2bW3aA",
+          "usuario": "H4dZBn4VjDnaQ2eLwol9mA"
+        },
+        "autor": "qEoLnUI8M4zdNCA5HUJNTA",
+        "hecho": {
+          "sha256": "bceeb172605670a493d4f6a31ece2bedced493592f967dc64bac9f5ea7e927a6",
+          "firma": {
+            "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+            "valor": "bfz0IyqbcLN7H5sLh6Z07LhQIYSA8Dd8W7L1GKIIJSbngeqMvyWSaqnxMbnby4rEW77SdZ45y5yrka5ty81uAQ",
+            "instante": "2026-09-21T15:04:05-03:00"
+          }
+        },
+        "datos": {
+          "motivo": "no_recibido",
+          "rol": "repartidor"
+        },
+        "anterior": "0000000000000000000000000000000000000000000000000000000000000000",
+        "hash": "C415F3A5383E350D3FF0549364E1683A82698288F85C633C03FEF46D72E71B6E",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "UaLNoB7KiI0SG6cNXxnau3Zliq5ao0onI1z-is1SZj_Vgz15kn5Lpa9dERCGa3xrH6b9fpi-0huXv_4yf15BDw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un tipo que no está en la lista no se anota.",
+      "doc": {
+        "secuencia": 3,
+        "nodo": "vereda.ar",
+        "tipo": "actor.sospechoso",
+        "instante": "2026-09-22T09:00:00-03:00",
+        "sujetos": {
+          "actor": "YdY7pyZkYwg6GPCD2bW3aA",
+          "vinculacion": "qMK77H1vcBjXE6b6T5Teng"
+        },
+        "datos": {
+          "vinculacion_tipo": "instagram"
+        },
+        "anterior": "c50b4fddab2b4b41f9f5f03c941c80cd205f114cfd2657a04ccd2af53b9bda7b",
+        "hash": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "Hgj5PBZEsIVq6WGW-qx3HuOP1FMjzqiS3JrMM5dSbd11e5XE0j-CkX7RlP4ZKVmrWB8G2-4vRCK3vFLodyKmDQ",
+          "instante": "2026-09-22T09:00:00-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La entrada no lleva campos fuera del esquema.",
+      "doc": {
+        "secuencia": 3,
+        "nodo": "vereda.ar",
+        "tipo": "vinculacion.caida",
+        "instante": "2026-09-22T09:00:00-03:00",
+        "sujetos": {
+          "actor": "YdY7pyZkYwg6GPCD2bW3aA",
+          "vinculacion": "qMK77H1vcBjXE6b6T5Teng"
+        },
+        "datos": {
+          "vinculacion_tipo": "instagram"
+        },
+        "anterior": "c50b4fddab2b4b41f9f5f03c941c80cd205f114cfd2657a04ccd2af53b9bda7b",
+        "hash": "5968e4a1ec195cbd5df6ce3f6116c36083eac6484f0d9a36f579a3c211bc2756",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "B4-nd2XMdDLfCD89di5oDoJm_RnwRrOPTn9njBZjPHU",
+          "valor": "Hgj5PBZEsIVq6WGW-qx3HuOP1FMjzqiS3JrMM5dSbd11e5XE0j-CkX7RlP4ZKVmrWB8G2-4vRCK3vFLodyKmDQ",
+          "instante": "2026-09-22T09:00:00-03:00"
+        },
+        "nota": "revisado a mano"
+      }
+    }
+  ]
+}

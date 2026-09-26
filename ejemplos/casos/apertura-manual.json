@@ -181,8 +181,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -389,8 +389,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -596,8 +596,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -802,8 +802,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -1009,8 +1009,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },

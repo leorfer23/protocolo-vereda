@@ -163,6 +163,30 @@ paths:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/sostenimiento.json" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
 
+  /registro:
+    get:
+      operationId: verRegistro
+      tags: [descubrimiento]
+      summary: "Registro público del nodo: los hechos que cambian lo que ven otros, solo-agregar, firmados y encadenados por hash"
+      description: |
+        Público, sin token. Cambios de cuenta de cobro, reversiones, "no vino" y su descargo,
+        denuncias y sus respuestas, vinculaciones caídas y bloqueos de federación, cada uno en la
+        misma transacción que el hecho, sin datos personales: identidades y pedidos van por
+        referencia opaca (`esquemas/registro.json#/$defs/ref`). Cada entrada lleva el hash de la
+        anterior y la firma del nodo, así cualquiera lo copia y comprueba que nadie reescribió el
+        pasado (docs/claves-y-firmas.md, "Registro público"; qué se anota, en docs/registro.md).
+        En orden de secuencia, de la más vieja a la más nueva. `desde` fuera de rango (más allá de
+        la cabeza) devuelve `entradas` vacío con la cabeza. Nada se borra nunca, ni por retención.
+      security: []
+      parameters:
+        - { name: desde, in: query, schema: { type: integer, minimum: 1, default: 1 }, description: "Primera secuencia de la página. El 'siguiente' de la página anterior." }
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 500, default: 100 } }
+        - { $ref: "#/components/parameters/ifNoneMatch" }
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/registro.json#/$defs/pagina" } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "422": { $ref: "#/components/responses/Error" }
+
   /zona/calles:
     get:
       operationId: verCallesDeLaZona
@@ -1932,6 +1956,7 @@ paths:
         "202": { description: "Sin cuerpo. Aceptado. Un evento repetido (mismo id, mismo contenido) se acepta de nuevo sin volver a aplicarlo." }
         "400": { description: "version_no_soportada; detalle.versiones trae las que el receptor acepta. No se reintenta igual: se reenvía en una versión común o se abandona.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "401": { description: "firma_invalida, clave_desconocida o clave_comprometida. No se reintenta.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "403": { description: "nodo_bloqueado: el emisor está en la lista de bloqueo por un criterio automático (docs/federacion.md, \"Lista de bloqueo\"), a la vista en GET /registro. detalle.hasta dice cuándo se levanta solo. No se reintenta antes.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "409": { description: "secuencia_fuera_de_orden (detalle.ultima_secuencia dice desde dónde reenviar), o un id ya visto con otro contenido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "429": { $ref: "#/components/responses/Reintentar" }
         "503": { $ref: "#/components/responses/Reintentar" }

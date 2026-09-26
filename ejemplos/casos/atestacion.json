@@ -47,7 +47,159 @@
           "peso": 0,
           "motivos": [
             "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "es_el_dueno"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una marca 'dueno_o_vinculada' sin 'vinculo' no se puede recalcular: el motivo se publica siempre.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "duenio.lahuerta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
           ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Comparte teléfono con quien administra el comercio: se publica que es el teléfono, nunca el número.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "duenio.lahuerta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "comparte_contacto_con_el_dueno",
+            "por": [
+              "telefono"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Administra otro comercio que comparte CUIT con este: 'via' dice cuál, y se comprueba en su verificacion.vinculados.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "duenio.lahuerta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "dueno_de_comercio_vinculado",
+            "via": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "cuit"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Compartir contacto es por teléfono o email; un CUIT compartido es un vínculo entre comercios, con 'via'.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "duenio.lahuerta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "comparte_contacto_con_el_dueno",
+            "por": [
+              "cuit"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin la marca 'dueno_o_vinculada' no hay 'vinculo'.",
+      "doc": {
+        "id": "01926b3a-3333-7000-8000-000000000001",
+        "tipo": "presencia",
+        "autor": "duenio.lahuerta@vereda.ar",
+        "sujeto": "lahuerta@vereda.ar",
+        "vinculacion": "01926b3a-2222-7000-8000-000000000005",
+        "prueba": "q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6j7k8l9z0x1c",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "duenio.lahuerta@vereda.ar",
+          "clave_publica": "4sL3MSKEcH6MYe9X9Ye20a2oFHhSBRxhvL5nDZWt71k",
+          "valor": "bS40rAcGnUYJFgU2872rEnrNhcEtp6uK9T9as0tCZZMuAYaw8hqK48LU9cn8PEzULRfTWrYt-FbRU6gHLW13AA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        },
+        "visible": true,
+        "senales": {
+          "peso": 0.4,
+          "vinculo": {
+            "relacion": "es_el_dueno"
+          }
         }
       }
     },

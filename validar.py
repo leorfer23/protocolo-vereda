@@ -9,6 +9,7 @@ from cryptography.exceptions import InvalidSignature
 from jsonschema import Draft202012Validator
 
 from conformidad.oraculo import cargar as cargar_esquemas
+from conformidad import registro as reg
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 EJ = os.path.join(BASE, "ejemplos")
@@ -231,7 +232,33 @@ def verificar_vectores():
                 base64.b64decode(f["cabeceras"]["Signature"].split("=", 1)[1].strip(":")), base.encode())
         except (InvalidSignature, ValueError):
             malos.append("firma_fresca: la firma no verifica contra la clave activa")
-    return malos, len(V["vectores"]) + len(V["casos_jcs"]) + 2
+
+    # Registro público (docs/claves-y-firmas.md, "Registro público"): la cadena
+    # se rehace entera, cada 'hecho' corresponde a su vector y cada 'ref' a su valor.
+    R = V["registro"]
+    pagina = R["pagina"]
+    errs = list(Draft202012Validator({"$ref": "https://vereda.ar/esquemas/v1/registro.json#/$defs/pagina"}, registry=registry).iter_errors(pagina))
+    if errs:
+        malos.append(f"registro: la página no cumple registro.json#/$defs/pagina: {errs[0].message[:100]}")
+    nodo_pub = next(c["clave_publica"] for c in V["claves"] if c["actor"] == pagina["nodo"])
+    errores, cabeza, ultima = reg.verificar_cadena(pagina["entradas"], claves_nodo={nodo_pub})
+    malos += [f"registro: {e}" for e in errores]
+    if pagina["cabeza"] != {"secuencia": ultima, "hash": cabeza}:
+        malos.append("registro: 'cabeza' no es la secuencia y el hash de la última entrada")
+    if [reg.bytes_de_entrada(e).hex() for e in pagina["entradas"]] != R["jcs_utf8_hex"]:
+        malos.append("registro: el JCS de las entradas no reproduce 'jcs_utf8_hex'")
+    por_nombre = {v["nombre"]: v for v in V["vectores"]}
+    for e in pagina["entradas"]:
+        if e["tipo"] in R["hechos"]:
+            error = reg.verificar_hecho(e, por_nombre[R["hechos"][e["tipo"]]]["objeto_sin_firma"])
+            if error:
+                malos.append(f"registro: {e['tipo']}: {error}")
+    malos += [f"registro: la ref de {v} no es la publicada" for v, r in R["refs"].items() if reg.ref(v) != r]
+    # reescribir el pasado rompe la cadena: se cambia la primera entrada y se vuelve a verificar
+    alterada = [{**pagina["entradas"][0], "datos": {"motivo": "no_retirado", "rol": "repartidor"}}] + pagina["entradas"][1:]
+    if not reg.verificar_cadena(alterada, claves_nodo={nodo_pub})[0]:
+        malos.append("registro: una entrada reescrita pasa la verificación de la cadena")
+    return malos, len(V["vectores"]) + len(V["casos_jcs"]) + 3
 
 malos, total = verificar_vectores()
 fallos += len(malos)

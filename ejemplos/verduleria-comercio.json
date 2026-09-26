@@ -30,7 +30,7 @@
   "imagenes": [ { "url": "https://cdn.lahuerta.ar/frente.jpg", "alt": "El frente del local sobre Yatay" } ],
   "videos": [ { "url": "https://cdn.lahuerta.ar/portada.mp4", "tipo": "video/mp4", "poster": { "url": "https://cdn.lahuerta.ar/portada.jpg", "alt": "Cajones de fruta en la vereda" }, "duracion_s": 8, "ancho": 1080, "alto": 1920, "bytes": 2100000, "alt": "Descargan los cajones que llegan del Mercado Central" } ],
   "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
-  "verificacion": { "cuit_verificado": true, "foto_geolocalizada": true, "cuenta_cobro_coincide": true, "verificado_en": "2026-09-10T10:00:00-03:00" },
+  "verificacion": { "cuit_verificado": false, "foto_geolocalizada": false, "cuenta_cobro_coincide": true, "verificado_en": "2026-09-10T10:00:00-03:00" },
   "reputacion": { "promedio": 4.8, "cantidad": 213, "pedidos_entregados": 240, "pedidos_aceptados": 244, "pedidos_rechazados": 3, "cumplimiento": { "entregados": 240, "aceptados_propios": 241, "rechazados_con_historial": 1 }, "desde": "2026-06-01" },
   "clave_publica": "b64u_clave_publica_lahuerta"
 }

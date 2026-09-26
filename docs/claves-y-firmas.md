@@ -138,3 +138,52 @@ Un mandato nombra la clave del agente. Si el agente cambia de clave, hace falta 
 ## Mudanza
 
 El paquete de `GET /yo/exportar` lleva el historial completo con sus avales. El nodo nuevo lo publica tal cual. Si la clave la custodiaba el nodo viejo, el nodo nuevo rota al importar: el nodo viejo conoció la clave privada.
+
+## Registro público
+
+`GET /registro` (`docs/registro.md`) es una lista de entradas `esquemas/registro.json` que solo
+crece. Cada entrada se encadena con la anterior y la firma el nodo, así que cualquiera que guardó
+una copia comprueba que el nodo no reescribió ni sacó nada: cambiar una entrada vieja cambia su
+hash, y con él el `anterior` de todas las que siguen.
+
+**Formato.**
+
+1. `cuerpo` = la entrada sin `hash` ni `firma`. Incluye `secuencia`, `nodo`, `tipo`, `instante`,
+   `sujetos`, `autor`, `hecho`, `datos` y `anterior`.
+2. `hash` = SHA-256 del JCS (RFC 8785) de `cuerpo`, en hexadecimal minúscula.
+3. `anterior` = el `hash` de la entrada con `secuencia - 1`. La primera (`secuencia: 1`) lleva 64
+   ceros.
+4. `firma` = Ed25519 del nodo sobre los mismos bytes que `hash`, con `firmante` = el dominio del
+   nodo. Se verifica contra `claves` de `/.well-known/vereda.json`, como la recepción con código.
+
+`hash` no lo escribe nadie: es la huella de los bytes firmados, y quien verifica la recalcula en
+lugar de creerla. Por eso queda fuera de la firma, junto con `firma`.
+
+**Referencias.** Nada personal va en claro. Identidades, pedidos, denuncias y vinculaciones van
+como `ref` = base64url sin relleno de los primeros 16 bytes de `SHA-256("vereda:registro:" + valor)`,
+donde `valor` es la identidad (`marta@vereda.ar`) o el id tal cual. Sin sal, a propósito: quien ya
+conoce a alguien encuentra sus entradas; quien no, no aprende nada. Un id de pedido (UUIDv7) no se
+adivina; una identidad sí se puede probar una por una, y está bien: es la que el propio actor
+publica.
+
+**El hecho firmado por su autor.** Cuando el hecho es un objeto que firmó una persona (la
+constancia de "no vino", el descargo, la denuncia, su respuesta), la entrada lleva `hecho.sha256`,
+la huella de ese objeto sin los campos que no escribió su autor, y `hecho.firma`, la firma del
+autor sin `firmante` (el autor ya está en `autor`, por referencia). El registro no publica el
+contenido. Quien tiene el objeto (las partes, o cualquiera si es público, como una denuncia)
+comprueba que es el mismo y que lo firmó esa clave.
+
+**Cómo se audita.**
+
+1. Se pide `GET /registro?desde=1` y se siguen las páginas con `siguiente` hasta la cabeza.
+2. Se verifica cada entrada con los pasos 1 a 4 y que `secuencia` no tenga huecos.
+3. Se guarda la cabeza (`secuencia`, `hash`). En la próxima visita se pide desde la secuencia
+   siguiente y se comprueba que la primera entrada nueva lleve como `anterior` el `hash` guardado.
+   Si no, el nodo reescribió el pasado, y la prueba es su propia firma sobre las dos versiones.
+
+**Qué no prueba.** Que el nodo anotó todo. Un nodo puede callarse un hecho. Lo que no puede es
+anotarlo y después sacarlo o cambiarlo sin que se note. La defensa contra un nodo que calla es la
+de siempre: las partes tienen sus objetos firmados, y se pueden mudar (`docs/federacion.md`).
+
+El vector está en `ejemplos/vectores-firma.json` → `registro`: cuatro entradas encadenadas, con los
+bytes JCS de cada una. `validar.py` rehace la cadena y comprueba que cambiar una entrada la rompe.
