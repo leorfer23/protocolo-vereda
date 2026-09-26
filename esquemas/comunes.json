@@ -610,6 +610,22 @@
       },
       "additionalProperties": false
     },
+    "vinculo_no_computa": {
+      "type": "object",
+      "description": "Por qué una reseña o atestación pesa 0 como 'dueno_o_vinculada': el hecho, recalculable, nunca el valor que se comparte (docs/resenas.md, \"Dueño e identidades vinculadas\"). 'es_el_comercio': el autor es el mismo comercio. 'es_el_dueno': el autor administra el comercio. 'comercio_vinculado': el autor es un comercio vinculado ('via' es él mismo). 'dueno_de_comercio_vinculado': el autor administra 'via', un comercio vinculado. 'comparte_contacto_con_el_dueno': el autor confirmó el mismo teléfono o email que quien administra el comercio; se publica cuál de los dos, nunca el valor. Las dos relaciones con 'via' se comprueban en verificacion.vinculados del comercio (GET /actores/{identidad}/verificacion), con los mismos criterios en 'por'.",
+      "required": ["relacion"],
+      "properties": {
+        "relacion": { "type": "string", "enum": ["es_el_comercio", "es_el_dueno", "comercio_vinculado", "dueno_de_comercio_vinculado", "comparte_contacto_con_el_dueno"] },
+        "via": { "$ref": "#/$defs/identidad", "description": "El comercio vinculado por el que existe la relación. Solo en 'comercio_vinculado' y 'dueno_de_comercio_vinculado'." },
+        "por": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "enum": ["dueno", "cuit", "cuenta_cobro", "clave", "vinculacion", "telefono", "email"] }, "description": "Qué comparten. Con 'via', los criterios de verificacion.vinculados; con 'comparte_contacto_con_el_dueno', 'telefono' o 'email'." }
+      },
+      "allOf": [
+        { "if": { "properties": { "relacion": { "enum": ["comercio_vinculado", "dueno_de_comercio_vinculado"] } } }, "then": { "required": ["via", "por"], "properties": { "por": { "items": { "enum": ["dueno", "cuit", "cuenta_cobro", "clave", "vinculacion"] } } } } },
+        { "if": { "properties": { "relacion": { "const": "comparte_contacto_con_el_dueno" } } }, "then": { "required": ["por"], "not": { "required": ["via"] }, "properties": { "por": { "items": { "enum": ["telefono", "email"] } } } } },
+        { "if": { "properties": { "relacion": { "enum": ["es_el_comercio", "es_el_dueno"] } } }, "then": { "not": { "anyOf": [{ "required": ["via"] }, { "required": ["por"] }] } } }
+      ],
+      "additionalProperties": false
+    },
     "tipo_vinculacion": {
       "type": "string",
       "enum": ["dominio", "sitio", "instagram", "whatsapp", "local", "cuenta_cobro"],
@@ -682,8 +698,12 @@
           "required": ["peso"],
           "properties": {
             "peso": { "type": "number", "minimum": 0, "maximum": 1, "description": "El crédito de identidad k del autor (docs/resenas.md), o 0 si no computa: dueño o vinculada, o autor sin ningún pedido entregado." },
-            "motivos": { "type": "array", "items": { "type": "string", "enum": ["dueno_o_vinculada", "sin_pedidos_entregados"] } }
+            "motivos": { "type": "array", "items": { "type": "string", "enum": ["dueno_o_vinculada", "sin_pedidos_entregados"] } },
+            "vinculo": { "$ref": "#/$defs/vinculo_no_computa", "description": "Presente si y solo si 'motivos' trae 'dueno_o_vinculada'." }
           },
+          "if": { "required": ["motivos"], "properties": { "motivos": { "contains": { "const": "dueno_o_vinculada" } } } },
+          "then": { "required": ["vinculo"] },
+          "else": { "not": { "required": ["vinculo"] } },
           "additionalProperties": false
         }
       },

@@ -165,6 +165,21 @@ nodo ya tiene: no se recolecta ningún dato nuevo. El detalle, y qué se publica
 Estas reseñas **se publican igual**, marcadas `no_computa: dueno_o_vinculada`. Que un dueño se
 autorreseñe es información útil para quien mira.
 
+**El motivo se publica, no solo la marca.** `senales.vinculo` dice qué relación la hace pesar 0,
+para que nadie tenga que creerle al nodo:
+
+| `relacion` | Qué pasa | Cómo se recalcula |
+| --- | --- | --- |
+| `es_el_comercio` | El autor es el mismo comercio | autor = destinatario |
+| `es_el_dueno` | El autor administra el comercio | La persona lo sabe; el comercio también |
+| `comercio_vinculado` | El autor es un comercio vinculado (`via`) por `por` | `verificacion.vinculados` del destinatario |
+| `dueno_de_comercio_vinculado` | El autor administra `via`, un comercio vinculado por `por` | `verificacion.vinculados` del destinatario |
+| `comparte_contacto_con_el_dueno` | El autor confirmó el mismo teléfono o email (`por`) que quien administra el comercio | Lo comprueba la persona, que sabe qué teléfono confirmó. Nunca se publica el valor |
+
+Lo mismo en las atestaciones (`senales.vinculo`). "Comparte teléfono con quien administra el
+comercio" es un hecho que la persona reseñada por su propio dueño tiene derecho a ver, y que quien
+lee la reseña necesita para entender por qué no cuenta.
+
 ### Marcar no rompe la firma
 
 `senales` y `visible` los escribe el nodo, no el autor, así que quedan fuera del JCS que cubre la

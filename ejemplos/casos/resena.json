@@ -87,7 +87,169 @@
           "peso": 0,
           "motivos": [
             "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "es_el_comercio"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una marca 'dueno_o_vinculada' sin 'vinculo' no se puede recalcular: el motivo se publica siempre.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "lahuerta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
           ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Comparte teléfono con quien administra el comercio: se publica que es el teléfono, nunca el número.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "lahuerta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "comparte_contacto_con_el_dueno",
+            "por": [
+              "telefono"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Administra otro comercio que comparte CUIT con este: 'via' dice cuál, y se comprueba en su verificacion.vinculados.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "lahuerta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "dueno_de_comercio_vinculado",
+            "via": "lahuerta-palermo@vereda.ar",
+            "por": [
+              "cuit"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Compartir contacto es por teléfono o email; un CUIT compartido es un vínculo entre comercios, con 'via'.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "lahuerta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 0,
+          "motivos": [
+            "dueno_o_vinculada"
+          ],
+          "vinculo": {
+            "relacion": "comparte_contacto_con_el_dueno",
+            "por": [
+              "cuit"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin la marca 'dueno_o_vinculada' no hay 'vinculo'.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T19:00:00-03:00",
+        "actualizado": "2026-09-21T19:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-0000-7000-8000-000000000055",
+        "autor": "lahuerta@vereda.ar",
+        "destinatario": "lahuerta@vereda.ar",
+        "rol_autor": "usuario",
+        "puntaje": 5,
+        "firma": {
+          "firmante": "lahuerta@vereda.ar",
+          "clave_publica": "MCowBQYDK2VwAyEAGb9ECWmEzf6FQbrBZ9w7lshQhqowtrbLDFw4rXAxZuE",
+          "valor": "3Rl0uNTK0bXxPnLh1pQeVJ1hZJ9uGxKe2Q6KX3tEr5cCkKQ8nqVpR2sYdA0mJ7Xf9wLb6TcN4uPzHgAeQvBnCw",
+          "instante": "2026-09-21T19:00:00-03:00"
+        },
+        "senales": {
+          "peso": 1,
+          "vinculo": {
+            "relacion": "es_el_dueno"
+          }
         }
       }
     },

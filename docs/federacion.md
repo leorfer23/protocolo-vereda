@@ -82,7 +82,36 @@ Un nodo no cobra comisión. Se sostiene con aportes voluntarios de sus propios c
 
 ## Confianza entre nodos
 
-Un nodo acepta pedidos de cualquier nodo que publique un `.well-known` válido y firme correctamente. Puede bloquear nodos que envíen fraude (identidades falsas, reseñas de pedidos inexistentes), y esa lista de bloqueo es pública. No hay otro mecanismo de moderación entre nodos: la reputación de los actores viaja con ellos y es lo que cuenta.
+Un nodo acepta pedidos de cualquier nodo que publique un `.well-known` válido y firme correctamente. Solo puede bloquear a otro nodo por los criterios escritos y automáticos de la lista de bloqueo (abajo), y cada bloqueo queda en su registro público. No hay otro mecanismo de moderación entre nodos: la reputación de los actores viaja con ellos y es lo que cuenta.
+
+### Lista de bloqueo
+
+Un bloqueo no lo decide nadie: lo dispara una prueba que el nodo bloqueado firmó él mismo. No hay
+bloqueo a mano, ni del operador ni de un agente, y no hay desbloqueo a mano tampoco.
+
+**Criterios**, los únicos:
+
+| `criterio` | Qué pasó | Evidencia |
+| --- | --- | --- |
+| `firma_contradictoria` | El otro nodo firmó con su clave dos objetos distintos con el mismo id: dos eventos con el mismo `id`, o con la misma entidad y `secuencia`, y contenido distinto | Las huellas (SHA-256 del JCS) de los dos objetos firmados |
+| `resenas_de_pedidos_inexistentes` | El otro nodo entregó, firmadas por él, 5 o más reseñas en 30 días sobre pedidos de comercios de este nodo que este nodo no tiene. Este nodo es la fuente de verdad de los pedidos de sus comercios | Las huellas de las reseñas |
+
+Las dos son conservadoras a propósito: una firma contradictoria no puede ser un error de red, y
+el umbral de reseñas deja pasar un error suelto. Una firma inválida, una clave desconocida o un
+evento fuera de orden no bloquean: se rechaza ese objeto (401 o 409) y nada más.
+
+**Efecto.** Mientras dura, `POST /federacion/entrantes` del nodo bloqueado responde `403
+nodo_bloqueado` y no se importan sus reseñas ni sus eventos. Lo que ya se guardó antes no se borra
+ni se reescribe, y los actores de ese nodo no pierden su reputación: los hechos firmados siguen
+siendo lo que son.
+
+**Duración.** 30 días desde la última evidencia. Una evidencia nueva mientras dura lo extiende con
+otra entrada. Al vencer se levanta solo.
+
+**Publicación.** Cada bloqueo y cada desbloqueo es una entrada `federacion.bloqueo` o
+`federacion.desbloqueo` del registro público (`docs/registro.md`), con el criterio, las huellas de
+la evidencia y cuándo vence. La lista de bloqueo vigente es lo que resulta de recorrer el registro:
+no existe otra. El nodo bloqueado tiene los objetos que firmó y puede comprobar cada huella.
 
 ## Mudanza
 
@@ -117,7 +146,7 @@ La red no arbitra. Eso ya está en el README; esto dice qué significa cuando do
 - **Evidencia.** El historial firmado del pedido, y nada más. Cada transición lleva quién y cuándo. Lo que no está firmado no es evidencia.
 - **Quién responde ante quién.** Cada operador de nodo responde por los actores que hospeda, ante ellos y ante la ley que le aplique (`docs/datos-y-privacidad.md`). No responde ante los actores de otro nodo, y ningún nodo responde por otro.
 - **La red no compensa.** No hay fondo de garantía, ni reembolso, ni reversión de pagos. La plata nunca pasó por la red: fue directo del usuario al comercio y al repartidor.
-- **Lo que sí queda.** El desacuerdo se refleja en la reputación, que está firmada y es portable, y un nodo puede bloquear a otro por fraude con la lista de bloqueo pública.
+- **Lo que sí queda.** El desacuerdo se refleja en la reputación, que está firmada y es portable, y un nodo solo puede bloquear a otro por los criterios automáticos de la lista de bloqueo, a la vista en su registro público.
 
 Esto es una elección, no una omisión. Comprarle a un desconocido acá da menos garantías que en una plataforma con respaldo central, y favorece al comercio del barrio que ya conocés.
 

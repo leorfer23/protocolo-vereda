@@ -22,6 +22,7 @@
       "properties": {
         "peso": { "type": "number", "minimum": 0, "maximum": 1, "description": "El factor f de la fórmula: 1 normal, 0,2 en revisión por ráfaga, 0 dueño o identidad vinculada." },
         "motivos": { "type": "array", "items": { "type": "string", "enum": ["en_revision_por_rafaga", "dueno_o_vinculada"] } },
+        "vinculo": { "$ref": "comunes.json#/$defs/vinculo_no_computa", "description": "Presente si y solo si 'motivos' trae 'dueno_o_vinculada': qué relación hace que no compute, para que cualquiera la recalcule." },
         "rafaga": {
           "type": "object",
           "description": "Los tres números que dispararon la marca, para que cualquiera rehaga la cuenta.",
@@ -33,6 +34,9 @@
           }
         }
       },
+      "if": { "required": ["motivos"], "properties": { "motivos": { "contains": { "const": "dueno_o_vinculada" } } } },
+      "then": { "required": ["vinculo"] },
+      "else": { "not": { "required": ["vinculo"] } },
       "additionalProperties": false
     },
     "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Cubre el JCS de la reseña sin 'firma', 'respuesta', 'senales' ni 'visible': los tres últimos los escribe el reseñado o el nodo después, y si entraran, responder o marcar una reseña invalidaría la firma de quien la escribió." }

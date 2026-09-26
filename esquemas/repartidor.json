@@ -23,8 +23,8 @@
     "verificacion": {
       "type": "object",
       "description": "Chequeos automáticos y verificables, no una habilitación: un repartidor con todo en false reparte igual, y quien le entrega un pedido ve exactamente qué está verificado y qué no.",
-      "required": ["dni_prueba_de_vida", "cuenta_cobro_propia"],
-      "properties": { "dni_prueba_de_vida": { "type": "boolean" }, "cuenta_cobro_propia": { "type": "boolean" }, "verificado_en": { "$ref": "comunes.json#/$defs/instante" } }
+      "required": ["cuenta_cobro_propia"],
+      "properties": { "dni_prueba_de_vida": { "type": "boolean", "const": false, "deprecated": true, "description": "Obsoleto: una prueba de vida con DNI necesita un verificador externo (RENAPER) y el protocolo no pide documentos ni tiene verificadores (docs/antifraude.md, S10). Siempre false; el nodo ignora lo que venga. Sigue solo para las apps 1.0, que lo esperan; se va en 2.0. Ninguna app lo muestra como sello." }, "cuenta_cobro_propia": { "type": "boolean" }, "verificado_en": { "$ref": "comunes.json#/$defs/instante" } }
     },
     "vinculaciones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/vinculacion" }, "description": "Cuentas y lugares que el actor probó que son suyos (docs/identidad-y-verificacion.md). Las declara él y las comprueba cualquiera; nadie las otorga. La ficha trae las que no están vencidas; el historial completo está en GET /actores/{identidad}/verificacion." },
     "reputacion": { "$ref": "#/$defs/reputacion" },
@@ -112,7 +112,7 @@
         "caja_termica": { "type": "boolean" },
         "cooperativa": { "$ref": "#/$defs/cooperativa" },
         "cobro": { "$ref": "#/$defs/cobro" },
-        "verificacion": { "type": "object", "properties": { "dni_prueba_de_vida": { "type": "boolean" }, "cuenta_cobro_propia": { "type": "boolean" } } },
+        "verificacion": { "type": "object", "properties": { "dni_prueba_de_vida": { "type": "boolean", "const": false, "deprecated": true, "description": "Obsoleto, siempre false; se va en 2.0 (ver la ficha)." }, "cuenta_cobro_propia": { "type": "boolean" } } },
         "vinculaciones": { "type": "array", "items": { "$ref": "comunes.json#/$defs/vinculacion" } },
         "reputacion": { "$ref": "#/$defs/reputacion" },
         "clave_publica": { "type": "string" },

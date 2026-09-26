@@ -37,6 +37,7 @@ Cada ruta rompe una cosa distinta a propósito:
   la única vinculación trae una firma que no verifica (docs/identidad-y-verificacion.md).
 - /v1/actores/{identidad}/denuncias: todo bien, sin denuncias (omite las firmas).
 - /v1/actores/{identidad}/atestaciones: no existe, 404 (la ruta no está implementada).
+- /v1/registro: no existe, 404 (el registro público no está implementado).
 
 POST /v1/federacion/entrantes (para el nivel C) SÍ verifica de verdad: RFC
 9421 completo (Content-Digest, base de firma, Ed25519) contra la identidad

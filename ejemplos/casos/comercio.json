@@ -181,8 +181,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -384,8 +384,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -596,8 +596,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -805,8 +805,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -1016,8 +1016,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -1219,8 +1219,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -1430,8 +1430,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -1642,8 +1642,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -1838,8 +1838,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -2041,8 +2041,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -2240,8 +2240,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -2439,8 +2439,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -2633,8 +2633,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -2832,8 +2832,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -3031,8 +3031,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -3228,8 +3228,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -3426,8 +3426,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -3644,8 +3644,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -3853,8 +3853,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -4059,8 +4059,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -4269,8 +4269,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -4475,8 +4475,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -4681,8 +4681,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -4891,8 +4891,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -5098,8 +5098,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -5319,8 +5319,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -5568,8 +5568,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -5781,8 +5781,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -5987,8 +5987,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -6193,8 +6193,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -6400,8 +6400,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -6633,8 +6633,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -6867,8 +6867,8 @@
         "acepta_propinas": true,
         "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
         "verificacion": {
-          "cuit_verificado": true,
-          "foto_geolocalizada": true,
+          "cuit_verificado": false,
+          "foto_geolocalizada": false,
           "cuenta_cobro_coincide": true,
           "verificado_en": "2026-09-10T10:00:00-03:00"
         },
@@ -6892,6 +6892,410 @@
         "cobradores": [
           "uala_bis",
           "uala_bis"
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'cuit_verificado' es obsoleto y siempre false: nadie comprueba un CUIT sin un verificador externo (docs/antifraude.md, S10).",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuit_verificado": true,
+          "foto_geolocalizada": false,
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "clave_publica": "b64u_clave_publica_lahuerta",
+        "claves": [
+          {
+            "clave_publica": "b0qzKp3m1xYt8Jc2Vn5rWd7sLh9aFg4eUi6oTk0pQyA",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa",
+            "clave_cifrado": "Zt7Hn2vB9cXk4Lm1Qp8sRj5wDf3gYa6eUo0iTy2hNbM"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Sin los dos chequeos obsoletos: la ficha vale igual; un nodo 1.x los sigue mandando en false para las apps 1.0.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000002",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "identidad": "lahuerta@vereda.ar",
+        "nombre": "Verdulería La Huerta",
+        "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
+        "tipo": "verduleria",
+        "ubicacion": {
+          "direccion": {
+            "texto": "Yatay 850, Almagro",
+            "punto": {
+              "lat": -34.6055,
+              "lng": -58.4215
+            },
+            "localidad": "CABA",
+            "provincia": "Buenos Aires"
+          },
+          "zona_entrega": [
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.41
+            },
+            {
+              "lat": -34.62,
+              "lng": -58.43
+            },
+            {
+              "lat": -34.59,
+              "lng": -58.43
+            }
+          ]
+        },
+        "horarios": [
+          {
+            "dias": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa"
+            ],
+            "desde": "08:00",
+            "hasta": "20:00"
+          }
+        ],
+        "modalidades": [
+          {
+            "id": "franja",
+            "tipo": "franja",
+            "nombre": "Te lo llevo hoy",
+            "precio_envio": {
+              "modo": "por_tramo",
+              "tramos": [
+                {
+                  "hasta_km": 2,
+                  "monto": {
+                    "centavos": 150000,
+                    "moneda": "ARS"
+                  }
+                },
+                {
+                  "hasta_km": 5,
+                  "monto": {
+                    "centavos": 250000,
+                    "moneda": "ARS"
+                  }
+                }
+              ]
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "11:00",
+                "hasta": "13:00",
+                "cupo": 15
+              },
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "17:00",
+                "hasta": "20:00",
+                "cupo": 20
+              }
+            ]
+          },
+          {
+            "id": "consolidada-martes-jueves",
+            "tipo": "consolidada",
+            "nombre": "Envío de martes y jueves, más barato",
+            "descripcion": "Junto pedidos del barrio y salgo martes y jueves a la tarde. Pagás la mitad de envío.",
+            "precio_envio": {
+              "modo": "fijo",
+              "fijo": {
+                "centavos": 80000,
+                "moneda": "ARS"
+              }
+            },
+            "consolidada": {
+              "minimo_pedidos": 4,
+              "plazo_horas": 72,
+              "descuento_pct": 50,
+              "descuento_sobre": "envio",
+              "promesa": "Llega el próximo martes o jueves entre 15 y 19"
+            }
+          },
+          {
+            "id": "ronda-los-alamos",
+            "tipo": "ronda",
+            "nombre": "Viernes en Los Álamos",
+            "precio_envio": {
+              "modo": "dividido",
+              "quien_paga": "participantes"
+            }
+          },
+          {
+            "id": "retiro",
+            "tipo": "retiro",
+            "nombre": "Pasá a buscar",
+            "precio_envio": {
+              "modo": "gratis"
+            },
+            "franjas": [
+              {
+                "dias": [
+                  "lu",
+                  "ma",
+                  "mi",
+                  "ju",
+                  "vi",
+                  "sa"
+                ],
+                "desde": "08:00",
+                "hasta": "20:00"
+              }
+            ]
+          }
+        ],
+        "politica_cancelacion": {
+          "texto": "Podés cancelar hasta que armemos tu pedido. Si ya está armado, te lo guardo hasta el día siguiente y lo pasás a buscar.",
+          "hasta_estado": "aceptado",
+          "cobra_preparado": false,
+          "plazo_devolucion_horas": 24
+        },
+        "medios_cobro": [
+          "qr_interoperable",
+          "transferencia",
+          "efectivo"
+        ],
+        "acepta_propinas": true,
+        "notas_para_agentes": "Si piden fruta 'para hoy', mandamos la más madura. Los viernes llega la mercadería nueva a las 10.",
+        "verificacion": {
+          "cuenta_cobro_coincide": true,
+          "verificado_en": "2026-09-10T10:00:00-03:00"
+        },
+        "reputacion": {
+          "promedio": 4.8,
+          "cantidad": 213,
+          "pedidos_entregados": 240,
+          "pedidos_aceptados": 244,
+          "pedidos_rechazados": 3,
+          "desde": "2026-06-01"
+        },
+        "clave_publica": "b64u_clave_publica_lahuerta",
+        "claves": [
+          {
+            "clave_publica": "b0qzKp3m1xYt8Jc2Vn5rWd7sLh9aFg4eUi6oTk0pQyA",
+            "desde": "2026-01-10T10:00:00-03:00",
+            "estado": "activa",
+            "clave_cifrado": "Zt7Hn2vB9cXk4Lm1Qp8sRj5wDf3gYa6eUo0iTy2hNbM"
+          }
         ]
       }
     }
