@@ -200,6 +200,9 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - No vino: en el ciclo, con el pedido recién `listo`, `marcarNoVino` con `no_retirado` da `409
   plazo_no_cumplido` con `detalle.desde` (la hora prometida más 30 minutos todavía no pasó) y el
   pedido no se mueve; entregado, `dejarDescargo` da `409 sin_no_vino` (`docs/carrito-y-reserva.md`).
+- Recibido y revertido: entregado el pedido del ciclo (en efectivo), `revertirTransferencia` da
+  `409 cobro_no_confirmado`: solo se revierte una transferencia confirmada
+  (`docs/carrito-y-reserva.md`, "Recibido firmado y revertido").
 - Aceptar con tiempo: en el ciclo, `aceptarPedido` con `tiempo_preparacion_min` fuera de rango
   da `422` y no acepta; con `25` responde el pedido con `tiempo_preparacion_min: 25` y `eta` a
   25 minutos de la aceptación (±2 min: es retiro, sin ruta).

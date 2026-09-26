@@ -208,6 +208,21 @@ v_descargo = vector("descargo-yo-si-fui",
     "Juan ve que su pedido quedó 'no_recibido' y deja su versión: firma con la clave de su teléfono y manda {texto, firma} en POST /pedidos/{id}/descargo. El nodo arma este objeto con el id del pedido, la identidad de la sesión, el texto y firma.instante, lo verifica y lo guarda en pedido.no_vino.descargo, al lado de la constancia de Marta. Nadie arbitra (docs/carrito-y-reserva.md, \"No vino\").",
     descargo, "firma", "juan@vereda.ar", TS, "pedido.json#/$defs/descargo")
 
+# --- 5f. Recibido: el comercio vio la transferencia en su cuenta ---
+cobro = {
+    "accion": "cobro_recibido",
+    "pago_id": "01926b3a-7c4e-7000-8000-00000000c0b0",
+    "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+    "destinatario": "lahuerta@nodo.rosario.coop",
+    "concepto": "productos",
+    "monto": {"centavos": 1239963, "moneda": "ARS"},
+    "por": "marta@vereda.ar",
+    "instante": TS,
+}
+v_cobro = vector("cobro-recibido",
+    "Marta, dueña de La Huerta, ve en la app de su banco los $12.399,63 que pidió el cobro (monto_a_transferir, con 37 centavos únicos descontados) y confirma: firma con la clave de su teléfono y manda {concepto, firma} en POST /pedidos/{id}/transferencia/confirmar. El nodo arma este objeto con el id y los datos del pago, la identidad de la sesión y firma.instante, lo verifica y lo guarda en pago.confirmacion (y la firma en pedido.firmas.cobro). 'Me la desconocieron' es igual, con accion 'cobro_revertido' y 'motivo' (docs/carrito-y-reserva.md, \"Recibido firmado y revertido\").",
+    cobro, "firma", "marta@vereda.ar", TS, "pago.json#/$defs/constancia_cobro")
+
 # --- 6. Casos JCS sin firma: donde las implementaciones se separan ---
 CASOS = [
     ("orden-de-claves", "Las claves se ordenan por sus unidades de código UTF-16, no por alfabeto ni por orden de aparición.",
@@ -378,7 +393,7 @@ doc = {
         {"actor": "marta@vereda.ar (clave nueva del vector de rotación)", "etiqueta_semilla": "marta-clave-2",
          "semilla_sha256_de": "vereda:vector:marta-clave-2", "semilla_hex": semilla("marta-clave-2").hex(), "clave_publica": pub_nueva},
     ],
-    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_recepcion, v_rendicion, v_no_vino, v_descargo],
+    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_recepcion, v_rendicion, v_no_vino, v_descargo, v_cobro],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
     "firma_fresca": firma_fresca,

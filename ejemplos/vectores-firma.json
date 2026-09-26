@@ -468,6 +468,47 @@
           "instante": "2026-09-21T15:04:05-03:00"
         }
       }
+    },
+    {
+      "nombre": "cobro-recibido",
+      "descripcion": "Marta, dueña de La Huerta, ve en la app de su banco los $12.399,63 que pidió el cobro (monto_a_transferir, con 37 centavos únicos descontados) y confirma: firma con la clave de su teléfono y manda {concepto, firma} en POST /pedidos/{id}/transferencia/confirmar. El nodo arma este objeto con el id y los datos del pago, la identidad de la sesión y firma.instante, lo verifica y lo guarda en pago.confirmacion (y la firma en pedido.firmas.cobro). 'Me la desconocieron' es igual, con accion 'cobro_revertido' y 'motivo' (docs/carrito-y-reserva.md, \"Recibido firmado y revertido\").",
+      "esquema": "pago.json#/$defs/constancia_cobro",
+      "objeto_sin_firma": {
+        "accion": "cobro_recibido",
+        "pago_id": "01926b3a-7c4e-7000-8000-00000000c0b0",
+        "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1239963,
+          "moneda": "ARS"
+        },
+        "por": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00"
+      },
+      "jcs_utf8_hex": "7b22616363696f6e223a22636f62726f5f726563696269646f222c22636f6e636570746f223a2270726f647563746f73222c2264657374696e61746172696f223a226c61687565727461406e6f646f2e726f736172696f2e636f6f70222c22696e7374616e7465223a22323032362d30392d32315431353a30343a30352d30333a3030222c226d6f6e746f223a7b2263656e7461766f73223a313233393936332c226d6f6e656461223a22415253227d2c227061676f5f6964223a2230313932366233612d376334652d373030302d383030302d303030303030303063306230222c2270656469646f5f6964223a2230313932366233612d376334652d373030302d383030302d303030303030303061626364222c22706f72223a226d61727461407665726564612e6172227d",
+      "jcs_sha256_hex": "601208f43bd83c2ca775f2986f1913e97dff5fbc5ee02196c493df989234ffd9",
+      "jcs_bytes": 301,
+      "campo_firma": "firma",
+      "objeto_firmado": {
+        "accion": "cobro_recibido",
+        "pago_id": "01926b3a-7c4e-7000-8000-00000000c0b0",
+        "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1239963,
+          "moneda": "ARS"
+        },
+        "por": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "marta@vereda.ar",
+          "clave_publica": "7ASJOcME92GElir-dTmrpibgGve6jv5oDMc4Oczcv0I",
+          "valor": "uqNKugMDi01qolJTuN0mUZQoN2QmrX_xOBnKFanblQrE-pq9iQsrgsZofkTXKEQytF1waHUAuCEkiEdpOW1ZAw",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
     }
   ],
   "casos_jcs": [

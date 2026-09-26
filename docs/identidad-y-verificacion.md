@@ -152,7 +152,30 @@ mostró. Con compradores distintos de los últimos 90 días, pesados por su `k`:
 - `pendiente` en cualquier otro caso.
 
 Solo puede opinar quien transfirió de verdad en un pedido de ese comercio: una campaña para ensuciar
-el titular de alguien cuesta pedidos pagados. `comercio.verificacion.cuenta_cobro_coincide` es este
+el titular de alguien cuesta pedidos pagados.
+
+**La cuenta deja huella.** Los veredictos se cuentan por la cuenta, no por el comercio: su huella es
+el alias y el titular, normalizados (minúsculas, sin espacios al borde). `pago.instrucciones.comprobacion_titular`
+y `comercio.verificacion.comprobacion_titular` son los veredictos de compradores distintos sobre la
+huella de ahora, sin ventana de tiempo: "Titular: Juan Pérez · coincidió en 38 pagos con este alias".
+Cambiar el alias o el titular es una cuenta nueva y empieza de cero: "Alias nuevo: todavía nadie
+comprobó el titular". Un impostor puede copiar un nombre; no hereda el historial de otra cuenta. El
+estado de la vinculación `cuenta_cobro` (arriba, con la ventana de 90 días y el peso `k`) se calcula
+sobre la misma huella, así que tampoco sobrevive a un cambio de alias.
+
+**Cambiar la cuenta se ve.** Cada cambio de alias o titular en `privado.cuenta_cobro`:
+
+- pide firma fresca de la persona que lo hace (`docs/acceso.md`, punto 7): un token de sesión o de
+  agente solo no alcanza, y un agente nunca la puede dar;
+- fija `comercio.verificacion.cuenta_cobro_desde` (público) y `pago.instrucciones.cuenta_cobro_desde`
+  en los cobros nuevos, para que la ficha y la pantalla de transferencia digan "Cambió su cuenta de
+  cobro hace 2 días";
+- emite `comercio.cuenta_cobro_cambiada` a la dueña y a su equipo con `datos`, en todas sus sesiones
+  (`docs/eventos.md`), y va al registro público sin el alias (`docs/registro.md`).
+
+Los cobros ya creados no cambian: sus instrucciones se congelaron al crearlos. Qué más dice de la
+identidad de quien cambió la cuenta (sesiones, dispositivos, la persona detrás) es la señal de
+identidad de `docs/antifraude.md`, S8, y no se repite acá. `comercio.verificacion.cuenta_cobro_coincide` es este
 estado resumido a un booleano. Lo mismo vale para el repartidor cuando le pagan el envío por
 transferencia (`concepto: envio`).
 

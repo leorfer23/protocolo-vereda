@@ -533,7 +533,7 @@
             "centavos": 1250000,
             "moneda": "ARS"
           },
-          "referencia": "01926B3A"
+          "referencia": "9F3A7C21"
         }
       }
     },
@@ -632,7 +632,7 @@
             "centavos": 1250000,
             "moneda": "ARS"
           },
-          "referencia": "01926B3A",
+          "referencia": "9F3A7C21",
           "comprobacion_titular": {
             "coincide": 14,
             "no_coincide": 0
@@ -667,7 +667,7 @@
             "centavos": 1250000,
             "moneda": "ARS"
           },
-          "referencia": "01926B3A",
+          "referencia": "9F3A7C21",
           "comprobacion_titular": {
             "coincide": 1,
             "no_coincide": 1,
@@ -914,6 +914,597 @@
         "estado": "confirmado",
         "confirmado_en": "2026-09-21T16:00:00-03:00",
         "periodo": "2026-09"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Recibido firmado (S2): la constancia de quien vio la plata, con el monto que tenía que llegar, y la referencia que también ve el destinatario.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "comercio",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-21T15:06:00-03:00"
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Recibido por un agente con mandato: la constancia va sin firma y con mandato_id.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "comercio",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "mandato_id": "01926b3a-9999-7000-8000-0000000000e1"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Me la desconocieron (S2): revertido, con la confirmación y la reversión firmadas, una al lado de la otra.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "revertido",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "comercio",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-21T15:06:00-03:00"
+          }
+        },
+        "reversion": {
+          "accion": "cobro_revertido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-22T10:00:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-22T10:00:00-03:00"
+          },
+          "motivo": "El banco la devolvió por desconocimiento del titular."
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Revertido sin la constancia de quien lo marcó.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "revertido",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-21T15:06:00-03:00"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La reversión sin motivo.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "revertido",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-21T15:06:00-03:00"
+          }
+        },
+        "reversion": {
+          "accion": "cobro_revertido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-22T10:00:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-22T10:00:00-03:00"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El recibido no lleva motivo: eso es de la reversión.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-21T15:06:00-03:00"
+          },
+          "motivo": "x"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una reversión en un cobro que no está revertido.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-21T15:06:00-03:00"
+          }
+        },
+        "reversion": {
+          "accion": "cobro_revertido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-22T10:00:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-22T10:00:00-03:00"
+          },
+          "motivo": "El banco la devolvió por desconocimiento del titular."
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Solo una transferencia se revierte: con tarjeta, lo que vuelve es una devolución o un contracargo.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "revertido",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q",
+        "confirmacion": {
+          "accion": "cobro_recibido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-21T15:06:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-21T15:06:00-03:00"
+          }
+        },
+        "reversion": {
+          "accion": "cobro_revertido",
+          "pago_id": "01926b3a-9999-7000-8000-0000000000b1",
+          "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+          "destinatario": "lahuerta@nodo.rosario.coop",
+          "concepto": "productos",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "por": "marta@vereda.ar",
+          "instante": "2026-09-22T10:00:00-03:00",
+          "firma": {
+            "firmante": "marta@vereda.ar",
+            "clave_publica": "x9vYcW1ObqvZ3Z0Kx3cJmQn1vXo3oYk7bCq0hN8G5bA",
+            "valor": "ejemplo-no-verifica",
+            "instante": "2026-09-22T10:00:00-03:00"
+          },
+          "motivo": "El banco la devolvió por desconocimiento del titular."
+        },
+        "psp": "mercado_pago"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "La referencia tiene que entrar en el concepto de un banco: nunca el id entero.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "01926b3a-9999-7000-8000-0000000000b2"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Instrucciones con la huella de la cuenta (S3): alias nuevo (nadie comprobó el titular todavía) y desde cuándo cobra en esta cuenta.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "pendiente",
+        "vence": "2026-09-21T15:15:00-03:00",
+        "instrucciones": {
+          "alias": "lahuerta.mp",
+          "titular": "Juan Pérez",
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
+          "ajuste_centavos": -37,
+          "referencia": "Vereda 7K2Q",
+          "comprobacion_titular": {
+            "coincide": 0,
+            "no_coincide": 0
+          },
+          "cuenta_cobro_desde": "2026-09-19T10:00:00-03:00"
+        },
+        "monto_a_transferir": {
+          "centavos": 1249963,
+          "moneda": "ARS"
+        },
+        "referencia": "Vereda 7K2Q"
       }
     }
   ]

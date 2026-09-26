@@ -16,8 +16,8 @@ una propina) no entra.
 
 | `tipo` | Cuándo | `autor` | `hecho` | `datos` |
 | --- | --- | --- | --- | --- |
-| `comercio.cuenta_cobro_cambiada` | El comercio cambió `privado.cuenta_cobro` (S3) | quien la cambió | — | nada: nunca el alias |
-| `pago.revertido` | El destinatario marcó un cobro confirmado como revertido (S2) | el destinatario | la constancia, si la firmó | `metodo` |
+| `comercio.cuenta_cobro_cambiada` | El comercio cambió el alias o el titular de `privado.cuenta_cobro` (S3, `docs/identidad-y-verificacion.md`, cuenta de cobro) | quien la cambió | — | nada: nunca el alias |
+| `pago.revertido` | El destinatario marcó un cobro confirmado como revertido (S2, `revertirTransferencia`) | quien lo marcó | `pago.reversion`, si la firmó | `metodo` |
 | `pedido.no_vino` | Se cerró un pedido como `no_retirado` o `no_recibido` (`docs/carrito-y-reserva.md`, "No vino") | quien lo marcó | `no_vino.constancia` | `motivo`, `rol` |
 | `pedido.descargo` | El comprador dejó su versión ("Yo sí fui") | el comprador | `no_vino.descargo` | nada: nunca el texto |
 | `denuncia.recibida` | Se publicó una denuncia de suplantación (`docs/identidad-y-verificacion.md`, punto 5) | el denunciante | la denuncia | `reclama`: el tipo de vinculación |

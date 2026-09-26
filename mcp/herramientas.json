@@ -716,8 +716,13 @@
     },
     {
       "name": "cobro_confirmar",
-      "description": "El repartidor confirma que recibió la transferencia del envío o de la propina en su cuenta ('recibido'). Solo él puede: es el único que ve su cuenta. Preguntale a la persona si la vio antes de confirmar. Requiere scope 'repartir'.",
+      "description": "El repartidor confirma que recibió la transferencia del envío o de la propina en su cuenta ('recibido'). Solo él puede: es el único que ve su cuenta. Preguntale a la persona si la vio antes de confirmar: por mandato la constancia de 'recibido' queda sin firma. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "required": ["pedido_id", "concepto"], "properties": {"pedido_id": {"type": "string"}, "concepto": {"type": "string", "enum": ["envio", "propina_repartidor"]}}}
+    },
+    {
+      "name": "cobro_revertir",
+      "description": "El repartidor marca que una transferencia del envío o de la propina que había confirmado se fue de su cuenta ('me la desconocieron'). El cobro queda 'revertido', final y a la vista de quien pagó, al lado de la confirmación. No mueve el pedido. Preguntale a la persona qué pasó y mandalo en motivo; por mandato la constancia queda sin firma. Un cobro que no está confirmado responde 409 cobro_no_confirmado. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "concepto", "motivo"], "properties": {"pedido_id": {"type": "string"}, "concepto": {"type": "string", "enum": ["envio", "propina_repartidor"]}, "motivo": {"type": "string", "minLength": 1, "maxLength": 300}}}
     },
     {
       "name": "rendicion_declarar",

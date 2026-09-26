@@ -282,6 +282,7 @@ class NivelB:
         self.casos.append(_ok(cat, "entregarPedido", "entregar con el código correcto responde 200"))
         self._recepcion_firmada(cat, pedido_id)
         self._descargo_sin_no_vino(pedido_id)
+        self._revertir_sin_transferencia(pedido_id)
         return pedido_id
 
     # "no vino" (docs/carrito-y-reserva.md): recién listo, la hora prometida
@@ -306,6 +307,18 @@ class NivelB:
         codigo = r.cuerpo.get("codigo") if isinstance(r.cuerpo, dict) else None
         self.casos.append(_ok(cat, "dejarDescargo", desc) if r.ok and r.estado == 409 and codigo == "sin_no_vino"
                           else _fallo(cat, "dejarDescargo", desc, f"llegó {r.estado} {codigo or r.motivo}"))
+
+    # "me la desconocieron" (docs/carrito-y-reserva.md, "Recibido firmado y
+    # revertido") solo vale sobre una transferencia confirmada: el pedido del
+    # ciclo se pagó en efectivo, así que revertir responde 409
+    # cobro_no_confirmado y el cobro no se mueve.
+    def _revertir_sin_transferencia(self, pedido_id):
+        cat = "cobro"
+        desc = "revertir el cobro de un pedido sin transferencia confirmada responde 409 cobro_no_confirmado"
+        r = cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido_id}/transferencia/revertir", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+        codigo = r.cuerpo.get("codigo") if isinstance(r.cuerpo, dict) else None
+        self.casos.append(_ok(cat, "revertirTransferencia", desc) if r.ok and r.estado == 409 and codigo == "cobro_no_confirmado"
+                          else _fallo(cat, "revertirTransferencia", desc, f"llegó {r.estado} {codigo or r.motivo}"))
 
     # hechos del comprador (docs/hechos-del-comprador.md): con un pedido recién
     # entregado, GET /yo/hechos cuenta al menos uno, y el pedido le muestra al
