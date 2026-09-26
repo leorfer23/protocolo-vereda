@@ -92,7 +92,7 @@
         "pago_id": { "$ref": "comunes.json#/$defs/id" },
         "pedido_id": { "$ref": "comunes.json#/$defs/id" },
         "destinatario": { "$ref": "comunes.json#/$defs/identidad", "description": "El comercio o el repartidor que cobra." },
-        "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor"] },
+        "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor", "propina_comercio"] },
         "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que tenía que llegar: justo lo que se firma." },
         "por": { "$ref": "comunes.json#/$defs/identidad", "description": "La persona que la vio (o dejó de verla) en la cuenta: la dueña del comercio o un miembro de su equipo con permiso 'pedidos', o el repartidor. Del lado del comercio no es la identidad del comercio: así queda a nombre de quien confirmó." },
         "motivo": { "type": "string", "minLength": 1, "maxLength": 300, "description": "Solo 'cobro_revertido', y ahí obligatorio: qué pasó, en una frase ('el banco la devolvió por desconocimiento')." },

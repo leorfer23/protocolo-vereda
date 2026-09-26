@@ -1550,9 +1550,10 @@ paths:
       tags: [pedidos]
       summary: "El destinatario del pago confirma que vio la plata en su cuenta ('recibido'). Es lo único que pasa ese cobro a confirmado"
       description: |
-        Solo el destinatario del pago que dice `concepto`: el comercio para `productos` (y el
-        pedido pasa a pagado), el repartidor para `envio` y `propina_repartidor`. Cualquier otro
-        recibe 403 no_es_el_destinatario. Es el único que puede: es el único que ve su cuenta.
+        Solo el destinatario del pago que dice `concepto`: el comercio para `productos` y
+        `propina_comercio` (y con `productos` el pedido pasa a pagado), el repartidor para
+        `envio` y `propina_repartidor`. Cualquier otro recibe 403 no_es_el_destinatario. Es el
+        único que puede: es el único que ve su cuenta.
         Lo que tiene que buscar en su cuenta es `monto_a_transferir` del pago, con los centavos
         únicos ya descontados, y si no alcanza, `referencia` en el concepto.
 
@@ -1575,7 +1576,7 @@ paths:
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." }, firma: { $ref: "#/components/schemas/FirmaCobro" } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor, propina_comercio], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md); 'propina_comercio', al comercio." }, firma: { $ref: "#/components/schemas/FirmaCobro" } } } } } }
       responses:
         "403": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
@@ -1603,7 +1604,7 @@ paths:
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [motivo], properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos }, motivo: { type: string, minLength: 1, maxLength: 300, description: "Qué pasó, en una frase: queda en la constancia, a la vista de quien pagó." }, firma: { $ref: "#/components/schemas/FirmaCobro" } } } } } }
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [motivo], properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor, propina_comercio], default: productos }, motivo: { type: string, minLength: 1, maxLength: 300, description: "Qué pasó, en una frase: queda en la constancia, a la vista de quien pagó." }, firma: { $ref: "#/components/schemas/FirmaCobro" } } } } } }
       responses:
         "200": { description: "Pedido con el cobro revertido y las dos constancias en el pago", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "403": { $ref: "#/components/responses/Error" }
