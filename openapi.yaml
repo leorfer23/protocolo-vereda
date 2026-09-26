@@ -185,7 +185,7 @@ paths:
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/registro.json#/$defs/pagina" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
-        "422": { $ref: "#/components/responses/Error" }
+        "400": { description: "parametro_invalido: 'desde' menor que 1 o 'limite' fuera de 1 a 500.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /zona/calles:
     get:
