@@ -98,6 +98,35 @@ Si un destinatario no publica `clave_cifrado`, el chat de ese contexto va sin ci
 - Un pedido firmado con una clave `retirada` se acepta si su `created` es anterior a `hasta`: estaba en vuelo durante la rotación.
 - Si se compromete la clave de un nodo que custodia claves de actores, esas claves también están comprometidas. El nodo declara la suya y rota todas las que custodia.
 
+## Recepción con código
+
+Cuando quien entrega manda el código del comprador y coincide (`codigo_entrega` en envío,
+`codigo_retiro` en retiro), el nodo firma `pedido.json#/$defs/recepcion` y lo guarda en
+`pedido.firmas.recepcion` (`docs/repartidores.md`, punto m). `firmante` es el dominio del nodo y se
+verifica contra sus claves (`/.well-known/vereda.json`, `claves`). El objeto se rearma desde el
+pedido: `pedido_id`, `usuario` (el comprador), `entrego` (quien mandó el código: el `actor` del paso a `entregado` en `historial`) e `instante` =
+`firma.instante`.
+
+Es la co-firma de hecho del comprador: no firma con su clave (no hay un paso más para él), pero el
+código lo tenían solo él y el nodo, y decirlo es su acto.
+
+**Qué prueba.**
+
+- Que a ese instante, quien entregó presentó el código que el nodo le había dado solo al comprador.
+- Por lo tanto, que el comprador (o alguien a quien él le pasó el código) estuvo en la entrega o
+  la aceptó.
+- Que el nodo lo registró así y no lo puede reescribir sin que su propia firma deje de verificar.
+
+**Qué no prueba.**
+
+- Que el comprador en persona recibió el paquete: pudo dárselo a un vecino o dictarlo por teléfono.
+- El estado ni el contenido de lo entregado: eso es de la reseña y del chat.
+- Nada contra un nodo deshonesto: el nodo conoce el código, así que podría firmar una recepción que
+  no pasó. Protege entre las partes, no del nodo. La defensa contra el nodo es la de siempre:
+  mudarse (`docs/federacion.md`).
+- Su ausencia no prueba que el pedido no llegó: con la regla en `nunca`, o con `sin_codigo`, se
+  entregó sin código y lo que queda es la firma del repartidor y la foto.
+
 ## Reclamo de un comercio
 
 Cuando un reclamo de propiedad se resuelve (`docs/identidad-y-verificacion.md`, punto 6), la clave del comercio pasa a `retirada` y la nueva entra sin `avalada_por` —la anterior era del dueño anterior— y con `reclamo`, el id del reclamo firmado que la instaló. Quien verifica el historial sigue la cadena por ahí: el reclamo es público, firmado por el reclamante, y dice con qué prueba se resolvió. Las firmas de la clave retirada anteriores a `hasta` siguen valiendo.

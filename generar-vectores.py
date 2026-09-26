@@ -157,6 +157,18 @@ v_traspaso = vector("traspaso-entrega",
     "Marta, repartidora, entrega el pedido y firma con la clave de su teléfono. Manda solo 'firma' en POST /pedidos/{id}/entregar; el nodo rearma este objeto con la acción de la ruta, el id del pedido, la identidad de la sesión y firma.instante, y lo verifica. Lo guarda en pedido.firmas.entrega (docs/repartidores.md, punto j).",
     traspaso, "firma", "marta@vereda.ar", TS, "pedido.json#/$defs/traspaso")
 
+# --- 5b. Recepción: el nodo atestigua que quien entregó dio el código del comprador ---
+recepcion = {
+    "accion": "recepcion",
+    "pedido_id": "01926b3a-7c4e-7000-8000-00000000abcd",
+    "usuario": "juan@vereda.ar",
+    "entrego": "marta@vereda.ar",
+    "instante": TS,
+}
+v_recepcion = vector("recepcion-con-codigo",
+    "Marta entrega y manda el codigo_entrega que le dijo Juan; coincide. El nodo vereda.ar firma este objeto con su clave (firmante = su dominio) y lo guarda en pedido.firmas.recepcion. No lleva el código. Se rearma desde el pedido: id, usuario, quien mandó el código y firma.instante (docs/claves-y-firmas.md, \"Recepción con código\").",
+    recepcion, "firma", "vereda.ar", TS, "pedido.json#/$defs/recepcion")
+
 # --- 5c. Rendición: el repartidor declara cuánto efectivo le dio al comercio ---
 rendicion = {
     "accion": "rendida",
@@ -294,7 +306,7 @@ doc = {
         {"actor": "marta@vereda.ar (clave nueva del vector de rotación)", "etiqueta_semilla": "marta-clave-2",
          "semilla_sha256_de": "vereda:vector:marta-clave-2", "semilla_hex": semilla("marta-clave-2").hex(), "clave_publica": pub_nueva},
     ],
-    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_rendicion],
+    "vectores": [v_resena, v_resena_marcada, v_clave, v_evento, v_mudanza, v_vinculacion, v_traspaso, v_recepcion, v_rendicion],
     "casos_jcs": casos_jcs,
     "rfc9421": rfc9421,
     "firma_fresca": firma_fresca,

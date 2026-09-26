@@ -69,7 +69,7 @@ Vereda nunca maneja plata: con `metodo: transferencia` la plata va del comprador
 ## Retiro por el usuario
 
 - Con modalidad `retiro` no hay viaje ni repartidor: de `listo` el pedido pasa a `entregado`.
-- El pedido lleva un `codigo_retiro` que ve solo el usuario. Al pasar a buscar se lo dice al comercio, que lo envía en `entregar` y firma la entrega. Sin código válido no hay `entregado`, y sin `entregado` no hay reseña.
+- El pedido lleva un `codigo_retiro` que ve solo el usuario. Al pasar a buscar se lo dice al comercio, que lo envía en `entregar` y firma la entrega. Sin código válido no hay `entregado`, y sin `entregado` no hay reseña. Admite 5 intentos equivocados; agotados, el comercio entrega con foto y el pedido queda `sin_codigo` (`docs/repartidores.md`, punto m). Con código válido, el nodo firma `firmas.recepcion`.
 - Retiro con efectivo es pagar en el mostrador: el comercio envía el código y `cobrado_en_mano` en la misma llamada.
 - Si nadie pasa a buscar, el comercio cancela con `no_retirado` según su política de cancelación publicada.
 

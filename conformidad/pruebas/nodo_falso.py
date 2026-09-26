@@ -176,6 +176,7 @@ ERROR_NO_AUTENTICADO = {"codigo": "no_autenticado", "mensaje": "Falta un token v
 
 _carritos = {}          # id -> {"items": [...], "modalidad": {...} | None}
 _pedidos = {}           # id -> pedido.json-shaped dict, mutado en cada transición
+_intentos_codigo = {}  # pedido_id -> códigos equivocados (docs/repartidores.md, punto m)
 _resenas_vistas = set()  # (pedido_id, autor, destinatario) -- se llena pero, a propósito, no se usa para bloquear
 _mandatos_revocados = set()
 _gasto_mandato = {}     # token -> centavos acumulados en "el período" (la corrida entera, no hay reloj de prueba)
@@ -509,7 +510,8 @@ class Handler(BaseHTTPRequestHandler):
         if p is None:
             return 404, {"codigo": "pedido_no_encontrado", "mensaje": "no existe ese pedido.", "estado_http": 404}
         if p["modalidad"].get("tipo") == "retiro" and cuerpo.get("codigo_retiro") != p.get("codigo_retiro"):
-            return 422, {"codigo": "codigo_retiro_invalido", "mensaje": "el código de retiro no coincide.", "estado_http": 422}
+            _intentos_codigo[pedido_id] = _intentos_codigo.get(pedido_id, 0) + 1
+            return 422, {"codigo": "codigo_retiro_invalido", "mensaje": "el código de retiro no coincide.", "estado_http": 422, "detalle": {"intentos_restantes": max(0, 5 - _intentos_codigo[pedido_id])}}
         p["estado"] = "entregado"
         p["historial"].append({"estado": "entregado", "instante": _instante(), "actor": COMERCIO_B_IDENTIDAD})
         return 200, None

@@ -393,3 +393,70 @@ Los tres eventos llegan al comercio y al repartidor del pedido, con la rendició
 - Lo que corresponda se dice en la reseña, en los dos sentidos (punto e), que es la única
   reputación que hay. La red no persigue deudas.
 
+
+## m. Entregar con código
+
+Es lo mismo que el retiro por el local, que ya usa código (`docs/carrito-y-reserva.md`): el
+comprador ve "Tu código: 4821" en su pedido y se lo dice a quien le entrega, que lo escribe al tocar
+"entregué". Protege contra el "no llegó" (`docs/antifraude.md`, S6): con el código, la entrega deja
+una recepción firmada, no solo la palabra del repartidor.
+
+**El código.** Todo pedido con envío (toda modalidad menos `retiro`) lleva `codigo_entrega`, cuatro
+dígitos que genera el nodo al crear el pedido. Lo ve únicamente el comprador, y su agente con
+`leer`; la copia del comercio y la del repartidor lo omiten. Si el pedido pasa a retiro
+(`pedido.pasa_a_retiro`), lleva `codigo_retiro` en su lugar.
+
+**La regla es del comercio, y pública.** Cada modalidad con envío dice en la ficha
+`codigo_entrega`:
+
+| Regla | Cuándo hay que pedir el código |
+| --- | --- |
+| `nunca` (default) | Nunca. Si el comprador lo da igual, se puede mandar y deja la recepción firmada |
+| `solo_efectivo` | Cuando quien entrega cobra algo en mano (hay pagos `en_mano` al entregar) |
+| `siempre` | En toda entrega |
+
+La regla vigente al crear el pedido se congela en `pedido.modalidad.codigo_entrega`: cambiarla
+después no toca los pedidos en curso. Con el default nada cambia para nadie.
+
+**Qué hace el nodo en `POST /pedidos/{id}/entregar`.**
+
+| Caso | Respuesta |
+| --- | --- |
+| `codigo_entrega` coincide | Entrega y firma `firmas.recepcion` (abajo) |
+| La regla pide código, no vino, y vino `foto` | Entrega igual y deja `sin_codigo: {motivo: no_lo_dio, foto}` |
+| La regla pide código y no vino ni código ni `foto` | 422 `codigo_entrega_requerido`; el pedido no se mueve |
+| La regla es `nunca` y no vino código | Entrega como siempre, sin `sin_codigo` |
+| `codigo_entrega` no coincide | 422 `codigo_entrega_invalido` con `detalle.intentos_restantes`; el intento cuenta |
+| Ya hubo 5 intentos equivocados | Cualquier código responde 422 `codigo_agotado`; con `foto` entrega y deja `sin_codigo: {motivo: intentos_agotados, foto}` |
+
+Si el comprador no está (lo deja en portería, con un vecino), se entrega con foto, como hoy. No es
+un bloqueo ni una sanción: `sin_codigo` queda a la vista del comprador, del comercio y del
+repartidor, y cada uno saca su conclusión: es un hecho registrado, no un juicio del nodo.
+
+**Tope de intentos.** Cinco equivocados por pedido, para `codigo_entrega` y para `codigo_retiro`: con
+cuatro dígitos, sin tope, el código se adivina probando. Cada intento equivocado cuenta aunque
+responda 422 y el pedido no se mueva. El mensaje dice cuántos quedan ("El código no coincide. Te
+quedan 3 intentos"), y `detalle.intentos_restantes` lo da en número. Agotados, en retiro también se
+entrega con foto: el comercio no queda con la mercadería trabada, y el pedido queda `sin_codigo`
+con `intentos_agotados`.
+
+**La recepción firmada.** Con un código válido, sea de entrega o de retiro, el nodo firma con su
+clave `pedido.json#/$defs/recepcion`:
+
+```json
+{ "accion": "recepcion", "entrego": "marta@vereda.ar", "instante": "2026-09-21T15:04:05-03:00",
+  "pedido_id": "01926b3a-...", "usuario": "juan@vereda.ar" }
+```
+
+y la guarda en `pedido.firmas.recepcion`, con `firmante` = el dominio del nodo. `entrego` es quien
+mandó el código, el `actor` del paso a `entregado` en `historial`: el repartidor, o la persona
+del comercio en retiro o si lleva él. No lleva el código. Se
+verifica contra las claves del nodo en `/.well-known/vereda.json`. Qué prueba y qué no, en
+`docs/claves-y-firmas.md`, "Recepción con código".
+
+La firma de la entrega (punto j) no cambia: el repartidor sigue firmando su traspaso, con o sin
+código. Son dos hechos distintos: "entregué" lo dice el repartidor; "le dieron el código del
+comprador" lo atestigua el nodo.
+
+**Por MCP.** El agente del comprador lee su código con `estado_pedido`; el del repartidor lo manda
+en `viaje_entregar` (y el del comercio que lleva él, en `pedido_entregar`), con `codigo_entrega`.

@@ -1,0 +1,56 @@
+{
+  "$comentario": "Lo que firma el nodo cuando quien entrega presenta el código del comprador (docs/claves-y-firmas.md, \"Recepción con código\"). Se rearma desde el pedido y la firma.",
+  "esquema": "pedido.json#/$defs/recepcion",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Recepción con código: pedido, comprador, quien entregó e instante. Es lo único que entra en el JCS.",
+      "doc": {
+        "accion": "recepcion",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "usuario": "juan@vereda.ar",
+        "entrego": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Con su firma, del nodo: 'firmante' es el dominio y 'firma' queda fuera del JCS.",
+      "doc": {
+        "accion": "recepcion",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "usuario": "juan@vereda.ar",
+        "entrego": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "firma": {
+          "firmante": "vereda.ar",
+          "clave_publica": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo",
+          "valor": "AAAA",
+          "instante": "2026-09-21T15:04:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El código no va en lo firmado: es del comprador, y la recepción queda a la vista de las otras partes.",
+      "doc": {
+        "accion": "recepcion",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "usuario": "juan@vereda.ar",
+        "entrego": "marta@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00",
+        "codigo_entrega": "4821"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin quién entregó no se sabe quién presentó el código.",
+      "doc": {
+        "accion": "recepcion",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000d1",
+        "usuario": "juan@vereda.ar",
+        "instante": "2026-09-21T15:04:05-03:00"
+      }
+    }
+  ]
+}
