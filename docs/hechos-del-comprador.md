@@ -60,4 +60,6 @@ decidió o dejó de hacer otro, o que el comprador soltó antes de que alguien m
 - No bloquea, no esconde ni ordena nada por estos hechos. No hay umbral del nodo ni del protocolo.
 - Lo que el comercio quiera exigir lo pone él, público en su ficha (`efectivo.pedidos_entregados_minimo`,
   `transferencia.pedidos_entregados_minimo`, requisitos de primera compra en `docs/topes.md`).
-- No viaja entre nodos: cuenta solo lo que pasó en este nodo.
+- No viaja entre nodos: cuenta solo lo que pasó en este nodo, y solo de sus propios compradores. Un
+  pedido de alguien de otro nodo llega sin `hechos`: este nodo no sabe su alta ni lo que pidió allá, y
+  no inventa un "0 entregados" que el comercio leería como cuenta nueva.
