@@ -73,6 +73,158 @@
     },
     {
       "espera": "valido",
+      "porque": "Tarjeta con Ualá Bis confirmada: el nodo re-consultó la orden y la vio APPROVED (docs/cobro-con-psp.md).",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:06:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "confirmado",
+        "psp": "uala_bis",
+        "psp_referencia": "6f1c2a4e-3b0d-4c1e-9a7f-2d5e8b1c0a93",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "psp"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Cobro con tarjeta con una devolución parcial ya confirmada: 'reembolsado' suma lo devuelto.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-22T10:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "confirmado",
+        "psp": "uala_bis",
+        "psp_referencia": "6f1c2a4e-3b0d-4c1e-9a7f-2d5e8b1c0a93",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "psp",
+        "reembolsado": {
+          "centavos": 250000,
+          "moneda": "ARS"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Devolución parcial pedida con reembolsarPago: la paga el comercio al comprador, dice qué cobro devuelve y queda pendiente hasta que el proveedor la confirme.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c2",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-22T10:00:00-03:00",
+        "actualizado": "2026-09-22T10:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "ana@vereda.ar",
+        "pagador": "lahuerta@nodo.rosario.coop",
+        "concepto": "devolucion",
+        "monto": {
+          "centavos": 250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "pendiente",
+        "psp": "uala_bis",
+        "reembolsa": "01926b3a-9999-7000-8000-0000000000c1",
+        "motivo": "Faltó la docena de huevos.",
+        "vence": "2026-09-29T10:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Devolución confirmada por el proveedor (REFUNDED en Ualá Bis).",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c2",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-22T10:00:00-03:00",
+        "actualizado": "2026-09-22T10:02:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "ana@vereda.ar",
+        "pagador": "lahuerta@nodo.rosario.coop",
+        "concepto": "devolucion",
+        "monto": {
+          "centavos": 250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "confirmado",
+        "psp": "uala_bis",
+        "reembolsa": "01926b3a-9999-7000-8000-0000000000c1",
+        "motivo": "Faltó la docena de huevos.",
+        "confirmado_en": "2026-09-22T10:02:00-03:00",
+        "confirmado_por": "psp"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una devolución por el proveedor sin 'reembolsa' no dice qué cobro devuelve.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c2",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-22T10:00:00-03:00",
+        "actualizado": "2026-09-22T10:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "ana@vereda.ar",
+        "pagador": "lahuerta@nodo.rosario.coop",
+        "concepto": "devolucion",
+        "monto": {
+          "centavos": 250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "pendiente",
+        "psp": "uala_bis",
+        "motivo": "Faltó la docena de huevos.",
+        "vence": "2026-09-29T10:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'reembolsa' es solo de una devolución, no de un cobro de productos.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000c1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:06:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "confirmado",
+        "psp": "uala_bis",
+        "psp_referencia": "6f1c2a4e-3b0d-4c1e-9a7f-2d5e8b1c0a93",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "psp",
+        "reembolsa": "01926b3a-9999-7000-8000-0000000000c0"
+      }
+    },
+    {
+      "espera": "valido",
       "porque": "Transferencia confirmada por el comercio: confirmado_por comercio.",
       "doc": {
         "id": "01926b3a-9999-7000-8000-0000000000b1",

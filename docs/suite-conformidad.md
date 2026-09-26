@@ -138,6 +138,28 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   ese medio. `tarjeta` se prueba solo si el nodo publica `cobradores` en
   `/.well-known/vereda.json` y el comercio de prueba tiene `tarjeta` en `medios_cobro`
   (`docs/cobro-con-psp.md`); si no, se omite.
+- Tarjeta de punta a punta, contra los proveedores de prueba (`docs/cobro-con-psp.md`, "Los
+  proveedores de prueba"): solo si el nodo anuncia `prueba` en `cobradores` y la sesión de prueba
+  administra el comercio de prueba; si no, se omite. Conecta con firma fresca si la sesión salió
+  de `/acceso` con clave propia; si el nodo la exige y no hay clave, se omite. No toca los
+  proveedores que el comercio ya tenía: al final desconecta solo los que agregó. `cobradores`
+  cumple `CapacidadCobradores`. Conectar con una clave mala da `422 credenciales_invalidas`; con
+  `volver_a` en vez de credenciales, `422 conexion_no_corresponde`; con la clave de prueba, `200`
+  con el cobrador `conectado`, y ni esa respuesta ni `verCobrador` traen la clave. La ficha lo
+  lista en `cobradores` y suma `tarjeta`. Un pedido con tarjeta y `psp: prueba` nace `pendiente`
+  con ese `psp` y `link_pago`; `procesado` en el proveedor lo deja `pendiente`; `aprobado` lo
+  confirma en menos de 15 s con `confirmado_por: psp`. Devolver una parte crea una `devolucion`
+  que `reembolsa` el cobro y el proveedor la confirma (`reembolsado`); devolver más de lo que
+  queda da `422 monto_excede_lo_cobrado`; devolver sin monto devuelve el resto. `rechazado` deja
+  el cobro `fallido` y el pedido `cancelado` con `pago_fallido`; `vencido`, `vencido` con
+  `pago_vencido`.
+- Dos proveedores a la vez, si el nodo también anuncia `prueba_redireccion`: conectarlo devuelve
+  una `url` y autorizarla lo deja `conectado` sin tocar a `prueba`; `listarCobradores` y la ficha
+  pública traen los dos. Con los dos activos, tarjeta sin `psp` da `422 psp_requerido` y con un
+  `psp` que el comercio no tiene, `422 psp_no_activo`, los dos con `detalle.cobradores`; elegir
+  `prueba_redireccion` saca el cobro con ese `psp` y se confirma con él. Desconectarlo deja a
+  `prueba` activo y a `tarjeta` en `medios_cobro`, y pagar con el desconectado da `422
+  psp_no_activo`.
 - Seguimiento en camino: la identidad de prueba se declara repartidora, pide con envío,
   toma el viaje, retira y reporta un punto. `GET /pedidos/{id}` en `en_camino` trae ese
   punto en `ubicacion_repartidor`, y ya entregado no lo trae. Si el nodo no deja armar

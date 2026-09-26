@@ -28,7 +28,7 @@ El comercio publica qué medios acepta en `medios_cobro`. Si acepta más de uno,
 - Sin `metodo_pago` elige el comercio: el primero que acepta para esa modalidad, con el efectivo adelante cuando está, porque es el que no necesita a nadie más.
 - Un medio que el comercio no acepta es `422` y no crea el pedido: `efectivo_no_disponible` si pidió efectivo, `medio_no_disponible` si pidió otro (transferencia o tarjeta). Los dos traen `detalle.medios_cobro`, los que sí acepta, para que la persona elija de nuevo.
 - Elegir efectivo no saltea las condiciones del comercio (abajo): si no las cumple, también es `422 efectivo_no_disponible`.
-- `tarjeta` solo aparece si el comercio tiene cobrador conectado (`docs/cobro-con-psp.md`): el cobro nace `pendiente` con `link_pago`, `psp`, `psp_referencia` y `vence`.
+- `tarjeta` solo aparece si el comercio tiene al menos un proveedor de pagos activo (`docs/cobro-con-psp.md`): la ficha los lista en `cobradores` y el comprador elige con cuál paga en `psp`. El cobro nace `pendiente` con `link_pago`, `psp`, `psp_referencia` y `vence`.
 - `metodo_envio` es otra cosa: cómo se le paga el envío al repartidor cuando va directo a él (`docs/repartidores.md`).
 
 ## Efectivo
@@ -46,12 +46,15 @@ El efectivo no pasa por ningún PSP: se cobra en mano. Es un medio de cobro de p
 
 ## Tarjeta (cobrador / PSP)
 
-Con `metodo_pago: tarjeta` la plata va del comprador a la cuenta del comercio por el proveedor que el comercio conectó. Vereda no toca la plata ni guarda datos de tarjeta (`docs/cobro-con-psp.md`).
+Con `metodo_pago: tarjeta` la plata va del comprador a la cuenta del comercio por el proveedor que eligió el comprador, entre los que el comercio tiene activos (`cobradores` en su ficha). Vereda no toca la plata ni guarda datos de tarjeta (`docs/cobro-con-psp.md`).
 
 - El cobro nace `pendiente` con `vence` (`ventana_pago_min`), `link_pago` (URL del checkout del proveedor), `psp` y `psp_referencia`.
-- La app redirige a `link_pago`. El estado real llega por el evento (`pago.confirmado`, `pago.fallido`, `pago.vencido`), no por la query de vuelta.
+- La app redirige a `link_pago`. El estado real llega por el evento (`pago.confirmado`, `pago.fallido`, `pago.vencido`), no por la query de vuelta. El nodo confirma solo después de re-consultar al proveedor.
 - Quien confirmó queda en `pago.confirmado_por: psp` (o `comercio` / `repartidor` en los otros medios).
-- Sin `tarjeta` en `medios_cobro` del comercio: `422 medio_no_disponible`.
+- Con `psp` el comprador elige el proveedor. Si el comercio tiene uno solo, puede omitirse; con varios y sin `psp`, `422 psp_requerido`; con uno que el comercio no tiene activo, `422 psp_no_activo`. Los dos traen `detalle.cobradores`.
+- Sin `tarjeta` en `medios_cobro` del comercio: `422 medio_no_disponible`. Un total fuera de lo que acepta el proveedor (Ualá Bis: desde $25): `422 monto_menor_al_minimo` o `monto_mayor_al_maximo`.
+- Rechazado por el proveedor (`fallido`) o vencido: el pedido se cancela con `pago_fallido` o `pago_vencido` y libera lo reservado, como cualquier pendiente (punto 6 de arriba).
+- Devolver lo cobrado con tarjeta, total o parcial, es `reembolsarPago` (`docs/cobro-con-psp.md`, devoluciones). Con efectivo o transferencia la devolución sigue siendo del comercio por su cuenta.
 
 ## Transferencia directa
 

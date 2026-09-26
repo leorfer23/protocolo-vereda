@@ -116,6 +116,7 @@ class NivelB:
         self._mis_comercios()
         self._viaje_ajeno()
         self._metodo_pago()
+        self._cobro_con_prueba()
         self._ubicacion_en_camino()
         self._eventos_de_quien_administra(capacidades)
         self._nombres(capacidades)
@@ -1014,7 +1015,8 @@ class NivelB:
             if not cid2:
                 self.casos.append(_omitido(cat, opid, desc, "no se pudo armar un segundo carrito con retiro para tarjeta"))
             else:
-                r = self._confirmar(cid2, {"metodo_pago": "tarjeta"})
+                cuerpo = {"metodo_pago": "tarjeta", **({"psp": comercio["cobradores"][0]} if comercio.get("cobradores") else {})}
+                r = self._confirmar(cid2, cuerpo)
                 if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
                     self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}"))
                 else:
@@ -1034,6 +1036,340 @@ class NivelB:
                         self.casos.append(_fallo(cat, opid, desc, f"esperaba pendiente+link_pago+psp+psp_referencia+vence, llegó {pagos}"))
                     if r.cuerpo.get("id"):
                         cliente.solicitud("POST", f"{self.base_v1}/pedidos/{r.cuerpo['id']}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+
+    # cobro con tarjeta de punta a punta contra los proveedores de prueba --------
+    # (docs/cobro-con-psp.md, "Los proveedores de prueba"). Solo si el nodo anuncia
+    # 'prueba' en cobradores y la sesión administra el comercio de prueba. Un
+    # comercio tiene varios proveedores a la vez: conectar los de prueba no toca
+    # los que ya tenía, y al final se desconectan solo los que se agregaron acá.
+    def _cobro_con_prueba(self):
+        cat = "cobro_psp"
+        oferta = "01920000-0000-7000-8000-0000000000b1"
+        r = cliente.solicitud("GET", f"{self.origen.rstrip('/')}/.well-known/vereda.json", timeout=self.timeout)
+        nodo = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else {}
+        cobradores = nodo.get("cobradores")
+        if not cobradores:
+            self.casos.append(_omitido(cat, "conectarCobrador", "cobro con tarjeta de punta a punta (docs/cobro-con-psp.md)", "el nodo no publica cobradores en /.well-known/vereda.json"))
+            return
+        desc = "cobradores en /.well-known/vereda.json dice cómo se conecta cada proveedor (CapacidadCobradores)"
+        errores = self._validar(oi.resolver_esquema(self.api, {"$ref": "#/components/schemas/CapacidadCobradores"}), cobradores)
+        self.casos.append(_fallo(cat, "verNodo", desc, self._formatear_errores(errores)) if errores else _ok(cat, "verNodo", desc))
+        anunciados = {c.get("psp") for c in cobradores if isinstance(c, dict)}
+        if "prueba" not in anunciados:
+            self.casos.append(_omitido(cat, "conectarCobrador", "cobro con tarjeta de punta a punta contra el proveedor de prueba", "el nodo no anuncia el proveedor 'prueba' (un nodo de producción nunca lo anuncia)"))
+            return
+        fresca = (nodo.get("acceso") or {}).get("firma_fresca") if isinstance(nodo.get("acceso"), dict) else None
+        if isinstance(fresca, dict) and fresca.get("exigida") is True and not self.clave:
+            self.casos.append(_omitido(cat, "conectarCobrador", "cobro con tarjeta de punta a punta", "el nodo exige firma fresca para conectar y la sesión no salió de /acceso con clave propia"))
+            return
+        comercio = self._comercio_de_la_oferta(oferta)
+        if not comercio or not comercio.get("id"):
+            self.casos.append(_omitido(cat, "conectarCobrador", "cobro con tarjeta de punta a punta", "no se pudo leer el comercio de la oferta de prueba"))
+            return
+        base = f"{self.base_v1}/comercios/{comercio['id']}/cobradores"
+        antes = cliente.solicitud("GET", base, headers=self._cabecera(), timeout=self.timeout)
+        if not antes.ok or antes.estado != 200 or not isinstance(antes.cuerpo, list):
+            motivo = f"la sesión de prueba no administra el comercio de prueba (listarCobradores: {antes.estado})" if antes.ok and antes.estado in (401, 403) else (antes.motivo or f"listarCobradores esperaba 200 con una lista, llegó {antes.estado}")
+            self.casos.append(_omitido(cat, "listarCobradores", "cobro con tarjeta de punta a punta", motivo))
+            return
+        ya_estaban = {c.get("psp") for c in antes.cuerpo if isinstance(c, dict)}
+        agregados = set()
+        try:
+            if self._conectar_prueba(cat, base, agregados):
+                self._pagar_con_prueba(cat, oferta)
+                if "prueba_redireccion" in anunciados:
+                    self._dos_proveedores(cat, base, oferta, agregados)
+                else:
+                    self.casos.append(_omitido(cat, "conectarCobrador", "dos proveedores activos a la vez", "el nodo no anuncia 'prueba_redireccion'"))
+        finally:
+            for psp in agregados - ya_estaban:
+                cliente.solicitud("DELETE", f"{base}/{psp}", headers=self._cabecera(), timeout=self.timeout)
+
+    def _conectar(self, url, cuerpo):
+        # conectarCobrador pide firma fresca (docs/acceso.md, punto 7): se firma
+        # si la sesión salió de /acceso con clave propia; si no, va sin firma y
+        # un nodo en fase de gracia la acepta igual.
+        crudo = json.dumps(cuerpo).encode()
+        h = {**self._cabecera(), "Content-Type": "application/json"}
+        if self.clave:
+            path = "/" + url.split("://", 1)[-1].split("/", 1)[-1]
+            h.update(rfc9421.firma_fresca(metodo="POST", path=path, cuerpo=crudo, clave_privada=self.clave.privada, keyid=self.clave.publica))
+        return cliente.solicitud_cruda("POST", url, headers=h, cuerpo=crudo, timeout=self.timeout)
+
+    def _conectar_prueba(self, cat, base, agregados) -> bool:
+        opid = "conectarCobrador"
+        conectar = f"{base}/prueba/conectar"
+        clave = "prueba-valida"
+
+        desc = "conectar con credenciales que el proveedor rechaza responde 422 credenciales_invalidas y no guarda nada"
+        r = self._conectar(conectar, {"ambiente": "prueba", "credenciales": {"clave": "otra"}})
+        codigo = r.cuerpo.get("codigo") if isinstance(r.cuerpo, dict) else None
+        if not r.ok or r.estado != 422 or codigo != "credenciales_invalidas":
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 422 credenciales_invalidas, llegó {r.estado} {codigo}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        desc = "mandar volver_a a un proveedor que se conecta con credenciales responde 422 conexion_no_corresponde"
+        r = self._conectar(conectar, {"volver_a": "https://ejemplo.invalid/vuelta"})
+        codigo = r.cuerpo.get("codigo") if isinstance(r.cuerpo, dict) else None
+        self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 422 and codigo == "conexion_no_corresponde" else _fallo(cat, opid, desc, r.motivo or f"llegó {r.estado} {codigo}"))
+
+        desc = "conectar con las credenciales del proveedor de prueba responde el cobrador conectado, sin las credenciales"
+        r = self._conectar(conectar, {"ambiente": "prueba", "credenciales": {"clave": clave}})
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return False
+        agregados.add("prueba")
+        caso = self._chequear_esquema(opid, desc + " (esquema)", "/comercios/{id}/cobradores/{psp}/conectar", "post", r.cuerpo)
+        if caso and caso.resultado != "ok":
+            self.casos.append(caso)
+        elif r.cuerpo.get("psp") != "prueba" or r.cuerpo.get("estado") != "conectado":
+            self.casos.append(_fallo(cat, opid, desc, f"esperaba psp prueba y estado conectado, llegó {r.cuerpo}"))
+            return False
+        elif clave in json.dumps(r.cuerpo):
+            self.casos.append(_fallo(cat, opid, desc, "la respuesta trae la clave que se mandó"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        desc = "verCobrador dice conectado y nunca trae las credenciales"
+        r = cliente.solicitud("GET", f"{base}/prueba", headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, "verCobrador", desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+        elif r.cuerpo.get("estado") != "conectado" or clave in json.dumps(r.cuerpo):
+            self.casos.append(_fallo(cat, "verCobrador", desc, f"llegó {r.cuerpo}"))
+        else:
+            self.casos.append(_ok(cat, "verCobrador", desc))
+        return True
+
+    def _pedido(self, pid):
+        r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pid}", headers=self._cabecera(), timeout=self.timeout)
+        return r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+
+    def _esperar_pedido(self, pid, condicion, espera_s=15.0):
+        limite = time.monotonic() + espera_s
+        pedido = None
+        while time.monotonic() < limite:
+            pedido = self._pedido(pid)
+            if pedido and condicion(pedido):
+                return pedido, True
+            time.sleep(0.5)
+        return pedido, False
+
+    @staticmethod
+    def _cobro_productos(pedido):
+        return next((p for p in (pedido or {}).get("pagos") or [] if p.get("concepto") == "productos"), None)
+
+    def _pedido_con_tarjeta(self, cat, oferta, psp="prueba"):
+        cid = self._carrito_con(oferta, {"tipo": "retiro"})
+        if not cid:
+            return None, "no se pudo armar un carrito con retiro"
+        r = self._confirmar(cid, {"metodo_pago": "tarjeta", "psp": psp})
+        cuerpo = r.cuerpo if isinstance(r.cuerpo, dict) else {}
+        if r.ok and r.estado == 422 and cuerpo.get("codigo") == "monto_menor_al_minimo":
+            return None, "la oferta de prueba cuesta menos que el mínimo del proveedor de prueba"
+        if not r.ok or r.estado != 201 or not cuerpo.get("id"):
+            self.casos.append(_fallo(cat, "confirmarCarrito", f"con {psp} activo, confirmar con tarjeta y psp {psp} crea el pedido", r.motivo or f"esperaba 201, llegó {r.estado} {cuerpo.get('codigo')}"))
+            return None, None
+        cobro = self._cobro_productos(cuerpo)
+        if not cobro or cobro.get("psp") != psp or cobro.get("estado") != "pendiente" or not cobro.get("link_pago"):
+            self.casos.append(_fallo(cat, "confirmarCarrito", f"con tarjeta el cobro nace pendiente, con psp {psp} (el elegido) y link_pago", f"llegó {cobro}"))
+            return None, None
+        return cuerpo, None
+
+    def _resultado(self, cobro, resultado):
+        return cliente.solicitud("POST", cobro["link_pago"], json_body={"resultado": resultado}, timeout=self.timeout)
+
+    def _cancelar(self, pedido):
+        cliente.solicitud("POST", f"{self.base_v1}/pedidos/{pedido['id']}/cancelar", headers=self._cabecera(), json_body={"motivo": "prueba de conformidad"}, timeout=self.timeout)
+
+    def _pagar_con_prueba(self, cat, oferta):
+        comercio = self._comercio_de_la_oferta(oferta) or {}
+        desc = "con un proveedor conectado, la ficha pública lo lista en cobradores y medios_cobro suma tarjeta"
+        ok = "tarjeta" in (comercio.get("medios_cobro") or []) and "prueba" in (comercio.get("cobradores") or [])
+        self.casos.append(_ok(cat, "verComercio", desc) if ok else _fallo(cat, "verComercio", desc, f"medios_cobro {comercio.get('medios_cobro')}, cobradores {comercio.get('cobradores')}"))
+
+        # aprobado, pasando antes por 'procesado', y después devuelto en dos partes
+        pedido, omitir = self._pedido_con_tarjeta(cat, oferta)
+        if omitir:
+            self.casos.append(_omitido(cat, "confirmarCarrito", "cobro con tarjeta de punta a punta", omitir))
+            return
+        if pedido:
+            cobro = self._cobro_productos(pedido)
+            desc = "un cobro 'procesado' en el proveedor sigue pendiente: solo el aprobado confirma"
+            r = self._resultado(cobro, "procesado")
+            if not r.ok or r.estado != 204:
+                self.casos.append(_fallo(cat, "proveedor_prueba", desc, r.motivo or f"POST link_pago esperaba 204, llegó {r.estado}"))
+            else:
+                time.sleep(2)
+                c = self._cobro_productos(self._pedido(pedido["id"]))
+                self.casos.append(_ok(cat, "verPedido", desc) if c and c.get("estado") == "pendiente" else _fallo(cat, "verPedido", desc, f"el cobro quedó {c and c.get('estado')}"))
+
+            desc = "pagado en el proveedor: el nodo re-consulta y confirma el cobro con confirmado_por psp, y el pedido sale de creado"
+            r = self._resultado(cobro, "aprobado")
+            listo = lambda p: (self._cobro_productos(p) or {}).get("estado") == "confirmado"
+            p, ok = self._esperar_pedido(pedido["id"], listo) if r.ok and r.estado == 204 else (None, False)
+            c = self._cobro_productos(p)
+            if not ok:
+                self.casos.append(_fallo(cat, "verPedido", desc, r.motivo if not r.ok else f"a los 15 s el cobro sigue {c and c.get('estado')}"))
+            elif c.get("confirmado_por") != "psp" or p.get("estado") in ("creado", "cancelado"):
+                self.casos.append(_fallo(cat, "verPedido", desc, f"confirmado_por {c.get('confirmado_por')}, pedido {p.get('estado')}"))
+            else:
+                self.casos.append(_ok(cat, "verPedido", desc))
+                self._devolver_con_prueba(cat, p)
+            self._cancelar(pedido)
+
+        # rechazado
+        pedido, omitir = self._pedido_con_tarjeta(cat, oferta)
+        if pedido:
+            desc = "rechazado en el proveedor: el cobro queda fallido y el pedido cancelado con pago_fallido"
+            r = self._resultado(self._cobro_productos(pedido), "rechazado")
+            p, ok = self._esperar_pedido(pedido["id"], lambda p: p.get("estado") == "cancelado") if r.ok and r.estado == 204 else (None, False)
+            c = self._cobro_productos(p)
+            motivo = ((p or {}).get("historial") or [{}])[-1].get("motivo_codigo")
+            if ok and c and c.get("estado") == "fallido" and motivo == "pago_fallido":
+                self.casos.append(_ok(cat, "verPedido", desc))
+            else:
+                self.casos.append(_fallo(cat, "verPedido", desc, r.motivo if not r.ok else f"pedido {p and p.get('estado')}, cobro {c and c.get('estado')}, motivo {motivo}"))
+
+        # vencido en el proveedor
+        pedido, omitir = self._pedido_con_tarjeta(cat, oferta)
+        if pedido:
+            desc = "vencido en el proveedor: el cobro queda vencido y el pedido cancelado con pago_vencido"
+            r = self._resultado(self._cobro_productos(pedido), "vencido")
+            p, ok = self._esperar_pedido(pedido["id"], lambda p: p.get("estado") == "cancelado") if r.ok and r.estado == 204 else (None, False)
+            c = self._cobro_productos(p)
+            motivo = ((p or {}).get("historial") or [{}])[-1].get("motivo_codigo")
+            if ok and c and c.get("estado") == "vencido" and motivo == "pago_vencido":
+                self.casos.append(_ok(cat, "verPedido", desc))
+            else:
+                self.casos.append(_fallo(cat, "verPedido", desc, r.motivo if not r.ok else f"pedido {p and p.get('estado')}, cobro {c and c.get('estado')}, motivo {motivo}"))
+
+    def _dos_proveedores(self, cat, base, oferta, agregados):
+        """Dos proveedores activos a la vez: el segundo se conecta por
+        redirección, la ficha lista los dos, el comprador elige con cuál paga y
+        desconectar uno deja el otro."""
+        opid = "conectarCobrador"
+        otro = "prueba_redireccion"
+        desc = "conectar un segundo proveedor, por redirección, devuelve la URL de autorización"
+        r = self._conectar(f"{base}/{otro}/conectar", {"volver_a": "https://ejemplo.invalid/vuelta"})
+        url = r.cuerpo.get("url") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        if not url:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200 con url, llegó {r.estado} {r.cuerpo}"))
+            return
+        self.casos.append(_ok(cat, opid, desc))
+        r = cliente.solicitud("POST", url, json_body={"resultado": "autorizar"}, timeout=self.timeout)
+        if not r.ok or r.estado != 204:
+            self.casos.append(_fallo(cat, "proveedor_prueba", "autorizar en el proveedor de prueba por redirección", r.motivo or f"POST url esperaba 204, llegó {r.estado}"))
+            return
+        agregados.add(otro)
+
+        desc = "listarCobradores trae los dos proveedores conectados a la vez"
+        r = cliente.solicitud("GET", base, headers=self._cabecera(), timeout=self.timeout)
+        lista = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, list) else []
+        estados = {c.get("psp"): c.get("estado") for c in lista if isinstance(c, dict)}
+        caso = self._chequear_esquema("listarCobradores", desc + " (esquema)", "/comercios/{id}/cobradores", "get", lista) if lista else None
+        if caso and caso.resultado != "ok":
+            self.casos.append(caso)
+        elif estados.get("prueba") == "conectado" and estados.get(otro) == "conectado":
+            self.casos.append(_ok(cat, "listarCobradores", desc))
+        else:
+            self.casos.append(_fallo(cat, "listarCobradores", desc, r.motivo or f"llegó {estados}"))
+
+        comercio = self._comercio_de_la_oferta(oferta) or {}
+        desc = "la ficha pública lista los dos en cobradores, sin titulares ni secretos"
+        publicos = comercio.get("cobradores") or []
+        ok = {"prueba", otro} <= set(publicos) and "Comercio de prueba" not in json.dumps(publicos)
+        self.casos.append(_ok(cat, "verComercio", desc) if ok else _fallo(cat, "verComercio", desc, f"cobradores {publicos}"))
+
+        def confirmar(cuerpo):
+            cid = self._carrito_con(oferta, {"tipo": "retiro"})
+            return self._confirmar(cid, cuerpo) if cid else None
+
+        for cuerpo, codigo, desc in (
+            ({"metodo_pago": "tarjeta"}, "psp_requerido", "con dos proveedores activos, tarjeta sin psp responde 422 psp_requerido con detalle.cobradores"),
+            ({"metodo_pago": "tarjeta", "psp": "no_activo_aca"}, "psp_no_activo", "tarjeta con un psp que el comercio no tiene activo responde 422 psp_no_activo con detalle.cobradores"),
+        ):
+            r = confirmar(cuerpo)
+            if r is None:
+                self.casos.append(_omitido(cat, "confirmarCarrito", desc, "no se pudo armar un carrito con retiro"))
+                continue
+            c = r.cuerpo if isinstance(r.cuerpo, dict) else {}
+            detalle = (c.get("detalle") or {}).get("cobradores")
+            if r.ok and r.estado == 422 and c.get("codigo") == codigo and isinstance(detalle, list) and {"prueba", otro} <= set(detalle):
+                self.casos.append(_ok(cat, "confirmarCarrito", desc))
+            else:
+                self.casos.append(_fallo(cat, "confirmarCarrito", desc, r.motivo or f"llegó {r.estado} {c.get('codigo')} detalle.cobradores {detalle}"))
+                if r.ok and r.estado == 201 and c.get("id"):
+                    self._cancelar(c)
+
+        pedido, omitir = self._pedido_con_tarjeta(cat, oferta, psp=otro)
+        if omitir:
+            self.casos.append(_omitido(cat, "confirmarCarrito", "pagar con el proveedor elegido", omitir))
+        elif pedido:
+            desc = "el comprador elige el segundo proveedor: el cobro sale con ese psp y se confirma con él"
+            r = self._resultado(self._cobro_productos(pedido), "aprobado")
+            p, ok = self._esperar_pedido(pedido["id"], lambda p: (self._cobro_productos(p) or {}).get("estado") == "confirmado") if r.ok and r.estado == 204 else (None, False)
+            c = self._cobro_productos(p) or {}
+            self.casos.append(_ok(cat, "verPedido", desc) if ok and c.get("psp") == otro else _fallo(cat, "verPedido", desc, r.motivo if not r.ok else f"cobro {c.get('estado')} con psp {c.get('psp')}"))
+            self._cancelar(pedido)
+
+        desc = "desconectar un proveedor deja al otro activo: la ficha lo saca de cobradores y sigue aceptando tarjeta"
+        r = cliente.solicitud("DELETE", f"{base}/{otro}", headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 204:
+            self.casos.append(_fallo(cat, "desconectarCobrador", desc, r.motivo or f"esperaba 204, llegó {r.estado}"))
+            return
+        agregados.discard(otro)
+        comercio = self._comercio_de_la_oferta(oferta) or {}
+        publicos = comercio.get("cobradores") or []
+        ok = otro not in publicos and "prueba" in publicos and "tarjeta" in (comercio.get("medios_cobro") or [])
+        self.casos.append(_ok(cat, "desconectarCobrador", desc) if ok else _fallo(cat, "desconectarCobrador", desc, f"cobradores {publicos}, medios_cobro {comercio.get('medios_cobro')}"))
+
+        desc = "pagar con el proveedor recién desconectado responde 422 psp_no_activo"
+        r = confirmar({"metodo_pago": "tarjeta", "psp": otro})
+        c = r.cuerpo if r is not None and isinstance(r.cuerpo, dict) else {}
+        if r is None:
+            self.casos.append(_omitido(cat, "confirmarCarrito", desc, "no se pudo armar un carrito con retiro"))
+        else:
+            self.casos.append(_ok(cat, "confirmarCarrito", desc) if r.ok and r.estado == 422 and c.get("codigo") == "psp_no_activo" else _fallo(cat, "confirmarCarrito", desc, r.motivo or f"llegó {r.estado} {c.get('codigo')}"))
+            if r.ok and r.estado == 201 and c.get("id"):
+                self._cancelar(c)
+
+    def _devolver_con_prueba(self, cat, pedido):
+        opid = "reembolsarPago"
+        cobro = self._cobro_productos(pedido)
+        total = cobro["monto"]["centavos"]
+        ruta = f"{self.base_v1}/pedidos/{pedido['id']}/reembolso"
+        parte = max(1, total // 4)
+        if parte % 100 == 13:
+            parte += 1
+
+        def devolver(cuerpo):
+            return cliente.solicitud("POST", ruta, headers={**self._cabecera(), **self._idem()}, json_body=cuerpo, timeout=self.timeout)
+
+        def reembolsado(p):
+            return ((self._cobro_productos(p) or {}).get("reembolsado") or {}).get("centavos", 0)
+
+        desc = "una devolución parcial queda como pago 'devolucion' que reembolsa el cobro, y el proveedor la confirma"
+        r = devolver({"monto_centavos": parte, "motivo": "prueba de conformidad"})
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        dev = next((x for x in r.cuerpo.get("pagos") or [] if x.get("concepto") == "devolucion"), None)
+        if not dev or dev.get("reembolsa") != cobro.get("id") or dev.get("monto", {}).get("centavos") != parte:
+            self.casos.append(_fallo(cat, opid, desc, f"no hay devolución por {parte} que reembolse {cobro.get('id')}: {dev}"))
+            return
+        p, ok = self._esperar_pedido(pedido["id"], lambda p: reembolsado(p) == parte)
+        self.casos.append(_ok(cat, opid, desc) if ok else _fallo(cat, opid, desc, f"a los 15 s 'reembolsado' del cobro es {reembolsado(p)}, esperaba {parte}"))
+
+        desc = "devolver más de lo que queda responde 422 monto_excede_lo_cobrado"
+        r = devolver({"monto_centavos": total})
+        codigo = r.cuerpo.get("codigo") if isinstance(r.cuerpo, dict) else None
+        self.casos.append(_ok(cat, opid, desc) if r.ok and r.estado == 422 and codigo == "monto_excede_lo_cobrado" else _fallo(cat, opid, desc, r.motivo or f"llegó {r.estado} {codigo}"))
+
+        desc = "devolver sin monto devuelve todo lo que queda"
+        r = devolver({})
+        p, ok = self._esperar_pedido(pedido["id"], lambda p: reembolsado(p) == total) if r.ok and r.estado == 200 else (None, False)
+        self.casos.append(_ok(cat, opid, desc) if ok else _fallo(cat, opid, desc, r.motivo if not r.ok else f"llegó {r.estado}; 'reembolsado' es {reembolsado(p)}, esperaba {total}"))
 
     # clips del local y del producto (docs/medios.md) -------------------------
     # Con el comercio y la oferta de prueba: el nodo guarda el clip tal cual y lo
