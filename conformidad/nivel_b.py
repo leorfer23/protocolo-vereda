@@ -125,6 +125,7 @@ class NivelB:
         self._videos()
         self._medios(capacidades)
         self._dispositivos()
+        self._ia()
         self._sesiones(capacidades)
         self._equipo(capacidades)
         self._topes()
@@ -2419,6 +2420,116 @@ class NivelB:
         else:
             self.casos.append(_fallo(cat, opid, desc_uso, f"esperaba 401, llegó {r_uso.estado} -- el mandato revocado todavía funciona"))
 
+    def _ia(self):
+        """Capacidad ia opcional (docs/ia/capacidad.md)."""
+        cat, opid = "ia", "verMiIa"
+        r = cliente.get(self.origen + "/.well-known/vereda.json", timeout=self.timeout)
+        nodo = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else {}
+        ia = nodo.get("ia") if isinstance(nodo.get("ia"), dict) else None
+        base = self.base_v1 + "/ia/yo"
+        if not ia:
+            desc = "sin ia en /.well-known/vereda.json, verMiIa responde 501 no_implementado"
+            r = cliente.solicitud("GET", base, headers=self._cabecera(), timeout=self.timeout)
+            if not r.ok:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo))
+            elif r.estado != 501:
+                self.casos.append(_fallo(cat, opid, desc, f"esperaba 501, llegó {r.estado}"))
+            else:
+                codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
+                if codigo and codigo != "no_implementado":
+                    self.casos.append(_fallo(cat, opid, desc, f"codigo {codigo}"))
+                else:
+                    self.casos.append(_ok(cat, opid, desc))
+            # una función también 501
+            opid2, desc2 = "iaResumenDia", "sin ia, una función responde 501 no_implementado"
+            r2 = cliente.solicitud(
+                "POST", f"{self.base_v1}/ia/comercios/01920000-0000-7000-8000-0000000000aa/resumen-dia",
+                headers=self._cabecera(), json_body={}, timeout=self.timeout,
+            )
+            if not r2.ok:
+                self.casos.append(_fallo(cat, opid2, desc2, r2.motivo))
+            elif r2.estado != 501:
+                self.casos.append(_fallo(cat, opid2, desc2, f"esperaba 501, llegó {r2.estado}"))
+            else:
+                self.casos.append(_ok(cat, opid2, desc2))
+            return
+
+        desc = "con ia en /.well-known/vereda.json, el anuncio cumple CapacidadIa"
+        errores = self._validar(oi.resolver_esquema(self.api, {"$ref": "#/components/schemas/CapacidadIa"}), ia)
+        if errores:
+            self.casos.append(_fallo(cat, "verNodo", desc, self._formatear_errores(errores)))
+            return
+        self.casos.append(_ok(cat, "verNodo", desc))
+
+        desc = "GET /ia/yo con sesión responde 200 y cumple mi_ia"
+        r = cliente.solicitud("GET", base, headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        self.casos.append(self._chequear_esquema(opid, desc, "/ia/yo", "get", r.cuerpo) or _ok(cat, opid, desc))
+
+        tope = ((ia.get("tope_mensual_usd") or {}).get("default_usd")) or 5
+        desc = "PUT /ia/yo activa con el tope default"
+        r = cliente.solicitud("PUT", base, headers=self._cabecera(), json_body={"estado": "activa", "tope_usd": tope}, timeout=self.timeout)
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, "configurarMiIa", desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        if r.cuerpo.get("estado") != "activa":
+            self.casos.append(_fallo(cat, "configurarMiIa", desc, f"estado {r.cuerpo.get('estado')}"))
+        else:
+            self.casos.append(self._chequear_esquema("configurarMiIa", desc, "/ia/yo", "put", r.cuerpo) or _ok(cat, "configurarMiIa", desc))
+
+        # Una función de comercio si está anunciada
+        funcs = ((ia.get("funciones") or {}).get("comercio")) or []
+        if "resumen_dia" in funcs:
+            comercio = self._comercio_de_la_oferta("01920000-0000-7000-8000-0000000000b1")
+            if not comercio or not comercio.get("id"):
+                self.casos.append(_omitido(cat, "iaResumenDia", "resumen del día con consumo", "no se pudo leer el comercio de la oferta de prueba"))
+            else:
+                desc = "iaResumenDia responde 200 con propuesta y consumo; el costo suma al extracto"
+                r = cliente.solicitud(
+                    "POST", f"{self.base_v1}/ia/comercios/{comercio['id']}/resumen-dia",
+                    headers=self._cabecera(), json_body={}, timeout=self.timeout,
+                )
+                if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+                    if r.ok and r.estado == 403 and (r.cuerpo or {}).get("codigo") in ("no_es_el_dueno", "sin_permiso"):
+                        self.casos.append(_omitido(cat, "iaResumenDia", desc, "la sesión de prueba no administra el comercio de la oferta de prueba"))
+                    else:
+                        self.casos.append(_fallo(cat, "iaResumenDia", desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+                else:
+                    consumo = r.cuerpo.get("consumo") or {}
+                    if "propuesta" not in r.cuerpo or "costo_usd" not in consumo:
+                        self.casos.append(_fallo(cat, "iaResumenDia", desc, f"cuerpo sin propuesta/consumo: {list(r.cuerpo)}"))
+                    else:
+                        self.casos.append(_ok(cat, "iaResumenDia", desc))
+                        costo = float(consumo.get("costo_usd") or 0)
+                        rex = cliente.solicitud("GET", f"{self.base_v1}/ia/yo/extracto", headers=self._cabecera(), timeout=self.timeout)
+                        total = ((rex.cuerpo or {}).get("total") or {}).get("usd") if rex.ok and isinstance(rex.cuerpo, dict) else None
+                        desc_e = "el extracto suma el costo de la generación"
+                        if total is None:
+                            self.casos.append(_fallo(cat, "verExtractoIa", desc_e, rex.motivo or f"estado {rex.estado}"))
+                        elif float(total) + 1e-9 < costo:
+                            self.casos.append(_fallo(cat, "verExtractoIa", desc_e, f"total {total} < costo {costo}"))
+                        else:
+                            self.casos.append(self._chequear_esquema("verExtractoIa", desc_e, "/ia/yo/extracto", "get", rex.cuerpo) or _ok(cat, "verExtractoIa", desc_e))
+
+        # tope inválido
+        maximo = ((ia.get("tope_mensual_usd") or {}).get("maximo_usd")) or 50
+        desc = "un tope sobre el máximo del nodo responde 422 tope_ia_invalido"
+        r = cliente.solicitud("PUT", base, headers=self._cabecera(), json_body={"estado": "activa", "tope_usd": float(maximo) + 1}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if r.ok and isinstance(r.cuerpo, dict) else None
+        if not r.ok or r.estado != 422 or codigo != "tope_ia_invalido":
+            self.casos.append(_fallo(cat, "configurarMiIa", desc, r.motivo or f"esperaba 422 tope_ia_invalido, llegó {r.estado} {codigo}"))
+        else:
+            self.casos.append(_ok(cat, "configurarMiIa", desc))
+
+        if self.mandato:
+            desc = "un token de mandato no configura la IA (401 o 403)"
+            r = cliente.solicitud("PUT", base, headers=self._cabecera(mandato=True), json_body={"estado": "pausada"}, timeout=self.timeout)
+            if not r.ok or r.estado not in (401, 403):
+                self.casos.append(_fallo(cat, "configurarMiIa", desc, r.motivo or f"esperaba 401/403, llegó {r.estado}"))
+            else:
+                self.casos.append(_ok(cat, "configurarMiIa", desc))
 
 def _tope_alcanzado(r) -> Optional[dict]:
     """El detalle de un 429 tope_alcanzado (docs/topes.md), o None."""

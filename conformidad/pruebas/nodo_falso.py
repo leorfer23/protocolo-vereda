@@ -301,6 +301,9 @@ class Handler(BaseHTTPRequestHandler):
             self._responder_con_cache(VERIFICACION, "verificacion-v1")
         elif p == f"/v1/actores/{IDENTIDAD}/denuncias":
             self._responder_con_cache([], "denuncias-v1")
+        elif p.startswith("/v1/ia"):
+            # Capacidad ia ausente: toda ruta bajo /ia es 501 (docs/ia/capacidad.md).
+            self._json(501, {"codigo": "no_implementado", "mensaje": "Este nodo no ofrece IA.", "estado_http": 501})
         else:
             m = re.match(r"^/v1/pedidos/([^/]+)$", p)
             if m:
@@ -359,6 +362,8 @@ class Handler(BaseHTTPRequestHandler):
             estado, obj = self._revocar_mandato(actor, p.split("/")[3])
         elif p == "/v1/yo/claves/rotar":
             estado, obj = self._rotar_clave(actor)
+        elif p.startswith("/v1/ia"):
+            estado, obj = 501, {"codigo": "no_implementado", "mensaje": "Este nodo no ofrece IA.", "estado_http": 501}
         else:
             estado, obj = 404, {"codigo": "ruta_no_reconocida", "mensaje": f"el nodo falso no sirve POST {p}", "estado_http": 404}
         self._enviar(estado) if obj is None else self._json(estado, obj)
@@ -369,6 +374,8 @@ class Handler(BaseHTTPRequestHandler):
         m = re.match(r"^/v1/carritos/([^/]+)/modalidad$", p)
         if m:
             estado, obj = self._elegir_modalidad(actor, m.group(1), self._cuerpo())
+        elif p.startswith("/v1/ia"):
+            estado, obj = 501, {"codigo": "no_implementado", "mensaje": "Este nodo no ofrece IA.", "estado_http": 501}
         else:
             estado, obj = 404, {"codigo": "ruta_no_reconocida", "mensaje": f"el nodo falso no sirve PUT {p}", "estado_http": 404}
         self._enviar(estado) if obj is None else self._json(estado, obj)

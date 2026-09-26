@@ -1,0 +1,36 @@
+{
+  "$comentario": "GET /ia/yo/extracto?periodo=2026-09",
+  "periodo": "2026-09",
+  "lineas": [
+    {
+      "generacion": "gen_01HXYZ",
+      "funcion": "resumen_dia",
+      "instante": "2026-09-26T11:02:00-03:00",
+      "tokens_entrada": 2200,
+      "tokens_salida": 600,
+      "costo_usd": 0.08
+    },
+    {
+      "generacion": "gen_01HXYY",
+      "funcion": "catalogo_desde_fotos",
+      "instante": "2026-09-25T18:40:00-03:00",
+      "tokens_entrada": 8000,
+      "tokens_salida": 1500,
+      "costo_usd": 0.34
+    }
+  ],
+  "total": {
+    "usd": 0.42,
+    "tokens_entrada": 10200,
+    "tokens_salida": 2100,
+    "generaciones": 2
+  },
+  "pago": {
+    "referencia": "ia:lahuerta@vereda.ar:2026-09",
+    "estado": "pendiente",
+    "cuenta": {
+      "alias": "nodo.barrio.norte",
+      "titular": "Cooperativa Nodo Norte"
+    }
+  }
+}

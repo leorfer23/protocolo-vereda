@@ -1,0 +1,80 @@
+{
+  "$comentario": "Casos de la capacidad ia y de mi_ia (docs/ia/capacidad.md).",
+  "esquema": "ia.json#/$defs/capacidad",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Capacidad completa del nodo de referencia.",
+      "doc": {
+        "funciones": {
+          "comercio": [
+            "catalogo_desde_fotos",
+            "resumen_dia"
+          ],
+          "comprador": [
+            "pedido_propuesto"
+          ]
+        },
+        "precio": {
+          "modalidad": "costo",
+          "margen": 0,
+          "moneda": "USD"
+        },
+        "pago": {
+          "destino": "sostenimiento.cuenta",
+          "referencia": "ia:<identidad>:<periodo>"
+        },
+        "tope_mensual_usd": {
+          "default_usd": 5,
+          "maximo_usd": 50
+        },
+        "periodo_reseteo": "mensual"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Con margen distinto de 0 no es la opción A.",
+      "doc": {
+        "funciones": {
+          "comercio": [
+            "resumen_dia"
+          ]
+        },
+        "precio": {
+          "modalidad": "costo",
+          "margen": 0.1,
+          "moneda": "USD"
+        },
+        "pago": {
+          "destino": "sostenimiento.cuenta",
+          "referencia": "ia:<identidad>:<periodo>"
+        },
+        "tope_mensual_usd": {
+          "default_usd": 5,
+          "maximo_usd": 50
+        },
+        "periodo_reseteo": "mensual"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Falta precio.",
+      "doc": {
+        "funciones": {
+          "comercio": [
+            "resumen_dia"
+          ]
+        },
+        "pago": {
+          "destino": "sostenimiento.cuenta",
+          "referencia": "ia:<identidad>:<periodo>"
+        },
+        "tope_mensual_usd": {
+          "default_usd": 5,
+          "maximo_usd": 50
+        },
+        "periodo_reseteo": "mensual"
+      }
+    }
+  ]
+}

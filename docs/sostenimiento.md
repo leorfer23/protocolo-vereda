@@ -84,6 +84,9 @@ todos, y cualquiera comprueba que el titular que le muestra su banco es el publi
   `acepta_propinas_de_usuarios`, `quien_paga`.
 - `gastos_publicados`, un período por mes: pedidos entregados, cuántos comercios aportaron, aportes
   y propinas recibidos, y gastos en servidor, tokens y otros, con una nota libre del operador.
+  Si el nodo ofrece la capacidad `ia` (`docs/ia/capacidad.md`), el período puede traer también
+  `gastos.tokens_ia` (costo del gateway) y `aportes_ia_recibidos` (lo recuperado con referencia
+  `ia:<identidad>:<periodo>`), para que las cuentas cierren a la vista.
 - Lo recibido son **conteos automáticos** de pagos confirmados; lo gastado lo carga el operador. Un
   nodo que gasta menos de lo que recibe lo dice en la nota, y qué hace con la diferencia también.
 

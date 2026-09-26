@@ -773,6 +773,269 @@
       "name": "denuncia_responder",
       "description": "El comercio o el repartidor denunciado responde una denuncia de suplantación, una sola vez y en público. Ej: 'contestá que somos otra verdulería, en Yatay 1400'. Requiere scope 'administrar' o 'repartir'.",
       "inputSchema": {"type": "object", "required": ["identidad", "denuncia_id", "texto"], "properties": {"identidad": {"type": "string"}, "denuncia_id": {"type": "string"}, "texto": {"type": "string", "maxLength": 1000}}}
+    },
+  {
+    "name": "ia_ver",
+    "description": "Estado de tu IA en este nodo: si está activa, el tope del mes en USD y cuánto consumiste. Solo si el nodo publica 'ia' en /.well-known/vereda.json; si no, no_implementado. Ej: '¿tengo la IA prendida?', '¿cuánto gasté este mes?'. Solo con la sesión de la persona, no con un mandato.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
     }
+  },
+  {
+    "name": "ia_configurar",
+    "description": "Activá, pausá o apagá tu IA y elegí el tope mensual en USD (entre el default y el máximo del nodo). Nadie aprueba: es autoservicio. Ej: 'activá mi IA con tope de 5 dólares', 'pausá la IA'. Solo sesión. docs/ia/capacidad.md.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "estado"
+      ],
+      "properties": {
+        "estado": {
+          "type": "string",
+          "enum": [
+            "activa",
+            "pausada",
+            "inactiva"
+          ]
+        },
+        "tope_usd": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_extracto",
+    "description": "Extracto de consumo de IA de un mes: cada generación con tokens y costo, y el total a transferir a la cuenta del nodo con referencia ia:<identidad>:<periodo>. Ej: 'mostrame el extracto de septiembre'. Solo sesión.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "periodo": {
+          "type": "string",
+          "description": "AAAA-MM. Ausente: el mes abierto."
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_transferencia_declarar",
+    "description": "Declará que ya transferiste el extracto de un período a la cuenta pública del nodo. El operador marca recibido cuando ve la plata. Ej: 'ya pagué el extracto de septiembre'. Solo sesión.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "periodo"
+      ],
+      "properties": {
+        "periodo": {
+          "type": "string"
+        },
+        "comprobante": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_catalogo_desde_fotos",
+    "description": "Proponé borradores de ítems de catálogo a partir de fotos del local o de productos. No los publica: después los confirmás con oferta_crear / oferta_editar. Requiere IA activa y scope 'administrar'. Ej: 'armá el catálogo con estas fotos de la verdulería'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id",
+        "fotos"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "fotos": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_sugerir_producto",
+    "description": "Sugerí descripción y/o precio de un producto (borrador). No escribe la oferta. Scope 'administrar'. Ej: 'sugerí un precio para las milanesas'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "nombre": {
+          "type": "string"
+        },
+        "descripcion": {
+          "type": "string"
+        },
+        "foto": {
+          "type": "string"
+        },
+        "oferta_id": {
+          "type": "string"
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_borrador_respuesta",
+    "description": "Borrador de respuesta a un mensaje o una reseña. No lo envía. Scope 'administrar'. Ej: 'contestá esta reseña con tono cercano'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id",
+        "sobre"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "sobre": {
+          "type": "object",
+          "required": [
+            "tipo",
+            "id"
+          ],
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "enum": [
+                "mensaje",
+                "resena"
+              ]
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "tono": {
+          "type": "string",
+          "enum": [
+            "cercano",
+            "formal",
+            "breve"
+          ]
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_resumen_dia",
+    "description": "Resumen del día del comercio y qué conviene reponer. No cambia stock. Scope 'administrar'. Ej: '¿cómo nos fue hoy?', 'qué tengo que pedir'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "dia": {
+          "type": "string"
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_pedido_propuesto",
+    "description": "Proponé un carrito desde lenguaje natural ('armame una picada para 6'). No lo confirma: después lo armás con carrito_crear / carrito_agregar / carrito_confirmar. Scope 'armar'. Ej: 'pedime algo rico para 4 cerca de casa'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "pedido",
+        "lat",
+        "lng"
+      ],
+      "properties": {
+        "pedido": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "comercio_id": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_buscar",
+    "description": "Búsqueda interpretada sobre la zona. Scope 'leer'. Ej: 'algo liviano sin tacc cerca'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "q",
+        "lat",
+        "lng"
+      ],
+      "properties": {
+        "q": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_sugerir",
+    "description": "Repetí un pedido anterior o pedí sugerencias según el historial (borrador). Scope 'leer'. Ej: 'repetí el de la semana pasada', '¿qué me sugerís hoy?'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "tipo"
+      ],
+      "properties": {
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "repetir",
+            "sugerir"
+          ]
+        },
+        "pedido_id": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      }
+    }
+  }
   ]
 }

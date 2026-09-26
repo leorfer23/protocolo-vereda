@@ -49,6 +49,25 @@ for ej, esq in MAPA.items():
         print(f"✓ {ej} cumple {esq}")
 print(f"\n{len(MAPA) - fallos}/{len(MAPA)} ejemplos válidos")
 
+# Ejemplos contra un $defs (esquemas que no tienen raíz tipada, p. ej. ia.json).
+MAPA_DEFS = {
+    "ia-capacidad.json": "ia.json#/$defs/capacidad",
+    "ia-mi.json": "ia.json#/$defs/mi_ia",
+    "ia-extracto.json": "ia.json#/$defs/extracto",
+}
+for ej, ref in MAPA_DEFS.items():
+    doc = json.load(open(os.path.join(EJ, ej)))
+    doc = {k: v for k, v in doc.items() if not k.startswith("$")}
+    v = Draft202012Validator({"$ref": "https://vereda.ar/esquemas/v1/" + ref}, registry=registry)
+    errores = sorted(v.iter_errors(doc), key=lambda e: e.path)
+    if errores:
+        fallos += 1
+        print(f"✗ {ej} contra {ref}")
+        for e in errores[:8]:
+            print(f"    {'/'.join(map(str, e.path)) or '(raíz)'}: {e.message[:140]}")
+    else:
+        print(f"✓ {ej} cumple {ref}")
+
 for f in sorted(glob.glob(os.path.join(EJ, "casos", "*.json"))):
     suite = json.load(open(f))
     esq = suite["esquema"]

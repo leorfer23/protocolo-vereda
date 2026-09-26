@@ -1,0 +1,13 @@
+{
+  "$comentario": "GET /ia/yo con la IA activa a mitad de mes.",
+  "estado": "activa",
+  "tope_usd": 5,
+  "periodo": "2026-09",
+  "consumido": {
+    "usd": 0.42,
+    "tokens_entrada": 18000,
+    "tokens_salida": 4200,
+    "generaciones": 7
+  },
+  "pago_previo_pendiente": false
+}
