@@ -47,11 +47,13 @@
       }
     },
     {
-      "espera": "invalido",
-      "porque": "tipo desconocido no entra en el oneOf del esquema de validación del nodo; el cliente lo ignoraría en runtime.",
+      "espera": "valido",
+      "porque": "tipo desconocido (mapa_3d): valida como desconocido; el cliente lo saltea.",
       "doc": {
         "tipo": "mapa_3d",
-        "version": 1
+        "version": 1,
+        "tiles": "https://ejemplo/tiles",
+        "zoom": 14
       }
     },
     {
@@ -71,6 +73,14 @@
             "agregar": true
           }
         ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "sin tipo no es widget.",
+      "doc": {
+        "version": 1,
+        "foo": true
       }
     }
   ]

@@ -46,7 +46,7 @@ Toda función **devuelve un borrador** (o un mensaje con widgets). Confirmarlo e
 | `recomendacion` | Texto + ítems opcionales |
 | `comercio` | Ficha corta del local |
 
-**Regla de compatibilidad:** el cliente **ignora** widgets cuyo `tipo` no conoce y degrada a texto si lo hay. `version` del widget es `1` en esta revisión.
+**Regla de compatibilidad:** el cliente **ignora** widgets cuyo `tipo` no conoce y degrada a texto si lo hay. En el esquema, un tipo desconocido **valida** como objeto genérico (`desconocido`: `tipo` + `version` + props libres) para que el mensaje no falle entero; la app igual lo saltea. Los siete tipos conocidos se validan estrictos. `version` de los conocidos es `1` en esta revisión.
 
 Las acciones (agregar al carrito, confirmar pedido) las ejecuta la **persona** (o su agente) con `crearCarrito` / `agregarItemCarrito` / `confirmarCarrito` — el widget solo propone.
 
