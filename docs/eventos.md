@@ -8,6 +8,7 @@ Todo cambio de estado se publica como un evento (`esquemas/evento.json`), idempo
 | --- | --- | --- |
 | SSE `GET /eventos?desde=<id>` | Apps y agentes conectados | Stream; reconectar con el último id visto |
 | Webhook `POST /webhooks` | Agentes, PSP, sistemas del comercio | HTTP POST firmado; reintentos exponenciales durante 24 h; el receptor responde 2xx |
+| Push (APNs, FCM) | El teléfono de la persona, con la app cerrada | Opcional. Solo un aviso sin datos personales para algunos eventos; lo que pasó se lee en la API. Ver `docs/notificaciones-push.md` |
 | Federación `POST /federacion/entrantes` | Otros nodos | Firma HTTP del nodo emisor; en orden por entidad; mismos reintentos que el webhook. Ver `docs/federacion.md` |
 
 ## Quién recibe cada evento por SSE

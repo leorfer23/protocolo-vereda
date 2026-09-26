@@ -1,0 +1,70 @@
+{
+  "$comentario": "Casos del registro de un teléfono para push (POST /yo/dispositivos).",
+  "esquema": "dispositivo.json#/$defs/registro",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Un iPhone con un build de la App Store.",
+      "doc": {
+        "plataforma": "apns",
+        "app": "ar.vereda.app",
+        "token": "a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Un build de Xcode dice su entorno.",
+      "doc": {
+        "plataforma": "apns",
+        "app": "ar.vereda.app",
+        "token": "a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1",
+        "entorno": "desarrollo"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Android por FCM.",
+      "doc": {
+        "plataforma": "fcm",
+        "app": "ar.vereda.app",
+        "token": "dQw4w9WgXcQ:APA91bHxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin token no hay a quién avisar.",
+      "doc": {
+        "plataforma": "apns",
+        "app": "ar.vereda.app"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Solo APNs y FCM.",
+      "doc": {
+        "plataforma": "webpush",
+        "app": "ar.vereda.app",
+        "token": "a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El app es un bundle id o un package, no un nombre suelto.",
+      "doc": {
+        "plataforma": "apns",
+        "app": "vereda",
+        "token": "a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El registro no lleva la identidad: la pone la sesión.",
+      "doc": {
+        "plataforma": "apns",
+        "app": "ar.vereda.app",
+        "token": "a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1a3f1",
+        "identidad": "x"
+      }
+    }
+  ]
+}

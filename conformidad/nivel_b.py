@@ -122,6 +122,7 @@ class NivelB:
         self._apertura_manual()
         self._videos()
         self._medios(capacidades)
+        self._dispositivos()
         self._equipo(capacidades)
         if self.mandato:
             self._mandato_tope()
@@ -1073,6 +1074,93 @@ class NivelB:
     # La sesión de prueba es la dueña del comercio de prueba; una identidad nueva
     # de /acceso entra al equipo solo con 'pedidos'. Se prueba lo que no puede
     # fallar: entra con su clave, puede lo suyo y nada más, y sacarla corta ya.
+    # notificaciones push (docs/notificaciones-push.md): opcional ---------------
+    def _dispositivos(self):
+        cat, opid = "push", "registrarDispositivo"
+        r = cliente.get(self.origen + "/.well-known/vereda.json", timeout=self.timeout)
+        nodo = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else {}
+        push = nodo.get("push") if isinstance(nodo.get("push"), dict) else None
+        base = self.base_v1 + "/yo/dispositivos"
+        token = uuid.uuid4().hex + uuid.uuid4().hex
+        if not push:
+            desc = "sin push en /.well-known/vereda.json, registrarDispositivo responde 501 no_implementado"
+            r = cliente.solicitud("POST", base, headers=self._cabecera(), json_body={"plataforma": "apns", "app": "ar.vereda.conformidad", "token": token}, timeout=self.timeout)
+            if not r.ok:
+                self.casos.append(_fallo(cat, opid, desc, r.motivo))
+            elif r.estado != 501:
+                self.casos.append(_fallo(cat, opid, desc, f"esperaba 501, llegó {r.estado}"))
+            else:
+                self.casos.append(_ok(cat, opid, desc))
+            return
+        apps = push.get("apps") or []
+        if not apps or not apps[0].get("plataformas"):
+            self.casos.append(_fallo(cat, opid, "push.apps trae al menos una app con sus plataformas", f"push es {push}"))
+            return
+        app, plataforma = apps[0]["app"], apps[0]["plataformas"][0]
+        registro = {"plataforma": plataforma, "app": app, "token": token}
+
+        desc = "registrar un token nuevo responde 201 con el dispositivo, sin el token"
+        r = cliente.solicitud("POST", base, headers=self._cabecera(), json_body=registro, timeout=self.timeout)
+        if not r.ok or r.estado != 201 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 201, llegó {r.estado}"))
+            return
+        dispositivo = r.cuerpo
+        if token in str(dispositivo):
+            self.casos.append(_fallo(cat, opid, desc, "la respuesta trae el token"))
+        else:
+            self.casos.append(self._chequear_esquema(opid, desc, "/yo/dispositivos", "post", dispositivo, "201") or _ok(cat, opid, desc))
+
+        desc = "registrar el mismo token otra vez responde 200 con el mismo dispositivo"
+        r = cliente.solicitud("POST", base, headers=self._cabecera(), json_body=registro, timeout=self.timeout)
+        if not r.ok or r.estado != 200:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+        elif (r.cuerpo or {}).get("id") != dispositivo.get("id"):
+            self.casos.append(_fallo(cat, opid, desc, f"primero {dispositivo.get('id')}, después {(r.cuerpo or {}).get('id')}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        desc = "una app que el nodo no sabe avisar responde 422 app_no_soportada con detalle.apps"
+        r = cliente.solicitud("POST", base, headers=self._cabecera(), json_body={**registro, "app": "ar.vereda.conformidad.inexistente"}, timeout=self.timeout)
+        codigo = (r.cuerpo or {}).get("codigo") if r.ok and isinstance(r.cuerpo, dict) else None
+        if not r.ok or r.estado != 422 or codigo != "app_no_soportada":
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 422 app_no_soportada, llegó {r.estado} {codigo}"))
+        elif not isinstance(((r.cuerpo or {}).get("detalle") or {}).get("apps"), list):
+            self.casos.append(_fallo(cat, opid, desc, "falta detalle.apps"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
+        if self.mandato:
+            desc = "un token de mandato no registra dispositivos (401 o 403)"
+            r = cliente.solicitud("POST", base, headers=self._cabecera(mandato=True), json_body={**registro, "token": uuid.uuid4().hex}, timeout=self.timeout)
+            if not r.ok or r.estado not in (401, 403):
+                self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 401 o 403, llegó {r.estado}"))
+            else:
+                self.casos.append(_ok(cat, opid, desc))
+
+        opid, desc = "listarDispositivos", "el dispositivo registrado aparece en GET /yo/dispositivos"
+        r = cliente.solicitud("GET", base, headers=self._cabecera(), timeout=self.timeout)
+        ids = [d.get("id") for d in r.cuerpo] if r.ok and r.estado == 200 and isinstance(r.cuerpo, list) else None
+        if ids is None or dispositivo.get("id") not in ids:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"llegó {r.estado}, ids {ids}"))
+        else:
+            self.casos.append(self._chequear_esquema(opid, desc, "/yo/dispositivos", "get", r.cuerpo) or _ok(cat, opid, desc))
+
+        opid, desc = "borrarDispositivo", "borrarlo responde 204, deja de aparecer y borrarlo otra vez responde 404"
+        url = f"{base}/{dispositivo.get('id')}"
+        r = cliente.solicitud("DELETE", url, headers=self._cabecera(), timeout=self.timeout)
+        if not r.ok or r.estado != 204:
+            self.casos.append(_fallo(cat, opid, desc, r.motivo or f"esperaba 204, llegó {r.estado}"))
+            return
+        lista = cliente.solicitud("GET", base, headers=self._cabecera(), timeout=self.timeout)
+        otra = cliente.solicitud("DELETE", url, headers=self._cabecera(), timeout=self.timeout)
+        quedan = [d.get("id") for d in lista.cuerpo] if lista.ok and isinstance(lista.cuerpo, list) else []
+        if dispositivo.get("id") in quedan:
+            self.casos.append(_fallo(cat, opid, desc, "sigue en GET /yo/dispositivos"))
+        elif not otra.ok or otra.estado != 404:
+            self.casos.append(_fallo(cat, opid, desc, otra.motivo or f"la segunda vez esperaba 404, llegó {otra.estado}"))
+        else:
+            self.casos.append(_ok(cat, opid, desc))
+
     def _equipo(self, capacidades):
         cat = "equipo"
         if capacidades.get("custodia_propia") is not True:
