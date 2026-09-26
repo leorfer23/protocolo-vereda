@@ -52,7 +52,8 @@
                 "description": "Quién le paga, cuánto y por qué medio. Son los pagos que nacen en el pedido si acepta ('pago.json'), dichos antes. Los de concepto 'envio' suman 'monto'. Vacío si el envío no le cuesta nada a nadie.",
                 "items": { "$ref": "#/$defs/cobro" }
               },
-              "rendicion": { "$ref": "#/$defs/rendicion" }
+              "rendicion": { "$ref": "#/$defs/rendicion" },
+              "paga_con": { "$ref": "comunes.json#/$defs/monto", "description": "Solo si el comprador paga en efectivo al entregar: con cuánto dijo que paga, para llevar cambio (pago.json, paga_con). Ausente: justo o no dijo." }
             }
           }
         }

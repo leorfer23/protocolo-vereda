@@ -118,7 +118,7 @@ carrito, `monto_envio_acordado_centavos` (`POST /carritos/{id}/confirmar`, herra
 si le sirve. Lo que se cobra y lo que queda en `pago.json` (`concepto: envio`) es ese monto, acordado
 o público, nunca otro.
 
-- **Efectivo.** El pago nace `en_mano` cuando el repartidor acepta el viaje. Quien lo cobra lo marca:
+- **Efectivo.** Si el comprador dijo con qué billete paga, el viaje lo trae en `por_pedido[].paga_con`, para llevar cambio. El pago nace `en_mano` cuando el repartidor acepta el viaje. Quien lo cobra lo marca:
   al entregar, `cobrado_en_mano` en `POST /pedidos/{id}/entregar`; si paga el comercio al retirar,
   `cobrado_en_mano` en `POST /pedidos/{id}/retirar`.
 - **Transferencia.** El pago nace `pendiente` cuando el repartidor acepta, con `instrucciones` que
