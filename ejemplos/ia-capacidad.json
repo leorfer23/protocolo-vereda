@@ -13,6 +13,7 @@
       "sugerir"
     ]
   },
+  "gateway": "openrouter",
   "precio": {
     "modalidad": "costo",
     "margen": 0,

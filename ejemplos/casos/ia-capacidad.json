@@ -28,6 +28,33 @@
           "default_usd": 5,
           "maximo_usd": 50
         },
+        "periodo_reseteo": "mensual",
+        "gateway": "openrouter"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Otro gateway, mismo contrato.",
+      "doc": {
+        "funciones": {
+          "comercio": [
+            "resumen_dia"
+          ]
+        },
+        "gateway": "vercel_ai_gateway",
+        "precio": {
+          "modalidad": "costo",
+          "margen": 0,
+          "moneda": "USD"
+        },
+        "pago": {
+          "destino": "sostenimiento.cuenta",
+          "referencia": "ia:<identidad>:<periodo>"
+        },
+        "tope_mensual_usd": {
+          "default_usd": 5,
+          "maximo_usd": 50
+        },
         "periodo_reseteo": "mensual"
       }
     },
@@ -53,7 +80,8 @@
           "default_usd": 5,
           "maximo_usd": 50
         },
-        "periodo_reseteo": "mensual"
+        "periodo_reseteo": "mensual",
+        "gateway": "openrouter"
       }
     },
     {
@@ -64,6 +92,31 @@
           "comercio": [
             "resumen_dia"
           ]
+        },
+        "pago": {
+          "destino": "sostenimiento.cuenta",
+          "referencia": "ia:<identidad>:<periodo>"
+        },
+        "tope_mensual_usd": {
+          "default_usd": 5,
+          "maximo_usd": 50
+        },
+        "periodo_reseteo": "mensual"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin gateway no hay transparencia del anuncio.",
+      "doc": {
+        "funciones": {
+          "comercio": [
+            "resumen_dia"
+          ]
+        },
+        "precio": {
+          "modalidad": "costo",
+          "margen": 0,
+          "moneda": "USD"
         },
         "pago": {
           "destino": "sostenimiento.cuenta",
