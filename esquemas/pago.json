@@ -30,6 +30,7 @@
     "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados. Un pago al repartidor ('envio', 'propina_repartidor') vence 24 h después de la entrega y nunca cancela el pedido: queda 'vencido' como constancia de que no se marcó recibido (docs/repartidores.md). Lo que va al nodo ('aporte_nodo', 'propina_nodo') vence a los 30 días y tampoco cancela ni cambia nada: queda 'vencido' y listo (docs/sostenimiento.md)." },
     "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
     "idempotency_key": { "type": "string" },
+    "paga_con": { "$ref": "comunes.json#/$defs/monto", "description": "Solo efectivo: con cuánto va a pagar la persona, para que quien cobra en mano lleve cambio. Lo dice el comprador al confirmar el carrito (paga_con_centavos) y lo ven el comercio y el repartidor del pedido. Ausente: paga justo o no dijo (docs/carrito-y-reserva.md, efectivo)." },
     "instrucciones": {
       "type": "object",
       "description": "A dónde transferir, solo con metodo 'transferencia'. Las ve únicamente quien paga, y solo mientras el pedido está activo: no salen en la copia de las otras partes ni en el pedido ya cerrado. Con destinatario repartidor, el alias es el de su 'privado.cobro'. Con destinatario el nodo, es su 'sostenimiento.cuenta', que ya es pública.",
@@ -45,7 +46,8 @@
           "additionalProperties": false
         },
         "advertencia": { "type": "string", "maxLength": 300, "description": "Frase que la app muestra tal cual antes de que la persona transfiera.", "examples": ["Antes de transferir, fijate que tu banco muestre a Juan Pérez como titular del alias. Si muestra otro nombre, no transfieras y avisale al comercio por el chat del pedido."] },
-        "monto": { "$ref": "comunes.json#/$defs/monto" },
+        "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que hay que transferir, tal cual: el 'monto' del pago más 'ajuste_centavos'. Es el número que la app muestra grande y el que el destinatario busca en su cuenta." },
+        "ajuste_centavos": { "type": "integer", "minimum": -99, "maximum": 0, "default": 0, "description": "Centavos que el nodo descontó para que el monto a transferir sea único entre los cobros pendientes por transferencia del mismo destinatario, y así la transferencia se reconozca sola por el monto (docs/carrito-y-reserva.md, centavos únicos). 0 o ausente: sin ajuste. Los absorbe el destinatario; nunca se suma." },
         "referencia": { "type": "string", "description": "Texto corto para el concepto de la transferencia, así el comercio sabe qué pedido le pagaron." }
       }
     },

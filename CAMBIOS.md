@@ -2,6 +2,11 @@
 
 Lo que cambia en el protocolo después de publicarlo, del más nuevo al más viejo. Un cambio **incompatible** obliga a los clientes a actualizarse.
 
+## 2026-09-25
+
+- **Centavos únicos en la transferencia directa.** `pago.instrucciones.monto` es lo que hay que transferir y el nodo lo hace único entre los cobros `pendiente` por transferencia del mismo destinatario: si otro pendiente pide el mismo monto, descuenta los centavos libres más chicos (1 a 99) y lo anota en `instrucciones.ajuste_centavos` (0 o negativo, nunca suma). El destinatario reconoce la transferencia por el monto, sin leer el concepto. Default del protocolo; el comercio lo apaga con `privado.cuenta_cobro.centavos_unicos: false`. Reglas en `docs/carrito-y-reserva.md`, "Transferencia directa". Ningún cliente cambia: las apps ya mostraban `instrucciones.monto`.
+- **¿Con cuánto pagás?** `confirmarCarrito` y `carrito_confirmar` suman `paga_con_centavos`, solo con efectivo: el billete con el que paga la persona, para que quien cobra en mano lleve cambio. Queda en `pago.paga_con` y el repartidor lo ve en `viaje.pago_repartidor.por_pedido[].paga_con`. Menor que lo que paga en mano es `422 paga_con_insuficiente`, nuevo en `esquemas/error.json`. Opcional: ningún cliente cambia.
+
 ## 2026-09-24
 
 - Ver una invitación al equipo antes de aceptarla: `GET /equipo/invitaciones/{codigo}` (`verInvitacion`) devuelve `equipo.json#/$defs/invitacion` sin `codigo` ni `enlace`, con `comercio_nombre`, para que la app muestre a qué local entra la persona. No consume la invitación. Mismo alcance que `aceptarInvitacion` (sesión o mandato `administrar`) y el mismo 410 `invitacion_invalida` para un código que ya no sirve. Ningún cliente cambia.
