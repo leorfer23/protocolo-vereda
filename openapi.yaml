@@ -2476,7 +2476,7 @@ components:
               nombre: { type: string, pattern: "^[a-z_]+$", description: "Clave en 'credenciales' (username, client_id, client_secret_id)." }
               secreto: { type: boolean, default: true, description: "Si el portal lo oculta al tipearlo. Nunca vuelve en una respuesta, sea secreto o no." }
         ambientes: { type: array, minItems: 1, uniqueItems: true, items: { type: string, enum: [produccion, prueba] }, default: [produccion], description: "De qué ambiente del proveedor acepta credenciales. Un nodo de producción anuncia solo 'produccion'; 'prueba' es para nodos de prueba (cobros sin plata real)." }
-        monto_minimo: { $ref: "esquemas/comunes.json#/$defs/monto", description: "El cobro más chico que acepta el proveedor (Ualá Bis: $25). Un pedido con tarjeta por menos es 422 monto_menor_al_minimo." }
+        monto_minimo: { $ref: "esquemas/comunes.json#/$defs/monto", description: "El cobro más chico que acepta el proveedor (Ualá Bis: $100). Un pedido con tarjeta por menos es 422 monto_menor_al_minimo." }
         monto_maximo: { $ref: "esquemas/comunes.json#/$defs/monto", description: "El cobro más grande que acepta el proveedor. Más es 422 monto_mayor_al_maximo." }
         reembolso:
           type: object

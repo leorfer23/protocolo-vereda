@@ -38,8 +38,8 @@ El nodo que ofrece cobradores publica `cobradores` en `/.well-known/vereda.json`
     "conexion": "credenciales",
     "campos": [ { "nombre": "username", "secreto": false }, { "nombre": "client_id", "secreto": false }, { "nombre": "client_secret_id" } ],
     "ambientes": ["produccion"],
-    "monto_minimo": { "centavos": 2500, "moneda": "ARS" },
-    "reembolso": { "parcial": true, "dias_maximo": 90 }
+    "monto_minimo": { "centavos": 10000, "moneda": "ARS" },
+    "reembolso": { "parcial": false, "dias_maximo": 90 }
   },
   { "psp": "mercado_pago", "nombre": "Mercado Pago", "conexion": "redireccion", "reembolso": { "parcial": true, "dias_maximo": 180 } },
   { "psp": "mobbex", "nombre": "Mobbex", "conexion": "credenciales", "campos": [ { "nombre": "api_key" }, { "nombre": "access_token" } ], "reembolso": { "parcial": true, "dias_maximo": 180 } }
@@ -49,8 +49,8 @@ El nodo que ofrece cobradores publica `cobradores` en `/.well-known/vereda.json`
 - `conexion`: `credenciales` (el comercio pega lo que generó en su cuenta del proveedor) o `redireccion` (autoriza en el proveedor y vuelve).
 - `campos`: solo con `credenciales`, qué pide y en qué orden. `secreto` le dice al portal si lo oculta al tipearlo; sea secreto o no, nunca vuelve.
 - `ambientes`: de qué ambiente del proveedor acepta credenciales. Un nodo de producción anuncia solo `produccion`.
-- `monto_minimo` / `monto_maximo`: lo que acepta el proveedor por cobro (Ualá Bis: $25 mínimo).
-- `reembolso`: si el nodo puede devolver por la API del proveedor, si acepta parciales y hasta cuántos días después. Ausente: la devolución es del comercio con su proveedor, fuera del nodo. El plazo de Mobbex no está documentado: el nodo de referencia anuncia 180 días y, si el proveedor rechaza antes, la devolución queda `fallida`.
+- `monto_minimo` / `monto_maximo`: lo que acepta el proveedor por cobro. **Ualá Bis: $100 mínimo** (`10000` centavos). La doc oficial se contradice (tabla de `/v2/orders/create`: `"2500"` / $25; errores de la misma página: `"Minimum amount is 100.00"`). El nodo de referencia anuncia el más alto: un pedido de $50 que Ualá rechace deja al comprador sin pagar; uno que el nodo no ofrece con Ualá, no. Si un humo futuro contra stage confirma que $25 pasa, se baja el anuncio.
+- `reembolso`: si el nodo puede devolver por la API del proveedor, si acepta parciales y hasta cuántos días después. Ausente: la devolución es del comercio con su proveedor, fuera del nodo. **Ualá Bis anuncia `parcial: false`**: la API acepta un `amount` menor, pero no documenta cómo queda la orden tras una parcial (la re-consulta es lo único que confirma y `REFUNDED` es "el pago fue devuelto"); hasta verlo en el sandbox, solo total. El plazo de Mobbex no está documentado: el nodo de referencia anuncia 180 días y, si el proveedor rechaza antes, la devolución queda `fallida`.
 
 Sin `cobradores`, las operaciones del cobrador responden `501 no_implementado` y las apps no ofrecen tarjeta.
 
@@ -136,7 +136,7 @@ Lo que un proveedor tiene de particular vive en un **adaptador**. El nodo de ref
 | **Autorizar / canjear / renovar** | Solo redirección: URL de autorización, canje del código, renovación del token | No aplica: el token de 24 h se vuelve a pedir con las credenciales | OAuth con PKCE; el refresh token **rota en cada uso** y se guarda en la misma transacción | No aplica: el token de la entidad no vence (NC) |
 | **Crear cobro** | Monto, referencia externa, vencimiento, URL de aviso, vuelta. Devuelve `psp_referencia` y `link_pago` | `POST /v2/api/checkout`: `amount` en centavos como string, `external_reference`, `notification_url`, `callback_success` / `callback_fail` → `uuid`, `links.checkout_link` | `POST /checkout/preferences` sin `marketplace_fee`, `binary_mode: true`, `expiration_date_to` = `vence` → `id`, `init_point` | `POST /p/checkout` con `total`, `reference` (única), `webhook`, `return_url`, `timeout` = minutos hasta `vence`, sin `split` → `id`, `url` |
 | **Re-consultar** | Estado real del cobro, monto y referencia externa. Es lo único que confirma | `GET /v2/api/orders/{uuid}` | `GET /v1/payments/{id}` (o la búsqueda por `external_reference`) | `GET /p/operations/{id}` (o `?ref=`) |
-| **Reembolsar** | Total o parcial, idempotente | `POST /v2/api/orders/{uuid}/refund` con `amount`; responde `INITIATED`, el resultado llega por aviso | `POST /v1/payments/{id}/refunds` con `X-Idempotency-Key` | Total `GET /p/operations/{id}/refund`; parcial `POST` con `total`, solo desde el día siguiente al cobro |
+| **Reembolsar** | Total o parcial según el anuncio, idempotente | `POST /v2/api/orders/{uuid}/refund` con `amount`; responde `INITIATED`, el resultado llega por aviso. El anuncio del nodo de referencia lleva `parcial: false` (solo total) hasta confirmar parciales en sandbox | `POST /v1/payments/{id}/refunds` con `X-Idempotency-Key` | Total `GET /p/operations/{id}/refund`; parcial `POST` con `total`, solo desde el día siguiente al cobro |
 | **Interpretar un aviso** | Del cuerpo crudo saca **qué** cobro cambió; nunca **cómo** quedó | `{uuid, external_reference, status}` sin firma | Verifica `x-signature` (HMAC-SHA256) y saca `data.id` | `data.payment.id` y `data.checkout.reference`, sin firma |
 
 El adaptador compara siempre lo re-consultado con lo que el nodo espera: la referencia externa es la del pago y el monto es el del pago. Si no coinciden, no confirma y lo registra.
@@ -186,7 +186,7 @@ Son entre el comercio y su proveedor. Si el proveedor avisa (MP `charged_back` /
 
 ## Los proveedores de prueba (`prueba`, `prueba_redireccion`)
 
-Dos proveedores falsos para la suite de conformidad y los e2e, sin plata ni terceros. Se comportan igual al cobrar y al devolver (como Ualá Bis: sin firma, re-consulta, devoluciones parciales hasta 90 días); cambian en cómo se conectan, para probar las dos formas y **dos proveedores activos a la vez**. Solo los anuncia un nodo de prueba; un nodo de producción nunca.
+Dos proveedores falsos para la suite de conformidad y los e2e, sin plata ni terceros. Se comportan igual al cobrar y al devolver (sin firma, re-consulta, devoluciones hasta 90 días; a diferencia de Ualá Bis en el nodo de referencia, **sí** aceptan parciales); cambian en cómo se conectan, para probar las dos formas y **dos proveedores activos a la vez**. Solo los anuncia un nodo de prueba; un nodo de producción nunca.
 
 - **Anuncio:**
   - `{"psp": "prueba", "nombre": "Proveedor de prueba", "conexion": "credenciales", "campos": [{"nombre": "clave"}], "ambientes": ["prueba"], "monto_minimo": {"centavos": 2500, "moneda": "ARS"}, "reembolso": {"parcial": true, "dias_maximo": 90}}`
