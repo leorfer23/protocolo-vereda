@@ -161,6 +161,7 @@
       }
     },
     "reputacion": { "$ref": "resena.json#/$defs/reputacion" },
+    "rendiciones": { "$ref": "pedido.json#/$defs/rendiciones", "description": "Cómo confirmó el efectivo que le rindieron sus repartidores: conteos, nunca montos (docs/repartidores.md, punto l). No entra en 'reputacion', que mide a sus compradores; es lo que ve el repartidor antes de aceptar un viaje. Lo fija el nodo; ausente si nunca tuvo una rendición." },
     "datos": {
       "type": "object",
       "description": "Política de datos de este comercio, pública en su ficha. Los datos de su operación son del comercio: el protocolo estandariza y promueve un default, no lo impone. Ausente: rige el default recomendado (90 días de retención, sin lista de clientes), que es el estándar.",

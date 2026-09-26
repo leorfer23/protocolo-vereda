@@ -626,12 +626,12 @@
     },
     {
       "name": "ver_repartidor",
-      "description": "Perfil público de un repartidor: nombre, vehículo, cooperativa, si cobra en efectivo o transferencia, qué tiene verificado y su reputación (promedio ponderado, viajes completados y viajes que soltó después de aceptarlos). Ej: '¿quién es el que me trae el pedido?'. No requiere mandato.",
+      "description": "Perfil público de un repartidor: nombre, vehículo, cooperativa, si cobra en efectivo o transferencia, qué tiene verificado y su reputación (promedio ponderado, viajes completados, viajes que soltó después de aceptarlos y cómo rindió el efectivo: reputacion.rendiciones, en conteos). Ej: '¿quién es el que me trae el pedido?', '¿este repartidor rinde bien?'. No requiere mandato.",
       "inputSchema": {"type": "object", "required": ["identidad"], "properties": {"identidad": {"type": "string", "description": "actor@nodo"}}}
     },
     {
       "name": "pedido_asignar",
-      "description": "El comercio decide quién lleva este pedido: él mismo ('comercio'), uno de sus repartidores propios, el pool público, o el repartidor que propuso el comprador ('usuario'). Pisa el orden de asignación de la ficha solo para este pedido. Usala cuando llega 'pedido.sin_repartidor' o cuando el comprador propuso un repartidor y el comercio no tiene 'usuario' en su orden. Requiere scope 'administrar'.",
+      "description": "El comercio decide quién lleva este pedido: él mismo ('comercio'), uno de sus repartidores propios, el pool público, o el repartidor que propuso el comprador ('usuario'). Pisa el orden de asignación de la ficha solo para este pedido. Usala cuando llega 'pedido.sin_repartidor' o cuando el comprador propuso un repartidor y el comercio no tiene 'usuario' en su orden. Antes de elegir a uno, mirá con ver_repartidor cómo rindió el efectivo (reputacion.rendiciones: rendidas, en desacuerdo, sin rendir hace más de 24 h) y contáselo a la persona como hechos; la decisión es de ella. Requiere scope 'administrar'.",
       "inputSchema": {"type": "object", "required": ["pedido_id", "modo"], "properties": {"pedido_id": {"type": "string"}, "modo": {"type": "string", "enum": ["comercio", "propio", "usuario", "pool"]}, "repartidor": {"type": "string", "description": "Con modo 'propio': ofrecerlo solo a este."}}}
     },
     {
@@ -656,7 +656,7 @@
     },
     {
       "name": "viajes_ofrecidos",
-      "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, quién le paga cada envío, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros), cuánto efectivo le va a deber al comercio y si se lo adelanta al retirar (por_pedido[].rendicion), y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
+      "description": "Viajes que se le ofrecen al repartidor ahora, con monto, distancia, peso, paradas, quién le paga cada envío, cuánto y por qué medio (pago_repartidor.por_pedido[].cobros), cuánto efectivo le va a deber al comercio y si se lo adelanta al retirar (por_pedido[].rendicion), cómo confirmó ese comercio las rendiciones que le hicieron (por_pedido[].rendicion.comercio, en conteos), y hasta cuándo se puede aceptar. Del pool solo llegan los que caen enteros en su zona y respetan su vehículo y sus medios de cobro. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "properties": {}}
     },
     {
@@ -681,7 +681,7 @@
     },
     {
       "name": "viaje_retirar",
-      "description": "Marca que el repartidor retiró un pedido del comercio. Si el nodo custodia su clave, el nodo firma el traspaso; por mandato, un agente no firma por la persona y el retiro queda en el historial sin su firma. Si el comercio le pagó el envío en efectivo al retirar, marcá cobrado_en_mano. Requiere scope 'repartir'.",
+      "description": "Marca que el repartidor retiró un pedido del comercio. Si el nodo custodia su clave, el nodo firma el traspaso; por mandato, un agente no firma por la persona y el retiro queda en el historial sin su firma. Si el comercio le pagó el envío en efectivo al retirar, marcá cobrado_en_mano. Si el comercio rinde 'al_retirar', primero declarar la rendición (rendicion_declarar) y esperar que el comercio la confirme: antes responde 409 rendicion_pendiente. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "cobrado_en_mano": {"type": "boolean"}}}
     },
     {

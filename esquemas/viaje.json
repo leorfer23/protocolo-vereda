@@ -76,7 +76,8 @@
       "additionalProperties": false,
       "properties": {
         "cuando": { "type": "string", "enum": ["despues_de_entregar", "al_retirar"], "description": "El 'envios.rendicion_efectivo' del comercio." },
-        "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que va a ser 'pedido.rendicion.monto'." }
+        "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que va a ser 'pedido.rendicion.monto'." },
+        "comercio": { "$ref": "pedido.json#/$defs/rendiciones", "description": "Cómo confirmó ese comercio las rendiciones que le hicieron ('comercio.rendiciones'), para que el repartidor decida antes de aceptar. Ausente si el comercio nunca tuvo una rendición." }
       }
     },
     "cobro": {

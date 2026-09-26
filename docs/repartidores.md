@@ -162,6 +162,8 @@ No hay término de recompra: el comprador no elige al repartidor del pool, así 
 nada. En su lugar, el perfil muestra hechos que no son opinión (`repartidor.json#/$defs/reputacion`):
 
 - `viajes_completados`.
+- `rendiciones`: cómo rindió el efectivo que cobró por cuenta de los comercios (punto l, "A la
+  vista"). Conteos, nunca montos.
 - **Rechazar no penaliza**: una oferta rechazada, o vencida sin respuesta, no queda en ningún lado.
 - **Soltar sí se ve**: un viaje aceptado y después dejado (`POST /viajes/{id}/soltar`, herramienta
   `viaje_soltar`) cuenta en `viajes_soltados`, y aparte en `soltados_con_pedido_retirado` si ya tenía
@@ -306,7 +308,8 @@ Lo único obligatorio es la transparencia:
 
 - el orden de asignación, a quién se le paga el envío y cuándo se le rinde el efectivo están en la
   ficha pública del comercio;
-- los medios de cobro, las verificaciones y la reputación del repartidor están en su perfil público;
+- los medios de cobro, las verificaciones y la reputación del repartidor, con cómo rindió el
+  efectivo, están en su perfil público, y cómo confirmó el comercio lo que le rindieron, en su ficha;
 - el monto, la distancia, el peso, quién paga cada envío y por qué medio, y cuánto efectivo se le
   va a deber al comercio y cuándo, están en el viaje antes de aceptarlo;
 - quién eligió al repartidor y quién responde está en cada pedido (`pedido.asignacion`).
@@ -354,7 +357,7 @@ retirar. Ausente si no cobra nada en mano por cuenta del comercio.
 
 | Quién | Operación | Herramienta | Acción | Desde cuándo |
 | --- | --- | --- | --- | --- |
-| Repartidor | `POST /pedidos/{id}/rendicion` (`declararRendicion`) | `rendicion_declarar` | `rendida`: "te di $X" | `al_retirar`: desde que aceptó el viaje. `despues_de_entregar`: desde que el pedido está `entregado` |
+| Repartidor | `POST /pedidos/{id}/rendicion` (`declararRendicion`) | `rendicion_declarar` | `rendida`: "te di $X" | `al_retirar`: desde que aceptó el viaje, y antes de retirar. `despues_de_entregar`: desde que el pedido está `entregado` |
 | Comercio | `POST /pedidos/{id}/rendicion/confirmar` (`confirmarRendicion`) | `rendicion_confirmar` | `recibida`: "recibí $X" | Después de una `rendida` |
 
 El cuerpo es `{monto, firma?}`. El nodo arma la constancia con la acción de la ruta, el id del
@@ -390,8 +393,46 @@ Los tres eventos llegan al comercio y al repartidor del pedido, con la rendició
 - En desacuerdo, están las dos versiones firmadas. Si se arregla (el repartidor completa la
   diferencia, o el comercio contó mal), cualquiera agrega otra constancia y, cuando la última de
   cada uno coincide, queda `confirmada`. Las anteriores siguen ahí.
-- Lo que corresponda se dice en la reseña, en los dos sentidos (punto e), que es la única
-  reputación que hay. La red no persigue deudas.
+- Lo que corresponda se dice en la reseña, en los dos sentidos (punto e). La red no persigue deudas:
+  lo que hace es contar, a la vista (abajo).
+
+**Con `al_retirar`, el retiro espera la rendición.** Si el comercio eligió que el repartidor le pague
+al retirar, `retirarPedido` (y `viaje_retirar`) no mueve el pedido hasta que la rendición está
+`confirmada`: el repartidor declaró cuánto le dio y el comercio dijo lo mismo. Antes responde 409
+`rendicion_pendiente`, con `detalle.estado` (`pendiente`, `declarada` o `en_desacuerdo`) y un
+`mensaje` que dice qué falta ("Declará cuánto le diste al comercio" o "Falta que el comercio
+confirme que recibió $X"). Es la regla que el comercio eligió y el repartidor vio en la oferta
+(`rendicion.cuando`), no un castigo. Con `despues_de_entregar` el retiro es el de siempre.
+
+**A la vista.** Cómo le fue a cada uno con las rendiciones es público, en conteos y nunca montos
+(`pedido.json#/$defs/rendiciones`):
+
+- **Repartidor**, en `repartidor.reputacion.rendiciones` (su perfil público, `GET
+  /repartidores/{identidad}`, herramienta `ver_repartidor`): lo que ve el comercio al elegir a
+  quién le da el pedido ("Rindió 57 de 57" o "2 en desacuerdo · 1 sin rendir hace más de 24 h").
+- **Comercio**, en `comercio.rendiciones` (su ficha) y en cada pedido de la oferta de viaje, en
+  `pago_repartidor.por_pedido[].rendicion.comercio`: lo que ve el repartidor antes de aceptar
+  ("Confirmó 57 de 57"), porque el que no confirma lo que recibió también hace daño.
+
+Las reglas, para el actor como repartidor o como comercio de un pedido, sobre todas sus
+rendiciones (las que desaparecieron al cancelarse sin constancias no existen):
+
+| Campo | Repartidor | Comercio |
+| --- | --- | --- |
+| `total` | Rendiciones de pedidos `entregado`, más las que tienen alguna constancia | Rendiciones con al menos una `rendida` |
+| `rendidas` | Estado `confirmada` | Estado `confirmada` |
+| `en_desacuerdo` | Estado `en_desacuerdo` | Estado `en_desacuerdo` |
+| `pendientes_mas_24h` | Estado `pendiente` y el pedido `entregado` hace más de 24 h | Estado `declarada` y la última `rendida` tiene más de 24 h |
+
+Son estados de hoy, no historia: una rendición en desacuerdo que se arregla pasa a `rendidas`, y
+una pendiente que se declara sale de `pendientes_mas_24h`. `total`, `rendidas` y `en_desacuerdo`
+se actualizan con cada constancia y cada entrega; `pendientes_mas_24h` depende del reloj, y la
+recalcula el mantenimiento horario del nodo, así que puede llegar con hasta una hora de atraso.
+Cualquiera que tenga las rendiciones de un actor llega a los mismos números.
+
+Nada vence ni castiga: no excluye a nadie del pool, no ordena el despacho, no baja el ranking. Es
+un hecho para quien decide: el comercio que arma su lista de propios o acepta al repartidor del
+comprador, y el repartidor que mira una oferta.
 
 
 ## m. Entregar con código

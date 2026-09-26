@@ -130,6 +130,7 @@
         "viajes_completados": { "type": "integer", "minimum": 0 },
         "viajes_soltados": { "type": "integer", "minimum": 0, "description": "Viajes que aceptó y después soltó, antes de retirar." },
         "soltados_con_pedido_retirado": { "type": "integer", "minimum": 0, "description": "Viajes que soltó con la mercadería ya en la mano. Es lo más grave que puede pasar en un viaje y se muestra aparte." },
+        "rendiciones": { "$ref": "pedido.json#/$defs/rendiciones", "description": "Cómo rindió el efectivo que cobró por cuenta de los comercios: conteos, nunca montos (docs/repartidores.md, punto l). Es lo que ve el comercio al elegirlo." },
         "desde": { "type": "string", "format": "date" }
       }
     },
