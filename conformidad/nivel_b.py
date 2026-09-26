@@ -260,6 +260,7 @@ class NivelB:
             self.casos.append(_ok(cat, "entregarPedido", desc_entrega_mal))
         else:
             self.casos.append(_fallo(cat, "entregarPedido", desc_entrega_mal, f"esperaba 422, llegó {r_entrega_mal.estado}"))
+        self._intentos_restantes(cat, r_entrega_mal)
 
         r_ver = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pedido_id}", headers=self._cabecera(), timeout=self.timeout)
         codigo_real = (r_ver.cuerpo or {}).get("codigo_retiro") if r_ver.ok and r_ver.cuerpo_es_json else None
@@ -276,7 +277,46 @@ class NivelB:
             self.casos.append(_fallo(cat, "entregarPedido", "entregar con el código correcto responde 200", r_entrega.motivo or f"estado {r_entrega.estado}"))
             return pedido_id
         self.casos.append(_ok(cat, "entregarPedido", "entregar con el código correcto responde 200"))
+        self._recepcion_firmada(cat, pedido_id)
         return pedido_id
+
+    # tope de intentos del código (docs/repartidores.md, punto m): el primer
+    # intento equivocado dice que quedan 4 de 5, en número, para que la app
+    # y el agente lo muestren sin parsear el mensaje.
+    def _intentos_restantes(self, cat, r):
+        desc = "un código equivocado dice cuántos intentos quedan: detalle.intentos_restantes = 4 (tope de 5)"
+        if not r.ok or r.estado != 422 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_omitido(cat, "entregarPedido", desc, "el código equivocado no respondió 422 con JSON"))
+            return
+        restantes = (r.cuerpo.get("detalle") or {}).get("intentos_restantes")
+        self.casos.append(_ok(cat, "entregarPedido", desc) if restantes == 4 else _fallo(cat, "entregarPedido", desc, f"llegó intentos_restantes={restantes!r}"))
+
+    # con el código válido, el nodo firma la recepción con su clave
+    # (docs/claves-y-firmas.md, "Recepción con código"): se rearma desde el
+    # pedido y verifica contra las claves de /.well-known/vereda.json.
+    def _recepcion_firmada(self, cat, pedido_id):
+        opid = "entregarPedido"
+        desc = "entregado con el código, firmas.recepcion es del nodo y verifica sobre {accion, pedido_id, usuario, entrego, instante} contra sus claves de /.well-known/vereda.json"
+        r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pedido_id}", headers=self._cabecera(), timeout=self.timeout)
+        pedido = r.cuerpo if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else {}
+        firma = (pedido.get("firmas") or {}).get("recepcion")
+        if not isinstance(firma, dict):
+            self.casos.append(_fallo(cat, opid, desc, "GET /pedidos/{id} no trae firmas.recepcion"))
+            return
+        r_nodo = cliente.solicitud("GET", f"{self.origen}/.well-known/vereda.json", timeout=self.timeout)
+        nodo = r_nodo.cuerpo if r_nodo.ok and r_nodo.cuerpo_es_json and isinstance(r_nodo.cuerpo, dict) else {}
+        dominio, claves = nodo.get("nodo"), nodo.get("claves")
+        if not dominio or not isinstance(claves, list):
+            self.casos.append(_omitido(cat, opid, desc, "/.well-known/vereda.json no dice 'nodo' y 'claves'"))
+            return
+        if firma.get("firmante") != dominio:
+            self.casos.append(_fallo(cat, opid, desc, f"firmada por {firma.get('firmante')!r}, no por el nodo {dominio!r}"))
+            return
+        entrega = next((h for h in reversed(pedido.get("historial") or []) if h.get("estado") == "entregado"), {})
+        recepcion = {"accion": "recepcion", "pedido_id": pedido_id, "usuario": pedido.get("usuario"),
+                     "entrego": entrega.get("actor"), "instante": firma.get("instante"), "firma": firma}
+        ok, motivo = NivelA(self.origen, timeout=self.timeout)._verificar_firma(recepcion, {dominio: claves})
+        self.casos.append(_ok(cat, opid, desc) if ok else _fallo(cat, opid, desc, motivo))
 
     def _paso_a_preparando(self, cat, pedido_id, estado_antes):
         desc = "el primer ítem resuelto pasa el pedido de 'aceptado' a 'preparando'"

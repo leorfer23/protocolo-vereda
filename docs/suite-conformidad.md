@@ -151,6 +151,11 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   `200`, y `firmas.retiro` / `firmas.entrega` son del repartidor y verifican sobre el traspaso
   `{accion, pedido_id, repartidor, instante}` contra su historial (`docs/repartidores.md`,
   punto j). Si el nodo pide la firma y la suite no tiene la clave, se omite.
+- Código de retiro con tope y recepción firmada: el código equivocado da `422` con
+  `detalle.intentos_restantes = 4` (tope de 5), y entregado con el código correcto el pedido trae
+  `firmas.recepcion`, del nodo (`firmante` = `nodo` de `/.well-known/vereda.json`), que verifica
+  sobre `{accion: recepcion, pedido_id, usuario, entrego, instante}` contra sus `claves`, con
+  `entrego` = el actor de `entregado` en el historial (`docs/repartidores.md`, punto m).
 - Rendición del efectivo: entregado ese pedido en efectivo, `GET /pedidos/{id}` trae `rendicion`
   `pendiente` por lo que la repartidora cobró para el comercio. `declararRendicion` con una firma
   que no verifica da `422 firma_invalida`; bien firmada queda `declarada`, y `confirmarRendicion`

@@ -44,7 +44,8 @@
         "ronda_id": { "$ref": "comunes.json#/$defs/id" },
         "grupo_id": { "$ref": "comunes.json#/$defs/id" },
         "viaje_id": { "$ref": "comunes.json#/$defs/id" },
-        "promesa": { "type": "string", "description": "Lo que el usuario aceptó: 'entre hoy y el jueves'." }
+        "promesa": { "type": "string", "description": "Lo que el usuario aceptó: 'entre hoy y el jueves'." },
+        "codigo_entrega": { "type": "string", "enum": ["siempre", "solo_efectivo", "nunca"], "description": "La regla 'codigo_entrega' de la modalidad del comercio, congelada al crear el pedido. Ausente es 'nunca'." }
       }
     },
     "programado_para": { "$ref": "comunes.json#/$defs/instante" },
@@ -103,7 +104,18 @@
     "politica_cancelacion_aplicada": { "type": "string", "description": "Copia del texto vigente al crear el pedido." },
     "eta": { "$ref": "comunes.json#/$defs/instante", "description": "Cuándo lo tiene el comprador: al aceptar, el instante de aceptación más 'tiempo_preparacion_min', más la ruta si hay envío. En retiro, cuándo está listo para buscar." },
     "tiempo_preparacion_min": { "type": "integer", "minimum": 0, "maximum": 1440, "description": "Minutos de preparación que el comercio dio al aceptar este pedido (aceptarPedido). Si no dio ninguno, los de su ficha." },
-    "codigo_retiro": { "type": "string", "pattern": "^[0-9]{4,6}$", "description": "Solo modalidad 'retiro', y no siempre presente: lo ve únicamente el usuario, así que la copia del pedido que recibe cualquier otra parte lo omite. Se lo dice al comercio al pasar a buscar, y el comercio lo envía en 'entregar'. Es la prueba de entrega en mano." },
+    "codigo_retiro": { "type": "string", "pattern": "^[0-9]{4,6}$", "description": "Solo modalidad 'retiro', y no siempre presente: lo ve únicamente el usuario, así que la copia del pedido que recibe cualquier otra parte lo omite. Se lo dice al comercio al pasar a buscar, y el comercio lo envía en 'entregar'. Es la prueba de entrega en mano. Admite 5 intentos equivocados; agotados, el comercio entrega con foto y queda 'sin_codigo' (docs/repartidores.md, punto m)." },
+    "codigo_entrega": { "type": "string", "pattern": "^[0-9]{4}$", "description": "Solo pedidos con envío (toda modalidad menos 'retiro'). Como 'codigo_retiro': lo ve únicamente el usuario y cualquier otra copia lo omite. Se lo dice a quien le entrega, que lo envía en 'entregar'; con código válido el nodo firma 'firmas.recepcion'. Cuándo es obligatorio lo dice 'modalidad.codigo_entrega'; con 'nunca' igual se puede usar. Admite 5 intentos equivocados (docs/repartidores.md, punto m)." },
+    "sin_codigo": {
+      "type": "object",
+      "description": "Lo escribe el nodo cuando el pedido se entregó sin el código que pedía la regla: en envío con 'modalidad.codigo_entrega' que lo exigía, o en retiro con los intentos agotados. Es un hecho a la vista de las partes, no una sanción ni un bloqueo. Ausente en una entrega con código o sin regla que lo pida.",
+      "required": ["motivo", "foto"],
+      "properties": {
+        "motivo": { "type": "string", "enum": ["no_lo_dio", "intentos_agotados"], "description": "'no_lo_dio': quien entregó no mandó código (el comprador no estaba, lo dejó en portería). 'intentos_agotados': se equivocaron 5 veces." },
+        "foto": { "type": "string", "format": "uri", "description": "La foto de la entrega, obligatoria en este caso." }
+      },
+      "additionalProperties": false
+    },
     "ubicacion_repartidor": { "$ref": "comunes.json#/$defs/punto", "description": "La última ubicación que reportó el repartidor, solo mientras el pedido está en_camino y solo para las partes del pedido. Sale en GET /pedidos/{id} y en el evento pedido.ubicacion_repartidor." },
     "notas_usuario": { "type": "string", "maxLength": 500 },
     "requiere_mayoria_edad": { "type": "boolean", "default": false },
@@ -112,12 +124,13 @@
     "rendicion": { "$ref": "#/$defs/rendicion" },
     "firmas": {
       "type": "object",
-      "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; retiro y entrega por el repartidor, sobre '#/$defs/traspaso'; en modalidad 'retiro', entrega por el comercio, con el código del comprador como prueba.",
+      "description": "Creación firmada por el usuario (o su agente con mandato); aceptación por el comercio; retiro y entrega por el repartidor, sobre '#/$defs/traspaso'; en modalidad 'retiro', entrega por el comercio, con el código del comprador como prueba; recepción, por el nodo, cuando quien entregó presentó el código del comprador.",
       "properties": {
         "creacion": { "$ref": "comunes.json#/$defs/firma" },
         "aceptacion": { "$ref": "comunes.json#/$defs/firma" },
         "retiro": { "$ref": "comunes.json#/$defs/firma", "description": "Del repartidor, al retirar del comercio, sobre el JCS de '#/$defs/traspaso' con accion 'retiro'. Es el traspaso: con repartidor elegido por el comprador, marca hasta dónde responde el comercio." },
-        "entrega": { "$ref": "comunes.json#/$defs/firma", "description": "Con repartidor, la suya al entregar, sobre el JCS de '#/$defs/traspaso' con accion 'entrega'. En modalidad 'retiro', la del comercio." }
+        "entrega": { "$ref": "comunes.json#/$defs/firma", "description": "Con repartidor, la suya al entregar, sobre el JCS de '#/$defs/traspaso' con accion 'entrega'. En modalidad 'retiro', la del comercio." },
+        "recepcion": { "$ref": "comunes.json#/$defs/firma", "description": "Del nodo ('firmante' es su dominio), sobre el JCS de '#/$defs/recepcion', cuando la entrega vino con el código válido del comprador ('codigo_entrega' o 'codigo_retiro'). Es la co-firma de hecho del comprador: el código lo tenían solo él y el nodo. Qué prueba y qué no, en docs/claves-y-firmas.md, \"Recepción con código\"." }
       }
     }
   },
@@ -185,6 +198,20 @@
         "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
         "instante": { "$ref": "comunes.json#/$defs/instante" },
         "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Fuera del JCS, como toda firma." }
+      },
+      "additionalProperties": false
+    },
+    "recepcion": {
+      "type": "object",
+      "description": "Lo que firma el nodo cuando quien entrega presenta el código del comprador (docs/claves-y-firmas.md, \"Recepción con código\"). Todo sale del pedido y de la firma: 'pedido_id' es el id, 'usuario' el comprador, 'entrego' quien mandó el código, que es el 'actor' del paso a 'entregado' en 'historial' (el repartidor, o la persona del comercio en retiro o si lleva él) e 'instante' es 'firma.instante'. No lleva el código: queda del comprador.",
+      "required": ["accion", "pedido_id", "usuario", "entrego", "instante"],
+      "properties": {
+        "accion": { "const": "recepcion" },
+        "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+        "usuario": { "$ref": "comunes.json#/$defs/identidad" },
+        "entrego": { "$ref": "comunes.json#/$defs/identidad" },
+        "instante": { "$ref": "comunes.json#/$defs/instante" },
+        "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Del nodo, fuera del JCS, como toda firma." }
       },
       "additionalProperties": false
     },

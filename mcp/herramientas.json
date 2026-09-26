@@ -79,7 +79,7 @@
     },
     {
       "name": "estado_pedido",
-      "description": "Estado actual, ítems (con sustituciones pendientes), hora estimada, el reparto del dinero y, mientras el pedido está en_camino, dónde está el repartidor ('ubicacion_repartidor', su último reporte). Requiere 'leer'; el agente del comercio lee los pedidos de su comercio con 'administrar'.",
+      "description": "Estado actual, ítems (con sustituciones pendientes), hora estimada, el reparto del dinero y, mientras el pedido está en_camino, dónde está el repartidor ('ubicacion_repartidor', su último reporte). Al agente del comprador le trae también su 'codigo_entrega' (o 'codigo_retiro'): es el que la persona le dice a quien le entrega, para que se lo recuerdes cuando lo pida. Requiere 'leer'; el agente del comercio lee los pedidos de su comercio con 'administrar'.",
       "inputSchema": { "type": "object", "required": ["pedido_id"], "properties": { "pedido_id": { "type": "string" } } }
     },
     {
@@ -509,7 +509,7 @@
     },
     {
       "name": "pedido_entregar",
-      "description": "Marca el pedido entregado y firma la entrega. En modalidad retiro hay que pasar el código que trae el usuario; si el pago es en efectivo, marcar que se cobró en mano; si hay alcohol, que se verificó la mayoría de edad. Requiere scope 'administrar'.",
+      "description": "Marca el pedido entregado y firma la entrega. En modalidad retiro hay que pasar el código que trae el usuario; si el pago es en efectivo, marcar que se cobró en mano; si hay alcohol, que se verificó la mayoría de edad. Si lo lleva el comercio y el comprador le da su código de entrega, va en codigo_entrega. Requiere scope 'administrar'.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -522,6 +522,10 @@
           "codigo_retiro": {
             "type": "string"
           },
+          "codigo_entrega": {
+            "type": "string",
+            "description": "El código de 4 dígitos del comprador, en pedidos con envío. Uno equivocado responde 422 con los intentos que quedan (5 en total)."
+          },
           "cobrado_en_mano": {
             "type": "boolean"
           },
@@ -530,7 +534,8 @@
           },
           "foto": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "La foto de la entrega. Obligatoria si la regla del comercio pedía código y no vino, o si se agotaron los intentos: queda 'sin_codigo'."
           }
         }
       }
@@ -681,8 +686,8 @@
     },
     {
       "name": "viaje_entregar",
-      "description": "Marca entregado un pedido del viaje y firma la entrega. Si hay pagos en efectivo (productos, envío o propina), marcá cobrado_en_mano; si hay alcohol, que se verificó la mayoría de edad. Requiere scope 'repartir'.",
-      "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "cobrado_en_mano": {"type": "boolean"}, "mayoria_edad_verificada": {"type": "boolean"}, "foto": {"type": "string", "format": "uri"}}}
+      "description": "Marca entregado un pedido del viaje y firma la entrega. Si hay pagos en efectivo (productos, envío o propina), marcá cobrado_en_mano; si hay alcohol, que se verificó la mayoría de edad. Pedile a la persona el código de entrega que le dio el comprador y mandalo en codigo_entrega: deja la recepción firmada. Si la regla del comercio lo pide y el comprador no está, mandá la foto sin código: se entrega igual y queda 'sin_codigo'. Requiere scope 'repartir'.",
+      "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "codigo_entrega": {"type": "string", "description": "Los 4 dígitos que dijo el comprador. Uno equivocado responde 422 con los intentos que quedan (5 en total); agotados, solo con foto."}, "cobrado_en_mano": {"type": "boolean"}, "mayoria_edad_verificada": {"type": "boolean"}, "foto": {"type": "string", "format": "uri", "description": "La foto de la entrega. Obligatoria si la regla pedía código y no vino, o si se agotaron los intentos."}}}
     },
     {
       "name": "cobro_confirmar",
