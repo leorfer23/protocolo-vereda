@@ -29,6 +29,7 @@
     "link_pago": { "type": "string", "format": "uri" },
     "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados. Un pago al repartidor ('envio', 'propina_repartidor') vence 24 h después de la entrega y nunca cancela el pedido: queda 'vencido' como constancia de que no se marcó recibido (docs/repartidores.md). Lo que va al nodo ('aporte_nodo', 'propina_nodo') vence a los 30 días y tampoco cancela ni cambia nada: queda 'vencido' y listo (docs/sostenimiento.md)." },
     "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
+    "confirmado_por": { "type": "string", "enum": ["comercio", "psp", "repartidor"], "description": "Quién vio la plata y dejó el cobro en confirmado: el comercio (transferencia directa), el proveedor (tarjeta / PSP) o el repartidor (efectivo en mano o envío). Ausente en cobros que aún no están confirmados (docs/cobro-con-psp.md)." },
     "idempotency_key": { "type": "string" },
     "paga_con": { "$ref": "comunes.json#/$defs/monto", "description": "Solo efectivo: con cuánto va a pagar la persona, para que quien cobra en mano lleve cambio. Lo dice el comprador al confirmar el carrito (paga_con_centavos) y lo ven el comercio y el repartidor del pedido. Ausente: paga justo o no dijo (docs/carrito-y-reserva.md, efectivo)." },
     "instrucciones": {

@@ -420,6 +420,76 @@ paths:
         "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comercio.json#/$defs/metricas" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/cobrador/conectar:
+    post:
+      operationId: conectarCobrador
+      tags: [mi-comercio]
+      summary: "Conectar un proveedor de cobros (PSP) al comercio: devuelve la URL de autorización"
+      description: |
+        Solo si el nodo publica `cobradores` en /.well-known/vereda.json; si no, 501
+        `no_implementado` (docs/cobro-con-psp.md). Solo el dueño, o un agente / miembro con
+        permiso `datos`. El cuerpo trae el `psp` (un id de la lista del nodo) y `volver_a`
+        (URL https del portal a la que vuelve después de autorizar). Responde la `url` para
+        que la persona autorice en el proveedor. La vuelta OAuth y el webhook viven fuera de
+        `/v1` (`/pagos/{psp}/volver`, `/pagos/{psp}/webhook`). Al conectar, `medios_cobro`
+        suma `tarjeta`. Los tokens quedan cifrados en el nodo: nunca salen en ninguna respuesta.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [psp, volver_a]
+              additionalProperties: false
+              properties:
+                psp: { type: string, minLength: 1, description: "Id del proveedor, de los que el nodo lista en cobradores (string libre: mercado_pago, uala_bis, mobbex, …)." }
+                volver_a: { type: string, format: uri, description: "URL https del portal a la que el nodo redirige cuando el comercio terminó de autorizar." }
+      responses:
+        "200": { description: URL de autorización, content: { application/json: { schema: { $ref: "#/components/schemas/CobradorConectar" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { description: "No existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Reintentar" }
+        "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /comercios/{id}/cobrador:
+    get:
+      operationId: verCobrador
+      tags: [mi-comercio]
+      summary: "Estado del cobrador conectado: proveedor, titular y cuándo se conectó"
+      description: |
+        Solo el dueño, o un agente / miembro con permiso `datos`. Sin cobrador conectado,
+        404 `no_encontrado`. Sin `cobradores` en el anuncio del nodo, 501 `no_implementado`.
+        Nunca trae tokens ni secretos (docs/cobro-con-psp.md).
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Cobrador" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { description: "No hay cobrador conectado, o no existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    delete:
+      operationId: desconectarCobrador
+      tags: [mi-comercio]
+      summary: "Desconectar el cobrador del comercio y sacar tarjeta de medios_cobro"
+      description: |
+        Solo el dueño, o un agente / miembro con permiso `datos`. Borra los tokens cifrados,
+        saca `tarjeta` de `medios_cobro` y deja de crear cobros con ese proveedor. Sin
+        cobrador, 404. Sin `cobradores` en el anuncio, 501 `no_implementado` (docs/cobro-con-psp.md).
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "204": { description: Desconectado }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { description: "No hay cobrador conectado, o no existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /medios:
     post:
       operationId: subirMedio
@@ -779,13 +849,13 @@ paths:
       summary: Crea el pedido, reserva stock y cupos hasta que venza el cobro, y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
       security: [ { sesion: [] }, { mandato: [pedir] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, propina_nodo_centavos: { type: integer, minimum: 0, description: "Propina opcional del comprador al nodo (docs/sostenimiento.md). Solo si el nodo publica 'acepta_propinas_de_usuarios'; si no, 422 propina_nodo_no_aceptada. Se paga siempre por transferencia a la cuenta del nodo, aparte del pedido, aunque el pedido sea en efectivo; si no se paga, no pasa nada." }, notas: { type: string }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "El repartidor de confianza que nombra el comprador (docs/repartidores.md). Si el comercio tiene 'usuario' en envios.asignacion se le ofrece en ese turno; si no, queda como propuesta que el comercio acepta o no. Lo contrata el comprador: el envío se le paga a él." }, monto_envio_acordado_centavos: { type: integer, minimum: 0, description: "Solo con 'repartidor': lo que el comprador y el repartidor arreglaron entre ellos por el envío. Ausente: rige 'tarifa_envio', la pública. El repartidor lo ve en viaje.pago_repartidor antes de aceptar (docs/repartidores.md)." }, metodo_pago: { type: string, enum: [efectivo, transferencia], description: "Cómo paga el comprador los productos, entre los medios_cobro del comercio (docs/carrito-y-reserva.md, elegir cómo pagar). Ausente: el que elige el comercio, efectivo primero si lo acepta para esa modalidad. Un medio que el comercio no acepta es 422 con detalle.medios_cobro; efectivo que el comprador no puede usar (efectivo.pedidos_entregados_minimo, efectivo.modalidades, efectivo.monto_maximo) es 422 efectivo_no_disponible." }, metodo_envio: { type: string, enum: [efectivo, transferencia], description: "Cómo se paga el envío cuando va directo al repartidor. El despacho solo lo ofrece a repartidores que aceptan ese medio. Ausente: efectivo si el pedido es en efectivo, si no transferencia." }, paga_con_centavos: { type: integer, minimum: 0, description: "Solo con efectivo: con cuánto va a pagar la persona (el billete), para que quien cobra en mano lleve cambio. Queda en pago.paga_con y lo ven el comercio y el repartidor. Menor que lo que paga en mano es 422 paga_con_insuficiente; con otro medio se ignora. Ausente: paga justo o no dijo (docs/carrito-y-reserva.md, efectivo)." }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, propina_nodo_centavos: { type: integer, minimum: 0, description: "Propina opcional del comprador al nodo (docs/sostenimiento.md). Solo si el nodo publica 'acepta_propinas_de_usuarios'; si no, 422 propina_nodo_no_aceptada. Se paga siempre por transferencia a la cuenta del nodo, aparte del pedido, aunque el pedido sea en efectivo; si no se paga, no pasa nada." }, notas: { type: string }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "El repartidor de confianza que nombra el comprador (docs/repartidores.md). Si el comercio tiene 'usuario' en envios.asignacion se le ofrece en ese turno; si no, queda como propuesta que el comercio acepta o no. Lo contrata el comprador: el envío se le paga a él." }, monto_envio_acordado_centavos: { type: integer, minimum: 0, description: "Solo con 'repartidor': lo que el comprador y el repartidor arreglaron entre ellos por el envío. Ausente: rige 'tarifa_envio', la pública. El repartidor lo ve en viaje.pago_repartidor antes de aceptar (docs/repartidores.md)." }, metodo_pago: { type: string, enum: [efectivo, transferencia, tarjeta], description: "Cómo paga el comprador los productos, entre los medios_cobro del comercio (docs/carrito-y-reserva.md, elegir cómo pagar; docs/cobro-con-psp.md). Ausente: el que elige el comercio, efectivo primero si lo acepta para esa modalidad. Un medio que el comercio no acepta es 422 con detalle.medios_cobro; efectivo que el comprador no puede usar (efectivo.pedidos_entregados_minimo, efectivo.modalidades, efectivo.monto_maximo) es 422 efectivo_no_disponible. Con tarjeta el cobro nace pendiente con link_pago, psp, psp_referencia y vence." }, metodo_envio: { type: string, enum: [efectivo, transferencia], description: "Cómo se paga el envío cuando va directo al repartidor. El despacho solo lo ofrece a repartidores que aceptan ese medio. Ausente: efectivo si el pedido es en efectivo, si no transferencia." }, paga_con_centavos: { type: integer, minimum: 0, description: "Solo con efectivo: con cuánto va a pagar la persona (el billete), para que quien cobra en mano lleve cambio. Queda en pago.paga_con y lo ven el comercio y el repartidor. Menor que lo que paga en mano es 422 paga_con_insuficiente; con otro medio se ignora. Ausente: paga justo o no dijo (docs/carrito-y-reserva.md, efectivo)." }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
       responses:
         "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado); el carrito queda no_disponible. O el comercio está cerrado (comercio_cerrado): sin `programado_para`, porque `abierto_ahora` es false; programado, porque sus `horarios` no cubren ese instante. En los dos casos no se crea el pedido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "410": { $ref: "#/components/responses/CarritoVencido" }
-        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada). O un metodo_pago que el comercio no acepta: efectivo_no_disponible si es efectivo, medio_no_disponible si es otro, los dos con detalle.medios_cobro, los que sí acepta. O efectivo que el comprador no puede usar con las condiciones del comercio (efectivo_no_disponible). O paga_con_centavos menor que lo que paga en mano (paga_con_insuficiente).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada). O un metodo_pago que el comercio no acepta: efectivo_no_disponible si es efectivo, medio_no_disponible si es otro (transferencia o tarjeta), los dos con detalle.medios_cobro, los que sí acepta. O efectivo que el comprador no puede usar con las condiciones del comercio (efectivo_no_disponible). O paga_con_centavos menor que lo que paga en mano (paga_con_insuficiente).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /pedidos/{id}:
     get:
@@ -1595,6 +1665,7 @@ components:
         zona: { $ref: "esquemas/comunes.json#/$defs/poligono" }
         endpoints: { type: object, properties: { api: { type: string }, mcp: { type: string }, federacion: { type: string }, medios: { type: string, format: uri, description: "Dónde se suben las fotos de un comercio (subirMedio). Ausente si el operador no ofrece alojarlas: entonces van por URL (docs/medios.md)." } } }
         medios: { $ref: "#/components/schemas/CapacidadMedios" }
+        cobradores: { $ref: "#/components/schemas/CapacidadCobradores" }
         codigo_fuente: { type: string, format: uri }
         acceso: { $ref: "esquemas/acceso.json#/$defs/capacidades", description: "Cómo se entra a este nodo (docs/acceso.md). Una app que habla con cualquier nodo mira esto antes de ofrecer la entrada." }
         vinculaciones: { type: array, uniqueItems: true, items: { $ref: "esquemas/comunes.json#/$defs/tipo_vinculacion" }, description: "Los tipos de vinculación que este nodo sabe comprobar (docs/identidad-y-verificacion.md). Un nodo sin canal de WhatsApp, por ejemplo, no lista 'whatsapp'." }
@@ -1609,6 +1680,28 @@ components:
         limite_bytes: { type: integer, minimum: 1, description: "Tamaño máximo de un archivo, en bytes. El nodo de referencia acepta 2 MB (2097152). La app achica antes de subir." }
         tipos: { type: array, minItems: 1, uniqueItems: true, items: { type: string, enum: [image/jpeg, image/png] }, description: "Tipos que acepta. Una foto HEIC del teléfono se convierte a JPEG en el teléfono, antes de subir." }
         maximo_por_comercio: { type: integer, minimum: 1, description: "Cuántas fotos distintas guarda como máximo para un mismo comercio." }
+    CapacidadCobradores:
+      type: array
+      description: "Proveedores de cobro (PSP) que este nodo ofrece a los comercios (docs/cobro-con-psp.md). Ausente o vacío: conectarCobrador responde 501 no_implementado. Cada ítem es un string libre (mercado_pago, uala_bis, mobbex, …); no hay enum cerrado."
+      minItems: 1
+      uniqueItems: true
+      items: { type: string, minLength: 1 }
+    CobradorConectar:
+      type: object
+      required: [url]
+      additionalProperties: false
+      properties:
+        url: { type: string, format: uri, description: "URL de autorización del proveedor (o del flujo de credenciales). La app o el portal se la muestran a la persona." }
+    Cobrador:
+      type: object
+      required: [psp, estado]
+      additionalProperties: false
+      description: "Lo que ve el comercio de su cobrador conectado. Nunca tokens ni secretos."
+      properties:
+        psp: { type: string, minLength: 1, description: "Id del proveedor (el mismo de cobradores / privado.cuenta_cobro.psp)." }
+        estado: { type: string, enum: [conectado, vencido, revocado], description: "conectado: tokens vigentes. vencido: hay que volver a autorizar. revocado: el comercio o el proveedor cortaron el vínculo." }
+        titular: { type: string, description: "Nombre que muestra el proveedor para la cuenta conectada (privado.cuenta_cobro.titular_psp)." }
+        conectado_en: { $ref: "esquemas/comunes.json#/$defs/instante" }
     MedioSubido:
       type: object
       required: [url, tipo, bytes]

@@ -25,6 +25,98 @@
     },
     {
       "espera": "valido",
+      "porque": "Tarjeta pendiente con link_pago del cobrador: el comprador paga en el PSP (docs/cobro-con-psp.md).",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "pendiente",
+        "psp": "mercado_pago",
+        "psp_referencia": "pref_7K2Q9M",
+        "link_pago": "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=pref_7K2Q9M",
+        "vence": "2026-09-21T15:15:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Tarjeta confirmada por el PSP: confirmado_por dice quién vio la plata.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:06:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "confirmado",
+        "psp": "mercado_pago",
+        "psp_referencia": "pay_88A1",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "psp"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Transferencia confirmada por el comercio: confirmado_por comercio.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:04:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "transferencia",
+        "estado": "confirmado",
+        "confirmado_en": "2026-09-21T15:04:00-03:00",
+        "confirmado_por": "comercio"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "confirmado_por solo admite comercio, psp o repartidor.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-0000000000b1",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:06:00-03:00",
+        "version_esquema": "1.0",
+        "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
+        "destinatario": "lahuerta@nodo.rosario.coop",
+        "concepto": "productos",
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
+        "metodo": "tarjeta",
+        "estado": "confirmado",
+        "confirmado_en": "2026-09-21T15:06:00-03:00",
+        "confirmado_por": "nodo"
+      }
+    },
+    {
+      "espera": "valido",
       "porque": "Efectivo en mano: no hay ventana de pago.",
       "doc": {
         "id": "01926b3a-9999-7000-8000-0000000000b1",
@@ -76,14 +168,20 @@
         "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
         "destinatario": "lahuerta@nodo.rosario.coop",
         "concepto": "productos",
-        "monto": { "centavos": 1250000, "moneda": "ARS" },
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
         "metodo": "transferencia",
         "estado": "pendiente",
         "vence": "2026-09-21T15:15:00-03:00",
         "instrucciones": {
           "alias": "lahuerta.mp",
           "titular": "Juan Pérez",
-          "monto": { "centavos": 1249963, "moneda": "ARS" },
+          "monto": {
+            "centavos": 1249963,
+            "moneda": "ARS"
+          },
           "ajuste_centavos": -37,
           "referencia": "Vereda 7K2Q"
         }
@@ -101,13 +199,19 @@
         "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
         "destinatario": "lahuerta@nodo.rosario.coop",
         "concepto": "productos",
-        "monto": { "centavos": 1250000, "moneda": "ARS" },
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
         "metodo": "transferencia",
         "estado": "pendiente",
         "vence": "2026-09-21T15:15:00-03:00",
         "instrucciones": {
           "alias": "lahuerta.mp",
-          "monto": { "centavos": 1250037, "moneda": "ARS" },
+          "monto": {
+            "centavos": 1250037,
+            "moneda": "ARS"
+          },
           "ajuste_centavos": 37,
           "referencia": "Vereda 7K2Q"
         }
@@ -125,10 +229,16 @@
         "pedido_id": "01926b3a-9999-7000-8000-0000000000b2",
         "destinatario": "lahuerta@nodo.rosario.coop",
         "concepto": "productos",
-        "monto": { "centavos": 1250000, "moneda": "ARS" },
+        "monto": {
+          "centavos": 1250000,
+          "moneda": "ARS"
+        },
         "metodo": "efectivo",
         "estado": "en_mano",
-        "paga_con": { "centavos": 2000000, "moneda": "ARS" }
+        "paga_con": {
+          "centavos": 2000000,
+          "moneda": "ARS"
+        }
       }
     },
     {

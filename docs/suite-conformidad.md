@@ -132,10 +132,12 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   cada comercio de la lista existe y coincide con su ficha pública. La lista puede venir vacía:
   la sesión de prueba puede ser la identidad del comercio y no su dueña.
 - Elegir cómo pagar: con el comercio de prueba, `metodo_pago` fuera de
-  `efectivo`/`transferencia` da `422`; uno que el comercio no acepta da `422`
+  `efectivo`/`transferencia`/`tarjeta` da `422`; uno que el comercio no acepta da `422`
   `efectivo_no_disponible` o `medio_no_disponible` con `detalle.medios_cobro` igual a los
   `medios_cobro` publicados; uno que acepta crea el pedido con el cobro de los productos por
-  ese medio.
+  ese medio. `tarjeta` se prueba solo si el nodo publica `cobradores` en
+  `/.well-known/vereda.json` y el comercio de prueba tiene `tarjeta` en `medios_cobro`
+  (`docs/cobro-con-psp.md`); si no, se omite.
 - Seguimiento en camino: la identidad de prueba se declara repartidora, pide con envío,
   toma el viaje, retira y reporta un punto. `GET /pedidos/{id}` en `en_camino` trae ese
   punto en `ubicacion_repartidor`, y ya entregado no lo trae. Si el nodo no deja armar
