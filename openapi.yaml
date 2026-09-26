@@ -1204,14 +1204,61 @@ paths:
         pedido pasa a pagado), el repartidor para `envio` y `propina_repartidor`. Cualquier otro
         recibe 403 no_es_el_destinatario. Es el único que puede: es el único que ve su cuenta.
         Lo que tiene que buscar en su cuenta es `monto_a_transferir` del pago, con los centavos
-        únicos ya descontados.
+        únicos ya descontados, y si no alcanza, `referencia` en el concepto.
+
+        Vale mientras el cobro esté `pendiente`, esté el pedido donde esté: `creado` pasa a
+        `pagado`; `aceptado`, `preparando`, `listo`, `en_camino` o `entregado` no se mueven y el
+        cobro queda confirmado. Un pedido con transferencia se puede aceptar y entregar antes de
+        confirmar: el cobro queda "por confirmar" a la vista de las dos partes. Un cobro que no
+        está `pendiente` (ya confirmado, vencido o revertido) es 409 `cobro_no_pendiente`.
+
+        Es "Recibido" firmado (docs/carrito-y-reserva.md, "Recibido firmado y revertido"): el
+        nodo arma `pago.json#/$defs/constancia_cobro` con `accion: cobro_recibido`, la guarda en
+        `pago.confirmacion` y, para los productos, la firma en `pedido.firmas.cobro`. La firma es
+        la de la persona que confirma (la dueña, un miembro con `pedidos` o el repartidor), con
+        las reglas de `marcarNoVino`: la manda el teléfono; si no viene y el nodo custodia la
+        clave, firma el nodo; por mandato queda sin firma y con `mandato_id`. Con sesión y
+        custodia propia sin `firma`: mientras el nodo no exija la firma fresca
+        (`acceso.firma_fresca.exigida`), confirma igual y la constancia queda sin firma; cuando
+        la exige, 422 `firma_requerida`. La constancia ya es una firma de la clave sobre la
+        operación con su instante, así que no lleva además las cabeceras de firma fresca.
       security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
       x-permiso-equipo: [pedidos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos, description: "Qué pago del pedido. 'envio' y 'propina_repartidor' van al repartidor (docs/repartidores.md)." }, firma: { $ref: "#/components/schemas/FirmaCobro" } } } } } }
       responses:
         "403": { $ref: "#/components/responses/Error" }
-        "200": { description: Pedido con el cobro confirmado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { description: "firma_requerida (solo con la firma fresca exigida), firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "200": { description: "Pedido con el cobro confirmado y su constancia en pago.confirmacion (y firmas.cobro, para los productos)", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+  /pedidos/{id}/transferencia/revertir:
+    post:
+      operationId: revertirTransferencia
+      tags: [pedidos]
+      summary: "El destinatario marca que una transferencia que había confirmado se fue de su cuenta ('me la desconocieron'), firmado y a la vista"
+      description: |
+        Solo el destinatario del pago que dice `concepto`, como `confirmarTransferencia`; otro,
+        403 `no_es_el_destinatario`. Solo un cobro por transferencia `confirmado`: si no, 409
+        `cobro_no_confirmado`. El cobro pasa a `revertido`, que es final, con la constancia
+        `pago.json#/$defs/constancia_cobro` (`accion: cobro_revertido`, con `motivo`) en
+        `pago.reversion`, al lado de la de `confirmacion`. Nadie arbitra: quedan las dos, las
+        ven quien pagó y el destinatario, y el hecho va al registro público (`pago.revertido`,
+        docs/registro.md) y a los hechos del comprador (`transferencias_revertidas`,
+        docs/hechos-del-comprador.md).
+
+        No mueve el pedido ni lo cancela: lo que pasa con la mercadería lo arreglan por el chat.
+        La firma sigue las reglas de `confirmarTransferencia`. Emite `pago.revertido` a quien
+        pagó y al destinatario. Repetir responde 409 `cobro_no_confirmado`: no hace falta
+        `Idempotency-Key`.
+      security: [ { sesion: [] }, { mandato: [administrar] }, { mandato: [repartir] } ]
+      x-permiso-equipo: [pedidos]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [motivo], properties: { concepto: { type: string, enum: [productos, envio, propina_repartidor], default: productos }, motivo: { type: string, minLength: 1, maxLength: 300, description: "Qué pasó, en una frase: queda en la constancia, a la vista de quien pagó." }, firma: { $ref: "#/components/schemas/FirmaCobro" } } } } } }
+      responses:
+        "200": { description: "Pedido con el cobro revertido y las dos constancias en el pago", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { description: "firma_requerida (solo con la firma fresca exigida), firma_invalida, clave_desconocida, clave_comprometida o un motivo vacío", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /pedidos/{id}/reembolso:
     post:
       operationId: reembolsarPago
@@ -2137,6 +2184,17 @@ components:
         pasos de docs/claves-y-firmas.md contra el historial del repartidor. `firmante` distinto de
         quien actúa, o `instante` a más de 5 minutos del reloj del nodo: 422 `firma_invalida`.
         Vector: `ejemplos/vectores-firma.json` → `traspaso-entrega`.
+      allOf: [ { $ref: "esquemas/comunes.json#/$defs/firma" } ]
+    FirmaCobro:
+      description: |
+        La firma de quien confirma o revierte una transferencia, cuando la clave vive en su
+        teléfono: Ed25519 sobre el JCS de `pago.json#/$defs/constancia_cobro`, `{accion, pago_id,
+        pedido_id?, destinatario, concepto, monto, por, motivo?, instante}`, con `por` =
+        `firmante` e `instante` = el de la firma. El nodo la rearma con la acción de la ruta, los
+        datos del pago de ese `concepto` (`monto` es `monto_a_transferir`), la identidad de la
+        sesión y el `motivo` del cuerpo. `firmante` distinto de quien actúa, o `instante` a más de
+        5 minutos del reloj del nodo: 422 `firma_invalida`. Vector:
+        `ejemplos/vectores-firma.json` → `cobro-recibido`.
       allOf: [ { $ref: "esquemas/comunes.json#/$defs/firma" } ]
     FirmaNoVino:
       description: |

@@ -131,6 +131,7 @@
         "aceptacion": { "$ref": "comunes.json#/$defs/firma" },
         "retiro": { "$ref": "comunes.json#/$defs/firma", "description": "Del repartidor, al retirar del comercio, sobre el JCS de '#/$defs/traspaso' con accion 'retiro'. Es el traspaso: con repartidor elegido por el comprador, marca hasta dónde responde el comercio." },
         "entrega": { "$ref": "comunes.json#/$defs/firma", "description": "Con repartidor, la suya al entregar, sobre el JCS de '#/$defs/traspaso' con accion 'entrega'. En modalidad 'retiro', la del comercio." },
+        "cobro": { "$ref": "comunes.json#/$defs/firma", "description": "Con transferencia directa, la de quien confirmó el cobro de los productos: la misma de 'pago.confirmacion' (esquemas/pago.json#/$defs/constancia_cobro, accion 'cobro_recibido'), a mano en el pedido. No depende del estado del pedido: se agrega cuando el comercio confirma, esté donde esté. Ausente si se confirmó por mandato (sin firma) o todavía no se confirmó." },
         "recepcion": { "$ref": "comunes.json#/$defs/firma", "description": "Del nodo ('firmante' es su dominio), sobre el JCS de '#/$defs/recepcion', cuando la entrega vino con el código válido del comprador ('codigo_entrega' o 'codigo_retiro'). Es la co-firma de hecho del comprador: el código lo tenían solo él y el nodo. Qué prueba y qué no, en docs/claves-y-firmas.md, \"Recepción con código\"." }
       }
     }

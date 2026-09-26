@@ -21,7 +21,7 @@ Esquema en `esquemas/equipo.json`; rutas en `openapi.yaml` (`verEquipo`, `invita
 
 | Permiso | Qué puede |
 | --- | --- |
-| `pedidos` | La bandeja, aceptar y rechazar, resolver ítems, marcar listo, entregar, asignar repartidor, transferencias, devoluciones con tarjeta (`reembolsarPago`) y rendiciones, leer los pedidos y viajes del comercio, y todo lo que pasa dentro de un pedido o una cotización: su chat, sus eventos en `GET /eventos` y presupuestar |
+| `pedidos` | La bandeja, aceptar y rechazar, resolver ítems, marcar listo, entregar, asignar repartidor, transferencias (confirmarlas firmado y marcarlas revertidas), devoluciones con tarjeta (`reembolsarPago`) y rendiciones, leer los pedidos y viajes del comercio, y todo lo que pasa dentro de un pedido o una cotización: su chat, sus eventos en `GET /eventos` y presupuestar |
 | `catalogo` | Ofertas, stock, promociones y fotos |
 | `numeros` | Las métricas del comercio |
 | `datos` | La ficha (horarios, abierto ahora, modalidades, cobro, envíos, política de datos, `clave_cifrado`), el aporte al nodo, vinculaciones y atestaciones, y responder reseñas y denuncias |

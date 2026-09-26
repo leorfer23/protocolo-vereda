@@ -11,6 +11,9 @@
     { "description": "Lo que va al nodo (docs/sostenimiento.md) es solo por transferencia a su cuenta pública, y el destinatario es la identidad 'nodo@<dominio>' del nodo.", "if": { "properties": { "concepto": { "enum": ["aporte_nodo", "propina_nodo"] } }, "required": ["concepto"] }, "then": { "properties": { "metodo": { "const": "transferencia" }, "destinatario": { "pattern": "^nodo@" } } } },
     { "description": "Una devolución por el proveedor (docs/cobro-con-psp.md, devoluciones) dice qué cobro devuelve y la paga el comercio.", "if": { "properties": { "concepto": { "const": "devolucion" }, "metodo": { "const": "tarjeta" } }, "required": ["concepto", "metodo"] }, "then": { "required": ["reembolsa", "pagador", "psp"] } },
     { "description": "'monto_a_transferir' es solo de una transferencia.", "if": { "required": ["monto_a_transferir"] }, "then": { "properties": { "metodo": { "const": "transferencia" } }, "required": ["metodo"] } },
+    { "description": "'referencia' es solo de una transferencia.", "if": { "required": ["referencia"] }, "then": { "properties": { "metodo": { "const": "transferencia" } }, "required": ["metodo"] } },
+    { "description": "'revertido' es solo de una transferencia que estuvo confirmada, y lleva la constancia de quien la marcó (docs/carrito-y-reserva.md, \"Recibido firmado y revertido\").", "if": { "properties": { "estado": { "const": "revertido" } }, "required": ["estado"] }, "then": { "properties": { "metodo": { "const": "transferencia" } }, "required": ["metodo", "reversion"] } },
+    { "description": "'reversion' solo existe en un cobro 'revertido'.", "if": { "required": ["reversion"] }, "then": { "properties": { "estado": { "const": "revertido" } }, "required": ["estado"] } },
     { "description": "'reembolsa' y 'motivo' son solo de una devolución.", "if": { "anyOf": [ { "required": ["reembolsa"] }, { "required": ["motivo"] } ] }, "then": { "properties": { "concepto": { "const": "devolucion" } }, "required": ["concepto"] } },
     { "description": "El aporte al nodo lo paga el comercio: siempre dice quién. Va atado a un pedido entregado ('por_pedido') o a un mes ('mensual').", "if": { "properties": { "concepto": { "const": "aporte_nodo" } }, "required": ["concepto"] }, "then": { "required": ["pagador"], "oneOf": [ { "required": ["pedido_id"], "not": { "required": ["periodo"] } }, { "required": ["periodo"], "not": { "required": ["pedido_id"] } } ] }, "else": { "required": ["pedido_id"], "not": { "required": ["periodo"] } } }
   ],
@@ -25,7 +28,7 @@
     "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor", "propina_comercio", "punto_entrega", "periodo_suscripcion", "devolucion", "aporte_nodo", "propina_nodo"], "description": "'aporte_nodo': lo que el comercio elige aportar al nodo, por pedido o por mes. 'propina_nodo': la propina opcional del comprador al nodo. Ninguno de los dos se suma a lo que cobra el comercio ni lo condiciona (docs/sostenimiento.md)." },
     "monto": { "$ref": "comunes.json#/$defs/monto" },
     "metodo": { "type": "string", "enum": ["qr_interoperable", "transferencia", "tarjeta", "efectivo"] },
-    "estado": { "type": "string", "enum": ["pendiente", "confirmado", "vencido", "en_mano", "fallido"], "description": "'en_mano': efectivo que se cobra al entregar o al retirar. Pasa a 'confirmado' cuando quien entrega marca el cobro en 'entregar'." },
+    "estado": { "type": "string", "enum": ["pendiente", "confirmado", "vencido", "en_mano", "fallido", "revertido"], "description": "'en_mano': efectivo que se cobra al entregar o al retirar. Pasa a 'confirmado' cuando quien entrega marca el cobro en 'entregar'. 'revertido': una transferencia que el destinatario había confirmado y después se fue de su cuenta ('me la desconocieron'); la marca él, firmada, y queda a la vista con 'confirmacion' y 'reversion' (docs/carrito-y-reserva.md, \"Recibido firmado y revertido\"). Es final: no vuelve a 'confirmado' ni mueve el pedido." },
     "psp": { "type": "string", "description": "Proveedor que generó el cobro: el id de 'cobradores' en /.well-known/vereda.json (uala_bis, mercado_pago, prueba, …)." },
     "psp_referencia": { "type": "string", "description": "Id opaco del cobro en el PSP (Ualá Bis: el uuid de la orden; Mercado Pago: el id de la preferencia). En una devolución, el id que el proveedor le dio, si le dio uno." },
     "qr": { "type": "string", "description": "Payload del QR interoperable, si aplica." },
@@ -33,6 +36,9 @@
     "vence": { "$ref": "comunes.json#/$defs/instante", "description": "Creación más la ventana de pago del comercio. Al pasar sin confirmación: pago 'vencido', pedido 'cancelado' con motivo_codigo 'pago_vencido', stock y cupos liberados. Un pago al repartidor ('envio', 'propina_repartidor') vence 24 h después de la entrega y nunca cancela el pedido: queda 'vencido' como constancia de que no se marcó recibido (docs/repartidores.md). Lo que va al nodo ('aporte_nodo', 'propina_nodo') vence a los 30 días y tampoco cancela ni cambia nada: queda 'vencido' y listo (docs/sostenimiento.md)." },
     "confirmado_en": { "$ref": "comunes.json#/$defs/instante" },
     "confirmado_por": { "type": "string", "enum": ["comercio", "psp", "repartidor"], "description": "Quién vio la plata y dejó el cobro en confirmado: el comercio (transferencia directa), el proveedor (tarjeta / PSP: el nodo lo re-consultó y lo vio aprobado, también en una devolución) o el repartidor (efectivo en mano o envío). Ausente en cobros que aún no están confirmados (docs/cobro-con-psp.md)." },
+    "confirmacion": { "$ref": "#/$defs/constancia_cobro", "description": "Solo transferencia confirmada (o revertida): la constancia de 'recibido', con 'accion' 'cobro_recibido', firmada por la persona que la vio en la cuenta del destinatario. La ven quien paga y el destinatario. Ausente en un nodo que todavía no la firma, y en un cobro confirmado antes de 2026-09-26: vale 'confirmado_en'." },
+    "reversion": { "$ref": "#/$defs/constancia_cobro", "description": "Solo 'revertido': la constancia de 'me la desconocieron', con 'accion' 'cobro_revertido' y 'motivo', firmada por la persona del lado del destinatario que la marcó." },
+    "referencia": { "$ref": "#/$defs/referencia", "description": "Solo con metodo 'transferencia': la misma de 'instrucciones.referencia'. A diferencia de 'instrucciones', la ven quien paga y el destinatario, también con el pedido cerrado: es lo que el destinatario busca en el concepto de la transferencia si el monto no alcanza. Ausente en un nodo que todavía no la manda: la tiene 'instrucciones.referencia'." },
     "idempotency_key": { "type": "string" },
     "reembolsa": { "$ref": "comunes.json#/$defs/id", "description": "Solo 'devolucion': el id del cobro que devuelve (reembolsarPago, o una devolución que el comercio hizo directo en su proveedor y el nodo vio al re-consultar)." },
     "reembolsado": { "$ref": "comunes.json#/$defs/monto", "description": "Solo en un cobro con tarjeta: cuánto se devolvió ya, sumando las devoluciones confirmadas. Igual al 'monto': se devolvió todo. Ausente: nada." },
@@ -41,22 +47,23 @@
     "monto_a_transferir": { "$ref": "comunes.json#/$defs/monto", "description": "Solo con metodo 'transferencia': el monto exacto que tiene que llegar, igual a 'instrucciones.monto' (con los centavos únicos ya descontados). A diferencia de 'instrucciones', lo ven quien paga y el destinatario (el comercio con su equipo y sus agentes, o el repartidor que cobra), también con el pedido cerrado: es el número con el que el destinatario reconoce la transferencia en su cuenta antes de confirmarla. Nunca lleva datos de cuenta. Ausente en un nodo que todavía no lo manda: vale 'monto'." },
     "instrucciones": {
       "type": "object",
-      "description": "A dónde transferir, solo con metodo 'transferencia'. Las ve únicamente quien paga, y solo mientras el pedido está activo: no salen en la copia de las otras partes ni en el pedido ya cerrado. El monto sí lo ve también el destinatario, en 'monto_a_transferir'. Con destinatario repartidor, el alias es el de su 'privado.cobro'. Con destinatario el nodo, es su 'sostenimiento.cuenta', que ya es pública.",
+      "description": "A dónde transferir, solo con metodo 'transferencia'. Se congelan al crear el cobro: si después el destinatario cambia su cuenta de cobro, estas no cambian, y la transferencia va a la cuenta que el comprador vio. Las ve únicamente quien paga, y solo mientras el pedido está activo: no salen en la copia de las otras partes ni en el pedido ya cerrado. El monto sí lo ve también el destinatario, en 'monto_a_transferir'. Con destinatario repartidor, el alias es el de su 'privado.cobro'. Con destinatario el nodo, es su 'sostenimiento.cuenta', que ya es pública.",
       "required": ["alias", "monto", "referencia"],
       "properties": {
         "alias": { "type": "string" },
         "titular": { "type": "string", "description": "A nombre de quién dice el destinatario que está el alias. El banco del comprador le muestra el titular real antes de confirmar: si no coincide, no se transfiere." },
         "comprobacion_titular": {
           "type": "object",
-          "description": "Qué dijeron compradores distintos de los últimos 90 días al transferir a este mismo destinatario: si el titular que les mostró su banco coincidía con 'titular'. Solo veredictos, contados; nunca lo que mostró el banco (docs/identidad-y-verificacion.md, cuenta de cobro).",
+          "description": "Qué dijeron compradores distintos que transfirieron a esta misma cuenta (la huella de 'alias' y 'titular', no el destinatario): si el titular que les mostró su banco coincidía con 'titular'. Cambiar el alias o el titular empieza la cuenta de cero, así un impostor no hereda el historial de otra cuenta. Los dos en 0: 'alias nuevo, todavía nadie comprobó el titular'. Solo veredictos, contados; nunca lo que mostró el banco (docs/identidad-y-verificacion.md, cuenta de cobro).",
           "required": ["coincide", "no_coincide"],
           "properties": { "coincide": { "type": "integer", "minimum": 0 }, "no_coincide": { "type": "integer", "minimum": 0 } },
           "additionalProperties": false
         },
+        "cuenta_cobro_desde": { "$ref": "comunes.json#/$defs/instante", "description": "Desde cuándo el destinatario cobra en esta cuenta: el último cambio de su alias o su titular. La app muestra 'Cambió su cuenta de cobro hace 2 días' si es reciente. Ausente en un nodo que todavía no lo manda." },
         "advertencia": { "type": "string", "maxLength": 300, "description": "Frase que la app muestra tal cual antes de que la persona transfiera.", "examples": ["Antes de transferir, fijate que tu banco muestre a Juan Pérez como titular del alias. Si muestra otro nombre, no transfieras y avisale al comercio por el chat del pedido."] },
         "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que hay que transferir, tal cual: el 'monto' del pago más 'ajuste_centavos'. Es el número que la app muestra grande y el que el destinatario busca en su cuenta." },
         "ajuste_centavos": { "type": "integer", "minimum": -99, "maximum": 0, "default": 0, "description": "Centavos que el nodo descontó para que el monto a transferir sea único entre los cobros pendientes por transferencia del mismo destinatario, y así la transferencia se reconozca sola por el monto (docs/carrito-y-reserva.md, centavos únicos). 0 o ausente: sin ajuste. Los absorbe el destinatario; nunca se suma." },
-        "referencia": { "type": "string", "description": "Texto corto para el concepto de la transferencia, así el comercio sabe qué pedido le pagaron." }
+        "referencia": { "$ref": "#/$defs/referencia" }
       }
     },
     "transferencia": {
@@ -67,6 +74,36 @@
         "declarada_en": { "$ref": "comunes.json#/$defs/instante" },
         "comprobante": { "type": "string", "maxLength": 500, "description": "Número de operación o una nota corta. El nodo no guarda archivos." }
       }
+    }
+  },
+  "$defs": {
+    "referencia": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 -]{3,23}$",
+      "description": "Texto corto para el concepto de la transferencia, así el destinatario sabe qué cobro le pagaron: letras, números, espacios y guiones, de 4 a 24, que entra en el concepto de cualquier banco. Lo recomendado: 4 a 12 mayúsculas y números, más una palabra que dice el concepto cuando un pedido tiene más de un cobro al mismo destinatario ('ENVIO', 'PROPINA'). Nunca se deriva del principio del id (un UUIDv7 empieza por la hora: los pedidos del mismo minuto chocarían). Única entre los cobros por transferencia del mismo destinatario que están 'pendiente' o se cerraron hace menos de 24 h, y distinta para cada concepto de un mismo pedido (docs/carrito-y-reserva.md, centavos únicos y referencia).",
+      "examples": ["9F3A7C21", "9F3A7C21 ENVIO", "K7Q2"]
+    },
+    "constancia_cobro": {
+      "type": "object",
+      "description": "Lo que firma la persona del lado del destinatario al confirmar que vio una transferencia en su cuenta ('cobro_recibido') o al marcar que se la desconocieron ('cobro_revertido'). Todo sale del pago y de la firma: 'pago_id' es el id del pago, 'pedido_id' el suyo, 'destinatario', 'concepto' y 'monto' los del pago ('monto' es 'monto_a_transferir', o 'monto' si no hay), 'por' es 'firma.firmante' e 'instante' es 'firma.instante'. Cualquiera la verifica con la clave pública de 'por'. Marcada por un agente con mandato, va sin 'firma' y con 'mandato_id': un agente no firma por la persona.",
+      "required": ["accion", "pago_id", "destinatario", "concepto", "monto", "por", "instante"],
+      "properties": {
+        "accion": { "type": "string", "enum": ["cobro_recibido", "cobro_revertido"] },
+        "pago_id": { "$ref": "comunes.json#/$defs/id" },
+        "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+        "destinatario": { "$ref": "comunes.json#/$defs/identidad", "description": "El comercio o el repartidor que cobra." },
+        "concepto": { "type": "string", "enum": ["productos", "envio", "propina_repartidor"] },
+        "monto": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que tenía que llegar: justo lo que se firma." },
+        "por": { "$ref": "comunes.json#/$defs/identidad", "description": "La persona que la vio (o dejó de verla) en la cuenta: la dueña del comercio o un miembro de su equipo con permiso 'pedidos', o el repartidor. Del lado del comercio no es la identidad del comercio: así queda a nombre de quien confirmó." },
+        "motivo": { "type": "string", "minLength": 1, "maxLength": 300, "description": "Solo 'cobro_revertido', y ahí obligatorio: qué pasó, en una frase ('el banco la devolvió por desconocimiento')." },
+        "instante": { "$ref": "comunes.json#/$defs/instante" },
+        "mandato_id": { "$ref": "comunes.json#/$defs/id", "description": "Solo si la marcó un agente con mandato. Entonces no hay 'firma'." },
+        "firma": { "$ref": "comunes.json#/$defs/firma", "description": "Fuera del JCS, como toda firma." }
+      },
+      "if": { "properties": { "accion": { "const": "cobro_revertido" } } },
+      "then": { "required": ["motivo"] },
+      "else": { "not": { "required": ["motivo"] } },
+      "additionalProperties": false
     }
   }
 }
