@@ -371,6 +371,12 @@
     "condiciones": {
       "type": "object",
       "description": "Todas deben cumplirse. Ausente: siempre.",
+      "dependentSchemas": {
+        "primera_compra_requisitos": {
+          "required": ["primera_compra"],
+          "properties": { "primera_compra": { "const": true } }
+        }
+      },
       "properties": {
         "desde": {
           "$ref": "comunes.json#/$defs/instante"
@@ -426,6 +432,24 @@
           "type": "boolean",
           "default": false,
           "description": "Solo en el primer pedido del usuario a este comercio."
+        },
+        "primera_compra_requisitos": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Solo con primera_compra: lo que el comercio le pide además a quien estrena la promo, para que una identidad nueva no alcance. Público y determinista; se comprueba con la verificación pública de la persona (docs/topes.md). Sin cumplirlo la promo no es candidata, como cualquier otra condición.",
+          "properties": {
+            "contacto_confirmado": {
+              "type": "boolean",
+              "default": false,
+              "description": "true: la persona tiene un teléfono o un email confirmado (usuario.contacto_confirmado)."
+            },
+            "entregados_en_la_red_minimo": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "description": "Pedidos entregados que debe tener la persona en toda la red, en cualquier comercio (verificacion.historial.pedidos_entregados)."
+            }
+          }
         },
         "maximo_unidades": {
           "type": "number",

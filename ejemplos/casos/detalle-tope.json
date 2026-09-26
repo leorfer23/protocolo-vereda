@@ -1,0 +1,29 @@
+{
+  "$comentario": "Casos para el 'detalle' de un 429 tope_alcanzado (docs/topes.md).",
+  "esquema": "error.json#/$defs/detalle_tope",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Tope de mensajes en un pedido.",
+      "doc": {
+        "tope": "mensajes_por_minuto_por_pedido",
+        "maximo": 20
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "El tope tiene que ser uno de los que publica 'topes' en /.well-known/vereda.json.",
+      "doc": {
+        "tope": "pedidos_por_hora",
+        "maximo": 3
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sin 'maximo' la persona no sabe cuál es el límite.",
+      "doc": {
+        "tope": "pedidos_por_minuto_por_identidad"
+      }
+    }
+  ]
+}

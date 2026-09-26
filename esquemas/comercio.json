@@ -63,6 +63,13 @@
         "pedidos_entregados_minimo": { "type": "integer", "minimum": 0, "default": 0, "description": "Pedidos entregados que debe tener el usuario en la red para pagar en efectivo. 0: cualquiera. Un pedido en efectivo reserva sin haber pagado; este mínimo es la defensa del comercio." }
       }
     },
+    "transferencia": {
+      "type": "object",
+      "description": "Solo si 'transferencia' está en medios_cobro. Requisitos públicos que el comercio le pone a la transferencia directa, igual que a 'efectivo' (docs/topes.md). Ausente: cualquiera puede pagar por transferencia.",
+      "properties": {
+        "pedidos_entregados_minimo": { "type": "integer", "minimum": 0, "default": 0, "description": "Pedidos entregados que debe tener el usuario en la red (verificacion.historial.pedidos_entregados) para pagar por transferencia. 0: cualquiera. Si no llega, confirmar responde 422 medio_no_disponible con detalle.requisito." }
+      }
+    },
     "grupal": {
       "type": "object",
       "description": "Cómo trata este comercio los pedidos grupales.",

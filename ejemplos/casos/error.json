@@ -52,6 +52,41 @@
         "mensaje": "Ese comercio no cobra por transferencia.",
         "estado_http": 422
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Tope de pedidos sin pagar: la persona sabe cuáles pagar o cancelar (docs/topes.md).",
+      "doc": {
+        "codigo": "tope_alcanzado",
+        "mensaje": "Tenés 3 pedidos esperando pago. Pagá o cancelá uno para hacer otro.",
+        "estado_http": 429,
+        "detalle": {
+          "tope": "pedidos_sin_pagar_por_identidad",
+          "maximo": 3,
+          "pedidos": [
+            "01926b3a-5555-7000-8000-000000000001",
+            "01926b3a-5555-7000-8000-000000000002",
+            "01926b3a-5555-7000-8000-000000000003"
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Transferencia con un requisito del comercio que la persona todavía no cumple.",
+      "doc": {
+        "codigo": "medio_no_disponible",
+        "mensaje": "Este comercio acepta transferencia desde tu segundo pedido entregado en Vereda. Podés pagar en efectivo.",
+        "estado_http": 422,
+        "detalle": {
+          "requisito": "pedidos_entregados_minimo",
+          "minimo": 1,
+          "tiene": 0,
+          "medios_cobro": [
+            "efectivo"
+          ]
+        }
+      }
     }
   ]
 }

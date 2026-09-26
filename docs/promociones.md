@@ -18,13 +18,13 @@ Las promociones son del comercio, son públicas (`GET /comercios/{id}/promocione
 
 Todo lo comercial lo decide el comercio: qué promociones publica, si se acumulan, contra qué total mide la escalera, cuánto vale un punto y cuánto se puede pagar con puntos. Lo único fijo es el algoritmo, para que todos lleguen a la misma cuenta.
 
-`condiciones` acota cualquiera: vigencia, días, modalidades, medios de cobro, primera compra, máximo de unidades, tope de descuento.
+`condiciones` acota cualquiera: vigencia, días, modalidades, medios de cobro, primera compra (con requisitos opcionales para que una identidad nueva no alcance: contacto confirmado, pedidos entregados en la red), máximo de unidades, tope de descuento.
 
 ## El algoritmo
 
 Se corre al armar el carrito (para mostrar) y al confirmar (para congelar).
 
-1. **Candidatas.** Promociones `activa` del comercio cuyas `condiciones` se cumplen en ese instante, en la hora del comercio, con la modalidad y el medio de cobro elegidos.
+1. **Candidatas.** Promociones `activa` del comercio cuyas `condiciones` se cumplen en ese instante, en la hora del comercio, con la modalidad y el medio de cobro elegidos. Una de `primera_compra` con `primera_compra_requisitos` además pide que la persona los cumpla en ese instante, según su verificación pública (`docs/topes.md`).
 2. **Por ítem.** Para cada ítem dentro del `alcance`:
    - `lleva_n`: solo ofertas que se piden en unidades enteras. Se ordenan las unidades de mayor a menor precio, se arman grupos de `cada`, y en cada grupo completo la más barata lleva el descuento. Con `mezclable`, el grupo junta unidades de todos los ítems del alcance.
    - `escala_cantidad`: vale el tramo más alto con `desde` menor o igual a la cantidad, para todas las unidades.
