@@ -424,75 +424,131 @@ paths:
         "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comercio.json#/$defs/metricas" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "422": { $ref: "#/components/responses/Error" }
-  /comercios/{id}/cobrador/conectar:
-    post:
-      operationId: conectarCobrador
+  /comercios/{id}/cobradores:
+    get:
+      operationId: listarCobradores
       tags: [mi-comercio]
-      summary: "Conectar un proveedor de cobros (PSP) al comercio: devuelve la URL de autorización"
+      summary: "Los proveedores de cobro (PSP) del comercio, cada uno con su estado. Un comercio puede tener varios activos a la vez"
       description: |
-        Solo si el nodo publica `cobradores` en /.well-known/vereda.json; si no, 501
-        `no_implementado` (docs/cobro-con-psp.md). Solo el dueño, o un agente / miembro con
-        permiso `datos`. El cuerpo trae el `psp` (un id de la lista del nodo) y `volver_a`
-        (URL https del portal a la que vuelve después de autorizar). Responde la `url` para
-        que la persona autorice en el proveedor. La vuelta OAuth y el webhook viven fuera de
-        `/v1` (`/pagos/{psp}/volver`, `/pagos/{psp}/webhook`). Al conectar, `medios_cobro`
-        suma `tarjeta`. Los tokens quedan cifrados en el nodo: nunca salen en ninguna respuesta.
+        Solo el dueño, o un agente / miembro con permiso `datos`. Lista vacía si no conectó
+        ninguno. Sin `cobradores` en el anuncio del nodo, 501 `no_implementado`. Nunca trae
+        credenciales, tokens ni secretos (docs/cobro-con-psp.md).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [datos]
       parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Cobrador" } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { description: "No existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /comercios/{id}/cobradores/{psp}/conectar:
+    post:
+      operationId: conectarCobrador
+      tags: [mi-comercio]
+      summary: "Activar un proveedor de cobros (PSP) en el comercio, además de los que ya tenga: por redirección (devuelve la URL de autorización) o con las credenciales del comercio (devuelve el cobrador ya conectado)"
+      description: |
+        Solo si el nodo anuncia ese `psp` en `cobradores` de /.well-known/vereda.json; sin
+        `cobradores`, 501 `no_implementado`; con otros pero no ese, 422 `psp_no_ofrecido`
+        (docs/cobro-con-psp.md). Solo el dueño, o un agente / miembro con permiso `datos`. Decide
+        a qué cuenta va la plata de los compradores, así que pide firma fresca de quien lo conecta
+        (docs/acceso.md, punto 7).
+
+        El anuncio dice cómo se conecta cada proveedor (`conexion`), y el cuerpo va según eso:
+
+        - `redireccion` (Mercado Pago): `{volver_a}` → 200 `{url}`. La persona autoriza en el
+          proveedor; la vuelta llega al nodo fuera de `/v1` (`/pagos/{psp}/volver`) y el nodo
+          redirige a `volver_a`.
+        - `credenciales` (Ualá Bis, Mobbex, el proveedor de prueba): `{credenciales, ambiente?}`
+          → 200 con el `Cobrador` ya conectado. `credenciales` trae exactamente los `campos` del
+          anuncio. El nodo las prueba contra el proveedor antes de guardarlas: si el proveedor las
+          rechaza, 422 `credenciales_invalidas` y no guarda nada. Faltan o sobran campos: 422
+          `cuerpo_invalido` con `detalle.campos`, los que pide el anuncio.
+
+        Mandar la forma que no corresponde al proveedor (credenciales a uno de redirección o al
+        revés) es 422 `conexion_no_corresponde` con `detalle.conexion`. Un comercio tiene **varios
+        proveedores activos a la vez**, uno por `psp`: conectar uno no toca a los otros, y volver a
+        conectar el mismo reemplaza sus credenciales. Con al menos uno `conectado`, `medios_cobro`
+        suma `tarjeta` y la ficha pública lista los activos en `cobradores`. Las credenciales y los
+        tokens quedan cifrados en el nodo y nunca salen en ninguna respuesta, evento ni log.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
+      x-firma-fresca: siempre
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/psp" }, { $ref: "#/components/parameters/firmaFrescaEntrada" }, { $ref: "#/components/parameters/firmaFresca" }, { $ref: "#/components/parameters/contentDigest" } ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [psp, volver_a]
-              additionalProperties: false
-              properties:
-                psp: { type: string, minLength: 1, description: "Id del proveedor, de los que el nodo lista en cobradores (string libre: mercado_pago, uala_bis, mobbex, …)." }
-                volver_a: { type: string, format: uri, description: "URL https del portal a la que el nodo redirige cuando el comercio terminó de autorizar." }
+              oneOf:
+                - type: object
+                  title: Por redirección
+                  required: [volver_a]
+                  additionalProperties: false
+                  properties:
+                    volver_a: { type: string, format: uri, description: "URL https del portal a la que el nodo redirige cuando el comercio terminó de autorizar." }
+                - type: object
+                  title: Con credenciales
+                  required: [credenciales]
+                  additionalProperties: false
+                  properties:
+                    credenciales:
+                      type: object
+                      writeOnly: true
+                      minProperties: 1
+                      maxProperties: 10
+                      additionalProperties: { type: string, minLength: 1, maxLength: 500 }
+                      description: "Lo que el comercio sacó de su cuenta en el proveedor, con los nombres de 'campos' del anuncio (Ualá Bis: username, client_id, client_secret_id; Mobbex: api_key, access_token). Solo de escritura: nunca vuelve en ninguna respuesta."
+                      examples: [ { username: "comercio@ejemplo.com", client_id: "…", client_secret_id: "…" } ]
+                    ambiente: { type: string, enum: [produccion, prueba], default: produccion, description: "De qué ambiente del proveedor son las credenciales. Solo los que el anuncio lista en 'ambientes'; otro es 422 ambiente_no_ofrecido. Un nodo de producción anuncia solo 'produccion'." }
       responses:
-        "200": { description: URL de autorización, content: { application/json: { schema: { $ref: "#/components/schemas/CobradorConectar" } } } }
+        "200":
+          description: "Redirección: la URL de autorización. Credenciales: el cobrador ya conectado."
+          content: { application/json: { schema: { oneOf: [ { $ref: "#/components/schemas/CobradorConectar" }, { $ref: "#/components/schemas/Cobrador" } ] } } }
         "401": { $ref: "#/components/responses/Error" }
-        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "403": { description: "No administra el comercio (no_es_el_dueno), le falta el permiso 'datos' (sin_permiso), o falta la firma fresca o no vale (firma_fresca_requerida, con detalle.motivo).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "404": { description: "No existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
-        "422": { $ref: "#/components/responses/Error" }
+        "422": { description: "psp_no_ofrecido (el nodo no anuncia ese proveedor), conexion_no_corresponde (credenciales a uno de redirección o al revés, con detalle.conexion), cuerpo_invalido (faltan o sobran campos de credenciales, con detalle.campos), ambiente_no_ofrecido, o credenciales_invalidas (el proveedor las rechazó: no se guardó nada).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "429": { $ref: "#/components/responses/Reintentar" }
         "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
-  /comercios/{id}/cobrador:
+        "503": { $ref: "#/components/responses/PspNoDisponible" }
+  /comercios/{id}/cobradores/{psp}:
     get:
       operationId: verCobrador
       tags: [mi-comercio]
-      summary: "Estado del cobrador conectado: proveedor, titular y cuándo se conectó"
+      summary: "Estado de un proveedor del comercio: si está conectado, titular y cuándo se conectó"
       description: |
-        Solo el dueño, o un agente / miembro con permiso `datos`. Sin cobrador conectado,
-        404 `no_encontrado`. Sin `cobradores` en el anuncio del nodo, 501 `no_implementado`.
-        Nunca trae tokens ni secretos (docs/cobro-con-psp.md).
+        Solo el dueño, o un agente / miembro con permiso `datos`. Ese proveedor no conectado en el
+        comercio: 404 `no_encontrado`. Sin `cobradores` en el anuncio del nodo, 501
+        `no_implementado`. Nunca trae credenciales, tokens ni secretos (docs/cobro-con-psp.md).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [datos]
-      parameters: [ { $ref: "#/components/parameters/id" } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/psp" } ]
       responses:
         "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Cobrador" } } } }
         "401": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
-        "404": { description: "No hay cobrador conectado, o no existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "404": { description: "Ese proveedor no está conectado en el comercio, o no existe el comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     delete:
       operationId: desconectarCobrador
       tags: [mi-comercio]
-      summary: "Desconectar el cobrador del comercio y sacar tarjeta de medios_cobro"
+      summary: "Desactivar un proveedor del comercio. Los otros siguen activos"
       description: |
-        Solo el dueño, o un agente / miembro con permiso `datos`. Borra los tokens cifrados,
-        saca `tarjeta` de `medios_cobro` y deja de crear cobros con ese proveedor. Sin
-        cobrador, 404. Sin `cobradores` en el anuncio, 501 `no_implementado` (docs/cobro-con-psp.md).
+        Solo el dueño, o un agente / miembro con permiso `datos`. Deja de crear cobros con ese
+        proveedor y lo saca de los `cobradores` públicos en el acto. Sus credenciales y tokens
+        cifrados se borran cuando cierran los cobros pendientes que ya tenía (hasta entonces el
+        nodo solo los usa para re-consultarlos); sin pendientes, en el acto. Los demás proveedores del comercio no
+        cambian. Si era el último conectado, `tarjeta` sale de `medios_cobro`. Ese proveedor no
+        conectado: 404. Sin `cobradores` en el anuncio, 501 `no_implementado` (docs/cobro-con-psp.md).
       security: [ { sesion: [] }, { mandato: [administrar] } ]
       x-permiso-equipo: [datos]
-      parameters: [ { $ref: "#/components/parameters/id" } ]
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/psp" } ]
       responses:
         "204": { description: Desconectado }
         "401": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
-        "404": { description: "No hay cobrador conectado, o no existe ese comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "404": { description: "Ese proveedor no está conectado en el comercio, o no existe el comercio (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /medios:
     post:
@@ -860,14 +916,15 @@ paths:
       summary: Crea el pedido, reserva stock y cupos hasta que venza el cobro, y devuelve la referencia de cobro. Si excede el mandato, requiere_confirmacion.
       security: [ { sesion: [] }, { mandato: [pedir] } ]
       parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, propina_nodo_centavos: { type: integer, minimum: 0, description: "Propina opcional del comprador al nodo (docs/sostenimiento.md). Solo si el nodo publica 'acepta_propinas_de_usuarios'; si no, 422 propina_nodo_no_aceptada. Se paga siempre por transferencia a la cuenta del nodo, aparte del pedido, aunque el pedido sea en efectivo; si no se paga, no pasa nada." }, notas: { type: string }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "El repartidor de confianza que nombra el comprador (docs/repartidores.md). Si el comercio tiene 'usuario' en envios.asignacion se le ofrece en ese turno; si no, queda como propuesta que el comercio acepta o no. Lo contrata el comprador: el envío se le paga a él." }, monto_envio_acordado_centavos: { type: integer, minimum: 0, description: "Solo con 'repartidor': lo que el comprador y el repartidor arreglaron entre ellos por el envío. Ausente: rige 'tarifa_envio', la pública. El repartidor lo ve en viaje.pago_repartidor antes de aceptar (docs/repartidores.md)." }, metodo_pago: { type: string, enum: [efectivo, transferencia, tarjeta], description: "Cómo paga el comprador los productos, entre los medios_cobro del comercio (docs/carrito-y-reserva.md, elegir cómo pagar; docs/cobro-con-psp.md). Ausente: el que elige el comercio, efectivo primero si lo acepta para esa modalidad. Un medio que el comercio no acepta es 422 con detalle.medios_cobro; efectivo que el comprador no puede usar (efectivo.pedidos_entregados_minimo, efectivo.modalidades, efectivo.monto_maximo) es 422 efectivo_no_disponible. Con tarjeta el cobro nace pendiente con link_pago, psp, psp_referencia y vence." }, metodo_envio: { type: string, enum: [efectivo, transferencia], description: "Cómo se paga el envío cuando va directo al repartidor. El despacho solo lo ofrece a repartidores que aceptan ese medio. Ausente: efectivo si el pedido es en efectivo, si no transferencia." }, paga_con_centavos: { type: integer, minimum: 0, description: "Solo con efectivo: con cuánto va a pagar la persona (el billete), para que quien cobra en mano lleve cambio. Queda en pago.paga_con y lo ven el comercio y el repartidor. Menor que lo que paga en mano es 422 paga_con_insuficiente; con otro medio se ignora. Ausente: paga justo o no dijo (docs/carrito-y-reserva.md, efectivo)." }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { propina_repartidor_centavos: { type: integer }, propina_comercio_centavos: { type: integer }, propina_nodo_centavos: { type: integer, minimum: 0, description: "Propina opcional del comprador al nodo (docs/sostenimiento.md). Solo si el nodo publica 'acepta_propinas_de_usuarios'; si no, 422 propina_nodo_no_aceptada. Se paga siempre por transferencia a la cuenta del nodo, aparte del pedido, aunque el pedido sea en efectivo; si no se paga, no pasa nada." }, notas: { type: string }, repartidor: { $ref: "esquemas/comunes.json#/$defs/identidad", description: "El repartidor de confianza que nombra el comprador (docs/repartidores.md). Si el comercio tiene 'usuario' en envios.asignacion se le ofrece en ese turno; si no, queda como propuesta que el comercio acepta o no. Lo contrata el comprador: el envío se le paga a él." }, monto_envio_acordado_centavos: { type: integer, minimum: 0, description: "Solo con 'repartidor': lo que el comprador y el repartidor arreglaron entre ellos por el envío. Ausente: rige 'tarifa_envio', la pública. El repartidor lo ve en viaje.pago_repartidor antes de aceptar (docs/repartidores.md)." }, metodo_pago: { type: string, enum: [efectivo, transferencia, tarjeta], description: "Cómo paga el comprador los productos, entre los medios_cobro del comercio (docs/carrito-y-reserva.md, elegir cómo pagar; docs/cobro-con-psp.md). Ausente: el que elige el comercio, efectivo primero si lo acepta para esa modalidad. Un medio que el comercio no acepta es 422 con detalle.medios_cobro; efectivo que el comprador no puede usar (efectivo.pedidos_entregados_minimo, efectivo.modalidades, efectivo.monto_maximo) es 422 efectivo_no_disponible. Con tarjeta el cobro nace pendiente con link_pago, psp, psp_referencia y vence." }, psp: { type: string, pattern: "^[a-z0-9_]+$", description: "Solo con metodo_pago tarjeta: con qué proveedor paga, uno de los 'cobradores' de la ficha del comercio (los que tiene activos). Ausente: el único que tiene, si tiene uno solo; con varios es 422 psp_requerido con detalle.cobradores. Uno que el comercio no tiene activo: 422 psp_no_activo con detalle.cobradores. Con otro medio se ignora (docs/cobro-con-psp.md)." }, metodo_envio: { type: string, enum: [efectivo, transferencia], description: "Cómo se paga el envío cuando va directo al repartidor. El despacho solo lo ofrece a repartidores que aceptan ese medio. Ausente: efectivo si el pedido es en efectivo, si no transferencia." }, paga_con_centavos: { type: integer, minimum: 0, description: "Solo con efectivo: con cuánto va a pagar la persona (el billete), para que quien cobra en mano lleve cambio. Queda en pago.paga_con y lo ven el comercio y el repartidor. Menor que lo que paga en mano es 422 paga_con_insuficiente; con otro medio se ignora. Ausente: paga justo o no dijo (docs/carrito-y-reserva.md, efectivo)." }, acepta_lista_de_clientes: { type: boolean, default: false, description: "Consentimiento para que este comercio guarde nombre y contacto más allá del pedido, si su política 'datos.lista_de_clientes' lo declara. Se pregunta una sola vez por comercio y se puede decir que no: el pedido sale igual. Sin este campo en true el nodo no entrega esos datos al comercio pasado el pedido activo." } } } } } }
       responses:
         "201": { description: Pedido creado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
         "402": { description: Fuera de mandato; trae confirmación, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "409": { description: "Stock o cupo agotado entre el armado y la confirmación (oferta_no_disponible, cupo_agotado); el carrito queda no_disponible. O el comercio está cerrado (comercio_cerrado): sin `programado_para`, porque `abierto_ahora` es false; programado, porque sus `horarios` no cubren ese instante. En los dos casos no se crea el pedido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "410": { $ref: "#/components/responses/CarritoVencido" }
         "429": { $ref: "#/components/responses/TopeAlcanzado" }
-        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada). O un metodo_pago que el comercio no acepta: efectivo_no_disponible si es efectivo, medio_no_disponible si es otro (transferencia o tarjeta), los dos con detalle.medios_cobro, los que sí acepta. O efectivo o transferencia que el comprador no puede usar con los requisitos del comercio (efectivo_no_disponible, medio_no_disponible), con detalle.requisito y detalle.medios_cobro: los que sí puede usar. O paga_con_centavos menor que lo que paga en mano (paga_con_insuficiente).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "El repartidor nombrado no acepta que lo elija un comprador (repartidor_no_acepta), o no existe. O una propina al nodo que el nodo no acepta (propina_nodo_no_aceptada). O un metodo_pago que el comercio no acepta: efectivo_no_disponible si es efectivo, medio_no_disponible si es otro (transferencia o tarjeta), los dos con detalle.medios_cobro, los que sí acepta. O efectivo o transferencia que el comprador no puede usar con los requisitos del comercio (efectivo_no_disponible, medio_no_disponible), con detalle.requisito y detalle.medios_cobro: los que sí puede usar. O paga_con_centavos menor que lo que paga en mano (paga_con_insuficiente). O, con tarjeta, un total fuera de lo que acepta el proveedor del comercio: monto_menor_al_minimo o monto_mayor_al_maximo, con detalle.monto_minimo o detalle.monto_maximo (docs/cobro-con-psp.md). O, con tarjeta, psp_requerido (el comercio tiene varios proveedores activos y no dijo cuál) o psp_no_activo (ese proveedor no está activo en este comercio), los dos con detalle.cobradores.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { description: "Con tarjeta: el proveedor del comercio no respondió al crear el cobro (psp_no_disponible). No se creó el pedido ni se reservó nada; el carrito sigue igual.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /pedidos/{id}:
     get:
@@ -1054,6 +1111,47 @@ paths:
       responses:
         "403": { $ref: "#/components/responses/Error" }
         "200": { description: Pedido con el cobro confirmado, content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+  /pedidos/{id}/reembolso:
+    post:
+      operationId: reembolsarPago
+      tags: [pedidos]
+      summary: "El comercio devuelve, total o parcial, un cobro con tarjeta por la API de su proveedor. Queda como un pago 'devolucion' en el pedido"
+      description: |
+        Solo el comercio del pedido (la dueña, o un agente / miembro con permiso `pedidos`), y
+        solo sobre el cobro de `productos` con `metodo: tarjeta` ya `confirmado` por el
+        proveedor (docs/cobro-con-psp.md, devoluciones). La plata sale de la cuenta del comercio
+        en su proveedor, con sus credenciales: Vereda no pone ni retiene nada.
+
+        Crea en `pagos` del pedido un pago `concepto: devolucion`, `pagador` el comercio,
+        `destinatario` el comprador, mismo `metodo` y `psp`, `reembolsa` el id del cobro
+        original, `estado: pendiente` y `vence` (hasta cuándo el nodo re-consulta). Cuando el
+        proveedor confirma, pasa a `confirmado` con `confirmado_por: psp`, el cobro original
+        suma `reembolsado` y sale `pago.reembolsado`; si el proveedor la rechaza, `fallido` y
+        sale `pago.fallido`. Devolver no cancela el pedido ni cambia su estado.
+
+        Sin `monto_centavos` devuelve todo lo que queda sin devolver. Con `Idempotency-Key`: el
+        mismo key no devuelve dos veces.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos]
+      parameters: [ { $ref: "#/components/parameters/id" }, { $ref: "#/components/parameters/idem" } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                monto_centavos: { type: integer, minimum: 1, description: "Cuánto devolver. Ausente: todo lo que queda sin devolver del cobro. Menos que eso solo si el proveedor acepta parciales (reembolso.parcial en su anuncio)." }
+                motivo: { type: string, maxLength: 300, description: "Por qué, en una frase. Lo ve el comprador en el pago de devolución." }
+      responses:
+        "200": { description: "Pedido con el pago de devolución en pendiente (o ya confirmado, si el proveedor respondió en el momento)", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "404": { description: "No existe ese pedido, o no es de un comercio que administra (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "Ya hay una devolución de ese cobro en curso (reembolso_en_curso): el proveedor no acepta otra hasta que termine.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "reembolso_no_disponible: el cobro no es con tarjeta, no está confirmado, o el nodo no puede devolver con ese proveedor (sin 'reembolso' en su anuncio); con otro medio, la devolución la hace el comercio por su cuenta. reembolso_fuera_de_plazo: pasaron más de reembolso.dias_maximo desde que se cobró (Ualá Bis: 90 días), con detalle.dias_maximo. reembolso_parcial_no_admitido: el proveedor solo devuelve el total. monto_excede_lo_cobrado: más de lo que queda sin devolver, con detalle.disponible_centavos.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece cobradores (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { $ref: "#/components/responses/PspNoDisponible" }
   /pedidos/{id}/rendicion:
     post:
       operationId: declararRendicion
@@ -1750,6 +1848,7 @@ paths:
 components:
   parameters:
     id: { name: id, in: path, required: true, schema: { type: string } }
+    psp: { name: psp, in: path, required: true, schema: { type: string, pattern: "^[a-z0-9_]+$" }, description: "Id del proveedor, uno de los que el nodo anuncia en cobradores (uala_bis, mercado_pago, mobbex, prueba, …)." }
     idem: { name: Idempotency-Key, in: header, required: true, schema: { type: string }, description: Reintentar nunca duplica }
     ifNoneMatch: { name: If-None-Match, in: header, schema: { type: string }, description: "El ETag de la última respuesta. Si el recurso no cambió, el nodo responde 304 sin cuerpo." }
     firmaFrescaEntrada: { name: Signature-Input, in: header, schema: { type: string }, example: 'fresca=("@method" "@path" "@query" "content-digest");created=1790000000;keyid="<clave activa, base64url>";alg="ed25519";tag="vereda-fresca"', description: "Firma fresca (docs/acceso.md, punto 7): la etiqueta `fresca`, los cuatro componentes en ese orden, `created` a menos de `acceso.firma_fresca.ventana_segundos` de la hora del nodo, `keyid` la clave activa de la persona, `alg` ed25519 y `tag` vereda-fresca. Vector en ejemplos/vectores-firma.json → firma_fresca." }
@@ -1766,6 +1865,7 @@ components:
     NoEsElDueno: { description: "No administra el comercio: no es la dueña ni está en su equipo (código no_es_el_dueno), o el mandato no trae el scope 'administrar'. Si está en el equipo pero le falta el permiso de la operación, el código es sin_permiso (docs/equipo.md).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinPermiso: { description: "Está en el equipo pero le falta el permiso que pide la operación (código sin_permiso, con `detalle.falta`: el permiso que falta), o quiere cambiar o sacar a la dueña. Quien no está en el equipo recibe no_es_el_dueno, como siempre.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     FirmaFrescaRequerida: { description: "Operación sensible sin firma fresca válida (firma_fresca_requerida, con `detalle.motivo`: falta, vencida, invalida, clave_no_activa o sesion_no_reciente). Un token de mandato no alcanza: la firma es de la clave de la persona (docs/acceso.md, punto 7).", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    PspNoDisponible: { description: "El proveedor de cobros no respondió o respondió con un error propio (psp_no_disponible). No se hizo nada: reintentar más tarde, respetando Retry-After si viene.", headers: { Retry-After: { schema: { type: integer }, description: Segundos } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
     SinCambios: { description: Sin cambios desde el ETag enviado, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } } }
   securitySchemes:
     sesion: { type: http, scheme: bearer, description: "Token de sesión. Se obtiene en /acceso: firmando un desafío con la clave propia, o con un código por mensaje si el nodo custodia la clave (docs/acceso.md)" }
@@ -1830,24 +1930,58 @@ components:
         maximo_por_comercio: { type: integer, minimum: 1, description: "Cuántas fotos distintas guarda como máximo para un mismo comercio." }
     CapacidadCobradores:
       type: array
-      description: "Proveedores de cobro (PSP) que este nodo ofrece a los comercios (docs/cobro-con-psp.md). Ausente o vacío: conectarCobrador responde 501 no_implementado. Cada ítem es un string libre (mercado_pago, uala_bis, mobbex, …); no hay enum cerrado."
+      description: "Proveedores de cobro (PSP) que este nodo ofrece a los comercios, y cómo se conecta cada uno (docs/cobro-con-psp.md). Un proveedor aparece solo si el operador lo encendió y el nodo tiene lo que necesita para usarlo (interruptores). Ausente o vacío: conectarCobrador responde 501 no_implementado y las apps no ofrecen tarjeta."
       minItems: 1
-      uniqueItems: true
-      items: { type: string, minLength: 1 }
+      items: { $ref: "#/components/schemas/CapacidadCobrador" }
+    CapacidadCobrador:
+      type: object
+      required: [psp, conexion]
+      additionalProperties: false
+      if: { properties: { conexion: { const: credenciales } } }
+      then: { required: [campos] }
+      properties:
+        psp: { type: string, pattern: "^[a-z0-9_]+$", description: "Id del proveedor: string libre, sin enum cerrado. Orientativos: uala_bis, mercado_pago, mobbex; 'prueba' y 'prueba_redireccion' son los proveedores falsos de conformidad y e2e, que un nodo de producción nunca anuncia." }
+        nombre: { type: string, maxLength: 60, description: "Cómo se llama el proveedor, para mostrar (Ualá Bis, Mercado Pago)." }
+        conexion: { type: string, enum: [redireccion, credenciales], description: "redireccion: conectarCobrador devuelve una URL de autorización (OAuth). credenciales: el comercio pega en el portal lo que generó en su cuenta del proveedor, y conectarCobrador las prueba y responde el cobrador ya conectado." }
+        campos:
+          type: array
+          minItems: 1
+          maxItems: 10
+          description: "Solo con conexion 'credenciales': qué pide el proveedor, en orden. Las claves de 'credenciales' en conectarCobrador son estos 'nombre'."
+          items:
+            type: object
+            required: [nombre]
+            additionalProperties: false
+            properties:
+              nombre: { type: string, pattern: "^[a-z_]+$", description: "Clave en 'credenciales' (username, client_id, client_secret_id)." }
+              secreto: { type: boolean, default: true, description: "Si el portal lo oculta al tipearlo. Nunca vuelve en una respuesta, sea secreto o no." }
+        ambientes: { type: array, minItems: 1, uniqueItems: true, items: { type: string, enum: [produccion, prueba] }, default: [produccion], description: "De qué ambiente del proveedor acepta credenciales. Un nodo de producción anuncia solo 'produccion'; 'prueba' es para nodos de prueba (cobros sin plata real)." }
+        monto_minimo: { $ref: "esquemas/comunes.json#/$defs/monto", description: "El cobro más chico que acepta el proveedor (Ualá Bis: $25). Un pedido con tarjeta por menos es 422 monto_menor_al_minimo." }
+        monto_maximo: { $ref: "esquemas/comunes.json#/$defs/monto", description: "El cobro más grande que acepta el proveedor. Más es 422 monto_mayor_al_maximo." }
+        reembolso:
+          type: object
+          additionalProperties: false
+          required: [parcial, dias_maximo]
+          description: "Si el nodo puede devolver por la API de este proveedor (reembolsarPago), y hasta cuándo. Ausente: no puede, y la devolución es entre el comercio y su proveedor."
+          properties:
+            parcial: { type: boolean, description: "Si acepta devolver menos que lo cobrado." }
+            dias_maximo: { type: integer, minimum: 1, description: "Días desde que se cobró durante los que el proveedor deja devolver (Ualá Bis: 90, Mercado Pago: 180)." }
     CobradorConectar:
       type: object
       required: [url]
       additionalProperties: false
       properties:
-        url: { type: string, format: uri, description: "URL de autorización del proveedor (o del flujo de credenciales). La app o el portal se la muestran a la persona." }
+        url: { type: string, format: uri, description: "Solo proveedores de redirección: URL de autorización del proveedor. La app o el portal se la muestran a la persona." }
     Cobrador:
       type: object
       required: [psp, estado]
       additionalProperties: false
-      description: "Lo que ve el comercio de su cobrador conectado. Nunca tokens ni secretos."
+      description: "Lo que ve el comercio de uno de sus proveedores de cobro (tiene uno por psp). Nunca credenciales, tokens ni secretos."
       properties:
-        psp: { type: string, minLength: 1, description: "Id del proveedor (el mismo de cobradores / privado.cuenta_cobro.psp)." }
-        estado: { type: string, enum: [conectado, vencido, revocado], description: "conectado: tokens vigentes. vencido: hay que volver a autorizar. revocado: el comercio o el proveedor cortaron el vínculo." }
+        psp: { type: string, minLength: 1, description: "Id del proveedor (el mismo de cobradores en el anuncio y en privado.cuenta_cobro.cobradores)." }
+        conexion: { type: string, enum: [redireccion, credenciales] }
+        ambiente: { type: string, enum: [produccion, prueba], default: produccion }
+        estado: { type: string, enum: [conectado, vencido, revocado, credenciales_rechazadas], description: "conectado: el nodo puede cobrar. vencido: el token venció y no se pudo renovar, hay que volver a autorizar (redirección). revocado: el comercio o el proveedor cortaron el vínculo. credenciales_rechazadas: el proveedor dejó de aceptar las credenciales guardadas (el comercio las regeneró o las dio de baja), hay que pegar las nuevas. En los tres últimos ese proveedor sale de los 'cobradores' públicos del comercio hasta que vuelva a quedar conectado, y si no le queda ninguno conectado, 'tarjeta' sale de medios_cobro." }
         titular: { type: string, description: "Nombre que muestra el proveedor para la cuenta conectada (privado.cuenta_cobro.titular_psp)." }
         conectado_en: { $ref: "esquemas/comunes.json#/$defs/instante" }
     MedioSubido:

@@ -16,7 +16,7 @@
     "permiso": {
       "type": "string",
       "enum": ["pedidos", "catalogo", "numeros", "datos", "equipo"],
-      "description": "Qué parte del comercio puede operar un miembro. 'pedidos': la bandeja, aceptar y rechazar, resolver ítems, marcar listo, entregar, asignar repartidor, transferencias y rendiciones. 'catalogo': ofertas, stock, promociones y fotos. 'numeros': métricas. 'datos': la ficha (horarios, modalidades, apertura, cobro, envíos, política de datos, clave_cifrado), el aporte al nodo, vinculaciones, atestaciones, y responder reseñas y denuncias. 'equipo': invitar, cambiar rol y permisos, y sacar gente. Exportar el comercio no es de ningún permiso: es solo de la dueña, porque lleva los datos de los compradores. Qué permiso pide cada operación lo dice 'x-permiso-equipo' en openapi.yaml."
+      "description": "Qué parte del comercio puede operar un miembro. 'pedidos': la bandeja, aceptar y rechazar, resolver ítems, marcar listo, entregar, asignar repartidor, transferencias, devoluciones con tarjeta y rendiciones. 'catalogo': ofertas, stock, promociones y fotos. 'numeros': métricas. 'datos': la ficha (horarios, modalidades, apertura, cobro, envíos, política de datos, clave_cifrado), el aporte al nodo, vinculaciones, atestaciones, y responder reseñas y denuncias. 'equipo': invitar, cambiar rol y permisos, y sacar gente. Exportar el comercio no es de ningún permiso: es solo de la dueña, porque lleva los datos de los compradores. Qué permiso pide cada operación lo dice 'x-permiso-equipo' en openapi.yaml."
     },
     "permisos": {
       "type": "array",

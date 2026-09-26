@@ -308,6 +308,7 @@ firma de la clave activa de la persona hecha hace menos de 5 minutos:
 | Operación | Cuándo |
 | --- | --- |
 | `editarComercio` | Si cambia `privado.cuenta_cobro` (a dónde transfieren los compradores) |
+| `conectarCobrador` | Siempre: activa un proveedor de pagos, o sea a qué cuenta va la plata de los que pagan con tarjeta (`docs/cobro-con-psp.md`) |
 | `rotarClave`, `declararClaveComprometida` | Siempre |
 | `invitarAlEquipo`, `cambiarMiembro` | Siempre |
 | `sacarDelEquipo` | Si saca a otro. Irse uno mismo, no |

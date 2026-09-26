@@ -4,27 +4,37 @@ Documento de decisión del 2026-09-25. Construye sobre [`cobros.md`](cobros.md) 
 
 Lo que Leo fijó hoy: **los pagos con pasarela entran en el lanzamiento del 28/9** y **Vereda no cobra comisión** (fee de plataforma 0). Los principios siguen: Vereda nunca toca la plata, el cobro va directo a la cuenta del comercio, el efectivo es un diferencial.
 
+**Actualización del 2026-09-25 (tarde), decisiones de Leo: el proveedor oficial es Ualá Bis; Mercado Pago queda segundo y Mobbex tercero. Y es multi-proveedor:** el comercio activa uno o varios a la vez desde el portal, y el comprador elige con cuál paga entre los activos de ese comercio, además del efectivo y la transferencia. La spec no favorece a ninguno (`docs/cobro-con-psp.md`, que ahora trae la interfaz del proveedor, las devoluciones, el proveedor de prueba y los interruptores). La aplicación de Mercado Pago del operador deja de bloquear nada. §1 y §4 quedan reescritos en ese orden; §2 describe el flujo de Mercado Pago tal como se investigó y sigue valiendo para cuando entre, con las diferencias de Ualá Bis en §1.
+
 Los anexos de esta vuelta: [`pagos-lanzamiento/mercado-pago.md`](pagos-lanzamiento/mercado-pago.md), [`pagos-lanzamiento/mobbex-uala.md`](pagos-lanzamiento/mobbex-uala.md) y [`pagos-lanzamiento/conciliacion.md`](pagos-lanzamiento/conciliacion.md). Lo que dice **(NC)** no está confirmado en una fuente oficial.
 
 ---
 
 ## 1. Recomendación
 
-**Mercado Pago, conectado por OAuth, cobrando en la cuenta del comercio, sin comisión de Vereda, con checkout web por redirección y webhook firmado al nodo.** Ualá Bis como alternativa inmediata después (mismo adaptador, credenciales que pega el comercio), Mobbex más adelante.
+**Ualá Bis primero, con las credenciales del propio comercio, cobrando en su cuenta, sin comisión de Vereda, con checkout web por redirección y re-consulta de cada aviso.** Mercado Pago segundo, por OAuth; Mobbex tercero, también con las credenciales del comercio. **El comercio activa los que quiera a la vez** y el comprador elige. Dos proveedores falsos (`prueba` por credenciales, `prueba_redireccion` por redirección) para la suite de conformidad y los e2e.
 
-Por qué MP y no otro para el 28/9:
+Por qué Ualá Bis primero:
 
-- Es el único con **OAuth oficial** (el comercio toca "Conectar" y listo; access token de 180 días, refresh token de 6 meses que **rota en cada renovación**, confirmado en la doc) y **webhook firmado** (HMAC-SHA256 en `x-signature` con la clave secreta de la aplicación del operador, 22 s para responder, reintentos cada 15 min). Los demás piden pegar credenciales y no firman.
-- La mayoría de los comercios ya tiene cuenta. El alta en Vereda es un toque, no un formulario.
-- **Fee 0 está en la doc oficial**: en `POST /checkout/preferences`, `marketplace_fee` "default value is 0" y solo se puede mandar si hay un `marketplace` definido, cuyo default es "NONE". El nodo crea la preferencia con el token OAuth del comercio y omite los dos campos: es un cobro normal del comercio y Vereda no aparece en la plata en ningún momento (anexo MP, §1). Lo que en `cobros.md` era (NC) quedó confirmado.
-- El checkout es una URL (`init_point`). Se abre en el navegador, en la webapp o en un `SFSafariViewController`: no hay SDK nativo, no hay datos de tarjeta en el nodo, no hay PCI.
-- Contracargos y devoluciones son entre el comercio y MP. Con fee 0, Vereda no pone plata en ninguna devolución.
+- **Nada que registrar para el operador del nodo.** No hay aplicación, aprobación ni KYC del operador: el comercio genera `username`, `client_id` y `client_secret_id` en su app (Cobros online → API) y los pega en el portal. El nodo solo necesita su clave de cifrado. Con MP, en cambio, cada operador tiene que crear y mantener su aplicación en "Tus integraciones" antes de que un solo comercio pueda conectar.
+- **Fee 0 por construcción**: la API no tiene split ni fee de plataforma. Todo va a la cuenta Ualá del comercio.
+- **Acreditación al instante**, PSPCP inscripto en el BCRA (N.º 33.549), contracargos a cargo del comercio, devoluciones por API hasta 90 días.
+- **Son cuatro endpoints** (token, checkout, re-consulta, devolución) y ninguna decisión técnica pendiente (anexo Mobbex/Ualá, §B).
 
-Lo que ya estaba decidido y no cambia: la tensión de marca con MP la resolvió Leo al meter pagos en el lanzamiento. La interfaz sigue neutra: el comercio elige su proveedor, la app nunca lo presenta como "el" medio.
+Lo que cambia respecto de MP y la spec ya cubre:
 
-**Alternativa: Ualá Bis.** Sin nada que registrar para el operador: el comercio genera `client_id` y `client_secret` en su app de Ualá y los pega en el portal; token de 24 h, checkout por redirección, webhook sin firma (se re-consulta siempre), acreditación instantánea, PSPCP registrado (N.º 33.549). Cara en tarjeta (4,9%), barata en QR y dinero en cuenta (0,8%). Es la salida para quien no quiere MP y son cuatro endpoints (anexo Mobbex/Ualá, §B).
+- **Conectar con credenciales, no con OAuth.** `conectarCobrador` acepta las dos formas según el anuncio del proveedor (`conexion: credenciales | redireccion`); con credenciales el nodo las prueba antes de guardarlas y responde el cobrador ya conectado, o `422 credenciales_invalidas`.
+- **El aviso no viene firmado.** El nodo nunca cree el cuerpo: siempre re-consulta `GET /v2/api/orders/{uuid}`. Idempotencia por referencia + estado (Ualá no manda id de aviso).
+- **Se marca pagado en `APPROVED`, nunca en `PROCESSED`.**
+- **Mínimo $25 por cobro**: el anuncio lo publica en `monto_minimo` y un pedido menor con tarjeta es `422 monto_menor_al_minimo`.
+- **Token de 24 h sin refresh**: se vuelve a pedir con las credenciales. Si el comercio las regenera, el nodo lo ve en el 401 y el cobrador queda `credenciales_rechazadas` hasta que pegue las nuevas.
+- **Cara en tarjeta (4,9 %)**, barata en QR y dinero en cuenta (0,8 %), pero el QR no tiene API. Es entre el comercio y Ualá; la app no lo muestra como si fuera de Vereda.
 
-**Mobbex** queda tercero: Dev Connect es tan cómodo como OAuth y es el más barato en tarjeta (1,9% / 2,6%), pero exige cuenta y aplicación Mobbex por operador de nodo, con alta de "unos días hábiles", vida del token sin documentar y webhook sin firma ni reintentos documentados. No cierra en tres días.
+**Mercado Pago, segundo.** Es el único con OAuth oficial (el comercio toca "Conectar" y listo) y webhook firmado, y la mayoría de los comercios ya tiene cuenta. Queda detrás de que el operador cree su aplicación (§4). El flujo investigado está en §2 y en el anexo MP; `marketplace_fee` se omite y el default es 0.
+
+**Mobbex** queda tercero, **con las credenciales del comercio**: el comercio crea su propia aplicación en el portal de desarrolladores de Mobbex (`api_key`) y copia el token de su entidad (`access_token`); el operador no registra nada, igual que con Ualá Bis. Es el más barato en tarjeta (1,9% / 2,6%) y el de más medios. Dev Connect (tipo OAuth) queda descartado porque exige cuenta y aplicación Mobbex por operador de nodo. Pendientes (NC): vida del token, plazo de devolución y reintentos del webhook, que no firma.
+
+La interfaz sigue neutra: el comercio elige su proveedor, la app nunca lo presenta como "el" medio, y el efectivo sigue adelante.
 
 ---
 
@@ -33,6 +43,8 @@ Lo que ya estaba decidido y no cambia: la tensión de marca con MP la resolvió 
 Cuatro piezas, en este orden. Todas caben en la spec y en el nodo que ya existen: `servicio.PSP`, `ConfirmarCobro` (idempotente, "para el webhook del PSP"), `psp` y `psp_referencia` en el pedido, `link_pago` y `metodo: tarjeta` en `pago.json`.
 
 ### 2.1 Conexión de la cuenta del comercio (portal)
+
+> Las rutas de §2 y §3 son las de #65, con un solo cobrador por comercio. Desde el PR multi-proveedor van por proveedor (`/comercios/{id}/cobradores/{psp}/…`) y el comercio tiene varios a la vez: la referencia es `docs/cobro-con-psp.md`.
 
 1. En **Datos → Cobros** del portal, el comercio toca "Cobrar con Mercado Pago".
 2. El portal pide al nodo `POST /comercios/{id}/cobrador/conectar` `{psp: "mercado_pago", volver_a}` y recibe la `url` de autorización de MP (con `state` firmado por el nodo y PKCE).
@@ -99,35 +111,42 @@ Ya mergeado con este PR: centavos únicos (`instrucciones.ajuste_centavos`, `cue
 
 ## 4. Plan por PRs y repo
 
-Una rama por punto, squash, sin apilar (`memory-git`). Estimaciones para un worker con el gate local verde; "S" medio día, "M" un día, "L" un día y medio. Orden por dependencia; los que no dependen entre sí van en paralelo.
+Una rama por punto, squash, sin apilar (`memory-git`). Estimaciones para un worker con el gate local verde; "S" medio día, "M" un día, "L" un día y medio. Orden por dependencia; los que no dependen entre sí van en paralelo. Todo se construye contra `docs/cobro-con-psp.md`.
 
 | # | Repo | PR | Depende de | Tamaño |
-|---|---|---|---|---|
-| 0 | protocolo-vereda | **Este PR**: centavos únicos, `paga_con`, este documento | — | hecho |
-| 1 | protocolo-vereda | Spec del cobrador: §3 completo (`tarjeta`, `conectarCobrador`/`verCobrador`/`desconectarCobrador`, `cuenta_cobro.estado`, `confirmado_por`, `cobradores` en well-known, `docs/cobro-con-psp.md`, conformidad) | 0 | M |
-| 2 | vereda-nodo | Centavos únicos y `paga_con`: ajuste del monto en `armarPedido` (`servicio/confirmar.go`) y en los otros tres lugares que crean cobros, columna `monto_a_transferir` con índice único parcial por destinatario entre pendientes, `paga_con` en `Pago` y en `viaje.por_pedido`, `422 paga_con_insuficiente`, tests con `NuevaBaseDePrueba` | 0 | M |
-| 3 | vereda-nodo | Cobrador MP, conexión: tabla `cobradores` (comercio, psp, user_id, tokens **cifrados** AES-GCM con `VEREDA_PAGOS_CLAVE`, vence, estado), cliente OAuth (authorize URL con `state` firmado y PKCE, canje, refresh con rotación atómica), `montarPagos(mux)` con `/pagos/mercado_pago/volver`, `conectarCobrador`/`verCobrador`/`desconectarCobrador`, `cobradores` en well-known, config `VEREDA_PAGOS_MP_CLIENT_ID/CLIENT_SECRET/WEBHOOK_SECRET/URL_PUBLICA` con el patrón de `medios`, `api/operaciones.go` regenerado | 1 | L |
-| 4 | vereda-nodo | Cobrador MP, cobro: `MercadoPago` que cumple `servicio.PSP` (`Requerido` crea la preferencia sin `marketplace_fee`, `Reembolsar` por API), `PSPDe` por comercio, webhook `/pagos/mercado_pago/webhook` (HMAC, re-consulta, `ConfirmarCobro`), barrido de pendientes con `psp` en `Mantener` antes de `VencerCobros`, `confirmado_por`, MCP `carrito_confirmar` con `tarjeta`, tests con un MP falso en `httptest` | 3 | L |
-| 5 | vereda-nodo | Mock: un **MP falso** en `mock/` (autoriza, crea preferencia, página de "pagar/rechazar", manda el webhook firmado) para los e2e de la webapp y el QA agéntico. Imprescindible: los pagos de prueba de MP **no mandan webhooks**, y Checkout Pro se prueba con cuentas de prueba, no con credenciales de test | 4 | S |
-| 6 | vereda-webapp | Portal: "Cobrar con Mercado Pago" en Datos → Cobros (estado, conectar, desconectar, vuelta por `?cobrador=`), lista "por confirmar" con el monto exacto de centavos únicos, arreglo del `estado === 'declarada'` en `PedidoVista` (hoy el botón "Ya vi la plata" no aparece), SDK regenerado desde la spec | 1 (tipos), 3 (e2e) | M |
-| 7 | vereda-webapp | Comprador: "Tarjeta o Mercado Pago" en el checkout, redirección a `link_pago`, vuelta a `/pedido/:id` con el estado por SSE, "¿Con cuánto pagás?" en efectivo, monto con centavos en la pantalla de transferencia (ya se muestra bien) | 1 (tipos), 4 y 5 (e2e) | M |
-| 8 | vereda-webapp | E2E con el mock y el MP falso (`npm run e2e:mock`): conectar, pagar aprobado, pagar rechazado, vencido; y `e2e:prod-lectura` sin escribir | 5, 6, 7 | S |
-| 9 | vereda-nodo | Conciliación automática de transferencias con la cuenta MP del comercio: barrido que busca transferencias entrantes con el monto exacto de cada pendiente y confirma con `confirmado_por: psp`. **Solo si el anexo de conciliación lo confirma y una transferencia real lo prueba.** | 3 | M |
-| 10 | vereda-app | iOS y Android, versión siguiente: `tarjeta` en `CheckoutModelo` con `SFSafariViewController` / Custom Tabs y vuelta por link universal https (MP exige `back_urls` https: iOS necesita Associated Domains, que hoy no tiene; Android ya tiene el App Link); "¿Con cuánto pagás?"; cuenta de cobro y "Cobrar con Mercado Pago" en Datos. **Pantallas y copy los decide Leo** (2-3 opciones antes de abrir). | 1, 4 | M + M |
+| --- | --- | --- | --- | --- |
+| 0 | protocolo-vereda | Centavos únicos, `paga_con`, este documento (#64) | — | hecho |
+| 1 | protocolo-vereda | Cobrador neutral: `tarjeta`, `conectarCobrador`/`verCobrador`/`desconectarCobrador`, `confirmado_por`, `cobradores` (#65) | 0 | hecho |
+| 2 | protocolo-vereda | **Pagos completos en la spec, multi-proveedor**: cobradores como colección por `psp` (varios activos a la vez, `cobradores` en la ficha, `psp` elegido al confirmar), conectar con credenciales o por redirección y con firma fresca, anuncio con `conexion`/`campos`/`ambientes`/`monto_minimo`/`reembolso`, interfaz del proveedor y mapeo de estados, `reembolsarPago` + MCP `pedido_reembolsar`, proveedor `prueba`, interruptores, `comercio.cobrador_cambiado`, conformidad de tarjeta de punta a punta | 1 | M |
+| 3 | vereda-nodo | Centavos únicos y `paga_con` (en curso) | 0 | M |
+| 4 | vereda-nodo | **Cobrador base**: tabla de cobradores con credenciales y tokens **cifrados** (AES-GCM con la clave del nodo), interfaz de adaptador (probar, crear cobro, re-consultar, reembolsar, interpretar aviso), `conectarCobrador`/`verCobrador`/`desconectarCobrador` con las dos formas, `cobradores` en well-known según interruptores, `/pagos/{psp}/webhook` con re-consulta e idempotencia por referencia + estado, barrido de pendientes en `Mantener` antes de `VencerCobros`, `reembolsarPago`, `confirmado_por`, MCP. Uno por `psp`, varios por comercio, `cobradores` en la ficha y `psp` en `confirmarCarrito`. Con los adaptadores **`prueba`** y **`prueba_redireccion`** (página pagar/rechazar, `POST link_pago`, aviso doble, autorización simulada) como primeros proveedores | 2 | L |
+| 5 | vereda-nodo | **Adaptador Ualá Bis v2**: token de 24 h (y `credenciales_rechazadas` en el 401), checkout con `amount` en centavos y `external_reference` = id del pago, re-consulta, mapeo `PENDING/PROCESSED/APPROVED/REJECTED/REFUNDED`, devolución con resultado por aviso, mínimo $25. Tests contra un Ualá falso en `httptest`, **sin llamar a Ualá** | 4 | M |
+| 6 | vereda-nodo | Mock local con `prueba` encendido, para los e2e de la webapp y el QA agéntico | 4 | S |
+| 7 | vereda-webapp | Portal, Datos → Cobros: los proveedores del comercio con su estado, activar varios a la vez, conectar con credenciales (los `campos` del anuncio) o por redirección, desconectar, `credenciales_rechazadas`; "por confirmar" de transferencias (en curso); devolver desde el pedido. **Pantallas y copy los decide Leo** (2-3 opciones) | 2 (tipos), 4 y 6 (e2e) | M |
+| 8 | vereda-webapp | Comprador: tarjeta en el checkout (solo con `tarjeta` en `medios_cobro`), eligiendo el proveedor entre los `cobradores` del comercio, redirección a `link_pago`, vuelta a `/pedido/:id` con el estado por SSE (en curso, sin proveedor fijo) | 2, 6 | M |
+| 9 | vereda-webapp | E2E contra el mock con `prueba`: conectar, pagar, procesado, rechazar, vencer, devolver parcial y total; y `e2e:prod-lectura` sin escribir | 6, 7, 8 | S |
+| 10b | vereda-nodo | **Adaptador Mobbex**: `api_key` + `access_token` del comercio, `POST /p/checkout` con `reference` única y sin `split`, re-consulta `GET /p/operations/{id}`, códigos de estado (200–302 pagado), devolución total o parcial desde el día siguiente. Tests con un Mobbex falso | 4 | M |
+| 10 | vereda-nodo | **Adaptador Mercado Pago**: OAuth con PKCE y refresh que rota (atómico), preferencia sin `marketplace_fee` con `binary_mode`, webhook HMAC + re-consulta, devolución con `X-Idempotency-Key`, tópico de desconexión → `revocado`. Tests con un MP falso | 4 | L |
+| 11 | vereda-app | iOS y Android: tarjeta en el checkout con `SFSafariViewController` / Custom Tabs y vuelta por link universal https (iOS necesita Associated Domains), cobrador en Datos, devolver. **Pantallas y copy los decide Leo** | 2, 5 | M + M |
+| 12 | vereda-nodo | Conciliación automática de transferencias con la cuenta MP del comercio. Solo si una transferencia real lo prueba; con Ualá Bis no hay API de transferencias | 10 | M |
 
-Camino crítico para el 28/9: **1 → 3 → 4 → 5 → 8**, con 2, 6 y 7 en paralelo. Son tres días de nodo y dos de webapp si hay dos workers; con uno solo, entran 1-4 y 6-7 y el e2e completo (8) queda para el 29.
+Camino crítico para cobrar con tarjeta: **2 → 4 → 5**, con 6 → 9 para probarlo de punta a punta y 7, 8 en paralelo. Mercado Pago (10), Mobbex (10b) y las apps (11) no bloquean a Ualá Bis: cada proveedor es un adaptador aparte y un comercio los suma cuando existan.
 
-Lo que necesita a **Leo** antes de mergear 3 y 4:
+Lo que necesita **Leo**:
 
-1. Crear la aplicación de Mercado Pago en "Tus integraciones" de su cuenta (gratis): nombre, URL de vuelta `https://ar.protocolovereda.com/pagos/mercado_pago/volver`, URL del webhook `https://ar.protocolovereda.com/pagos/mercado_pago/webhook`, tópico `payment`. Copiar `client_id`, `client_secret` y la clave secreta del webhook al nodo de producción. Sin esto el nodo no publica `cobradores` y nada se ofrece.
-2. Confirmar el copy de los dos botones: "Cobrar con Mercado Pago" (portal) y "Tarjeta o Mercado Pago" (checkout), o darnos los suyos.
-3. Los términos del nodo tienen que decir que el comercio es el proveedor y que el cobro es entre el comercio y su pasarela (`legal.md`, *Juárez* vs *Almirón*). Lo escribe el agente de legales.
+1. Para Ualá Bis, nada que registrar. En producción, el operador (Leo) genera y guarda la **clave de cifrado del nodo** y enciende `uala_bis`; sin eso el nodo no lo anuncia.
+2. Una cuenta Ualá Bis propia con credenciales de **test** si quiere una prueba real antes de abrirlo a comercios (sin eso, todo se prueba contra `prueba` y el Ualá falso).
+3. El copy y las pantallas de activar proveedores (varios a la vez, credenciales o botón), de elegir con qué paga el comprador y de devolver, con 2-3 opciones.
+4. Para Mercado Pago, cuando toque: la aplicación en "Tus integraciones" (URL de vuelta `https://ar.protocolovereda.com/pagos/mercado_pago/volver`, webhook `https://ar.protocolovereda.com/pagos/mercado_pago/webhook`, tópico `payment`).
+5. Los términos del nodo tienen que decir que el comercio es el proveedor y que el cobro es entre el comercio y su pasarela (`legal.md`). Lo escribe el agente de legales.
 
 ---
 
 ## 5. Riesgos que quedan
 
 - **El refresh token de MP rota en cada uso (confirmado en la doc).** Si el nodo no guarda el nuevo de forma atómica, pierde al comercio y hay que reconectar. El PR 3 lo hace en una sola transacción.
+- **Credenciales de Ualá Bis en el nodo.** Con `client_secret_id` se puede cobrar y devolver en la cuenta del comercio. Van cifradas en reposo, se prueban antes de guardarse, nunca salen en una respuesta ni en un log, y desconectar las borra. Que los TyC de Ualá permitan cargarlas en software de un tercero sigue **(NC)**.
+- **Aviso de Ualá sin firma.** Cualquiera puede mandar un aviso falso; por eso el nodo nunca cree el cuerpo y re-consulta siempre, y la URL de aviso lleva un token por cobro.
 - **Tokens en el nodo.** Un token permite crear cobros y devoluciones en la cuenta del comercio. Cifrado en reposo con clave por variable de entorno, permisos mínimos (`offline_access read write`), revocación desde el portal y aviso al comercio. Hoy el nodo no cifra nada en reposo: es infraestructura nueva y chica.
 - **Webhook con la firma de la app del operador para pagos creados con el token del comercio.** Es lo que la doc describe para marketplaces (anexo MP, §3); se prueba en sandbox antes de mergear el PR 4.
 - **Costos por provincia.** MP cobra según la provincia del vendedor desde el 2026-03-06 (CABA 6,29 % al momento, PBA y Córdoba 6,60 %; 1,49 % / 1,56 % a 35 días; QR 0,8 % con dinero en cuenta). Es entre el comercio y MP; la app no lo muestra como si fuera de Vereda.
