@@ -125,6 +125,10 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Ventanas de tiempo (`carrito_vencido` a las 24 h, `plazo_aceptacion_min` en efectivo) se
   prueban con el reloj del nodo si expone uno de prueba corto, o quedan documentadas como
   prueba de larga duración opcional — no bloquean el resto del nivel B.
+- Hechos del comprador: entregado el pedido del ciclo, `GET /yo/hechos` cumple
+  `usuario.json#/$defs/hechos` con `entregados` ≥ 1, y `GET /pedidos/{id}` trae
+  `partes.usuario.hechos` con los mismos valores más `entregados_con_el_comercio` ≥ 1,
+  `primer_pedido_con_el_comercio` y `por_mandato: false` (`docs/hechos-del-comprador.md`).
 - Direcciones guardadas: `PUT /yo/direcciones` reemplaza la lista y la devuelve, `GET /yo` la
   muestra, etiquetas repetidas o una dirección sin punto dan `422`, y un token de mandato no
   la escribe nunca. Al final se restauran las que la sesión de prueba tenía.

@@ -112,6 +112,7 @@ class NivelB:
         pedido_id = self._ciclo_carrito_a_entregado()
         if pedido_id:
             self._resena(pedido_id)
+            self._hechos(pedido_id)
         self._direcciones()
         self._mis_comercios()
         self._viaje_ajeno()
@@ -305,6 +306,40 @@ class NivelB:
         codigo = r.cuerpo.get("codigo") if isinstance(r.cuerpo, dict) else None
         self.casos.append(_ok(cat, "dejarDescargo", desc) if r.ok and r.estado == 409 and codigo == "sin_no_vino"
                           else _fallo(cat, "dejarDescargo", desc, f"llegó {r.estado} {codigo or r.motivo}"))
+
+    # hechos del comprador (docs/hechos-del-comprador.md): con un pedido recién
+    # entregado, GET /yo/hechos cuenta al menos uno, y el pedido le muestra al
+    # comercio (acá la misma sesión) lo mismo que ve el comprador, más los tres
+    # campos de ese pedido. Nunca un puntaje: el esquema no deja campos de más.
+    def _hechos(self, pedido_id):
+        cat = "hechos"
+        r = cliente.solicitud("GET", f"{self.base_v1}/yo/hechos", headers=self._cabecera(), timeout=self.timeout)
+        desc = "GET /yo/hechos responde 200 y cumple usuario.json#/$defs/hechos"
+        if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+            self.casos.append(_fallo(cat, "verMisHechos", desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+            return
+        caso = self._chequear_esquema("verMisHechos", desc, "/yo/hechos", "get", r.cuerpo)
+        if caso:
+            self.casos.append(caso)
+        mios = r.cuerpo
+        desc = "con un pedido entregado, GET /yo/hechos trae entregados >= 1"
+        self.casos.append(_ok(cat, "verMisHechos", desc) if (mios.get("entregados") or 0) >= 1
+                          else _fallo(cat, "verMisHechos", desc, f"entregados={mios.get('entregados')!r}"))
+
+        r = cliente.solicitud("GET", f"{self.base_v1}/pedidos/{pedido_id}", headers=self._cabecera(), timeout=self.timeout)
+        hechos = (((r.cuerpo or {}).get("partes") or {}).get("usuario") or {}).get("hechos") if r.ok and isinstance(r.cuerpo, dict) else None
+        desc = "el pedido trae partes.usuario.hechos con lo mismo que GET /yo/hechos y los tres campos del pedido"
+        if not isinstance(hechos, dict):
+            self.casos.append(_fallo(cat, "verPedido", desc, f"partes.usuario.hechos={hechos!r}"))
+            return
+        distintos = [k for k, v in mios.items() if hechos.get(k) != v]
+        faltan = [k for k in ("entregados_con_el_comercio", "primer_pedido_con_el_comercio", "por_mandato") if k not in hechos]
+        if distintos or faltan:
+            self.casos.append(_fallo(cat, "verPedido", desc, f"distintos={distintos}, faltan={faltan}"))
+        elif hechos["entregados_con_el_comercio"] < 1 or hechos["por_mandato"] is not False:
+            self.casos.append(_fallo(cat, "verPedido", desc, f"entregados_con_el_comercio={hechos['entregados_con_el_comercio']}, por_mandato={hechos['por_mandato']!r} en un pedido entregado hecho con sesión"))
+        else:
+            self.casos.append(_ok(cat, "verPedido", desc))
 
     # tope de intentos del código (docs/repartidores.md, punto m): el primer
     # intento equivocado dice que quedan 4 de 5, en número, para que la app

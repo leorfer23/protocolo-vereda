@@ -1743,6 +1743,22 @@ paths:
         "422": { $ref: "#/components/responses/Error" }
   /yo/puntos:
     get: { operationId: listarMisPuntos, tags: [yo], summary: "Mis saldos de puntos, uno por comercio, cada uno firmado por su comercio", security: [ { sesion: [] }, { mandato: [leer] } ], responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/SaldoPuntos" } } } } } } }
+  /yo/hechos:
+    get:
+      operationId: verMisHechos
+      tags: [yo]
+      summary: "Mis hechos de comprador: exactamente lo que ve el comercio de un pedido mío"
+      description: |
+        Conteos de mis pedidos en este nodo y dos sí/no (`usuario.json#/$defs/hechos`): antigüedad,
+        entregados, no retirados, no recibidos, cancelados por mí después de aceptados,
+        transferencias revertidas y si confirmé un contacto. Es lo mismo que el comercio ve en
+        `partes.usuario.hechos` de un pedido mío, sin los tres campos que dependen de ese pedido
+        (`entregados_con_el_comercio`, `primer_pedido_con_el_comercio`, `por_mandato`). Nunca un
+        puntaje. Las reglas de cada conteo están en `docs/hechos-del-comprador.md`. Solo los míos:
+        no hay forma de pedir los de otra persona.
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/usuario.json#/$defs/hechos" } } } }
   /yo/claves/rotar:
     post:
       operationId: rotarClave

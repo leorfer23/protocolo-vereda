@@ -48,6 +48,26 @@
         "idioma": { "type": "string", "default": "es-AR" },
         "notas": { "type": "string", "maxLength": 1000, "description": "Texto libre para agentes: 'no me gusta la cebolla', 'portero hasta las 20'." }
       }
+    },
+    "hechos": {
+      "type": "object",
+      "description": "Hechos del comprador (salvaguarda S4, docs/hechos-del-comprador.md): conteos de sus pedidos en este nodo y dos sí/no, calculados por el nodo con reglas públicas que cualquiera recalcula. Nunca un puntaje, un color ni un 'riesgo': quien mira saca su conclusión. Lo ve el comercio en 'partes.usuario.hechos' de cada pedido suyo, y el comprador ve exactamente lo mismo en GET /yo/hechos y en sus pedidos. No es público: ni la ficha de la persona ni el repartidor lo ven. Los tres últimos campos existen solo en un pedido, porque hablan de ese pedido y de ese comercio.",
+      "required": ["alta", "antiguedad_dias", "entregados", "no_retirado", "no_recibido", "cancelados_despues_de_aceptar", "contacto_confirmado"],
+      "properties": {
+        "alta": { "type": "string", "format": "date", "description": "El día que la identidad entró a este nodo; el mismo que verificacion.historial.alta." },
+        "antiguedad_dias": { "type": "integer", "minimum": 0, "description": "Días de calendario entre 'alta' y el día en que se lee, con el reloj del nodo, igual que 'alta'. Se calcula al leer." },
+        "entregados": { "type": "integer", "minimum": 0, "description": "Sus pedidos en estado 'entregado' en este nodo, con cualquier comercio. El mismo número que verificacion.historial.pedidos_entregados." },
+        "no_retirado": { "type": "integer", "minimum": 0, "description": "Sus pedidos cerrados con motivo_codigo 'no_retirado': no vino a buscar un retiro (docs/carrito-y-reserva.md, \"No vino\")." },
+        "no_recibido": { "type": "integer", "minimum": 0, "description": "Sus pedidos cerrados con motivo_codigo 'no_recibido': nadie atendió en la puerta." },
+        "descargos": { "type": "integer", "minimum": 0, "description": "De los 'no_retirado' y 'no_recibido', en cuántos dejó su versión firmada (pedido.no_vino.descargo). Nadie arbitra: quedan las dos. Ausente es 0." },
+        "cancelados_despues_de_aceptar": { "type": "integer", "minimum": 0, "description": "Sus pedidos que canceló él (motivo_codigo 'cancelado_por_usuario') cuando el comercio ya los había aceptado. Cancelar antes de que lo acepten no cuenta." },
+        "transferencias_revertidas": { "type": "integer", "minimum": 0, "description": "Sus pedidos con un cobro por transferencia en estado 'revertido' (salvaguarda S2). Ausente es 0: un nodo sin 'revertido' no lo manda." },
+        "contacto_confirmado": { "type": "boolean", "description": "Si confirmó un teléfono o un email por desafío (usuario.contacto_confirmado). Nunca cuál ni el valor." },
+        "entregados_con_el_comercio": { "type": "integer", "minimum": 0, "description": "Solo en un pedido: de 'entregados', los que fueron con el comercio de este pedido." },
+        "primer_pedido_con_el_comercio": { "type": "boolean", "description": "Solo en un pedido: true si al crearse este pedido la persona no tenía ningún otro con este comercio, en ningún estado. Se fija al crear el pedido y no cambia." },
+        "por_mandato": { "type": "boolean", "description": "Solo en un pedido: true si el pedido trae 'via.mandato_id': lo armó un agente con mandato, aunque la persona haya aprobado la confirmación." }
+      },
+      "additionalProperties": false
     }
   }
 }
