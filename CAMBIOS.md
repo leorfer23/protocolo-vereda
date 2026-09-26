@@ -4,6 +4,7 @@ Lo que cambia en el protocolo después de publicarlo, del más nuevo al más vie
 
 ## 2026-09-26
 
+- Aclaración de los hechos del comprador (#75): un pedido de alguien de otro nodo llega sin `partes.usuario.hechos`. El nodo del comercio no sabe su alta ni lo que pidió en su nodo, y un "0 entregados" inventado se leería como cuenta nueva. Ningún cliente cambia: el campo ya era opcional.
 - **El destinatario ve el monto exacto de la transferencia.** `pago.monto_a_transferir`, solo con `metodo: transferencia`: lo que tiene que llegar, igual a `instrucciones.monto` con los centavos únicos ya descontados. Lo ven quien paga y el destinatario (el comercio con su equipo y sus agentes, o el repartidor que cobra), también con el pedido cerrado, y nunca lleva datos de cuenta. Hasta ahora las `instrucciones` eran solo de quien paga, así que el comercio veía `monto` sin el ajuste: justo el número con el que reconoce la transferencia en su cuenta. Las `instrucciones` no cambian. Ausente en un nodo que todavía no lo manda: vale `monto`. Las apps del comercio y del repartidor tienen que mostrarlo al confirmar; ningún cliente se rompe.
 
 ## 2026-09-25
