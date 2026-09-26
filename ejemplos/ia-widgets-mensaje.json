@@ -1,0 +1,54 @@
+{
+  "$comentario": "Mensaje del asistente con productos y checkout (docs/ia/capacidad.md).",
+  "rol": "asistente",
+  "texto": "Te armo una picada para 6. Mirà estas opciones:",
+  "widgets": [
+    {
+      "tipo": "elegir_categoria",
+      "version": 1,
+      "titulo": "¿Qué se te antoja?",
+      "opciones": [
+        {
+          "id": "picadas",
+          "etiqueta": "Picadas"
+        },
+        {
+          "id": "pizzeria",
+          "etiqueta": "Pizza"
+        }
+      ]
+    },
+    {
+      "tipo": "productos",
+      "version": 1,
+      "titulo": "Para la picada",
+      "items": [
+        {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000b1",
+          "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+          "nombre": "Tabla clásica",
+          "precio": {
+            "centavos": 12000,
+            "moneda": "ARS"
+          },
+          "imagen": "https://cdn.ejemplo/tabla.jpg",
+          "agregar": true
+        }
+      ]
+    },
+    {
+      "tipo": "checkout",
+      "version": 1,
+      "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+      "medios": [
+        "efectivo",
+        "transferencia"
+      ],
+      "total": {
+        "centavos": 12000,
+        "moneda": "ARS"
+      },
+      "nota": "Pagás al local, no a Vereda."
+    }
+  ]
+}

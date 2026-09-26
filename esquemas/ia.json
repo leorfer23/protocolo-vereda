@@ -9,7 +9,6 @@
       "description": "Presente solo si el nodo ofrece IA. Ausente: /ia/* responde 501 no_implementado y las apps no muestran nada.",
       "required": [
         "funciones",
-        "gateway",
         "precio",
         "pago",
         "tope_mensual_usd",
@@ -44,11 +43,44 @@
           "minLength": 1,
           "maxLength": 60,
           "pattern": "^[a-z0-9][a-z0-9._-]{0,59}$",
-          "description": "Gateway de inferencia que usa este nodo, solo informativo (openrouter, vercel_ai_gateway, u otro). La spec no cierra el enum: el operador elige. El tope por cuenta lo garantiza el nodo, no el gateway.",
+          "description": "Opcional e informativo: gateway de texto (openrouter, vercel, …). El tope por cuenta lo garantiza el nodo, sea cual sea el gateway.",
           "examples": [
             "openrouter",
-            "vercel_ai_gateway"
+            "vercel"
           ]
+        },
+        "medios": {
+          "type": "object",
+          "description": "Qué transformaciones de medio ofrece y con qué proveedor (informativo). Ausente = no ofrece medios con IA.",
+          "additionalProperties": false,
+          "required": [
+            "funciones"
+          ],
+          "properties": {
+            "funciones": {
+              "type": "array",
+              "uniqueItems": true,
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "mejorar_foto",
+                  "quitar_fondo",
+                  "foto_a_video"
+                ]
+              }
+            },
+            "proveedor": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60,
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,59}$",
+              "description": "Informativo (fal, replicate, …). La spec no cierra el enum; el nodo de referencia usa fal.",
+              "examples": [
+                "fal"
+              ]
+            }
+          }
         }
       }
     },
@@ -67,7 +99,12 @@
               "catalogo_desde_fotos",
               "sugerir_producto",
               "borrador_respuesta",
-              "resumen_dia"
+              "mejorar_texto",
+              "atencion",
+              "recepcion_pedidos",
+              "mejorar_foto",
+              "quitar_fondo",
+              "foto_a_video"
             ]
           }
         },
@@ -78,6 +115,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "chat",
               "pedido_propuesto",
               "buscar",
               "sugerir"
@@ -185,6 +223,26 @@
           "minLength": 1,
           "maxLength": 64,
           "description": "Id opaco de esta llamada; aparece en el extracto."
+        },
+        "imagenes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Imágenes generadas o transformadas en esta llamada."
+        },
+        "segundos_video": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Segundos de video generados."
+        },
+        "unidad": {
+          "type": "string",
+          "enum": [
+            "tokens",
+            "imagen",
+            "segundo_video",
+            "mixto"
+          ],
+          "description": "Cómo se tipifica el costo. Default tokens si ausente."
         }
       }
     },
@@ -390,7 +448,13 @@
             "catalogo_desde_fotos",
             "sugerir_producto",
             "borrador_respuesta",
-            "resumen_dia",
+            "mejorar_texto",
+            "atencion",
+            "recepcion_pedidos",
+            "mejorar_foto",
+            "quitar_fondo",
+            "foto_a_video",
+            "chat",
             "pedido_propuesto",
             "buscar",
             "sugerir"
@@ -521,56 +585,6 @@
             "breve"
           ],
           "description": "Cómo se pidió; el nodo puede ignorarlo."
-        }
-      }
-    },
-    "propuesta_resumen_dia": {
-      "type": "object",
-      "required": [
-        "resumen",
-        "reponer"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "resumen": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 4000
-        },
-        "reponer": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "nombre"
-            ],
-            "additionalProperties": false,
-            "properties": {
-              "nombre": {
-                "type": "string"
-              },
-              "oferta_id": {
-                "type": "string"
-              },
-              "motivo": {
-                "type": "string",
-                "maxLength": 200
-              }
-            }
-          }
-        },
-        "numeros": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "pedidos": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "vendido": {
-              "$ref": "comunes.json#/$defs/monto"
-            }
-          }
         }
       }
     },
@@ -791,21 +805,6 @@
         }
       }
     },
-    "pedido_resumen_dia": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "dia": {
-          "type": "string",
-          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
-          "description": "Default: hoy en la zona del nodo."
-        },
-        "indicaciones": {
-          "type": "string",
-          "maxLength": 1000
-        }
-      }
-    },
     "pedido_pedido_propuesto": {
       "type": "object",
       "required": [
@@ -878,6 +877,207 @@
         },
         "lng": {
           "type": "number"
+        }
+      }
+    },
+    "pedido_mejorar_texto": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "campo": {
+          "type": "string",
+          "enum": [
+            "nombre",
+            "descripcion",
+            "copy_local",
+            "oferta"
+          ],
+          "description": "Qué texto mejorar."
+        },
+        "texto": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "oferta_id": {
+          "type": "string"
+        },
+        "indicaciones": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "propuesta_mejorar_texto": {
+      "type": "object",
+      "required": [
+        "texto"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "texto": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "campo": {
+          "type": "string"
+        },
+        "alternativas": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        }
+      }
+    },
+    "pedido_atencion": {
+      "type": "object",
+      "required": [
+        "sobre"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sobre": {
+          "type": "object",
+          "required": [
+            "tipo",
+            "id"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "enum": [
+                "mensaje",
+                "resena",
+                "pedido"
+              ]
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "accion": {
+          "type": "string",
+          "enum": [
+            "responder",
+            "aceptar",
+            "ordenar"
+          ],
+          "default": "responder"
+        },
+        "tono": {
+          "type": "string",
+          "enum": [
+            "cercano",
+            "formal",
+            "breve"
+          ]
+        },
+        "indicaciones": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "propuesta_atencion": {
+      "type": "object",
+      "required": [
+        "accion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "accion": {
+          "type": "string",
+          "enum": [
+            "responder",
+            "aceptar",
+            "ordenar"
+          ]
+        },
+        "texto": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "Borrador de respuesta o nota."
+        },
+        "pedido_id": {
+          "type": "string"
+        },
+        "orden_propuesto": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ids de pedidos en el orden sugerido."
+        }
+      }
+    },
+    "pedido_medio_ia": {
+      "type": "object",
+      "required": [
+        "fuente"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "fuente": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL de la foto (p. ej. de POST /medios)."
+        },
+        "indicaciones": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "duracion_s": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15,
+          "description": "Solo foto_a_video: hasta 15 s como los clips del protocolo."
+        }
+      }
+    },
+    "propuesta_medio": {
+      "type": "object",
+      "required": [
+        "url",
+        "tipo"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Borrador: el comercio lo acepta poniéndolo en imagenes/videos con editarOferta/editarComercio."
+        },
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "image/jpeg",
+            "image/png",
+            "video/mp4",
+            "video/webm"
+          ]
+        },
+        "poster": {
+          "type": "string",
+          "format": "uri",
+          "description": "Obligatorio si es video (docs/medios.md)."
+        },
+        "duracion_s": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15
+        },
+        "ancho": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "alto": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     }

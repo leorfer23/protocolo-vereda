@@ -1,0 +1,77 @@
+{
+  "$comentario": "Casos de widgets del chat (esquemas/ia-widgets.json).",
+  "esquema": "ia-widgets.json#/$defs/widget",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "elegir_categoria mínimo.",
+      "doc": {
+        "tipo": "elegir_categoria",
+        "version": 1,
+        "opciones": [
+          {
+            "id": "a",
+            "etiqueta": "A"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "checkout solo efectivo/transferencia.",
+      "doc": {
+        "tipo": "checkout",
+        "version": 1,
+        "medios": [
+          "efectivo"
+        ],
+        "total": {
+          "centavos": 100,
+          "moneda": "ARS"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "checkout con tarjeta no permitido.",
+      "doc": {
+        "tipo": "checkout",
+        "version": 1,
+        "medios": [
+          "tarjeta"
+        ],
+        "total": {
+          "centavos": 100,
+          "moneda": "ARS"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "tipo desconocido no entra en el oneOf del esquema de validación del nodo; el cliente lo ignoraría en runtime.",
+      "doc": {
+        "tipo": "mapa_3d",
+        "version": 1
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "productos con agregar.",
+      "doc": {
+        "tipo": "productos",
+        "version": 1,
+        "items": [
+          {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000b1",
+            "nombre": "Pan",
+            "precio": {
+              "centavos": 500,
+              "moneda": "ARS"
+            },
+            "agregar": true
+          }
+        ]
+      }
+    }
+  ]
+}

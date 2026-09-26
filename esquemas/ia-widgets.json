@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/ia-widgets.json",
+  "title": "Widgets de la IA del comprador",
+  "description": "UI generativa del chat del comprador: cada mensaje puede traer widgets tipados que la app dibuja con componentes Vereda. El cliente IGNORA tipos que no conoce y degrada a texto (docs/ia/capacidad.md). Acciones (agregar, confirmar) las ejecuta la persona con los endpoints de siempre — la IA propone, nunca compra sola.",
+  "$defs": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Versión del contrato de widgets. Un tipo nuevo en una versión mayor no rompe clientes viejos: lo ignoran."
+    },
+    "widget": {
+      "description": "Un widget. Discriminado por 'tipo'. Un tipo no soportado: el cliente lo saltea.",
+      "oneOf": [
+        { "$ref": "#/$defs/elegir_categoria" },
+        { "$ref": "#/$defs/productos" },
+        { "$ref": "#/$defs/producto" },
+        { "$ref": "#/$defs/carrito" },
+        { "$ref": "#/$defs/checkout" },
+        { "$ref": "#/$defs/recomendacion" },
+        { "$ref": "#/$defs/comercio" }
+      ]
+    },
+    "tarjeta_producto": {
+      "type": "object",
+      "required": ["oferta_id", "nombre", "precio"],
+      "additionalProperties": false,
+      "properties": {
+        "oferta_id": { "type": "string" },
+        "comercio_id": { "type": "string" },
+        "nombre": { "type": "string", "maxLength": 120 },
+        "descripcion": { "type": "string", "maxLength": 500 },
+        "precio": { "$ref": "comunes.json#/$defs/monto" },
+        "imagen": { "type": "string", "format": "uri" },
+        "unidad": { "type": "string", "maxLength": 40 },
+        "agregar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Si true, la app muestra 'Agregar'. Al tocar, la persona llama a los endpoints de carrito; el widget no compra solo."
+        }
+      }
+    },
+    "elegir_categoria": {
+      "type": "object",
+      "required": ["tipo", "version", "opciones"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "elegir_categoria" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "titulo": { "type": "string", "maxLength": 80 },
+        "opciones": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "required": ["id", "etiqueta"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "maxLength": 64 },
+              "etiqueta": { "type": "string", "maxLength": 80 },
+              "icono": { "type": "string", "maxLength": 40 }
+            }
+          }
+        }
+      }
+    },
+    "productos": {
+      "type": "object",
+      "required": ["tipo", "version", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "productos" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "titulo": { "type": "string", "maxLength": 80 },
+        "items": { "type": "array", "minItems": 1, "maxItems": 30, "items": { "$ref": "#/$defs/tarjeta_producto" } }
+      }
+    },
+    "producto": {
+      "type": "object",
+      "required": ["tipo", "version", "item"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "producto" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "item": { "$ref": "#/$defs/tarjeta_producto" }
+      }
+    },
+    "carrito": {
+      "type": "object",
+      "required": ["tipo", "version", "items", "total"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "carrito" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "carrito_id": { "type": "string" },
+        "comercio_id": { "type": "string" },
+        "comercio_nombre": { "type": "string" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["oferta_id", "nombre", "cantidad", "subtotal"],
+            "additionalProperties": false,
+            "properties": {
+              "oferta_id": { "type": "string" },
+              "nombre": { "type": "string" },
+              "cantidad": { "type": "object", "required": ["valor", "unidad"], "properties": { "valor": { "type": "number" }, "unidad": { "type": "string" } } },
+              "subtotal": { "$ref": "comunes.json#/$defs/monto" }
+            }
+          }
+        },
+        "total": { "$ref": "comunes.json#/$defs/monto" }
+      }
+    },
+    "checkout": {
+      "type": "object",
+      "required": ["tipo", "version", "medios", "total"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "checkout" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "carrito_id": { "type": "string" },
+        "comercio_id": { "type": "string" },
+        "medios": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["efectivo", "transferencia"] },
+          "description": "Solo medios del comercio. Nunca cobro por Vereda."
+        },
+        "total": { "$ref": "comunes.json#/$defs/monto" },
+        "nota": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "recomendacion": {
+      "type": "object",
+      "required": ["tipo", "version", "texto"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "recomendacion" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "texto": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "items": { "type": "array", "maxItems": 10, "items": { "$ref": "#/$defs/tarjeta_producto" } }
+      }
+    },
+    "comercio": {
+      "type": "object",
+      "required": ["tipo", "version", "comercio_id", "nombre"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "comercio" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "comercio_id": { "type": "string" },
+        "nombre": { "type": "string", "maxLength": 120 },
+        "descripcion": { "type": "string", "maxLength": 500 },
+        "imagen": { "type": "string", "format": "uri" },
+        "abierto": { "type": "boolean" }
+      }
+    },
+    "mensaje": {
+      "type": "object",
+      "required": ["rol"],
+      "additionalProperties": false,
+      "properties": {
+        "rol": { "type": "string", "enum": ["usuario", "asistente"] },
+        "texto": { "type": "string", "maxLength": 4000 },
+        "widgets": {
+          "type": "array",
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/widget" }
+        }
+      }
+    },
+    "pedido_chat": {
+      "type": "object",
+      "required": ["mensaje", "lat", "lng"],
+      "additionalProperties": false,
+      "properties": {
+        "mensaje": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "historial": { "type": "array", "maxItems": 40, "items": { "$ref": "#/$defs/mensaje" } },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "comercio_id": { "type": "string" },
+        "carrito_id": { "type": "string" }
+      }
+    },
+    "respuesta_chat": {
+      "type": "object",
+      "required": ["mensaje", "consumo"],
+      "additionalProperties": false,
+      "properties": {
+        "mensaje": { "$ref": "#/$defs/mensaje" },
+        "consumo": { "$ref": "ia.json#/$defs/consumo" }
+      }
+    }
+  }
+}

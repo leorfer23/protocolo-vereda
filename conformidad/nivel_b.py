@@ -2441,10 +2441,10 @@ class NivelB:
                 else:
                     self.casos.append(_ok(cat, opid, desc))
             # una función también 501
-            opid2, desc2 = "iaResumenDia", "sin ia, una función responde 501 no_implementado"
+            opid2, desc2 = "iaChat", "sin ia, una función responde 501 no_implementado"
             r2 = cliente.solicitud(
-                "POST", f"{self.base_v1}/ia/comercios/01920000-0000-7000-8000-0000000000aa/resumen-dia",
-                headers=self._cabecera(), json_body={}, timeout=self.timeout,
+                "POST", f"{self.base_v1}/ia/chat",
+                headers=self._cabecera(), json_body={"mensaje": "hola", "lat": -34.6, "lng": -58.4}, timeout=self.timeout,
             )
             if not r2.ok:
                 self.casos.append(_fallo(cat, opid2, desc2, r2.motivo))
@@ -2479,39 +2479,37 @@ class NivelB:
         else:
             self.casos.append(self._chequear_esquema("configurarMiIa", desc, "/ia/yo", "put", r.cuerpo) or _ok(cat, "configurarMiIa", desc))
 
-        # Una función de comercio si está anunciada
-        funcs = ((ia.get("funciones") or {}).get("comercio")) or []
-        if "resumen_dia" in funcs:
-            comercio = self._comercio_de_la_oferta("01920000-0000-7000-8000-0000000000b1")
-            if not comercio or not comercio.get("id"):
-                self.casos.append(_omitido(cat, "iaResumenDia", "resumen del día con consumo", "no se pudo leer el comercio de la oferta de prueba"))
+        # Chat del comprador si está anunciado
+        funcs = ((ia.get("funciones") or {}).get("comprador")) or []
+        if "chat" in funcs:
+            desc = "iaChat responde 200 con mensaje (texto y/o widgets) y consumo; el costo suma al extracto"
+            r = cliente.solicitud(
+                "POST", f"{self.base_v1}/ia/chat",
+                headers=self._cabecera(),
+                json_body={"mensaje": "quiero una picada para 6", "lat": -34.6037, "lng": -58.3816},
+                timeout=self.timeout,
+            )
+            if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
+                self.casos.append(_fallo(cat, "iaChat", desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
             else:
-                desc = "iaResumenDia responde 200 con propuesta y consumo; el costo suma al extracto"
-                r = cliente.solicitud(
-                    "POST", f"{self.base_v1}/ia/comercios/{comercio['id']}/resumen-dia",
-                    headers=self._cabecera(), json_body={}, timeout=self.timeout,
-                )
-                if not r.ok or r.estado != 200 or not isinstance(r.cuerpo, dict):
-                    if r.ok and r.estado == 403 and (r.cuerpo or {}).get("codigo") in ("no_es_el_dueno", "sin_permiso"):
-                        self.casos.append(_omitido(cat, "iaResumenDia", desc, "la sesión de prueba no administra el comercio de la oferta de prueba"))
-                    else:
-                        self.casos.append(_fallo(cat, "iaResumenDia", desc, r.motivo or f"esperaba 200, llegó {r.estado}"))
+                consumo = r.cuerpo.get("consumo") or {}
+                mensaje = r.cuerpo.get("mensaje") or {}
+                if not isinstance(mensaje, dict) or "costo_usd" not in consumo:
+                    self.casos.append(_fallo(cat, "iaChat", desc, f"cuerpo sin mensaje/consumo: {list(r.cuerpo)}"))
                 else:
-                    consumo = r.cuerpo.get("consumo") or {}
-                    if "propuesta" not in r.cuerpo or "costo_usd" not in consumo:
-                        self.casos.append(_fallo(cat, "iaResumenDia", desc, f"cuerpo sin propuesta/consumo: {list(r.cuerpo)}"))
+                    # widgets desconocidos se ignoran en la app; el esquema del mensaje debe cumplir
+                    caso = self._chequear_esquema("iaChat", desc, "/ia/chat", "post", r.cuerpo)
+                    self.casos.append(caso or _ok(cat, "iaChat", desc))
+                    costo = float(consumo.get("costo_usd") or 0)
+                    rex = cliente.solicitud("GET", f"{self.base_v1}/ia/yo/extracto", headers=self._cabecera(), timeout=self.timeout)
+                    total = ((rex.cuerpo or {}).get("total") or {}).get("usd") if rex.ok and isinstance(rex.cuerpo, dict) else None
+                    desc_e = "el extracto suma el costo de la generación"
+                    if total is None:
+                        self.casos.append(_fallo(cat, "verExtractoIa", desc_e, rex.motivo or f"estado {rex.estado}"))
+                    elif float(total) + 1e-9 < costo:
+                        self.casos.append(_fallo(cat, "verExtractoIa", desc_e, f"total {total} < costo {costo}"))
                     else:
-                        self.casos.append(_ok(cat, "iaResumenDia", desc))
-                        costo = float(consumo.get("costo_usd") or 0)
-                        rex = cliente.solicitud("GET", f"{self.base_v1}/ia/yo/extracto", headers=self._cabecera(), timeout=self.timeout)
-                        total = ((rex.cuerpo or {}).get("total") or {}).get("usd") if rex.ok and isinstance(rex.cuerpo, dict) else None
-                        desc_e = "el extracto suma el costo de la generación"
-                        if total is None:
-                            self.casos.append(_fallo(cat, "verExtractoIa", desc_e, rex.motivo or f"estado {rex.estado}"))
-                        elif float(total) + 1e-9 < costo:
-                            self.casos.append(_fallo(cat, "verExtractoIa", desc_e, f"total {total} < costo {costo}"))
-                        else:
-                            self.casos.append(self._chequear_esquema("verExtractoIa", desc_e, "/ia/yo/extracto", "get", rex.cuerpo) or _ok(cat, "verExtractoIa", desc_e))
+                        self.casos.append(self._chequear_esquema("verExtractoIa", desc_e, "/ia/yo/extracto", "get", rex.cuerpo) or _ok(cat, "verExtractoIa", desc_e))
 
         # tope inválido
         maximo = ((ia.get("tope_mensual_usd") or {}).get("maximo_usd")) or 50

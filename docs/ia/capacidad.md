@@ -1,103 +1,105 @@
 # Capacidad `ia` (opcional)
 
-Un nodo **puede** ofrecer IA nativa a comercios y compradores: catálogo desde fotos, pedidos en lenguaje natural, borradores de respuesta, resumen del día. Es una capacidad opcional: cada operador decide si la prende, y ninguna app puede contar con que exista. Traer tu propio agente (MCP + mandato) sigue gratis siempre; esta capacidad es una capa aparte, con costo de tokens a precio real, sin margen.
+Un nodo **puede** ofrecer IA nativa a comercios y compradores: chat del comprador con UI generativa (texto + widgets), búsqueda inteligente, catálogo y textos asistidos, atención, y medios con IA (foto/video). Es opcional: cada operador decide si la prende, y ninguna app puede contar con que exista. Traer tu propio agente (MCP + mandato) sigue gratis siempre; esta capacidad es una capa aparte, con costo real sin margen.
 
-El nodo **no hospeda modelos**. Llama a un gateway de inferencia que el operador eligió (OpenRouter, Vercel AI Gateway u otro). La spec no cierra el enum de proveedores: solo exige medición auditable, que el costo se publique, y que el **nodo** garantice el tope por cuenta (no delega ese límite al gateway). En el anuncio, `gateway` es un texto libre informativo (`openrouter`, `vercel_ai_gateway`, …) para transparencia.
+El nodo **no hospeda modelos**. Para texto llama a un gateway (OpenRouter, Vercel AI Gateway u otro); para medios, a un proveedor intercambiable (el de referencia usa fal.ai). La spec no cierra enums de proveedor: exige medición auditable, costo publicado, y que el **nodo** garantice el tope por cuenta. `gateway` y `medios.proveedor` son textos libres **opcionales** e informativos.
 
 ## Cómo se sabe
 
-El nodo que la ofrece publica `ia` en `/.well-known/vereda.json` (`esquemas/ia.json#/$defs/capacidad`, `CapacidadIa` en el OpenAPI):
+El nodo que la ofrece publica `ia` en `/.well-known/vereda.json` (`esquemas/ia.json#/$defs/capacidad`, `CapacidadIa`):
 
 | Campo | Qué es |
 | --- | --- |
-| `funciones` | Qué ofrece: comercio (`catalogo_desde_fotos`, `sugerir_producto`, `borrador_respuesta`, `resumen_dia`) y/o comprador (`pedido_propuesto`, `buscar`, `sugerir`). Ausente una función = esa ruta responde `422 funcion_ia_no_ofrecida`. |
-| `gateway` | Texto libre informativo: qué gateway usa este nodo (`openrouter`, `vercel_ai_gateway`, u otro). No es un enum cerrado. No cambia el contrato de las rutas. |
-| `precio` | Siempre `modalidad: costo` y `margen: 0`. Moneda de medición `USD`; `equivalente_ars` opcional (solo referencia de UI). |
-| `pago` | A `sostenimiento.cuenta`, referencia `ia:<identidad>:<periodo>` (`AAAA-MM`). Mismo patrón P2P que un aporte: la persona declara la transferencia; el operador marca recibido. |
-| `tope_mensual_usd` | Default y máximo que una identidad puede elegir al activar. **El nodo lo garantiza** (rechaza con `429 tope_ia_alcanzado` al llegar), sea cual sea el `gateway`. |
+| `funciones` | Comercio y/o comprador (ver abajo). Ausente una función = esa ruta responde `422 funcion_ia_no_ofrecida`. |
+| `gateway` | Opcional. Texto libre del gateway de texto (`openrouter`, `vercel`, …). |
+| `medios` | Opcional. `funciones` de medio (`mejorar_foto`, `quitar_fondo`, `foto_a_video`) y `proveedor` informativo (`fal`, …). |
+| `precio` | Siempre `modalidad: costo` y `margen: 0`. Moneda `USD`; `equivalente_ars` opcional. |
+| `pago` | A `sostenimiento.cuenta`, referencia `ia:<identidad>:<periodo>`. P2P; Vereda no intermedia. |
+| `tope_mensual_usd` | Default y máximo. **El nodo lo garantiza** (`429 tope_ia_alcanzado`), sea cual sea el gateway o el proveedor de medios. |
 | `periodo_reseteo` | `mensual` (día 1, zona del nodo). |
-| `exige_pago_previo` | Si `true`, sin el extracto del mes anterior marcado recibido la IA queda pausada al empezar el mes. Default `false`. |
+| `exige_pago_previo` | Si `true`, sin el extracto del mes anterior recibido la IA queda pausada. Default `false`. |
 
-Sin `ia` en el anuncio, o si el operador la apaga, toda ruta bajo `/ia` responde `501 no_implementado` y las apps no muestran nada nuevo. Apagar no borra extractos ni el historial de activación.
+Sin `ia` en el anuncio, o si el operador la apaga, toda ruta bajo `/ia` responde `501 no_implementado` y las apps no muestran nada nuevo.
 
 ## Activación (autoservicio)
 
-Nadie aprueba a nadie. La persona (o el dueño de un comercio que actúa con su sesión) activa su IA:
+- `GET /ia/yo` (`verMiIa`) / `PUT /ia/yo` (`configurarMiIa`): solo sesión.
+- `POST /ia/yo/transferencia` (`declararTransferenciaIa`) / `GET /ia/yo/extracto` (`verExtractoIa`).
 
-- `GET /ia/yo` (`verMiIa`): estado `inactiva` \| `activa` \| `pausada`, `activa_hasta`, `tope_usd`, `consumido` del período abierto, `periodo`.
-- `PUT /ia/yo` (`configurarMiIa`): `{estado, tope_usd?}`. `activa` o `pausada` con un tope entre el default y el máximo del nodo. Solo con sesión (un mandato no activa la IA de nadie: es plata y consentimiento).
-- `POST /ia/yo/transferencia` (`declararTransferenciaIa`): declara que transfirió el extracto de un `periodo` a `sostenimiento.cuenta` con la referencia publicada. El operador confirma afuera, con sus herramientas; el nodo no mueve plata.
-
-Si no está `activa`, cualquier función responde `403 ia_no_activada`. Si el consumido del mes llega al tope, `429 tope_ia_alcanzado` con `detalle.tope_usd` y `detalle.consumido_usd` (y `Retry-After` hasta el próximo reseteo): ese límite lo aplica el nodo, no el gateway. Si el gateway no responde, `503 gateway_ia_caido`.
+Si no está `activa` → `403 ia_no_activada`. Tope → `429 tope_ia_alcanzado` (lo aplica el nodo). Gateway o proveedor de medios caído → `503 gateway_ia_caido`.
 
 ## Funciones: proponen, no escriben
 
-Toda función **devuelve un borrador**. Confirmarlo es un paso aparte, con los endpoints que ya existen (`crearOferta`, `editarOferta`, `responderResena`, `enviarMensaje`, `crearCarrito` / `agregarItemCarrito`, etc.) o con el agente de la persona y su mandato. La IA del nodo nunca escribe sola en el catálogo, el chat ni el carrito.
+Toda función **devuelve un borrador** (o un mensaje con widgets). Confirmarlo es un paso aparte con los endpoints que ya existen, o con el mandato de la persona cuando corresponda. La IA del nodo nunca compra sola ni publica sola.
 
-### Comercio (sesión dueña/equipo, o mandato `administrar`)
+### Comprador — chat con UI generativa
+
+`POST /ia/chat` (`iaChat`, mandato `armar` o sesión): un turno de conversación. El cuerpo manda `mensaje`, `lat`/`lng`, historial opcional y, si hay, `comercio_id` / `carrito_id`. La respuesta es un `mensaje` (`esquemas/ia-widgets.json#/$defs/mensaje`) con `texto` y/o `widgets` tipados que la app dibuja con componentes Vereda:
+
+| `tipo` | Qué dibuja |
+| --- | --- |
+| `elegir_categoria` | Chips/lista de categorías |
+| `productos` | Tarjetas (foto, precio, Agregar) |
+| `producto` | Una tarjeta |
+| `carrito` | Ítems y total propuestos |
+| `checkout` | Medios del comercio: solo `efectivo` / `transferencia` (nunca cobro por Vereda) |
+| `recomendacion` | Texto + ítems opcionales |
+| `comercio` | Ficha corta del local |
+
+**Regla de compatibilidad:** el cliente **ignora** widgets cuyo `tipo` no conoce y degrada a texto si lo hay. `version` del widget es `1` en esta revisión.
+
+Las acciones (agregar al carrito, confirmar pedido) las ejecuta la **persona** (o su agente) con `crearCarrito` / `agregarItemCarrito` / `confirmarCarrito` — el widget solo propone.
+
+Respuesta completa por defecto. Streaming SSE (`Accept: text/event-stream`) es opcional: el nodo puede mandar el mismo `mensaje` armado por partes; si no lo ofrece, responde JSON como siempre (mismo espíritu que `GET /eventos` en `docs/eventos.md`).
+
+También siguen:
+
+| Operación | Ruta | Mandato |
+| --- | --- | --- |
+| `iaPedidoPropuesto` | `POST /ia/pedido-propuesto` | `armar` |
+| `iaBuscar` | `POST /ia/buscar` | `leer` |
+| `iaSugerir` | `POST /ia/sugerir` (`repetir` \| `sugerir`) | `leer` |
+
+### Comercio (sesión / mandato `administrar`)
 
 | Operación | Ruta | Qué propone |
 | --- | --- | --- |
-| `iaCatalogoDesdeFotos` | `POST /ia/comercios/{id}/catalogo-desde-fotos` | Borradores de ítems (nombre, descripción, precio sugerido, atributos) a partir de URLs de fotos. |
-| `iaSugerirProducto` | `POST /ia/comercios/{id}/sugerir-producto` | Descripción y/o precio sugerido para un producto (texto y/o foto). |
-| `iaBorradorRespuesta` | `POST /ia/comercios/{id}/borrador-respuesta` | Texto de respuesta a un mensaje o una reseña. |
-| `iaResumenDia` | `POST /ia/comercios/{id}/resumen-dia` | Resumen del día y qué reponer, con números del nodo. |
+| `iaCatalogoDesdeFotos` | `POST /ia/comercios/{id}/catalogo-desde-fotos` | Borradores de ítems |
+| `iaSugerirProducto` | `POST /ia/comercios/{id}/sugerir-producto` | Descripción/precio |
+| `iaBorradorRespuesta` | `POST /ia/comercios/{id}/borrador-respuesta` | Texto a mensaje/reseña |
+| `iaMejorarTexto` | `POST /ia/comercios/{id}/mejorar-texto` | Nombre, descripción, copy del local u oferta |
+| `iaAtencion` | `POST /ia/comercios/{id}/atencion` | Responder / aceptar / ordenar pedidos entrantes (borrador; la persona confirma, o su mandato lo autoriza según `docs/mandatos.md`) |
+| `iaMejorarFoto` | `POST /ia/comercios/{id}/medios/mejorar-foto` | Borrador de imagen |
+| `iaQuitarFondo` | `POST /ia/comercios/{id}/medios/quitar-fondo` | Borrador de imagen |
+| `iaFotoAVideo` | `POST /ia/comercios/{id}/medios/foto-a-video` | Borrador de clip (≤ 15 s, con póster) |
 
-Permiso de equipo: `catalogo` o `pedidos` según la función (`x-permiso-equipo` en el OpenAPI). Un miembro sin permiso recibe `403 sin_permiso`.
+Los medios con IA solo existen si `ia.medios` los lista. El resultado es un **borrador** (`url`); el comercio lo acepta poniéndolo en `imagenes` / `videos` con `editarComercio` / `editarOferta` (o subiendo via `POST /medios` si aplica). El proveedor es intercambiable; el costo real va en `consumo` (puede tipificar `imagen` / `segundo_video` además de tokens).
 
-### Comprador (sesión, o mandato `armar` / `leer`)
-
-| Operación | Ruta | Qué propone | Mandato |
-| --- | --- | --- | --- |
-| `iaPedidoPropuesto` | `POST /ia/pedido-propuesto` | Un carrito propuesto (comercio + ítems + cantidades) desde lenguaje natural ("armame una picada para 6"). La persona lo confirma con `crearCarrito` / ítems / `confirmarCarrito`. | `armar` |
-| `iaBuscar` | `POST /ia/buscar` | Resultados de búsqueda interpretada (misma forma que `GET /buscar`, más una `interpretacion`). | `leer` |
-| `iaSugerir` | `POST /ia/sugerir` | Repetir un pedido anterior o sugerir a partir del historial. | `leer` |
+**Descartado:** resumen del día (no hay función ni ruta).
 
 ## Consumo auditable
 
-Cada respuesta exitosa de una función trae `consumo`:
-
-```json
-{
-  "tokens_entrada": 1200,
-  "tokens_salida": 340,
-  "costo_usd": 0.0124,
-  "generacion": "gen_…"
-}
-```
-
-`generacion` es opaco, único por llamada, y aparece en el extracto. El nodo suma `costo_usd` al `consumido` del período de la identidad. Si la llamada falla antes de llegar al gateway, no hay `consumo` y no se cobra.
+Cada respuesta exitosa trae `consumo`: `tokens_entrada`, `tokens_salida`, `costo_usd`, `generacion`, y opcionalmente `imagenes`, `segundos_video`, `unidad` (`tokens` \| `imagen` \| `segundo_video` \| `mixto`). El nodo suma `costo_usd` al extracto. Si falla antes del proveedor, no hay `consumo`.
 
 ## Extracto y cuentas públicas
 
-- `GET /ia/yo/extracto?periodo=AAAA-MM` (`verExtractoIa`): líneas por `generacion` (función, instante, tokens, costo) y totales del período. Lo ve solo la identidad con su sesión.
-- En `gastos_publicados` de `GET /sostenimiento` / `sostenimiento` del anuncio, cada período puede traer:
-  - `gastos.tokens_ia`: lo gastado en la IA ofrecida (suma de costos del gateway).
-  - `aportes_ia_recibidos`: lo que el operador marcó recibido con referencia `ia:…` en ese mes.
-
-Así las cuentas cierran a la vista: tokens de IA vs lo recuperado. `gastos.tokens` sigue siendo lo de los agentes que administran el nodo, no mezclado.
+Igual que antes: `GET /ia/yo/extracto`, y en `gastos_publicados` los opcionales `gastos.tokens_ia` y `aportes_ia_recibidos` (`docs/sostenimiento.md`).
 
 ## Errores
 
 | Qué pasa | Estado | Código |
 | --- | --- | --- |
-| El nodo no ofrece `ia`, o se apagó | 501 | `no_implementado` |
-| La identidad no tiene IA activa | 403 | `ia_no_activada` |
-| Pedí una función que el nodo no lista | 422 | `funcion_ia_no_ofrecida` |
-| Llegué al tope del mes | 429 | `tope_ia_alcanzado` |
-| El gateway no responde | 503 | `gateway_ia_caido` |
-| Tope pedido fuera del rango del nodo | 422 | `tope_ia_invalido` |
+| Sin capacidad `ia` | 501 | `no_implementado` |
+| IA no activada | 403 | `ia_no_activada` |
+| Función no listada | 422 | `funcion_ia_no_ofrecida` |
+| Tope del mes | 429 | `tope_ia_alcanzado` |
+| Gateway / proveedor caído | 503 | `gateway_ia_caido` |
+| Tope fuera de rango | 422 | `tope_ia_invalido` |
 
-## Lo que un nodo NO puede hacer con esto
+## Lo que un nodo NO puede hacer
 
-- Cobrar margen sobre el costo del gateway, ni un abono fijo disfrazado de "plan".
-- Intermediar la plata: el pago es P2P a `sostenimiento.cuenta`.
-- Escribir en catálogo, chat, reseñas o carrito sin que la persona (o su agente con mandato) confirme por los endpoints de siempre.
-- Mostrar IA en la app si no publicó `ia` en el anuncio.
-- Degradar a quien no activa: traer tu propio agente sigue igual.
-- Hospedar el modelo dentro del nodo como requisito del protocolo.
-- Dejar el tope mensual solo en manos del gateway: el nodo es quien lo garantiza y quien responde `tope_ia_alcanzado`.
-
-## Relación con mandatos y agentes propios
-
-La capacidad `ia` es del **nodo**. Un agente propio (Claude Desktop, etc.) habla por MCP con el mandato de la persona y no pasa por estas rutas ni consume este tope. Las herramientas MCP de `/ia` existen para que el mismo agente pueda, si la persona quiere, usar la IA del nodo con el costo a la vista.
+- Cobrar margen, intermediar plata, o escribir en catálogo/chat/carrito sin confirmación.
+- Cobrar el checkout del chat por Vereda o forzar tarjeta del nodo: solo medios del comercio.
+- Dejar el tope solo en manos del gateway/proveedor: el nodo responde `tope_ia_alcanzado`.
+- Mostrar IA en la app sin publicar `ia`.
+- Degradar a quien no activa: traer tu agente sigue igual.
