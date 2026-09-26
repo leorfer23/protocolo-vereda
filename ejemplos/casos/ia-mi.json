@@ -1,0 +1,49 @@
+{
+  "$comentario": "Casos de GET /ia/yo.",
+  "esquema": "ia.json#/$defs/mi_ia",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Activa con consumido.",
+      "doc": {
+        "estado": "activa",
+        "tope_usd": 5,
+        "periodo": "2026-09",
+        "consumido": {
+          "usd": 0.1,
+          "tokens_entrada": 100,
+          "tokens_salida": 20,
+          "generaciones": 1
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Inactiva sin tope.",
+      "doc": {
+        "estado": "inactiva",
+        "periodo": "2026-09",
+        "consumido": {
+          "usd": 0,
+          "tokens_entrada": 0,
+          "tokens_salida": 0,
+          "generaciones": 0
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Estado inventado.",
+      "doc": {
+        "estado": "premium",
+        "periodo": "2026-09",
+        "consumido": {
+          "usd": 0,
+          "tokens_entrada": 0,
+          "tokens_salida": 0,
+          "generaciones": 0
+        }
+      }
+    }
+  ]
+}

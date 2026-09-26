@@ -1,0 +1,33 @@
+{
+  "$comentario": "Anuncio de la capacidad ia en /.well-known/vereda.json (docs/ia/capacidad.md).",
+  "funciones": {
+    "comercio": [
+      "catalogo_desde_fotos",
+      "sugerir_producto",
+      "borrador_respuesta",
+      "resumen_dia"
+    ],
+    "comprador": [
+      "pedido_propuesto",
+      "buscar",
+      "sugerir"
+    ]
+  },
+  "gateway": "openrouter",
+  "precio": {
+    "modalidad": "costo",
+    "margen": 0,
+    "moneda": "USD",
+    "equivalente_ars": "al tipo del día"
+  },
+  "pago": {
+    "destino": "sostenimiento.cuenta",
+    "referencia": "ia:<identidad>:<periodo>"
+  },
+  "tope_mensual_usd": {
+    "default_usd": 5,
+    "maximo_usd": 50
+  },
+  "periodo_reseteo": "mensual",
+  "exige_pago_previo": false
+}

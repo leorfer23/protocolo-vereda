@@ -48,12 +48,14 @@
         "comercios_que_aportaron": { "type": "integer", "minimum": 0, "description": "Cuántos comercios distintos aportaron. Solo el número: el nodo nunca publica quién aportó y quién no." },
         "aportes_recibidos": { "$ref": "comunes.json#/$defs/monto", "description": "Suma de los aportes de comercios que el operador marcó recibidos." },
         "propinas_recibidas": { "$ref": "comunes.json#/$defs/monto", "description": "Suma de las propinas de compradores que el operador marcó recibidas." },
+        "aportes_ia_recibidos": { "$ref": "comunes.json#/$defs/monto", "description": "Suma de transferencias ia:<identidad>:<periodo> que el operador marcó recibidas en este mes. Ausente si el nodo no ofrece ia." },
         "gastos": {
           "type": "object",
           "required": ["servidor", "tokens", "otros"],
           "properties": {
             "servidor": { "$ref": "comunes.json#/$defs/monto", "description": "Máquinas, base de datos, dominio, ancho de banda." },
-            "tokens": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que cuestan los agentes que administran el nodo." },
+            "tokens": { "$ref": "comunes.json#/$defs/monto", "description": "Lo que cuestan los agentes que administran el nodo (no la IA ofrecida a comercios/compradores)." },
+            "tokens_ia": { "$ref": "comunes.json#/$defs/monto", "description": "Costo real del gateway de la capacidad ia en el período (docs/ia/capacidad.md). Ausente si el nodo no ofrece ia o no gastó." },
             "otros": { "$ref": "comunes.json#/$defs/monto" }
           },
           "additionalProperties": false
