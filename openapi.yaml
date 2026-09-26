@@ -45,7 +45,7 @@ tags:
   - { name: mandatos, description: Agentes }
   - { name: yo, description: Preferencias y exportación }
   - { name: eventos }
-  - { name: ia, description: "Capacidad opcional de IA nativa del nodo: activación, funciones que proponen (no escriben) y extracto a costo real (docs/ia/capacidad.md)" }
+  - { name: ia, description: "Capacidad opcional de IA nativa: chat con widgets, medios, textos, atención; proponen y no escriben (docs/ia/capacidad.md)" }
 
 paths:
   /.well-known/vereda.json:
@@ -756,25 +756,130 @@ paths:
         "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
-  /ia/comercios/{id}/resumen-dia:
+
+  /ia/chat:
     post:
-      operationId: iaResumenDia
-      tags: [ia, mi-comercio]
-      summary: "Resumen del día y qué reponer (borrador, no cambia stock)"
+      operationId: iaChat
+      tags: [ia, carrito]
+      summary: "Turno del chat del comprador: texto + widgets tipados (UI generativa)"
       description: |
-        Números del nodo + texto. No escribe stock ni pedidos. docs/ia/capacidad.md.
-      security: [ { sesion: [] }, { mandato: [administrar] } ]
-      x-permiso-equipo: [pedidos, numeros]
-      parameters: [ { $ref: "#/components/parameters/id" } ]
-      requestBody: { content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_resumen_dia" } } } }
+        Respuesta con `mensaje` (texto y/o widgets de esquemas/ia-widgets.json). La app dibuja
+        los tipos que conoce e ignora el resto. Las acciones (agregar, confirmar) las ejecuta
+        la persona con los endpoints de carrito/pedido — la IA no compra sola (docs/ia/capacidad.md).
+        JSON completo por defecto. Con `Accept: text/event-stream` el nodo puede streamear el
+        mensaje (opcional; si no, responde application/json igual).
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia-widgets.json#/$defs/pedido_chat" } } } }
       responses:
-        "200": { description: Resumen + consumo, content: { application/json: { schema: { type: object, required: [propuesta, consumo], properties: { propuesta: { $ref: "esquemas/ia.json#/$defs/propuesta_resumen_dia" }, consumo: { $ref: "esquemas/ia.json#/$defs/consumo" } } } } } }
+        "200":
+          description: Mensaje del asistente + consumo
+          content:
+            application/json: { schema: { $ref: "esquemas/ia-widgets.json#/$defs/respuesta_chat" } }
+            text/event-stream: { schema: { type: string, description: "SSE opcional: eventos con fragmentos o el mensaje final." } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada o fuera_de_mandato", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/comercios/{id}/mejorar-texto:
+    post:
+      operationId: iaMejorarTexto
+      tags: [ia, mi-comercio]
+      summary: "Proponer mejor nombre, descripción o copy (borrador)"
+      description: |
+        No escribe la ficha ni la oferta. Confirmar con editarComercio / editarOferta. docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo, datos]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_mejorar_texto" } } } }
+      responses:
+        "200": { description: Borrador + consumo, content: { application/json: { schema: { type: object, required: [propuesta, consumo], properties: { propuesta: { $ref: "esquemas/ia.json#/$defs/propuesta_mejorar_texto" }, consumo: { $ref: "esquemas/ia.json#/$defs/consumo" } } } } } }
         "401": { $ref: "#/components/responses/Error" }
         "403": { description: "ia_no_activada, no_es_el_dueno o sin_permiso", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/comercios/{id}/atencion:
+    post:
+      operationId: iaAtencion
+      tags: [ia, mi-comercio]
+      summary: "Borrador de atención: responder, aceptar u ordenar pedidos entrantes"
+      description: |
+        Propone; la persona confirma (enviarMensaje, aceptarPedido, etc.) o su mandato lo autoriza
+        según docs/mandatos.md. docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [pedidos, datos]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_atencion" } } } }
+      responses:
+        "200": { description: Borrador + consumo, content: { application/json: { schema: { type: object, required: [propuesta, consumo], properties: { propuesta: { $ref: "esquemas/ia.json#/$defs/propuesta_atencion" }, consumo: { $ref: "esquemas/ia.json#/$defs/consumo" } } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada, no_es_el_dueno o sin_permiso", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/comercios/{id}/medios/mejorar-foto:
+    post:
+      operationId: iaMejorarFoto
+      tags: [ia, mi-comercio]
+      summary: "Proponer una foto mejorada (borrador de medio)"
+      description: |
+        Solo si `ia.medios` lista `mejorar_foto`. El comercio acepta poniendo la URL en imagenes.
+        Proveedor intercambiable (informativo en ia.medios.proveedor). docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_medio_ia" } } } }
+      responses:
+        "200": { description: Borrador de medio + consumo, content: { application/json: { schema: { type: object, required: [propuesta, consumo], properties: { propuesta: { $ref: "esquemas/ia.json#/$defs/propuesta_medio" }, consumo: { $ref: "esquemas/ia.json#/$defs/consumo" } } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada, no_es_el_dueno o sin_permiso", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/comercios/{id}/medios/quitar-fondo:
+    post:
+      operationId: iaQuitarFondo
+      tags: [ia, mi-comercio]
+      summary: "Proponer la foto sin fondo (borrador)"
+      description: |
+        Solo si `ia.medios` lista `quitar_fondo`. docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_medio_ia" } } } }
+      responses:
+        "200": { description: Borrador de medio + consumo, content: { application/json: { schema: { type: object, required: [propuesta, consumo], properties: { propuesta: { $ref: "esquemas/ia.json#/$defs/propuesta_medio" }, consumo: { $ref: "esquemas/ia.json#/$defs/consumo" } } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada, no_es_el_dueno o sin_permiso", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/comercios/{id}/medios/foto-a-video:
+    post:
+      operationId: iaFotoAVideo
+      tags: [ia, mi-comercio]
+      summary: "Proponer un clip corto a partir de una foto (borrador)"
+      description: |
+        Solo si `ia.medios` lista `foto_a_video`. Clip ≤ 15 s con póster (docs/medios.md). docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [catalogo]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_medio_ia" } } } }
+      responses:
+        "200": { description: Borrador de video + consumo, content: { application/json: { schema: { type: object, required: [propuesta, consumo], properties: { propuesta: { $ref: "esquemas/ia.json#/$defs/propuesta_medio" }, consumo: { $ref: "esquemas/ia.json#/$defs/consumo" } } } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada, no_es_el_dueno o sin_permiso", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
   /ia/pedido-propuesto:
     post:
       operationId: iaPedidoPropuesto

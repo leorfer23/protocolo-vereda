@@ -1,19 +1,27 @@
 {
-  "$comentario": "Casos de la capacidad ia y de mi_ia (docs/ia/capacidad.md).",
+  "$comentario": "Casos CapacidadIa post-widgets (docs/ia/capacidad.md).",
   "esquema": "ia.json#/$defs/capacidad",
   "casos": [
     {
       "espera": "valido",
-      "porque": "Capacidad completa del nodo de referencia.",
+      "porque": "Con chat, medios y gateway.",
       "doc": {
         "funciones": {
           "comercio": [
-            "catalogo_desde_fotos",
-            "resumen_dia"
+            "mejorar_foto",
+            "atencion"
           ],
           "comprador": [
-            "pedido_propuesto"
+            "chat",
+            "buscar"
           ]
+        },
+        "gateway": "openrouter",
+        "medios": {
+          "funciones": [
+            "mejorar_foto"
+          ],
+          "proveedor": "fal"
         },
         "precio": {
           "modalidad": "costo",
@@ -28,20 +36,18 @@
           "default_usd": 5,
           "maximo_usd": 50
         },
-        "periodo_reseteo": "mensual",
-        "gateway": "openrouter"
+        "periodo_reseteo": "mensual"
       }
     },
     {
       "espera": "valido",
-      "porque": "Otro gateway, mismo contrato.",
+      "porque": "Sin gateway ni medios: ambos opcionales.",
       "doc": {
         "funciones": {
-          "comercio": [
-            "resumen_dia"
+          "comprador": [
+            "chat"
           ]
         },
-        "gateway": "vercel_ai_gateway",
         "precio": {
           "modalidad": "costo",
           "margen": 0,
@@ -60,62 +66,41 @@
     },
     {
       "espera": "invalido",
-      "porque": "Con margen distinto de 0 no es la opción A.",
+      "porque": "resumen_dia ya no existe.",
       "doc": {
         "funciones": {
           "comercio": [
             "resumen_dia"
+          ]
+        },
+        "precio": {
+          "modalidad": "costo",
+          "margen": 0,
+          "moneda": "USD"
+        },
+        "pago": {
+          "destino": "sostenimiento.cuenta",
+          "referencia": "ia:<identidad>:<periodo>"
+        },
+        "tope_mensual_usd": {
+          "default_usd": 5,
+          "maximo_usd": 50
+        },
+        "periodo_reseteo": "mensual"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "margen distinto de 0.",
+      "doc": {
+        "funciones": {
+          "comprador": [
+            "chat"
           ]
         },
         "precio": {
           "modalidad": "costo",
           "margen": 0.1,
-          "moneda": "USD"
-        },
-        "pago": {
-          "destino": "sostenimiento.cuenta",
-          "referencia": "ia:<identidad>:<periodo>"
-        },
-        "tope_mensual_usd": {
-          "default_usd": 5,
-          "maximo_usd": 50
-        },
-        "periodo_reseteo": "mensual",
-        "gateway": "openrouter"
-      }
-    },
-    {
-      "espera": "invalido",
-      "porque": "Falta precio.",
-      "doc": {
-        "funciones": {
-          "comercio": [
-            "resumen_dia"
-          ]
-        },
-        "pago": {
-          "destino": "sostenimiento.cuenta",
-          "referencia": "ia:<identidad>:<periodo>"
-        },
-        "tope_mensual_usd": {
-          "default_usd": 5,
-          "maximo_usd": 50
-        },
-        "periodo_reseteo": "mensual"
-      }
-    },
-    {
-      "espera": "invalido",
-      "porque": "Sin gateway no hay transparencia del anuncio.",
-      "doc": {
-        "funciones": {
-          "comercio": [
-            "resumen_dia"
-          ]
-        },
-        "precio": {
-          "modalidad": "costo",
-          "margen": 0,
           "moneda": "USD"
         },
         "pago": {

@@ -1,28 +1,28 @@
 {
-  "$comentario": "GET /ia/yo/extracto?periodo=2026-09",
+  "$comentario": "GET /ia/yo/extracto con tokens y una imagen.",
   "periodo": "2026-09",
   "lineas": [
     {
-      "generacion": "gen_01HXYZ",
-      "funcion": "resumen_dia",
-      "instante": "2026-09-26T11:02:00-03:00",
-      "tokens_entrada": 2200,
-      "tokens_salida": 600,
-      "costo_usd": 0.08
+      "generacion": "gen_01CHAT",
+      "funcion": "chat",
+      "instante": "2026-09-26T12:00:00-03:00",
+      "tokens_entrada": 900,
+      "tokens_salida": 400,
+      "costo_usd": 0.03
     },
     {
-      "generacion": "gen_01HXYY",
-      "funcion": "catalogo_desde_fotos",
-      "instante": "2026-09-25T18:40:00-03:00",
-      "tokens_entrada": 8000,
-      "tokens_salida": 1500,
-      "costo_usd": 0.34
+      "generacion": "gen_01FOTO",
+      "funcion": "mejorar_foto",
+      "instante": "2026-09-26T11:00:00-03:00",
+      "tokens_entrada": 0,
+      "tokens_salida": 0,
+      "costo_usd": 0.04
     }
   ],
   "total": {
-    "usd": 0.42,
-    "tokens_entrada": 10200,
-    "tokens_salida": 2100,
+    "usd": 0.07,
+    "tokens_entrada": 900,
+    "tokens_salida": 400,
     "generaciones": 2
   },
   "pago": {

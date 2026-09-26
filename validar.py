@@ -54,6 +54,7 @@ MAPA_DEFS = {
     "ia-capacidad.json": "ia.json#/$defs/capacidad",
     "ia-mi.json": "ia.json#/$defs/mi_ia",
     "ia-extracto.json": "ia.json#/$defs/extracto",
+    "ia-widgets-mensaje.json": "ia-widgets.json#/$defs/mensaje",
 }
 for ej, ref in MAPA_DEFS.items():
     doc = json.load(open(os.path.join(EJ, ej)))

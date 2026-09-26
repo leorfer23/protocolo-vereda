@@ -940,27 +940,6 @@
     }
   },
   {
-    "name": "ia_resumen_dia",
-    "description": "Resumen del día del comercio y qué conviene reponer. No cambia stock. Scope 'administrar'. Ej: '¿cómo nos fue hoy?', 'qué tengo que pedir'.",
-    "inputSchema": {
-      "type": "object",
-      "required": [
-        "comercio_id"
-      ],
-      "properties": {
-        "comercio_id": {
-          "type": "string"
-        },
-        "dia": {
-          "type": "string"
-        },
-        "indicaciones": {
-          "type": "string"
-        }
-      }
-    }
-  },
-  {
     "name": "ia_pedido_propuesto",
     "description": "Proponé un carrito desde lenguaje natural ('armame una picada para 6'). No lo confirma: después lo armás con carrito_crear / carrito_agregar / carrito_confirmar. Scope 'armar'. Ej: 'pedime algo rico para 4 cerca de casa'.",
     "inputSchema": {
@@ -1033,6 +1012,173 @@
         },
         "lng": {
           "type": "number"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_chat",
+    "description": "Turno del chat del comprador con UI generativa: texto + widgets (categorías, productos, carrito, checkout solo efectivo/transferencia, etc.). No compra sola: la persona confirma con el carrito. Scope 'armar'. Ej: 'armame una picada para 6 cerca'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "mensaje",
+        "lat",
+        "lng"
+      ],
+      "properties": {
+        "mensaje": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "historial": {
+          "type": "array"
+        },
+        "comercio_id": {
+          "type": "string"
+        },
+        "carrito_id": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_mejorar_texto",
+    "description": "Proponé mejor nombre, descripción o copy del local/oferta. No escribe. Scope 'administrar'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "campo": {
+          "type": "string",
+          "enum": [
+            "nombre",
+            "descripcion",
+            "copy_local",
+            "oferta"
+          ]
+        },
+        "texto": {
+          "type": "string"
+        },
+        "oferta_id": {
+          "type": "string"
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_atencion",
+    "description": "Borrador de atención al cliente: responder mensaje/reseña, o proponer aceptar/ordenar pedidos. La persona confirma. Scope 'administrar'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id",
+        "sobre"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "sobre": {
+          "type": "object"
+        },
+        "accion": {
+          "type": "string",
+          "enum": [
+            "responder",
+            "aceptar",
+            "ordenar"
+          ]
+        },
+        "tono": {
+          "type": "string"
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_mejorar_foto",
+    "description": "Proponé una foto mejorada (borrador). Solo si ia.medios lo ofrece. Scope 'administrar'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id",
+        "fuente"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "fuente": {
+          "type": "string"
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_quitar_fondo",
+    "description": "Proponé la foto sin fondo (borrador). Scope 'administrar'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id",
+        "fuente"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "fuente": {
+          "type": "string"
+        },
+        "indicaciones": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_foto_a_video",
+    "description": "Proponé un clip corto (≤15s) a partir de una foto. Scope 'administrar'.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "comercio_id",
+        "fuente"
+      ],
+      "properties": {
+        "comercio_id": {
+          "type": "string"
+        },
+        "fuente": {
+          "type": "string"
+        },
+        "duracion_s": {
+          "type": "integer"
+        },
+        "indicaciones": {
+          "type": "string"
         }
       }
     }
