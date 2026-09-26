@@ -109,10 +109,10 @@
     "sin_codigo": {
       "type": "object",
       "description": "Lo escribe el nodo cuando el pedido se entregó sin el código que pedía la regla: en envío con 'modalidad.codigo_entrega' que lo exigía, o en retiro con los intentos agotados. Es un hecho a la vista de las partes, no una sanción ni un bloqueo. Ausente en una entrega con código o sin regla que lo pida.",
-      "required": ["motivo", "foto"],
+      "required": ["motivo"],
       "properties": {
         "motivo": { "type": "string", "enum": ["no_lo_dio", "intentos_agotados"], "description": "'no_lo_dio': quien entregó no mandó código (el comprador no estaba, lo dejó en portería). 'intentos_agotados': se equivocaron 5 veces." },
-        "foto": { "type": "string", "format": "uri", "description": "La foto de la entrega, obligatoria en este caso." }
+        "foto": { "type": "string", "format": "uri", "description": "La foto de la entrega, obligatoria en este caso. Solo falta si el nodo no aloja fotos (no anuncia 'endpoints.medios'): ahí quien entrega no tiene dónde subirla y la entrega no se traba. Si es la URL de 'POST /medios?pedido=<id>', la ven solo las partes (verFotoEntrega)." }
       },
       "additionalProperties": false
     },

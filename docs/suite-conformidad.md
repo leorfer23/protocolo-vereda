@@ -236,6 +236,12 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   `tipos` la lista. Texto con `Content-Type: image/jpeg` da `415 tipo_no_admitido`, un
   archivo de más de `limite_bytes` da `413 medio_muy_grande`, sin token `401`, y con custodia
   propia otra identidad da `403`. El tope por comercio no se prueba: llenarlo es caro.
+- La foto de la entrega (`docs/medios.md`), solo si el nodo publica `endpoints.medios`. En el
+  ciclo en retiro, con el pedido `listo`, la sesión de prueba (el comercio, que entrega) sube una
+  JPEG con EXIF con `?pedido=<id>` (`201`, `MedioSubido`); la `url` sirve la JPEG sin EXIF con
+  token, no la sirve sin token y no dice `Cache-Control: public`. `comercio` y `pedido` a la vez
+  dan `400`, y con el pedido ya entregado subir otra da `409 transicion_invalida`. El tope de 3
+  por pedido y la retención no se prueban desde afuera.
 - Sesiones y firma fresca (`docs/acceso.md`, puntos 6 y 7), con custodia propia: una
   identidad nueva entra dos veces con la misma clave, la primera con `etiqueta`.
   `GET /yo/sesiones` trae las dos, una sola con `actual: true` y la etiqueta, sin tokens; con

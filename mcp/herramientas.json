@@ -261,6 +261,11 @@
       }
     },
     {
+      "name": "foto_entrega_subir",
+      "description": "Sube la foto de la entrega de un pedido que lleva la persona y devuelve su 'url', para mandarla en 'foto' de viaje_entregar o pedido_entregar cuando el comprador no está y la regla del comercio pide código. Solo quien lleva el pedido: el repartidor asignado con el pedido en_camino, o el comercio que lo entrega él mismo con el pedido listo. La foto es privada: la ven solo las partes del pedido, y se borra con sus datos personales. JPEG o PNG, hasta 'medios.limite_bytes'; una HEIC se convierte a JPEG antes. El nodo le borra la ubicación y demás metadatos. Hasta 3 por pedido. Si el nodo no aloja fotos responde no_implementado: ahí se entrega sin foto. Requiere scope 'repartir' (o 'administrar' para el comercio).",
+      "inputSchema": {"type": "object", "required": ["pedido_id", "contenido_base64", "tipo"], "properties": {"pedido_id": {"type": "string"}, "contenido_base64": {"type": "string", "description": "El archivo, en base64."}, "tipo": {"type": "string", "enum": ["image/jpeg", "image/png"]}}}
+    },
+    {
       "name": "oferta_crear",
       "description": "Publica una oferta nueva en el catálogo: producto, pesable, preparado, compuesto, servicio o recurrente, con su precio, grupos de opciones, variantes y disponibilidad. Ej: 'agregá milanesa de pollo a $8.500 con guarnición a elección'. Requiere scope 'administrar'.",
       "inputSchema": {
@@ -550,7 +555,7 @@
           "foto": {
             "type": "string",
             "format": "uri",
-            "description": "La foto de la entrega. Obligatoria si la regla del comercio pedía código y no vino, o si se agotaron los intentos: queda 'sin_codigo'."
+            "description": "La foto de la entrega: la url que devolvió foto_entrega_subir. Obligatoria si la regla del comercio pedía código y no vino, o si se agotaron los intentos, salvo que el nodo no aloje fotos: queda 'sin_codigo'."
           }
         }
       }
@@ -706,7 +711,7 @@
     },
     {
       "name": "viaje_entregar",
-      "description": "Marca entregado un pedido del viaje y firma la entrega. Si hay pagos en efectivo (productos, envío o propina), marcá cobrado_en_mano; si hay alcohol, que se verificó la mayoría de edad. Pedile a la persona el código de entrega que le dio el comprador y mandalo en codigo_entrega: deja la recepción firmada. Si la regla del comercio lo pide y el comprador no está, mandá la foto sin código: se entrega igual y queda 'sin_codigo'. Requiere scope 'repartir'.",
+      "description": "Marca entregado un pedido del viaje y firma la entrega. Si hay pagos en efectivo (productos, envío o propina), marcá cobrado_en_mano; si hay alcohol, que se verificó la mayoría de edad. Pedile a la persona el código de entrega que le dio el comprador y mandalo en codigo_entrega: deja la recepción firmada. Si la regla del comercio lo pide y el comprador no está, subí la foto con foto_entrega_subir y mandá su url en foto, sin código: se entrega igual y queda 'sin_codigo'. Requiere scope 'repartir'.",
       "inputSchema": {"type": "object", "required": ["pedido_id"], "properties": {"pedido_id": {"type": "string"}, "codigo_entrega": {"type": "string", "description": "Los 4 dígitos que dijo el comprador. Uno equivocado responde 422 con los intentos que quedan (5 en total); agotados, solo con foto."}, "cobrado_en_mano": {"type": "boolean"}, "mayoria_edad_verificada": {"type": "boolean"}, "foto": {"type": "string", "format": "uri", "description": "La foto de la entrega. Obligatoria si la regla pedía código y no vino, o si se agotaron los intentos."}}}
     },
     {

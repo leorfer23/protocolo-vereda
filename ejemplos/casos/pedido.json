@@ -2800,13 +2800,13 @@
         },
         "sin_codigo": {
           "motivo": "no_lo_dio",
-          "foto": "https://vereda.ar/medios/entrega-01926b3a.jpg"
+          "foto": "https://vereda.ar/v1/pedidos/01926b3a-7777-7000-8000-000000000001/fotos/9f2c4e1a7b3d5f60819a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f70.jpg"
         }
       }
     },
     {
-      "espera": "invalido",
-      "porque": "'sin_codigo' sin la foto: la foto es la prueba que reemplaza al código.",
+      "espera": "valido",
+      "porque": "'sin_codigo' sin la foto: el nodo no aloja fotos (sin 'endpoints.medios', el operador la apagó con el pedido en curso), así que quien entrega no tenía dónde subirla y la entrega no se traba.",
       "doc": {
         "id": "01926b3a-7777-7000-8000-000000000001",
         "nodo": "vereda.ar",
