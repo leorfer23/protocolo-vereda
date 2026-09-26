@@ -2,7 +2,7 @@
 
 Paquete para que Leo revise **antes** de construir pantallas. Nada de esto entra al lanzamiento del 28: el lunes llega la capacidad `ia` + el adaptador del nodo **apagados**; las pantallas van después del OK, hacia una 1.1.
 
-Decisiones ya cerradas (no reabrir): cobro = costo real del modelo, sin margen; traer tu propio agente sigue gratis; el barrio (nodo) prende o apaga la oferta; la plata va P2P al operador del barrio, como un aporte; Vereda nunca toca plata; piloto con 5 comercios.
+Decisiones ya cerradas (no reabrir): cobro = costo real del modelo, sin margen; traer tu propio agente sigue gratis; el barrio (nodo) prende o apaga la oferta; la plata va P2P al operador del barrio, como un aporte; Vereda nunca toca plata; piloto con 5 comercios; el gateway del nodo es **intercambiable** (OpenRouter o Vercel AI Gateway por config, dos adaptadores desde el día uno).
 
 ---
 
@@ -18,6 +18,7 @@ Una decisión por función. En cada una elegí **A, B o C**. La recomendación v
 6. **Búsqueda inteligente** — ¿A (la búsqueda entiende lo que escribís), B (resultado con “por qué”) o C (modo aparte)? → **recomiendo A**.
 7. **Repetir / sugerir** — ¿A (tarjeta en el inicio), B (después de entregar) o C (pantalla “Para vos”)? → **recomiendo A**.
 8. **Pantalla “Tu IA”** — ¿A (pantalla completa), B (hoja desde Vos) o C (toggle mínimo)? → **recomiendo A** para el piloto (transparencia de costo); B como atajo.
+9. **Gateway por defecto del nodo** — ¿OpenRouter o Vercel AI Gateway? (los dos adaptadores existen; el operador elige por config). → **recomiendo OpenRouter** como default; Vercel listo para cuando entren créditos del programa startups o el operador ya viva en Vercel. Detalle en §5.
 
 Regla de producto en todas: la IA **propone** y la persona **confirma**. Nada se publica ni se compra solo. Si el barrio no ofrece IA, la app no muestra nada nuevo.
 
@@ -197,7 +198,7 @@ Copy clave (para todas las opciones): *“No es comisión: es lo que cuesta el m
 
 ## 4. Modelos y costo estimado
 
-Precios tomados de [OpenRouter `/api/v1/models`](https://openrouter.ai/api/v1/models) el **2026-09-26**. Tipo de cambio de referencia: dólar blue venta **ARS 1.560** (bluelytics, mismo día). El barrio cobra en USD el costo real; el equivalente en pesos es solo para leer.
+Precios tomados de [OpenRouter `/api/v1/models`](https://openrouter.ai/api/v1/models) el **2026-09-26** (referencia de costo; en Vercel AI Gateway los precios de lista del proveedor son el mismo orden — ver §5; algunos ids de modelo cambian de prefijo). Tipo de cambio de referencia: dólar blue venta **ARS 1.560** (bluelytics, mismo día). El barrio cobra en USD el costo real; el equivalente en pesos es solo para leer.
 
 ### Supuestos de tokens por uso
 
@@ -247,21 +248,43 @@ Visión para fotos: `gemini-2.5-flash` (recomendado) o `gemini-2.5-flash-lite` /
 
 ---
 
-## 5. Qué llega el lunes 28 y qué no
+## 5. OpenRouter vs Vercel AI Gateway
+
+El operador del barrio elige el gateway por config (`openrouter` | `vercel`). El nodo trae **dos adaptadores desde el día uno**; ninguno hardcodeado. Fuentes leídas el **2026-09-26**: [Vercel AI Gateway](https://vercel.com/docs/ai-gateway), [pricing](https://vercel.com/docs/ai-gateway/pricing), [budgets](https://vercel.com/docs/ai-gateway/observability-and-spend/budgets), [usage/generation lookup](https://vercel.com/docs/ai-gateway/observability-and-spend/usage), [OpenRouter docs](https://openrouter.ai/docs) ([API keys](https://openrouter.ai/docs/api-keys), [FAQ / fees](https://openrouter.ai/docs/faq), [create keys](https://openrouter.ai/docs/api/api-reference/api-keys/create-keys), [get generation](https://openrouter.ai/docs/api/api-reference/generations/get-generation)), [Vercel for Startups credits](https://vercel.com/startups/credits).
+
+### Comparación
+
+| | **OpenRouter** | **Vercel AI Gateway** |
+| --- | --- | --- |
+| **Costo / markup sobre el proveedor** | Sin markup en la inferencia: pasa el precio de lista del proveedor. Al **comprar créditos** cobra **5,5% (mín. USD 0,80)** con tarjeta (Stripe); cripto **5%**. BYOK: sin fee hasta USD 25.000/mes de costo de lista (PAYG); arriba de eso, **5%** del costo OpenRouter equivalente. | Sin markup ni fee de plataforma sobre tokens: precio de lista del proveedor, también con BYOK. Tier free: **USD 5/mes** de créditos incluidos (subset de modelos + rate limits más bajos). Tier pago: comprás créditos. Pueden aplicar **fees de procesamiento de pago** (tarjeta); factura Enterprise = sin esos fees. Add-ons opcionales (reporting, allowlist/ZDR team-wide, traces) se cobran aparte. |
+| **Topes por cuenta (sub-claves)** | **Sí, nativo.** Management API `POST /api/v1/keys` con `limit` (USD) y `limit_reset` (`daily` \| `weekly` \| `monthly` \| sin reset). Ideal para una sub-clave por identidad con tope mensual. | **Budgets** opcionales por team / project / **API key** / member, con refresh daily/weekly/monthly. Sin budget = spend ilimitado en esa clave. **No** hay provisioning de sub-claves con tope tan directo como OpenRouter: el nodo tiene que crear claves + budgets (o imponer el tope él mismo). |
+| **Costo real por llamada** | `GET /api/v1/generation/{id}` → `total_cost`, `upstream_inference_cost`, tokens nativos. El `id` viene en la respuesta de chat. | `GET /v1/generation?id=…` (o SDK `gateway.getGenerationInfo`) → costo con desglose (`market_cost`, `surcharge_cost`, `gateway_cost`), tokens, latencia. El `id` viene en la respuesta (`id` / `providerMetadata.gateway.generationId`). Logs en el dashboard. |
+| **Modelos de la tabla §4** | Todos con los ids de OpenRouter (catálogo `/api/v1/models`). | Verificados el 2026-09-26 en `https://ai-gateway.vercel.sh/v1/models`: `google/gemini-2.5-flash`, `google/gemini-2.5-flash-lite`, `openai/gpt-4o-mini`, `anthropic/claude-haiku-4.5` **sí**. Llama: `meta/llama-3.3-70b` (id distinto a `meta-llama/llama-3.3-70b-instruct`). Visión Qwen: familia `alibaba/qwen3-vl-…` (no el id exacto `qwen/qwen3-vl-30b-a3b-instruct`). El adaptador mapea ids por gateway. |
+| **Créditos / programa startups** | No hay programa de financiamiento equivalente documentado; cargás créditos. | **Vercel for Startups**: hasta **USD 30.000** de Flexible Commitment (asientos, compute, **AI Gateway**, v0, etc.) por 1 año o hasta agotar. **Tope AI Gateway: 50%** del commitment (el resto no se puede volcar todo a IA). Elegibilidad: afiliación a un **Startup Partner** aprobado + prueba; Series A o menos; aplicar dentro de los 12 meses de la última ronda; web + email del dominio; sin créditos startups previos. Aplicación: [vercel.com/startups/credits](https://vercel.com/startups/credits) (formulario + team + partner + proof). Review ~5–7 días; al aceptar términos, créditos en ~5–7 días hábiles. Términos Flex Commit p/ aceptados desde **2026-08-06**. Sin partner en la lista: pedir al VC el [partner request](https://vercel.com/startups/partners) — Vereda bootstrapeada puede no calificar tal cual. |
+
+### Recomendación (default)
+
+**Arrancar con OpenRouter por defecto:** sub-claves con tope mensual nativas (encajan con “cada cuenta elige su tope”), lectura de costo por generación clara, sin depender de partner/créditos. **Vercel como segundo adaptador desde el día uno** — conviene prenderlo si Leo consigue el programa startups (hasta ~USD 15.000 útiles para AI Gateway vía el 50%) o si el operador del barrio ya opera en Vercel.
+
+---
+
+## 6. Qué llega el lunes 28 y qué no
 
 | Llega el lunes | No llega el lunes |
 | --- | --- |
 | Spec de la capacidad `ia` (otro worker: `docs/ia/capacidad.md` / `docs/ia.md`) | Pantallas de comercio o comprador |
-| Adaptador del nodo a OpenRouter, **apagado por defecto** | Deploy a prod del nodo con IA prendida |
+| Adaptadores del nodo **OpenRouter y Vercel AI Gateway**, elegidos por config, **apagados por defecto** | Deploy a prod del nodo con IA prendida |
 | Sin clave / sin toggle → el nodo se comporta como hoy | Build de tiendas (App Store / Play) con IA |
 | | Piloto con 5 comercios (después del OK de pantallas) |
+| | Créditos Vercel for Startups (Leo aplica aparte si califica) |
 
-Las pantallas de este documento se construyen **después** de que elijas A/B/C, apuntando a una **1.1**. El lanzamiento del 28 no se toca: mergeado y apagado, sin entrar al deploy ni a los builds de tienda.
+Las pantallas de este documento se construyen **después** de que elijas A/B/C (y el gateway default del §0.9), apuntando a una **1.1**. El lanzamiento del 28 no se toca: mergeado y apagado, sin entrar al deploy ni a los builds de tienda.
 
 ---
 
 ## Cómo leer esto en el teléfono
 
-1. Mirá la lista del §0 y marcá A/B/C.
-2. Si dudás, abrí el PNG de la opción.
+1. Mirá la lista del §0 y marcá A/B/C (incluida la 9 del gateway).
+2. Si dudás de pantallas, abrí el PNG de la opción.
 3. Los números del §4 son de referencia; el extracto real va a mostrar el costo centavo por centavo.
+4. Si te importa el financiamiento Vercel, leé el §5 antes de elegir gateway.
