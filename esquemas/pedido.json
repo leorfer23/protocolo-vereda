@@ -152,7 +152,7 @@
       "properties": {
         "identidad": { "$ref": "comunes.json#/$defs/identidad" },
         "nombre": { "type": "string", "minLength": 1, "maxLength": 120, "description": "El que eligió la parte: 'nombre' de su usuario, de su ficha de comercio o de su perfil de repartidor. Ausente si no eligió ninguno o si quien lee no tiene por qué verlo." },
-        "hechos": { "$ref": "usuario.json#/$defs/hechos", "description": "Solo en 'partes.usuario': los hechos del comprador (docs/hechos-del-comprador.md). Los ven el comprador y el lado del comercio (la dueña, su equipo con permiso 'pedidos' y un agente con 'administrar'), con el pedido activo y después. El repartidor no. Es lo que el comprador ve en GET /yo/hechos, más los tres campos de este pedido." }
+        "hechos": { "$ref": "usuario.json#/$defs/hechos", "description": "Solo en 'partes.usuario': los hechos del comprador (docs/hechos-del-comprador.md). Los ven el comprador y el lado del comercio (la dueña, su equipo con permiso 'pedidos' y un agente con 'administrar'), con el pedido activo y después. El repartidor no. Es lo que el comprador ve en GET /yo/hechos, más los tres campos de este pedido. Ausente si el comprador es de otro nodo: su alta y sus pedidos viven allá." }
       },
       "additionalProperties": false
     },
