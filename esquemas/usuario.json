@@ -55,7 +55,7 @@
       "required": ["alta", "antiguedad_dias", "entregados", "no_retirado", "no_recibido", "cancelados_despues_de_aceptar", "contacto_confirmado"],
       "properties": {
         "alta": { "type": "string", "format": "date", "description": "El día que la identidad entró a este nodo; el mismo que verificacion.historial.alta." },
-        "antiguedad_dias": { "type": "integer", "minimum": 0, "description": "Días enteros desde 'alta' hasta el día en que se lee, en UTC. Se calcula al leer." },
+        "antiguedad_dias": { "type": "integer", "minimum": 0, "description": "Días de calendario entre 'alta' y el día en que se lee, con el reloj del nodo, igual que 'alta'. Se calcula al leer." },
         "entregados": { "type": "integer", "minimum": 0, "description": "Sus pedidos en estado 'entregado' en este nodo, con cualquier comercio. El mismo número que verificacion.historial.pedidos_entregados." },
         "no_retirado": { "type": "integer", "minimum": 0, "description": "Sus pedidos cerrados con motivo_codigo 'no_retirado': no vino a buscar un retiro (docs/carrito-y-reserva.md, \"No vino\")." },
         "no_recibido": { "type": "integer", "minimum": 0, "description": "Sus pedidos cerrados con motivo_codigo 'no_recibido': nadie atendió en la puerta." },

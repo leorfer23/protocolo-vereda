@@ -26,7 +26,7 @@ que se está mirando.
 | Campo | Qué cuenta |
 |---|---|
 | `alta` | El día que la identidad entró al nodo (`verificacion.historial.alta`). |
-| `antiguedad_dias` | Días enteros desde `alta` hasta hoy, en UTC. Se calcula al leer. |
+| `antiguedad_dias` | Días de calendario entre `alta` y hoy, con el reloj del nodo (el mismo de `alta`): una cuenta de anoche a las 23:50 tiene un día a las 00:10. Se calcula al leer. |
 | `entregados` | Pedidos en `entregado`, con cualquier comercio. Igual a `verificacion.historial.pedidos_entregados`. |
 | `no_retirado` | Pedidos cerrados con `motivo_codigo: no_retirado` (`docs/carrito-y-reserva.md`, "No vino"). |
 | `no_recibido` | Pedidos cerrados con `motivo_codigo: no_recibido`. |
