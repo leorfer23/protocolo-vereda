@@ -1734,6 +1734,30 @@ class NivelB:
         codigo = (r.cuerpo or {}).get("codigo") if isinstance(r.cuerpo, dict) else None
         self.casos.append(_ok(cat, "declararRendicion", desc) if r.ok and r.estado == 409 and codigo == "rendicion_confirmada"
                           else _fallo(cat, "declararRendicion", desc, f"llegó {r.estado} {codigo or r.motivo}"))
+        self._rendiciones_a_la_vista(pedido)
+
+    # la rendición a la vista: conteos públicos, nunca montos ---------------
+    # docs/repartidores.md, punto l, "A la vista": con una rendición recién
+    # confirmada, el perfil público de la repartidora trae
+    # reputacion.rendiciones y la ficha del comercio trae rendiciones, las dos
+    # con rendidas >= 1 y sin montos.
+    def _rendiciones_a_la_vista(self, pedido):
+        cat = "rendicion"
+        yo = pedido.get("repartidor")
+        r = cliente.solicitud("GET", f"{self.base_v1}/repartidores/{yo}", headers={"Cache-Control": "no-cache"}, timeout=self.timeout)
+        rend = ((r.cuerpo or {}).get("reputacion") or {}).get("rendiciones") if r.ok and r.estado == 200 and isinstance(r.cuerpo, dict) else None
+        desc = "con una rendición confirmada, GET /repartidores/{identidad} trae reputacion.rendiciones con rendidas >= 1"
+        self.casos.append(_ok(cat, "verRepartidor", desc) if isinstance(rend, dict) and (rend.get("rendidas") or 0) >= 1
+                          else _fallo(cat, "verRepartidor", desc, f"llegó {r.estado}, reputacion.rendiciones={rend!r}"))
+        oferta = next((i.get("oferta_id") for i in pedido.get("items") or [] if i.get("oferta_id")), None)
+        comercio = self._comercio_de_la_oferta(oferta) if oferta else None
+        desc = "con una rendición confirmada, la ficha del comercio trae rendiciones con rendidas >= 1"
+        if comercio is None:
+            self.casos.append(_omitido(cat, "verComercio", desc, "no se pudo leer el comercio del pedido con GET /ofertas/{id} y GET /comercios/{id}"))
+            return
+        rend = comercio.get("rendiciones")
+        self.casos.append(_ok(cat, "verComercio", desc) if isinstance(rend, dict) and (rend.get("rendidas") or 0) >= 1
+                          else _fallo(cat, "verComercio", desc, f"rendiciones={rend!r}"))
 
     def _constancia(self, pid, ruta, opid, accion, actor, monto, firma, estado) -> bool:
         cat = "rendicion"

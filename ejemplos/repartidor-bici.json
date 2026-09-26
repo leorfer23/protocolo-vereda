@@ -40,6 +40,12 @@
     "viajes_completados": 212,
     "viajes_soltados": 2,
     "soltados_con_pedido_retirado": 0,
+    "rendiciones": {
+      "total": 64,
+      "rendidas": 63,
+      "en_desacuerdo": 1,
+      "pendientes_mas_24h": 0
+    },
     "desde": "2026-06-03"
   },
   "privado": {

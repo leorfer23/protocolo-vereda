@@ -1,0 +1,70 @@
+{
+  "$comentario": "Los conteos públicos de rendiciones de un repartidor o un comercio (docs/repartidores.md, punto l, 'A la vista'). Conteos, nunca montos.",
+  "esquema": "pedido.json#/$defs/rendiciones",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "Un repartidor que rindió todo: 'Rindió 57 de 57'.",
+      "doc": {
+        "total": 57,
+        "rendidas": 57,
+        "en_desacuerdo": 0,
+        "pendientes_mas_24h": 0
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Con cosas para mirar: '2 en desacuerdo · 1 sin rendir hace más de 24 h'. Es un hecho, no un castigo.",
+      "doc": {
+        "total": 40,
+        "rendidas": 37,
+        "en_desacuerdo": 2,
+        "pendientes_mas_24h": 1
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Un actor nuevo: todo en cero.",
+      "doc": {
+        "total": 0,
+        "rendidas": 0,
+        "en_desacuerdo": 0,
+        "pendientes_mas_24h": 0
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Nunca montos: cuánto se rindió es entre las partes del pedido.",
+      "doc": {
+        "total": 3,
+        "rendidas": 3,
+        "en_desacuerdo": 0,
+        "pendientes_mas_24h": 0,
+        "monto_rendido": {
+          "centavos": 3500000,
+          "moneda": "ARS"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "No hay puntaje ni nivel de riesgo: solo conteos.",
+      "doc": {
+        "total": 3,
+        "rendidas": 3,
+        "en_desacuerdo": 0,
+        "pendientes_mas_24h": 0,
+        "riesgo": "bajo"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Faltan los pendientes de más de 24 h: los cuatro conteos van siempre.",
+      "doc": {
+        "total": 3,
+        "rendidas": 3,
+        "en_desacuerdo": 0
+      }
+    }
+  ]
+}

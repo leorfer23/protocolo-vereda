@@ -161,8 +161,9 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
   que no verifica da `422 firma_invalida`; bien firmada queda `declarada`, y `confirmarRendicion`
   con el mismo monto la deja `confirmada`. Las dos constancias son de su actor (la repartidora y
   el comercio) y verifican sobre `{accion, pedido_id, actor, monto, instante}`; otra más da
-  `409 rendicion_confirmada` (`docs/repartidores.md`, punto l). Si una clave es de custodia propia
-  y la suite no la tiene, se omite.
+  `409 rendicion_confirmada` (`docs/repartidores.md`, punto l). Confirmada, el perfil público de
+  la repartidora trae `reputacion.rendiciones` y la ficha del comercio `rendiciones`, las dos con
+  `rendidas >= 1`. Si una clave es de custodia propia y la suite no la tiene, se omite.
 - Aceptar con tiempo: en el ciclo, `aceptarPedido` con `tiempo_preparacion_min` fuera de rango
   da `422` y no acepta; con `25` responde el pedido con `tiempo_preparacion_min: 25` y `eta` a
   25 minutos de la aceptación (±2 min: es retiro, sin ruta).

@@ -159,7 +159,7 @@
       "description": "Lo que el repartidor le debe al comercio por lo que cobra en mano por cuenta de él, y las constancias firmadas de que se lo dio (docs/repartidores.md, punto l). Lo escribe el nodo. Existe solo en pedidos con repartidor en los que el comprador le paga al comercio algo en efectivo que cobra el repartidor; un pedido cancelado sin constancias no la tiene. La ven el comercio y el repartidor del pedido; la copia del comprador la omite. La red no ve plata: registra lo que cada uno firmó.",
       "required": ["modo", "monto", "estado", "constancias"],
       "properties": {
-        "modo": { "type": "string", "enum": ["despues_de_entregar", "al_retirar"], "description": "El 'envios.rendicion_efectivo' del comercio al asignar el repartidor, congelado en el pedido." },
+        "modo": { "type": "string", "enum": ["despues_de_entregar", "al_retirar"], "description": "El 'envios.rendicion_efectivo' del comercio al asignar el repartidor, congelado en el pedido. Con 'al_retirar', retirarPedido espera a que la rendición esté 'confirmada' (409 rendicion_pendiente)." },
         "monto": { "$ref": "comunes.json#/$defs/monto", "description": "La suma de los pagos en efectivo del comprador al comercio que cobra el repartidor en la entrega ('productos', 'propina_comercio' y, con 'cobro_envio: al_comercio', 'envio'). Es lo que se debe; lo que se rindió está en las constancias." },
         "estado": {
           "type": "string",
@@ -173,6 +173,18 @@
         }
       },
       "additionalProperties": false
+    },
+    "rendiciones": {
+      "type": "object",
+      "description": "Cómo le fue a un actor con las rendiciones del efectivo (docs/repartidores.md, punto l, 'A la vista'): conteos de pedidos, nunca montos. La calcula el nodo con reglas públicas y cualquiera la recalcula con las rendiciones de ese actor. El mismo objeto para el repartidor (en 'repartidor.reputacion.rendiciones', lo que rindió) y para el comercio (en 'comercio.rendiciones', lo que confirmó que recibió), porque el que no confirma lo que recibió también hace daño. Nada vence ni castiga: se cuenta y se muestra.",
+      "required": ["total", "rendidas", "en_desacuerdo", "pendientes_mas_24h"],
+      "additionalProperties": false,
+      "properties": {
+        "total": { "type": "integer", "minimum": 0, "description": "Rendiciones que ya le tocaba cerrar. Repartidor: las de pedidos entregados más las que tienen alguna constancia. Comercio: las que tienen al menos una 'rendida'." },
+        "rendidas": { "type": "integer", "minimum": 0, "description": "Rendiciones en estado 'confirmada': el repartidor dijo cuánto dio y el comercio dijo lo mismo." },
+        "en_desacuerdo": { "type": "integer", "minimum": 0, "description": "Rendiciones en estado 'en_desacuerdo' hoy. Si se arreglan, dejan de contar acá y pasan a 'rendidas'." },
+        "pendientes_mas_24h": { "type": "integer", "minimum": 0, "description": "Repartidor: rendiciones 'pendiente' (no declaró nada) de pedidos entregados hace más de 24 h. Comercio: rendiciones 'declarada' (no confirmó) cuya última 'rendida' tiene más de 24 h. Lo recalcula el mantenimiento horario del nodo: puede llegar con hasta una hora de atraso." }
+      }
     },
     "constancia_rendicion": {
       "type": "object",

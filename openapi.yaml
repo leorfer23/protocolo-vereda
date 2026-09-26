@@ -983,11 +983,16 @@ paths:
         (docs/repartidores.md, punto j). Con la clave en el teléfono la manda en `firma`; si el
         nodo custodia la clave y no viene, firma el nodo. Con sesión y custodia propia, sin
         `firma` responde 422 `firma_requerida` y el pedido no se mueve.
+
+        Si el comercio rinde el efectivo `al_retirar` (`pedido.rendicion.modo`), el pedido no se
+        mueve hasta que la rendición está `confirmada`: antes responde 409 `rendicion_pendiente`,
+        con `detalle.estado` y un `mensaje` que dice qué falta (docs/repartidores.md, punto l).
       security: [ { sesion: [] }, { mandato: [repartir] } ]
       parameters: [ { $ref: "#/components/parameters/id" } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { cobrado_en_mano: { type: boolean, description: "El pago de envío en efectivo cuyo pagador es el comercio pasa a confirmado." }, firma: { $ref: "#/components/schemas/FirmaTraspaso" } } } } } }
       responses:
         "200": { description: "Pedido retirado, con firmas.retiro", content: { application/json: { schema: { $ref: "esquemas/pedido.json" } } } }
+        "409": { description: "rendicion_pendiente: el comercio rinde al_retirar y la rendición todavía no está confirmada", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "422": { description: "firma_requerida, firma_invalida, clave_desconocida o clave_comprometida", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /pedidos/{id}/entregar:
     post:
@@ -1242,7 +1247,7 @@ paths:
     get:
       operationId: verRepartidor
       tags: [viajes]
-      summary: "Perfil público de un repartidor: nombre, vehículo, cooperativa, medios de cobro, verificaciones y reputación"
+      summary: "Perfil público de un repartidor: nombre, vehículo, cooperativa, medios de cobro, verificaciones y reputación, con cómo rindió el efectivo"
       security: []
       parameters: [ { name: identidad, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/ifNoneMatch" } ]
       responses:
