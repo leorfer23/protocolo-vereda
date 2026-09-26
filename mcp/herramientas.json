@@ -555,7 +555,7 @@
           "foto": {
             "type": "string",
             "format": "uri",
-            "description": "La foto de la entrega: la url que devolvió foto_entrega_subir. Obligatoria si la regla del comercio pedía código y no vino, o si se agotaron los intentos, salvo que el nodo no aloje fotos: queda 'sin_codigo'."
+            "description": "La foto de la entrega: la url que devolvió foto_entrega_subir. Obligatoria si la regla del comercio pedía código y no vino, o si se agotaron los intentos, salvo con envío en un nodo que no aloja fotos: queda 'sin_codigo'."
           }
         }
       }

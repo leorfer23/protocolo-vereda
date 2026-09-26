@@ -65,7 +65,7 @@ Cuando el comercio pide el código de entrega y el comprador no está (lo deja e
 - **Dura lo que duran los datos del pedido.** Se borra junto con la dirección y el nombre del comprador, a los `datos.retencion_dias` del comercio (90 por defecto, `docs/datos-y-privacidad.md`). Las que se subieron y no se usaron, también.
 - **Por MCP.** El agente del repartidor (o del comercio que lleva él) la sube con `foto_entrega_subir` y manda la `url` en `viaje_entregar` o `pedido_entregar`.
 
-**Si el nodo no aloja fotos.** Sin `endpoints.medios`, quien entrega no tiene dónde subir la foto. Por eso un comercio no puede elegir `codigo_entrega` `siempre` ni `solo_efectivo` en ese nodo (`422 codigo_entrega_sin_medios` al crear o editar la ficha). Si el operador apaga la subida con pedidos en curso que ya congelaron esa regla, la foto deja de ser obligatoria: el pedido se entrega igual y queda `sin_codigo` sin `foto`. Una entrega nunca se traba porque falte dónde subir una foto.
+**Si el nodo no aloja fotos.** Sin `endpoints.medios`, quien entrega no tiene dónde subir la foto. Por eso un comercio no puede elegir `codigo_entrega` `siempre` ni `solo_efectivo` en ese nodo (`422 codigo_entrega_sin_medios` al crear o editar la ficha). Si el operador apaga la subida con pedidos en curso que ya congelaron esa regla, la foto deja de ser obligatoria: el pedido se entrega igual y queda `sin_codigo` sin `foto`. Una entrega nunca se traba porque falte dónde subir una foto. Esto vale solo para los pedidos con envío: en retiro, agotados los intentos del código, la foto sigue siendo obligatoria aunque el nodo no aloje fotos, para que nadie se equivoque a propósito y se saltee el código.
 
 | Qué pasa, con `pedido` | Estado | Código |
 | --- | --- | --- |

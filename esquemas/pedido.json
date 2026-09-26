@@ -112,7 +112,7 @@
       "required": ["motivo"],
       "properties": {
         "motivo": { "type": "string", "enum": ["no_lo_dio", "intentos_agotados"], "description": "'no_lo_dio': quien entregó no mandó código (el comprador no estaba, lo dejó en portería). 'intentos_agotados': se equivocaron 5 veces." },
-        "foto": { "type": "string", "format": "uri", "description": "La foto de la entrega, obligatoria en este caso. Solo falta si el nodo no aloja fotos (no anuncia 'endpoints.medios'): ahí quien entrega no tiene dónde subirla y la entrega no se traba. Si es la URL de 'POST /medios?pedido=<id>', la ven solo las partes (verFotoEntrega)." }
+        "foto": { "type": "string", "format": "uri", "description": "La foto de la entrega, obligatoria en este caso. Solo falta en un pedido con envío si el nodo no aloja fotos (no anuncia 'endpoints.medios'); en retiro nunca falta: ahí quien entrega no tiene dónde subirla y la entrega no se traba. Si es la URL de 'POST /medios?pedido=<id>', la ven solo las partes (verFotoEntrega)." }
       },
       "additionalProperties": false
     },
