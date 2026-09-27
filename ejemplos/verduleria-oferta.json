@@ -7,7 +7,7 @@
   "descripcion": "De Corrientes esta semana. Maduro para ensalada; si lo querés para salsa, poné 'para salsa' y te elijo los más pasados.",
   "categorias": ["Verduras"],
   "precio": { "modo": "por_unidad", "monto": { "centavos": 280000, "moneda": "ARS" } },
-  "cantidad": { "unidad": "kg", "minimo": 0.5, "maximo": 10, "paso": 0.25, "aproximada": true, "tolerancia_pct": 15 },
+  "cantidad": { "unidad": "kg", "minimo": 0.5, "maximo": 10, "paso": 0.25, "aproximada": true, "tolerancia_pct": 15, "sugeridas": [0.5, 1, 2] },
   "disponible": true,
   "stock": { "modo": "binario", "actualizado": "2026-09-21T08:30:00-03:00" },
   "modalidades": ["franja", "consolidada-martes-jueves", "ronda-los-alamos", "retiro"],

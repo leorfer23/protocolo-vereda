@@ -55,6 +55,96 @@
     },
     {
       "espera": "valido",
+      "porque": "Pesable con cantidades sugeridas por el comercio.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "pesable",
+        "nombre": "Tomate",
+        "precio": {
+          "modo": "por_unidad",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "kg",
+          "aproximada": true,
+          "minimo": 0.5,
+          "paso": 0.25,
+          "sugeridas": [
+            0.5,
+            1,
+            2
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sugeridas vacía: si está, trae al menos una.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "pesable",
+        "nombre": "Tomate",
+        "precio": {
+          "modo": "por_unidad",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "kg",
+          "aproximada": true,
+          "sugeridas": []
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Sugeridas repetidas.",
+      "doc": {
+        "id": "01926b3a-9999-7000-8000-000000000001",
+        "nodo": "vereda.ar",
+        "creado": "2026-09-21T15:00:00-03:00",
+        "actualizado": "2026-09-21T15:00:00-03:00",
+        "version_esquema": "1.0",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000002",
+        "disponible": true,
+        "tipo": "pesable",
+        "nombre": "Tomate",
+        "precio": {
+          "modo": "por_unidad",
+          "monto": {
+            "centavos": 1000,
+            "moneda": "ARS"
+          }
+        },
+        "cantidad": {
+          "unidad": "kg",
+          "aproximada": true,
+          "sugeridas": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
       "porque": "Base mínima: compuesto.",
       "doc": {
         "id": "01926b3a-9999-7000-8000-000000000001",

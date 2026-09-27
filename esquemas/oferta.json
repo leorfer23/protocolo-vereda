@@ -281,6 +281,17 @@
           "maximum": 100,
           "default": 15,
           "description": "Variación máxima del monto final para pesables."
+        },
+        "sugeridas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "description": "Las cantidades que el comercio recomienda, en 'unidad' y de menor a mayor: las apps las ofrecen de un toque (ej. 0.5, 1, 2 kg de banana). Cada una respeta minimo, maximo y paso; el nodo rechaza las que no (422 cuerpo_invalido). Sin este campo, cada app elige las suyas."
         }
       }
     },
