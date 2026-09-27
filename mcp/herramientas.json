@@ -267,7 +267,7 @@
     },
     {
       "name": "oferta_crear",
-      "description": "Publica una oferta nueva en el catálogo: producto, pesable, preparado, compuesto, servicio o recurrente, con su precio, grupos de opciones, variantes y disponibilidad. Ej: 'agregá milanesa de pollo a $8.500 con guarnición a elección'. Requiere scope 'administrar'.",
+      "description": "Publica una oferta nueva en el catálogo: producto, pesable, preparado, compuesto, servicio o recurrente, con su precio, grupos de opciones, variantes y disponibilidad. En un pesable, 'cantidad.sugeridas' son las cantidades que el comercio recomienda y las apps ofrecen de un toque (ej. [0.5, 1, 2] kg). Ej: 'agregá milanesa de pollo a $8.500 con guarnición a elección' o 'la banana, sugerí medio, uno y dos kilos'. Requiere scope 'administrar'.",
       "inputSchema": {
         "type": "object",
         "required": [

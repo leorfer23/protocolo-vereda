@@ -2,6 +2,10 @@
 
 Lo que cambia en el protocolo después de publicarlo, del más nuevo al más viejo. Un cambio **incompatible** obliga a los clientes a actualizarse.
 
+## 2026-09-27
+
+- **Cantidades sugeridas para pesables** (`esquemas/oferta.json`, `cantidad.sugeridas`). El comercio define de 1 a 6 cantidades recomendadas en la unidad de la oferta (ej. `[0.5, 1, 2]` kg), y las apps las muestran como selección rápida al tocar el + en la carta. Cada una respeta `minimo`, `maximo` y `paso`; si no, el nodo responde `422 cuerpo_invalido`. Se edita por API (`crearOferta`/`editarOferta`), MCP (`oferta_crear`/`oferta_editar`), el portal del comercio y las apps. Sin el campo, cada app elige las suyas (referencia: 250 g, 500 g, 1 kg, 2 kg llevados a los límites). Ningún cliente se rompe: el campo es opcional.
+
 ## 2026-09-26
 
 - **Ualá Bis: mínimo $100 y devolución solo total** (`docs/cobro-con-psp.md`, `docs/carrito-y-reserva.md`, `openapi.yaml` CapacidadCobrador). La doc oficial se contradice ($25 en la tabla de crear orden, $100 en los errores). El anuncio de referencia pasa a `monto_minimo: 10000` y `reembolso.parcial: false` (la API acepta `amount` menor, pero no documenta el estado de la orden tras una parcial). Alineado con vereda-nodo #132. Si un humo futuro confirma $25 o parciales, se baja el anuncio. Ningún cliente se rompe: leen el anuncio.
