@@ -1,5 +1,5 @@
 {
-  "$comentario": "Casos de widgets del chat (esquemas/ia-widgets.json).",
+  "$comentario": "Casos de widgets del chat (esquemas/ia-widgets.json), incl. flujos pizza, súper y bienvenida.",
   "esquema": "ia-widgets.json#/$defs/widget",
   "casos": [
     {
@@ -18,10 +18,11 @@
     },
     {
       "espera": "valido",
-      "porque": "checkout solo efectivo/transferencia.",
+      "porque": "checkout solo efectivo/transferencia con carrito_id.",
       "doc": {
         "tipo": "checkout",
         "version": 1,
+        "carrito_id": "01926b3a-0000-7000-8000-0000000000e1",
         "medios": [
           "efectivo"
         ],
@@ -79,6 +80,178 @@
       "espera": "invalido",
       "porque": "sin tipo no es widget.",
       "doc": {
+        "version": 1,
+        "foo": true
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "flujo pizza: mazo de pizzas adheridas.",
+      "doc": {
+        "tipo": "mazo",
+        "version": 1,
+        "titulo": "Pizzas",
+        "tarjetas": [
+          {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000c1",
+            "nombre": "Muzza",
+            "precio": {
+              "centavos": 8500,
+              "moneda": "ARS"
+            },
+            "distancia_m": 400,
+            "reputacion": {
+              "promedio": 4.5,
+              "cantidad": 10
+            },
+            "pedidos_mes": 20
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "flujo pizza: respuestas (chips).",
+      "doc": {
+        "tipo": "respuestas",
+        "version": 1,
+        "opciones": [
+          {
+            "texto": "Fugazzeta",
+            "valor": "fugazzeta"
+          },
+          {
+            "texto": "Muzza"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "flujo pizza: podio de 3 fugazzetas con razón pública.",
+      "doc": {
+        "tipo": "podio",
+        "version": 1,
+        "titulo": "Estas no te las podés perder",
+        "puestos": [
+          {
+            "puesto": 1,
+            "razon": "más pedida",
+            "tarjeta": {
+              "oferta_id": "01926b3a-0000-7000-8000-0000000000c2",
+              "nombre": "Fugazzeta",
+              "precio": {
+                "centavos": 9800,
+                "moneda": "ARS"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "flujo súper: carrito real con grupo, nota y faltantes.",
+      "doc": {
+        "tipo": "carrito",
+        "version": 1,
+        "carrito_id": "01926b3a-0000-7000-8000-0000000000e1",
+        "items": [
+          {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000f2",
+            "nombre": "Papa",
+            "cantidad": {
+              "valor": 1.1,
+              "unidad": "kg"
+            },
+            "subtotal": {
+              "centavos": 1800,
+              "moneda": "ARS"
+            },
+            "grupo": "milanesa con puré",
+            "nota": "2 platos"
+          }
+        ],
+        "faltantes": [
+          {
+            "nombre": "chorizo colorado",
+            "grupo": "guiso"
+          }
+        ],
+        "total": {
+          "centavos": 1800,
+          "moneda": "ARS"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "bienvenida del chat vacío (sin modelo).",
+      "doc": {
+        "tipo": "bienvenida",
+        "version": 1,
+        "titulo": "¡Hola, Ana! ¿Qué buscamos hoy?",
+        "sugerencias": [
+          "Quiero una pizza"
+        ],
+        "promos": [
+          {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000d1",
+            "nombre": "2x1",
+            "precio": {
+              "centavos": 6000,
+              "moneda": "ARS"
+            },
+            "etiqueta": "2x1"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "promo con sello.",
+      "doc": {
+        "tipo": "promo",
+        "version": 1,
+        "sello": "2x1",
+        "tarjeta": {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000c5",
+          "nombre": "Combo",
+          "precio": {
+            "centavos": 12000,
+            "moneda": "ARS"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "podio con puesto 4 fuera de rango.",
+      "doc": {
+        "tipo": "podio",
+        "version": 1,
+        "titulo": "x",
+        "puestos": [
+          {
+            "puesto": 4,
+            "razon": "x",
+            "tarjeta": {
+              "oferta_id": "01926b3a-0000-7000-8000-0000000000c2",
+              "nombre": "Fuga",
+              "precio": {
+                "centavos": 100,
+                "moneda": "ARS"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "bienvenida es tipo conocido: no puede validar como desconocido con props libres sin titulo.",
+      "doc": {
+        "tipo": "bienvenida",
         "version": 1,
         "foo": true
       }

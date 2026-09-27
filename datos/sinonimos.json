@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "licencia": "CC0-1.0",
+  "grupos": [
+    {
+      "canonico": "muzzarella",
+      "terminos": [
+        "muzza",
+        "muzzarella",
+        "mozzarella",
+        "muzarella"
+      ]
+    },
+    {
+      "canonico": "fugazzeta",
+      "terminos": [
+        "fuga",
+        "fugazzeta",
+        "fugazza"
+      ]
+    },
+    {
+      "canonico": "napolitana",
+      "terminos": [
+        "napo",
+        "napolitana"
+      ]
+    },
+    {
+      "canonico": "milanesa",
+      "terminos": [
+        "milanga",
+        "milanesa",
+        "mila"
+      ]
+    },
+    {
+      "canonico": "empanada",
+      "terminos": [
+        "empanada",
+        "empanadas",
+        "empana"
+      ]
+    },
+    {
+      "canonico": "asado",
+      "terminos": [
+        "asado",
+        "parrilla",
+        "carne a la parrilla"
+      ]
+    },
+    {
+      "canonico": "guiso",
+      "terminos": [
+        "guiso",
+        "estofado"
+      ]
+    },
+    {
+      "canonico": "pastel de papas",
+      "terminos": [
+        "pastel de papas",
+        "pastel de papa"
+      ]
+    },
+    {
+      "canonico": "fideos",
+      "terminos": [
+        "fideos",
+        "pasta",
+        "spaguetti",
+        "spaghetti"
+      ]
+    },
+    {
+      "canonico": "boloñesa",
+      "terminos": [
+        "boloñesa",
+        "bolognesa",
+        "con tuco"
+      ]
+    },
+    {
+      "canonico": "pure",
+      "terminos": [
+        "puré",
+        "pure",
+        "pure de papas"
+      ]
+    },
+    {
+      "canonico": "calabresa",
+      "terminos": [
+        "calabresa",
+        "longaniza",
+        "salame picante"
+      ]
+    },
+    {
+      "canonico": "provoleta",
+      "terminos": [
+        "provo",
+        "provoleta"
+      ]
+    },
+    {
+      "canonico": "choripan",
+      "terminos": [
+        "chori",
+        "choripán",
+        "choripan"
+      ]
+    },
+    {
+      "canonico": "matambre",
+      "terminos": [
+        "matambre",
+        "matambre a la pizza"
+      ]
+    },
+    {
+      "canonico": "ravioles",
+      "terminos": [
+        "ravioles",
+        "ravioli"
+      ]
+    },
+    {
+      "canonico": "ñoquis",
+      "terminos": [
+        "ñoquis",
+        "ñoqui",
+        "gnocchi"
+      ]
+    },
+    {
+      "canonico": "sorrentinos",
+      "terminos": [
+        "sorrentinos",
+        "sorrentino"
+      ]
+    },
+    {
+      "canonico": "pizza",
+      "terminos": [
+        "pizza",
+        "piza",
+        "pizá"
+      ]
+    },
+    {
+      "canonico": "hamburguesa",
+      "terminos": [
+        "burger",
+        "hamburguesa",
+        "hamburguesa casera"
+      ]
+    },
+    {
+      "canonico": "ensalada",
+      "terminos": [
+        "ensalada",
+        "ensalada mixta"
+      ]
+    },
+    {
+      "canonico": "tarta",
+      "terminos": [
+        "tarta",
+        "tarta salada"
+      ]
+    },
+    {
+      "canonico": "empanada de carne",
+      "terminos": [
+        "empanada de carne",
+        "empanada carne"
+      ]
+    },
+    {
+      "canonico": "vacío",
+      "terminos": [
+        "vacio",
+        "vacío"
+      ]
+    },
+    {
+      "canonico": "entraña",
+      "terminos": [
+        "entraña",
+        "entrana"
+      ]
+    },
+    {
+      "canonico": "pollo",
+      "terminos": [
+        "pollo",
+        "suprema"
+      ]
+    },
+    {
+      "canonico": "carne picada",
+      "terminos": [
+        "carne picada",
+        "picada",
+        "carne molida"
+      ]
+    },
+    {
+      "canonico": "papa",
+      "terminos": [
+        "papa",
+        "papas",
+        "patata"
+      ]
+    },
+    {
+      "canonico": "cebolla",
+      "terminos": [
+        "cebolla",
+        "cebolla morada"
+      ]
+    },
+    {
+      "canonico": "tomate",
+      "terminos": [
+        "tomate",
+        "tomates"
+      ]
+    },
+    {
+      "canonico": "aceite",
+      "terminos": [
+        "aceite",
+        "aceite de oliva",
+        "aceite girasol"
+      ]
+    },
+    {
+      "canonico": "leche",
+      "terminos": [
+        "leche",
+        "leche entera"
+      ]
+    },
+    {
+      "canonico": "huevo",
+      "terminos": [
+        "huevo",
+        "huevos"
+      ]
+    },
+    {
+      "canonico": "harina",
+      "terminos": [
+        "harina",
+        "harina 000",
+        "harina 0000"
+      ]
+    },
+    {
+      "canonico": "arroz",
+      "terminos": [
+        "arroz",
+        "arroz largo"
+      ]
+    },
+    {
+      "canonico": "lentejas",
+      "terminos": [
+        "lentejas",
+        "lenteja"
+      ]
+    },
+    {
+      "canonico": "porotos",
+      "terminos": [
+        "porotos",
+        "poroto",
+        "frijoles"
+      ]
+    },
+    {
+      "canonico": "zapallo",
+      "terminos": [
+        "zapallo",
+        "calabaza"
+      ]
+    },
+    {
+      "canonico": "choclo",
+      "terminos": [
+        "choclo",
+        "maíz",
+        "maiz"
+      ]
+    },
+    {
+      "canonico": "dulce de leche",
+      "terminos": [
+        "dulce de leche",
+        "ddl"
+      ]
+    }
+  ]
+}

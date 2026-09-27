@@ -1,0 +1,35 @@
+{
+  "$comentario": "Casos de ia.json#/$defs/pedido_catalogo_buscar.",
+  "esquema": "ia.json#/$defs/pedido_catalogo_buscar",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "búsqueda mínima con lat/lng.",
+      "doc": {
+        "q": "pizza",
+        "lat": -34.6,
+        "lng": -58.4
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "con gusto y solo_adheridos para el chat del nodo.",
+      "doc": {
+        "q": "pizza",
+        "gusto": "fugazzeta",
+        "lat": -34.6,
+        "lng": -58.4,
+        "solo_adheridos": true,
+        "limite": 5
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "sin q.",
+      "doc": {
+        "lat": -34.6,
+        "lng": -58.4
+      }
+    }
+  ]
+}

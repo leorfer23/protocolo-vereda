@@ -55,6 +55,9 @@ MAPA_DEFS = {
     "ia-mi.json": "ia.json#/$defs/mi_ia",
     "ia-extracto.json": "ia.json#/$defs/extracto",
     "ia-widgets-mensaje.json": "ia-widgets.json#/$defs/mensaje",
+    "ia-widgets-bienvenida.json": "ia-widgets.json#/$defs/mensaje",
+    "ia-widgets-super.json": "ia-widgets.json#/$defs/mensaje",
+    "ia-widgets-podio.json": "ia-widgets.json#/$defs/mensaje",
 }
 for ej, ref in MAPA_DEFS.items():
     doc = json.load(open(os.path.join(EJ, ej)))
@@ -68,6 +71,30 @@ for ej, ref in MAPA_DEFS.items():
             print(f"    {'/'.join(map(str, e.path)) or '(raíz)'}: {e.message[:140]}")
     else:
         print(f"✓ {ej} cumple {ref}")
+
+# Datos CC0 del chat IA (recetas y sinónimos).
+DATOS = os.path.join(BASE, "datos")
+MAPA_DATOS = {
+    "recetas.json": "recetas.json",
+    "sinonimos.json": "sinonimos.json",
+}
+for ej, esq in MAPA_DATOS.items():
+    path = os.path.join(DATOS, ej)
+    if not os.path.exists(path):
+        fallos += 1
+        print(f"✗ falta datos/{ej}")
+        continue
+    doc = json.load(open(path))
+    doc = {k: v for k, v in doc.items() if not k.startswith("$")}
+    v = Draft202012Validator(esquemas[esq], registry=registry)
+    errores = sorted(v.iter_errors(doc), key=lambda e: e.path)
+    if errores:
+        fallos += 1
+        print(f"✗ datos/{ej} contra {esq}")
+        for e in errores[:8]:
+            print(f"    {'/'.join(map(str, e.path)) or '(raíz)'}: {e.message[:140]}")
+    else:
+        print(f"✓ datos/{ej} cumple {esq}")
 
 for f in sorted(glob.glob(os.path.join(EJ, "casos", "*.json"))):
     suite = json.load(open(f))

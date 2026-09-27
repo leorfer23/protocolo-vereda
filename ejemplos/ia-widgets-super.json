@@ -1,0 +1,81 @@
+{
+  "$comentario": "Flujo súper: carrito real agrupado por plato con faltantes.",
+  "rol": "asistente",
+  "texto": "Te armé el carro para 2. Las papas las junté porque entran en dos platos.",
+  "widgets": [
+    {
+      "tipo": "carrito",
+      "version": 1,
+      "carrito_id": "01926b3a-0000-7000-8000-0000000000e1",
+      "comercio_id": "01926b3a-0000-7000-8000-0000000000a3",
+      "comercio_nombre": "Súper del barrio",
+      "items": [
+        {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000f1",
+          "nombre": "Milanesa de carne",
+          "cantidad": {
+            "valor": 2,
+            "unidad": "unidad"
+          },
+          "subtotal": {
+            "centavos": 7200,
+            "moneda": "ARS"
+          },
+          "grupo": "milanesa con puré"
+        },
+        {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000f2",
+          "nombre": "Papa",
+          "cantidad": {
+            "valor": 1.1,
+            "unidad": "kg"
+          },
+          "subtotal": {
+            "centavos": 1800,
+            "moneda": "ARS"
+          },
+          "grupo": "milanesa con puré",
+          "nota": "2 platos"
+        },
+        {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000f3",
+          "nombre": "Carne picada",
+          "cantidad": {
+            "valor": 0.24,
+            "unidad": "kg"
+          },
+          "subtotal": {
+            "centavos": 2100,
+            "moneda": "ARS"
+          },
+          "grupo": "fideos a la boloñesa"
+        }
+      ],
+      "faltantes": [
+        {
+          "nombre": "chorizo colorado",
+          "grupo": "guiso de lentejas"
+        }
+      ],
+      "total": {
+        "centavos": 11100,
+        "moneda": "ARS"
+      }
+    },
+    {
+      "tipo": "checkout",
+      "version": 1,
+      "carrito_id": "01926b3a-0000-7000-8000-0000000000e1",
+      "comercio_id": "01926b3a-0000-7000-8000-0000000000a3",
+      "medios": [
+        "efectivo",
+        "transferencia"
+      ],
+      "total": {
+        "centavos": 11100,
+        "moneda": "ARS"
+      },
+      "nota": "Pagás al local, no a Vereda."
+    }
+  ]
+}

@@ -36,6 +36,9 @@ Las claves de acá no tienen tilde ni eñe: el patrón de clave es `^[a-z][a-z0-
 | `congelado` | booleano | `true` |
 | `artesanal` | booleano | `true` |
 | `picante` | `"suave"`, `"medio"`, `"fuerte"` | `"medio"` |
+| `gusto` | texto corto: variante de sabor o estilo | `"fugazzeta"`, `"muzza"`, `"napolitana"` |
+| `tamano` | texto o número según el rubro | `"grande"`, `"chica"`, `8` |
+| `porciones` | número: para cuántas personas rinde | `2`, `4` |
 
 ## Almacén y supermercado
 
@@ -43,6 +46,8 @@ Las claves de acá no tienen tilde ni eñe: el patrón de clave es `^[a-z][a-z0-
 |---|---|---|
 | `contenido_neto` | número, en la unidad de `contenido_unidad` | `500` |
 | `contenido_unidad` | `"g"`, `"kg"`, `"ml"`, `"l"`, `"unidad"` | `"g"` |
+
+`contenido_neto` + `contenido_unidad` (y `gusto` / `tamano` / `porciones` arriba) son las claves que el chat de IA usa para armar carritos de súper y filtrar pizzas u otras variantes. Siguen siendo **recomendadas**, no obligatorias.
 | `sin_tacc` | booleano: apto celíacos | `true` |
 | `vegano` | booleano | `true` |
 | `vegetariano` | booleano | `true` |

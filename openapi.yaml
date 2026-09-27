@@ -763,11 +763,15 @@ paths:
       tags: [ia, carrito]
       summary: "Turno del chat del comprador: texto + widgets tipados (UI generativa)"
       description: |
-        Respuesta con `mensaje` (texto y/o widgets de esquemas/ia-widgets.json). La app dibuja
-        los tipos que conoce e ignora el resto. Las acciones (agregar, confirmar) las ejecuta
-        la persona con los endpoints de carrito/pedido — la IA no compra sola (docs/ia/capacidad.md).
+        Respuesta con `mensaje` (texto y/o widgets de esquemas/ia-widgets.json: mazo, podio,
+        promo, bienvenida, respuestas, carrito/checkout con carrito_id real, etc.). La app
+        dibuja los tipos que conoce e ignora el resto. El modelo solo entiende y redacta; el
+        nodo ejecuta las herramientas (catalogo/buscar, receta-a-lista, …) y arma los widgets.
+        En el chat del nodo solo hay comercios con `ia_chat.adherido`. Las acciones (agregar,
+        confirmar) las ejecuta la persona — la IA no compra sola (docs/ia/capacidad.md).
         JSON completo por defecto. Con `Accept: text/event-stream` el nodo puede streamear el
-        mensaje (opcional; si no, responde application/json igual).
+        mensaje (opcional; si no, responde application/json igual). Chat vacío: el nodo puede
+        devolver `bienvenida` sin llamar al modelo.
       security: [ { sesion: [] }, { mandato: [armar] } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia-widgets.json#/$defs/pedido_chat" } } } }
       responses:
@@ -932,6 +936,102 @@ paths:
         "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "429": { description: "tope_ia_alcanzado", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "503": { description: "gateway_ia_caido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
+  /ia/catalogo/buscar:
+    post:
+      operationId: iaCatalogoBuscar
+      tags: [ia, ofertas]
+      summary: "Búsqueda compacta de catálogo (determinista, con sinónimos)"
+      description: |
+        Tarjetas compactas para el chat y agentes. Busca en nombre, descripción, categorías
+        y atributos con `datos/sinonimos.json`. Con `solo_adheridos=true` (chat del nodo) solo
+        comercios con `ia_chat.adherido`. Por MCP del agente propio de la persona es neutral
+        (`solo_adheridos` ausente o false). Mandato `leer`. docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_catalogo_buscar" } } } }
+      responses:
+        "200": { description: Tarjetas compactas, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/respuesta_catalogo_buscar" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada o fuera_de_mandato", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
+  /ia/receta-a-lista:
+    post:
+      operationId: iaRecetaALista
+      tags: [ia, carrito]
+      summary: "Platos → ingredientes por persona (tabla CC0 + modelo solo para huecos)"
+      description: |
+        Resuelve `datos/recetas.json` (CC0). El modelo solo rellena platos que no están en la
+        tabla; ese resultado se cachea. Mandato `leer` o `armar`. docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [leer] }, { mandato: [armar] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_receta_a_lista" } } } }
+      responses:
+        "200": { description: Ingredientes agregados por plato, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/respuesta_receta_a_lista" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada o fuera_de_mandato", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "429": { description: "tope_ia_alcanzado (si usó el modelo)", headers: { Retry-After: { required: true, schema: { type: integer, minimum: 1 } } }, content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "503": { description: "gateway_ia_caido (si usó el modelo)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
+  /ia/lista-a-carrito:
+    post:
+      operationId: iaListaACarrito
+      tags: [ia, carrito]
+      summary: "Ingredientes → carrito real del nodo (con grupo y faltantes)"
+      description: |
+        Crea un carrito real (misma validación de stock/variantes que el carrito de siempre).
+        Cada ítem puede llevar `grupo` (plato); lo que el comercio no tiene va en `faltantes`.
+        Mandato `armar`. docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/pedido_lista_a_carrito" } } } }
+      responses:
+        "200": { description: Widget carrito con carrito_id real, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/respuesta_lista_a_carrito" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada o fuera_de_mandato", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "404": { description: "comercio no encontrado", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
+  /ia/promos:
+    get:
+      operationId: iaPromos
+      tags: [ia, ofertas]
+      summary: "Promos de adheridos cerca (determinista)"
+      description: |
+        Para la bienvenida del chat y el carrusel. Por defecto solo adheridos.
+        Mandato `leer`. docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      parameters:
+        - { name: lat, in: query, required: true, schema: { type: number } }
+        - { name: lng, in: query, required: true, schema: { type: number } }
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 30, default: 10 } }
+        - { name: solo_adheridos, in: query, schema: { type: boolean, default: true } }
+      responses:
+        "200": { description: Promos como tarjetas, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/respuesta_promos_ia" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada o fuera_de_mandato", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+
+  /ia/mis-pedidos:
+    get:
+      operationId: iaMisPedidos
+      tags: [ia, pedidos]
+      summary: "Pedidos compactos de la sesión ('volver a pedir')"
+      description: |
+        Solo la sesión actual. Compacto: tarjetas, no el pedido entero. Mandato `leer`.
+        docs/ia/capacidad.md.
+      security: [ { sesion: [] }, { mandato: [leer] } ]
+      parameters:
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 20, default: 5 } }
+      responses:
+        "200": { description: Ítems para volver a pedir, content: { application/json: { schema: { $ref: "esquemas/ia.json#/$defs/respuesta_mis_pedidos_ia" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { description: "ia_no_activada o fuera_de_mandato", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
   /comercios/{id}/exportar:

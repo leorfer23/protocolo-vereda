@@ -1,0 +1,82 @@
+{
+  "$comentario": "Flujo pizza: podio de fugazzetas + checkout.",
+  "rol": "asistente",
+  "texto": "Estas no te las podés perder:",
+  "widgets": [
+    {
+      "tipo": "podio",
+      "version": 1,
+      "titulo": "Estas no te las podés perder",
+      "puestos": [
+        {
+          "puesto": 1,
+          "razon": "más pedida",
+          "sello": "top",
+          "tarjeta": {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000c2",
+            "comercio_id": "01926b3a-0000-7000-8000-0000000000a1",
+            "nombre": "Fugazzeta",
+            "precio": {
+              "centavos": 9800,
+              "moneda": "ARS"
+            },
+            "pedidos_mes": 88,
+            "reputacion": {
+              "promedio": 4.8,
+              "cantidad": 210
+            },
+            "distancia_m": 420,
+            "agregar": true
+          }
+        },
+        {
+          "puesto": 2,
+          "razon": "más cerca",
+          "tarjeta": {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000c3",
+            "comercio_id": "01926b3a-0000-7000-8000-0000000000a4",
+            "nombre": "Fugazzeta al molde",
+            "precio": {
+              "centavos": 9200,
+              "moneda": "ARS"
+            },
+            "distancia_m": 180,
+            "agregar": true
+          }
+        },
+        {
+          "puesto": 3,
+          "razon": "mejor reputación",
+          "tarjeta": {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000c4",
+            "comercio_id": "01926b3a-0000-7000-8000-0000000000a5",
+            "nombre": "Fugazzeta rellena",
+            "precio": {
+              "centavos": 11000,
+              "moneda": "ARS"
+            },
+            "reputacion": {
+              "promedio": 4.9,
+              "cantidad": 95
+            },
+            "agregar": true
+          }
+        }
+      ]
+    },
+    {
+      "tipo": "promo",
+      "version": 1,
+      "sello": "2x1",
+      "tarjeta": {
+        "oferta_id": "01926b3a-0000-7000-8000-0000000000c5",
+        "nombre": "Fugazzeta + gaseosa",
+        "precio": {
+          "centavos": 12000,
+          "moneda": "ARS"
+        },
+        "agregar": true
+      }
+    }
+  ]
+}

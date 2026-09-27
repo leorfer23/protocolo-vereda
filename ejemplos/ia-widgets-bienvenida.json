@@ -1,0 +1,43 @@
+{
+  "$comentario": "Chat vacío: bienvenida sin llamar al modelo.",
+  "rol": "asistente",
+  "texto": "¡Hola, Ana! ¿Qué buscamos hoy?",
+  "widgets": [
+    {
+      "tipo": "bienvenida",
+      "version": 1,
+      "titulo": "¡Hola, Ana! ¿Qué buscamos hoy?",
+      "subtitulo": "Promos de adheridos cerca y lo que ya pediste.",
+      "promos": [
+        {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000d1",
+          "comercio_id": "01926b3a-0000-7000-8000-0000000000a2",
+          "nombre": "2x1 en empanadas",
+          "precio": {
+            "centavos": 6000,
+            "moneda": "ARS"
+          },
+          "etiqueta": "2x1",
+          "sello": "hoy",
+          "agregar": true
+        }
+      ],
+      "volver_a_pedir": [
+        {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000c1",
+          "nombre": "Muzzarella",
+          "precio": {
+            "centavos": 8500,
+            "moneda": "ARS"
+          },
+          "agregar": true
+        }
+      ],
+      "sugerencias": [
+        "Quiero una pizza",
+        "Compra semanal de súper",
+        "Algo rico para 2"
+      ]
+    }
+  ]
+}

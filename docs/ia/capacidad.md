@@ -41,16 +41,62 @@ Toda función **devuelve un borrador** (o un mensaje con widgets). Confirmarlo e
 | `elegir_categoria` | Chips/lista de categorías |
 | `productos` | Tarjetas (foto, precio, Agregar) |
 | `producto` | Una tarjeta |
-| `carrito` | Ítems y total propuestos |
-| `checkout` | Medios del comercio: solo `efectivo` / `transferencia` (nunca cobro por Vereda) |
+| `carrito` | Carrito **real** (`carrito_id`); ítems con `grupo` / `nota`; `faltantes` |
+| `checkout` | Sobre `carrito_id` real; medios `efectivo` (con `paga_con` al confirmar) / `transferencia` |
 | `recomendacion` | Texto + ítems opcionales |
 | `comercio` | Ficha corta del local |
+| `bienvenida` | Home del chat vacío (sin llamar al modelo): título, promos, volver a pedir, sugerencias |
+| `respuestas` | Chips sobre el campo; tocar = mandar ese texto/valor |
+| `mazo` | Cartas apiladas (Paso / ¡Esta! / Más como esta) |
+| `podio` | Hasta 3 puestos con `razon` pública |
+| `promo` | Carta grande con `sello` |
 
-**Regla de compatibilidad:** el cliente **ignora** widgets cuyo `tipo` no conoce y degrada a texto si lo hay. En el esquema, un tipo desconocido **valida** como objeto genérico (`desconocido`: `tipo` + `version` + props libres) para que el mensaje no falle entero; la app igual lo saltea. Los siete tipos conocidos se validan estrictos. `version` de los conocidos es `1` en esta revisión.
+**Regla de compatibilidad:** el cliente **ignora** widgets cuyo `tipo` no conoce y degrada a texto si lo hay. En el esquema, un tipo desconocido **valida** como objeto genérico (`desconocido`: `tipo` + `version` + props libres) para que el mensaje no falle entero; la app igual lo saltea. Los tipos conocidos se validan estrictos. `version` de los conocidos es `1` en esta revisión.
 
-Las acciones (agregar al carrito, confirmar pedido) las ejecuta la **persona** (o su agente) con `crearCarrito` / `agregarItemCarrito` / `confirmarCarrito` — el widget solo propone.
+Las acciones (agregar al carrito, confirmar pedido) las ejecuta la **persona** (o su agente) con `crearCarrito` / `agregarItemCarrito` / `confirmarCarrito` — el widget solo propone. El carrito del chat **reusa** el carrito del nodo (`carrito_id`).
 
 Respuesta completa por defecto. Streaming SSE (`Accept: text/event-stream`) es opcional: el nodo puede mandar el mismo `mensaje` armado por partes; si no lo ofrece, responde JSON como siempre (mismo espíritu que `GET /eventos` en `docs/eventos.md`).
+
+Chat vacío: el nodo puede devolver un widget `bienvenida` **sin** llamar al modelo (gratis): promos de adheridos cerca, volver a pedir, sugerencias.
+
+#### Adheridos al chat de IA (regla pública)
+
+Los usuarios pagan el costo de tokens de su IA; los comercios pueden adherirse (barato, cubre tokens, neto positivo para el nodo) para **aparecer en el chat de IA**. Eso vive en la ficha pública: `comercio.ia_chat` (`{adherido, vigente_hasta?}`), lo setea el operador del nodo.
+
+- **Solo en el chat de IA del nodo** se filtra por adheridos (`solo_adheridos=true` en `iaCatalogoBuscar` / `iaPromos`).
+- La **app común**, la **búsqueda** (`GET /buscar`) y el **ranking** siguen neutrales: sin efecto en ranking ni acceso (misma regla de sostenimiento).
+- Por **MCP**, el agente propio de la persona es **neutral** por defecto (`solo_adheridos` ausente o false).
+- Cobro de la adhesión: P2P a la cuenta del operador; Vereda nunca toca plata.
+
+#### Orquestación: el modelo entiende y redacta, el nodo ejecuta
+
+El modelo **no** llama herramientas a ciegas. En cada turno:
+
+1. El modelo entiende el mensaje y devuelve un JSON compacto `{intencion, terminos, gusto, comercio, platos, personas, …}` (`buscar` \| `refinar` \| `elegir` \| `armar_carro` \| `checkout` \| `charla`) y redacta la respuesta corta en **voseo**.
+2. El **nodo** ejecuta las herramientas deterministas, arma los widgets y guarda en el historial los ids de ofertas/carrito mostrados (así "de fugazzeta" y "esa" funcionan).
+
+Herramientas (OpenAPI + MCP + uso interno del chat), compactas:
+
+| Operación | Ruta | Qué hace |
+| --- | --- | --- |
+| `iaCatalogoBuscar` | `POST /ia/catalogo/buscar` | Tarjetas; texto + sinónimos en nombre/desc/categorías/atributos |
+| `iaRecetaALista` | `POST /ia/receta-a-lista` | Platos → ingredientes desde `datos/recetas.json`; modelo solo para huecos (cacheado) |
+| `iaListaACarrito` | `POST /ia/lista-a-carrito` | Ingredientes → carrito real con `grupo` y `faltantes` |
+| `iaPromos` | `GET /ia/promos` | Promos de adheridos cerca |
+| `iaMisPedidos` | `GET /ia/mis-pedidos` | Compacto, solo tu sesión |
+
+#### Fórmula pública del podio
+
+Cuando el nodo arma un widget `podio`, ordena hasta 3 tarjetas candidatas con un score público (misma idea que el ranking del barrio, calibrado al chat):
+
+```
+score = 0.35 · 1/(1 + distancia_m/2000)
+      + 0.30 · (reputacion.promedio / 5)
+      + 0.20 · min(1, pedidos_mes / 40)
+      + 0.15 · coincidencia
+```
+
+`coincidencia` ∈ [0, 1] es cuánto matchea el texto/gusto pedido (1 = exacto tras sinónimos). Cada puesto lleva una `razon` en castellano que refleja el término que más aportó (`más cerca`, `mejor reputación`, `más pedida`, `más parecida a lo que pediste`). No hay posiciones pagas ni boost oculto por adhesión más allá del filtro previo de adheridos.
 
 También siguen:
 

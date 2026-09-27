@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/recetas.json",
+  "title": "Recetas CC0 para armar listas",
+  "description": "Tabla pública de platos → ingredientes por persona (datos/recetas.json). CC0. El nodo la usa en POST /ia/receta-a-lista; el modelo solo rellena huecos (docs/ia/capacidad.md).",
+  "type": "object",
+  "required": [
+    "version",
+    "platos"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "licencia": {
+      "type": "string",
+      "const": "CC0-1.0"
+    },
+    "platos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/plato"
+      }
+    }
+  },
+  "$defs": {
+    "ingrediente": {
+      "type": "object",
+      "required": [
+        "nombre",
+        "cantidad",
+        "unidad"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "cantidad": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unidad": {
+          "type": "string",
+          "enum": [
+            "g",
+            "kg",
+            "ml",
+            "l",
+            "unidad",
+            "cucharada",
+            "taza"
+          ]
+        },
+        "opcional": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "plato": {
+      "type": "object",
+      "required": [
+        "id",
+        "nombre",
+        "ingredientes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "nombre": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "sinonimos": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "ingredientes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ingrediente"
+          }
+        }
+      }
+    }
+  }
+}
