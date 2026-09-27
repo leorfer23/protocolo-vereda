@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/sinonimos.json",
+  "title": "Sinónimos de búsqueda",
+  "description": "Grupos de términos equivalentes para catalogo/buscar (datos/sinonimos.json). CC0.",
+  "type": "object",
+  "required": [
+    "version",
+    "grupos"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "licencia": {
+      "type": "string",
+      "const": "CC0-1.0"
+    },
+    "grupos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "canonico",
+          "terminos"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "canonico": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "terminos": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          }
+        }
+      }
+    }
+  }
+}

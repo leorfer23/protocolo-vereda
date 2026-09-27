@@ -138,6 +138,16 @@
       "else": { "not": { "required": ["monto"] } },
       "additionalProperties": false
     },
+    "ia_chat": {
+      "type": "object",
+      "description": "Si este comercio aparece en el chat de IA del nodo. Público en la ficha. Lo setea el operador del nodo (comando del nodo), no el comercio por API. Solo aplica al chat de IA: la app, la búsqueda y el ranking comunes siguen neutrales (docs/ia/capacidad.md). Ausente: no adherido.",
+      "required": ["adherido"],
+      "additionalProperties": false,
+      "properties": {
+        "adherido": { "type": "boolean", "description": "true: el chat de IA del nodo puede mostrarlo. false: oculto en ese chat." },
+        "vigente_hasta": { "$ref": "comunes.json#/$defs/instante", "description": "Hasta cuándo vale la adhesión. Ausente: sin vencimiento anunciado." }
+      }
+    },
     "notas_para_agentes": { "type": "string", "maxLength": 2000, "description": "Lo que un mozo diría: 'la fugazzeta tarda 30 min los viernes'." },
     "atributos": { "$ref": "comunes.json#/$defs/atributos" },
     "imagenes": { "type": "array", "items": { "$ref": "comunes.json#/$defs/imagen" } },

@@ -1,0 +1,1297 @@
+{
+  "version": 1,
+  "licencia": "CC0-1.0",
+  "platos": [
+    {
+      "id": "milanesa_con_pure",
+      "nombre": "milanesa con puré",
+      "sinonimos": [
+        "milanga con puré",
+        "mila con puré"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "milanesa de carne",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "papa",
+          "cantidad": 300,
+          "unidad": "g"
+        },
+        {
+          "nombre": "leche",
+          "cantidad": 50,
+          "unidad": "ml"
+        },
+        {
+          "nombre": "manteca",
+          "cantidad": 10,
+          "unidad": "g"
+        },
+        {
+          "nombre": "sal",
+          "cantidad": 1,
+          "unidad": "cucharada",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "carne_al_horno_con_papas",
+      "nombre": "carne al horno con papas",
+      "sinonimos": [
+        "carne al horno",
+        "roast beef con papas"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "roast beef",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "papa",
+          "cantidad": 250,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "ajo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 15,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "fideos_a_la_bolognesa",
+      "nombre": "fideos a la boloñesa",
+      "sinonimos": [
+        "fideos con tuco",
+        "spaghetti a la boloñesa"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "fideos",
+          "cantidad": 100,
+          "unidad": "g"
+        },
+        {
+          "nombre": "carne picada",
+          "cantidad": 120,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate triturado",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "ajo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 10,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "guiso_de_lentejas",
+      "nombre": "guiso de lentejas",
+      "sinonimos": [
+        "guiso",
+        "lentejas guisadas"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "lentejas",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "papa",
+          "cantidad": 100,
+          "unidad": "g"
+        },
+        {
+          "nombre": "zanahoria",
+          "cantidad": 50,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "chorizo colorado",
+          "cantidad": 30,
+          "unidad": "g",
+          "opcional": true
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 10,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "pastel_de_papas",
+      "nombre": "pastel de papas",
+      "sinonimos": [
+        "pastel de papa"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "papa",
+          "cantidad": 350,
+          "unidad": "g"
+        },
+        {
+          "nombre": "carne picada",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "huevo",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "manteca",
+          "cantidad": 15,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "tarta_de_verdura",
+      "nombre": "tarta de verdura",
+      "sinonimos": [
+        "tarta de acelga",
+        "tarta salada"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "masa de tarta",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "acelga",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "huevo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "queso rallado",
+          "cantidad": 30,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "empanadas_de_carne",
+      "nombre": "empanadas de carne",
+      "sinonimos": [
+        "empanadas",
+        "empanada de carne"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "tapa de empanada",
+          "cantidad": 3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "carne picada",
+          "cantidad": 100,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "huevo",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceituna",
+          "cantidad": 15,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "asado",
+      "nombre": "asado",
+      "sinonimos": [
+        "asado de tira",
+        "parrilla"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "asado de tira",
+          "cantidad": 350,
+          "unidad": "g"
+        },
+        {
+          "nombre": "sal gruesa",
+          "cantidad": 1,
+          "unidad": "cucharada"
+        },
+        {
+          "nombre": "chimichurri",
+          "cantidad": 20,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "ensalada_mixta",
+      "nombre": "ensalada mixta",
+      "sinonimos": [
+        "ensalada"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "lechuga",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 15,
+          "unidad": "ml"
+        },
+        {
+          "nombre": "vinagre",
+          "cantidad": 5,
+          "unidad": "ml",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "pollo_al_horno_con_papas",
+      "nombre": "pollo al horno con papas",
+      "sinonimos": [
+        "pollo al horno"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "pollo",
+          "cantidad": 250,
+          "unidad": "g"
+        },
+        {
+          "nombre": "papa",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "limon",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "ajo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 15,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "milanesa_napolitana",
+      "nombre": "milanesa napolitana",
+      "sinonimos": [
+        "mila napolitana",
+        "napolitana"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "milanesa de carne",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "jamon cocido",
+          "cantidad": 40,
+          "unidad": "g"
+        },
+        {
+          "nombre": "muzzarella",
+          "cantidad": 60,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "milanesa_de_pollo",
+      "nombre": "milanesa de pollo",
+      "sinonimos": [
+        "suprema",
+        "mila de pollo"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "milanesa de pollo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "limon",
+          "cantidad": 0.25,
+          "unidad": "unidad",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "pure_de_papas",
+      "nombre": "puré de papas",
+      "sinonimos": [
+        "puré",
+        "pure"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "papa",
+          "cantidad": 300,
+          "unidad": "g"
+        },
+        {
+          "nombre": "leche",
+          "cantidad": 60,
+          "unidad": "ml"
+        },
+        {
+          "nombre": "manteca",
+          "cantidad": 15,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "arroz_con_pollo",
+      "nombre": "arroz con pollo",
+      "sinonimos": [],
+      "ingredientes": [
+        {
+          "nombre": "arroz",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "pollo",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "morrón",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 10,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "locro",
+      "nombre": "locro",
+      "sinonimos": [],
+      "ingredientes": [
+        {
+          "nombre": "maíz blanco",
+          "cantidad": 60,
+          "unidad": "g"
+        },
+        {
+          "nombre": "porotos",
+          "cantidad": 40,
+          "unidad": "g"
+        },
+        {
+          "nombre": "zapallo",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "panceta",
+          "cantidad": 40,
+          "unidad": "g"
+        },
+        {
+          "nombre": "chorizo colorado",
+          "cantidad": 40,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "carbonada",
+      "nombre": "carbonada",
+      "sinonimos": [],
+      "ingredientes": [
+        {
+          "nombre": "carne vacuna",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "zapallo",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "papa",
+          "cantidad": 100,
+          "unidad": "g"
+        },
+        {
+          "nombre": "choclo",
+          "cantidad": 50,
+          "unidad": "g"
+        },
+        {
+          "nombre": "durazno",
+          "cantidad": 0.5,
+          "unidad": "unidad",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "noquis_con_tuco",
+      "nombre": "ñoquis con tuco",
+      "sinonimos": [
+        "ñoquis",
+        "gnocchi"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "ñoquis",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 120,
+          "unidad": "g"
+        },
+        {
+          "nombre": "queso rallado",
+          "cantidad": 20,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "ravioles_de_ricota",
+      "nombre": "ravioles de ricota",
+      "sinonimos": [
+        "ravioles"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "ravioles de ricota",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 120,
+          "unidad": "g"
+        },
+        {
+          "nombre": "queso rallado",
+          "cantidad": 20,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "sorrentinos_de_jamon_y_queso",
+      "nombre": "sorrentinos de jamón y queso",
+      "sinonimos": [
+        "sorrentinos"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "sorrentinos",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 120,
+          "unidad": "g"
+        },
+        {
+          "nombre": "crema",
+          "cantidad": 30,
+          "unidad": "ml",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "pizza_muzzarella",
+      "nombre": "pizza muzzarella",
+      "sinonimos": [
+        "muzza",
+        "pizza muzza"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "masa de pizza",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "muzzarella",
+          "cantidad": 100,
+          "unidad": "g"
+        },
+        {
+          "nombre": "oregano",
+          "cantidad": 1,
+          "unidad": "cucharada",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "pizza_fugazzeta",
+      "nombre": "pizza fugazzeta",
+      "sinonimos": [
+        "fugazzeta",
+        "fuga"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "masa de pizza",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "muzzarella",
+          "cantidad": 120,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "pizza_napolitana",
+      "nombre": "pizza napolitana",
+      "sinonimos": [
+        "pizza napo"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "masa de pizza",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "muzzarella",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "ajos",
+          "cantidad": 1,
+          "unidad": "unidad",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "pizza_calabresa",
+      "nombre": "pizza calabresa",
+      "sinonimos": [
+        "calabresa"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "masa de pizza",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "muzzarella",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "longaniza",
+          "cantidad": 50,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "choripan",
+      "nombre": "choripán",
+      "sinonimos": [
+        "chori",
+        "choripan"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "chorizo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "pan de choripán",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "chimichurri",
+          "cantidad": 15,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "provoleta",
+      "nombre": "provoleta",
+      "sinonimos": [
+        "provo"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "provolone",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "oregano",
+          "cantidad": 1,
+          "unidad": "cucharada",
+          "opcional": true
+        },
+        {
+          "nombre": "aceite de oliva",
+          "cantidad": 5,
+          "unidad": "ml",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "matambre_a_la_pizza",
+      "nombre": "matambre a la pizza",
+      "sinonimos": [
+        "matambre"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "matambre",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 60,
+          "unidad": "g"
+        },
+        {
+          "nombre": "muzzarella",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "oregano",
+          "cantidad": 1,
+          "unidad": "cucharada",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "hamburguesa_casera",
+      "nombre": "hamburguesa casera",
+      "sinonimos": [
+        "burger",
+        "hamburguesa"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "carne picada",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "pan de hamburguesa",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "lechuga",
+          "cantidad": 20,
+          "unidad": "g",
+          "opcional": true
+        },
+        {
+          "nombre": "tomate",
+          "cantidad": 0.3,
+          "unidad": "unidad",
+          "opcional": true
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.2,
+          "unidad": "unidad",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "tortilla_de_papas",
+      "nombre": "tortilla de papas",
+      "sinonimos": [
+        "tortilla española"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "papa",
+          "cantidad": 250,
+          "unidad": "g"
+        },
+        {
+          "nombre": "huevo",
+          "cantidad": 2,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad",
+          "opcional": true
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 30,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "revuelto_gramajo",
+      "nombre": "revuelto gramajo",
+      "sinonimos": [
+        "gramajo"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "papa",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "huevo",
+          "cantidad": 2,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "jamon cocido",
+          "cantidad": 40,
+          "unidad": "g"
+        },
+        {
+          "nombre": "arvejas",
+          "cantidad": 30,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "bifes_a_la_criolla",
+      "nombre": "bifes a la criolla",
+      "sinonimos": [
+        "bife a la criolla"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "bife de nalga",
+          "cantidad": 200,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "morrón",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 15,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "vacio_a_la_parrilla",
+      "nombre": "vacío a la parrilla",
+      "sinonimos": [
+        "vacío",
+        "vacio"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "vacío",
+          "cantidad": 300,
+          "unidad": "g"
+        },
+        {
+          "nombre": "sal gruesa",
+          "cantidad": 1,
+          "unidad": "cucharada"
+        }
+      ]
+    },
+    {
+      "id": "entrana",
+      "nombre": "entraña",
+      "sinonimos": [
+        "entrana"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "entraña",
+          "cantidad": 250,
+          "unidad": "g"
+        },
+        {
+          "nombre": "sal gruesa",
+          "cantidad": 1,
+          "unidad": "cucharada"
+        },
+        {
+          "nombre": "limon",
+          "cantidad": 0.25,
+          "unidad": "unidad",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "pollo_grillado_con_ensalada",
+      "nombre": "pollo grillado con ensalada",
+      "sinonimos": [],
+      "ingredientes": [
+        {
+          "nombre": "pechuga de pollo",
+          "cantidad": 180,
+          "unidad": "g"
+        },
+        {
+          "nombre": "lechuga",
+          "cantidad": 60,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 10,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "sopa_de_verduras",
+      "nombre": "sopa de verduras",
+      "sinonimos": [
+        "caldo de verduras"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "zanahoria",
+          "cantidad": 50,
+          "unidad": "g"
+        },
+        {
+          "nombre": "papa",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "zapallo",
+          "cantidad": 60,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "apio",
+          "cantidad": 20,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "wok_de_verduras",
+      "nombre": "wok de verduras",
+      "sinonimos": [],
+      "ingredientes": [
+        {
+          "nombre": "zanahoria",
+          "cantidad": 50,
+          "unidad": "g"
+        },
+        {
+          "nombre": "morrón",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "zapallito",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "salsa de soja",
+          "cantidad": 10,
+          "unidad": "ml"
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 10,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "omelette_de_queso",
+      "nombre": "omelette de queso",
+      "sinonimos": [
+        "tortilla de queso"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "huevo",
+          "cantidad": 2,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "queso",
+          "cantidad": 40,
+          "unidad": "g"
+        },
+        {
+          "nombre": "manteca",
+          "cantidad": 5,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "panqueques_con_dulce_de_leche",
+      "nombre": "panqueques con dulce de leche",
+      "sinonimos": [
+        "panqueques"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "harina",
+          "cantidad": 50,
+          "unidad": "g"
+        },
+        {
+          "nombre": "huevo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "leche",
+          "cantidad": 100,
+          "unidad": "ml"
+        },
+        {
+          "nombre": "dulce de leche",
+          "cantidad": 40,
+          "unidad": "g"
+        }
+      ]
+    },
+    {
+      "id": "budin_de_pan",
+      "nombre": "budín de pan",
+      "sinonimos": [
+        "budin de pan"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "pan",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "leche",
+          "cantidad": 150,
+          "unidad": "ml"
+        },
+        {
+          "nombre": "huevo",
+          "cantidad": 1,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "azucar",
+          "cantidad": 30,
+          "unidad": "g"
+        },
+        {
+          "nombre": "pasas de uva",
+          "cantidad": 15,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "ensalada_de_pollo",
+      "nombre": "ensalada de pollo",
+      "sinonimos": [],
+      "ingredientes": [
+        {
+          "nombre": "pechuga de pollo",
+          "cantidad": 120,
+          "unidad": "g"
+        },
+        {
+          "nombre": "lechuga",
+          "cantidad": 60,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "mayonesa",
+          "cantidad": 20,
+          "unidad": "g",
+          "opcional": true
+        }
+      ]
+    },
+    {
+      "id": "guiso_de_mondongo",
+      "nombre": "guiso de mondongo",
+      "sinonimos": [
+        "mondongo"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "mondongo",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "garbanzos",
+          "cantidad": 50,
+          "unidad": "g"
+        },
+        {
+          "nombre": "papa",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate triturado",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        }
+      ]
+    },
+    {
+      "id": "cazuela_de_mariscos",
+      "nombre": "cazuela de mariscos",
+      "sinonimos": [],
+      "ingredientes": [
+        {
+          "nombre": "mezcla de mariscos",
+          "cantidad": 150,
+          "unidad": "g"
+        },
+        {
+          "nombre": "tomate triturado",
+          "cantidad": 100,
+          "unidad": "g"
+        },
+        {
+          "nombre": "cebolla",
+          "cantidad": 0.3,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "vino blanco",
+          "cantidad": 30,
+          "unidad": "ml",
+          "opcional": true
+        },
+        {
+          "nombre": "aceite",
+          "cantidad": 10,
+          "unidad": "ml"
+        }
+      ]
+    },
+    {
+      "id": "pizza_de_morrones",
+      "nombre": "pizza de morrones",
+      "sinonimos": [
+        "pizza morrones"
+      ],
+      "ingredientes": [
+        {
+          "nombre": "masa de pizza",
+          "cantidad": 0.25,
+          "unidad": "unidad"
+        },
+        {
+          "nombre": "salsa de tomate",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "muzzarella",
+          "cantidad": 80,
+          "unidad": "g"
+        },
+        {
+          "nombre": "morrón",
+          "cantidad": 0.5,
+          "unidad": "unidad"
+        }
+      ]
+    }
+  ]
+}

@@ -118,7 +118,12 @@
               "chat",
               "pedido_propuesto",
               "buscar",
-              "sugerir"
+              "sugerir",
+              "catalogo_buscar",
+              "receta_a_lista",
+              "lista_a_carrito",
+              "promos",
+              "mis_pedidos"
             ]
           }
         }
@@ -1078,6 +1083,163 @@
         "alto": {
           "type": "integer",
           "minimum": 1
+        }
+      }
+    },
+    "pedido_catalogo_buscar": {
+      "type": "object",
+      "description": "Búsqueda compacta para el chat y agentes. Determinista: nombre+descripción+categorías+atributos con sinónimos (datos/sinonimos.json). docs/ia/capacidad.md.",
+      "required": ["q", "lat", "lng"],
+      "additionalProperties": false,
+      "properties": {
+        "q": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "gusto": { "type": "string", "maxLength": 80, "description": "Filtro por atributo gusto (muzza, fugazzeta, …)." },
+        "atributos": { "$ref": "comunes.json#/$defs/atributos" },
+        "tipo": { "type": "string", "description": "Tipo de comercio (restaurante, supermercado, …)." },
+        "abierto_ahora": { "type": "boolean" },
+        "distancia_max_m": { "type": "integer", "minimum": 100, "maximum": 30000 },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "limite": { "type": "integer", "minimum": 1, "maximum": 30, "default": 10 },
+        "solo_adheridos": {
+          "type": "boolean",
+          "description": "true en el chat del nodo (solo comercios con ia_chat.adherido). Por MCP del agente propio de la persona: false/ausente = neutral."
+        }
+      }
+    },
+    "respuesta_catalogo_buscar": {
+      "type": "object",
+      "required": ["tarjetas"],
+      "additionalProperties": false,
+      "properties": {
+        "tarjetas": {
+          "type": "array",
+          "items": { "$ref": "ia-widgets.json#/$defs/tarjeta_producto" }
+        }
+      }
+    },
+    "pedido_receta_a_lista": {
+      "type": "object",
+      "description": "Platos → ingredientes por persona desde datos/recetas.json. El modelo solo rellena huecos (cacheado).",
+      "required": ["platos", "personas"],
+      "additionalProperties": false,
+      "properties": {
+        "platos": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+        },
+        "personas": { "type": "integer", "minimum": 1, "maximum": 20, "default": 2 }
+      }
+    },
+    "respuesta_receta_a_lista": {
+      "type": "object",
+      "required": ["ingredientes"],
+      "additionalProperties": false,
+      "properties": {
+        "ingredientes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["nombre", "cantidad", "unidad", "platos"],
+            "additionalProperties": false,
+            "properties": {
+              "nombre": { "type": "string" },
+              "cantidad": { "type": "number", "exclusiveMinimum": 0 },
+              "unidad": { "type": "string" },
+              "platos": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string" },
+                "description": "De qué platos sale este ítem (para agrupar y anotar 'papas: 2 platos')."
+              }
+            }
+          }
+        },
+        "consumo": {
+          "$ref": "#/$defs/consumo",
+          "description": "Solo si el modelo rellenó un hueco. Ausente si todo salió de la tabla."
+        }
+      }
+    },
+    "pedido_lista_a_carrito": {
+      "type": "object",
+      "description": "Arma un carrito REAL del nodo a partir de ingredientes (reusa la lógica de crear desde lista). Devuelve grupo y faltantes.",
+      "required": ["comercio_id", "ingredientes"],
+      "additionalProperties": false,
+      "properties": {
+        "comercio_id": { "type": "string" },
+        "ingredientes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["nombre"],
+            "additionalProperties": false,
+            "properties": {
+              "nombre": { "type": "string", "minLength": 1, "maxLength": 120 },
+              "cantidad": { "type": "number", "exclusiveMinimum": 0 },
+              "unidad": { "type": "string", "maxLength": 40 },
+              "platos": {
+                "type": "array",
+                "items": { "type": "string", "maxLength": 80 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "respuesta_lista_a_carrito": {
+      "type": "object",
+      "required": ["carrito"],
+      "additionalProperties": false,
+      "properties": {
+        "carrito": {
+          "$ref": "ia-widgets.json#/$defs/carrito",
+          "description": "Widget carrito con carrito_id real, items con grupo y faltantes."
+        }
+      }
+    },
+    "pedido_promos_ia": {
+      "type": "object",
+      "description": "Promos de adheridos cerca. Determinista.",
+      "required": ["lat", "lng"],
+      "additionalProperties": false,
+      "properties": {
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "limite": { "type": "integer", "minimum": 1, "maximum": 30, "default": 10 },
+        "solo_adheridos": { "type": "boolean", "default": true }
+      }
+    },
+    "respuesta_promos_ia": {
+      "type": "object",
+      "required": ["promos"],
+      "additionalProperties": false,
+      "properties": {
+        "promos": {
+          "type": "array",
+          "items": { "$ref": "ia-widgets.json#/$defs/tarjeta_producto" }
+        }
+      }
+    },
+    "pedido_mis_pedidos_ia": {
+      "type": "object",
+      "description": "Pedidos compactos de la sesión, para 'volver a pedir'.",
+      "additionalProperties": false,
+      "properties": {
+        "limite": { "type": "integer", "minimum": 1, "maximum": 20, "default": 5 }
+      }
+    },
+    "respuesta_mis_pedidos_ia": {
+      "type": "object",
+      "required": ["items"],
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": { "$ref": "ia-widgets.json#/$defs/tarjeta_producto" }
         }
       }
     }

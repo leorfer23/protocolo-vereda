@@ -1017,8 +1017,87 @@
     }
   },
   {
+    "name": "ia_catalogo_buscar",
+    "description": "Búsqueda compacta de catálogo (determinista, con sinónimos). Por defecto NEUTRAL: no filtra por adheridos al chat de IA del nodo. Scope 'leer'. Ej: 'fugazzeta cerca'.",
+    "inputSchema": {
+      "type": "object",
+      "required": ["q", "lat", "lng"],
+      "properties": {
+        "q": { "type": "string" },
+        "gusto": { "type": "string" },
+        "atributos": { "type": "object" },
+        "tipo": { "type": "string" },
+        "abierto_ahora": { "type": "boolean" },
+        "distancia_max_m": { "type": "integer" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "limite": { "type": "integer" },
+        "solo_adheridos": { "type": "boolean", "description": "Solo true si querés el filtro del chat del nodo. Default: neutral." }
+      }
+    }
+  },
+  {
+    "name": "ia_receta_a_lista",
+    "description": "Pasá platos y cantidad de personas; te arma la lista de ingredientes (tabla CC0 + modelo solo para huecos). Scope 'leer' o 'armar'. Ej: 'milanesa con puré, carne al horno, fideos a la boloñesa para 2'.",
+    "inputSchema": {
+      "type": "object",
+      "required": ["platos", "personas"],
+      "properties": {
+        "platos": { "type": "array", "items": { "type": "string" } },
+        "personas": { "type": "integer" }
+      }
+    }
+  },
+  {
+    "name": "ia_lista_a_carrito",
+    "description": "De una lista de ingredientes armá un carrito REAL en un comercio, con grupo por plato y faltantes. Scope 'armar'.",
+    "inputSchema": {
+      "type": "object",
+      "required": ["comercio_id", "ingredientes"],
+      "properties": {
+        "comercio_id": { "type": "string" },
+        "ingredientes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "nombre": { "type": "string" },
+              "cantidad": { "type": "number" },
+              "unidad": { "type": "string" },
+              "platos": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "ia_promos",
+    "description": "Promos cerca. Scope 'leer'. Por defecto solo adheridos al chat de IA; pasá solo_adheridos=false para neutral.",
+    "inputSchema": {
+      "type": "object",
+      "required": ["lat", "lng"],
+      "properties": {
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "limite": { "type": "integer" },
+        "solo_adheridos": { "type": "boolean" }
+      }
+    }
+  },
+  {
+    "name": "ia_mis_pedidos",
+    "description": "Tus pedidos recientes en forma compacta para 'volver a pedir'. Solo tu sesión. Scope 'leer'.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limite": { "type": "integer" }
+      }
+    }
+  },
+  {
     "name": "ia_chat",
-    "description": "Turno del chat del comprador con UI generativa: texto + widgets (categorías, productos, carrito, checkout solo efectivo/transferencia, etc.). No compra sola: la persona confirma con el carrito. Scope 'armar'. Ej: 'armame una picada para 6 cerca'.",
+    "description": "Turno del chat del comprador con UI generativa: texto + widgets (mazo, podio, promo, bienvenida, respuestas, carrito/checkout con carrito real, etc.). No compra sola: la persona confirma con el carrito. Scope 'armar'. Ej: 'quiero una pizza'.",
     "inputSchema": {
       "type": "object",
       "required": [

@@ -1,0 +1,28 @@
+{
+  "$comentario": "Casos de ia.json#/$defs/pedido_receta_a_lista.",
+  "esquema": "ia.json#/$defs/pedido_receta_a_lista",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "tres platos para 2.",
+      "doc": {
+        "platos": [
+          "milanesa con puré",
+          "carne al horno con papas",
+          "fideos a la boloñesa"
+        ],
+        "personas": 2
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "personas 0.",
+      "doc": {
+        "platos": [
+          "asado"
+        ],
+        "personas": 0
+      }
+    }
+  ]
+}

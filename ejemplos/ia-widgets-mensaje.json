@@ -1,54 +1,68 @@
 {
-  "$comentario": "Mensaje del asistente con productos y checkout (docs/ia/capacidad.md).",
+  "$comentario": "Mensaje del asistente con mazo, respuestas y podio (flujo pizza → fugazzeta). docs/ia/capacidad.md.",
   "rol": "asistente",
-  "texto": "Te armo una picada para 6. Mirà estas opciones:",
+  "texto": "¿De qué te gustan? Mirà estas opciones de adheridos cerca:",
   "widgets": [
     {
-      "tipo": "elegir_categoria",
+      "tipo": "mazo",
       "version": 1,
-      "titulo": "¿Qué se te antoja?",
-      "opciones": [
+      "titulo": "Pizzas cerca",
+      "tarjetas": [
         {
-          "id": "picadas",
-          "etiqueta": "Picadas"
-        },
-        {
-          "id": "pizzeria",
-          "etiqueta": "Pizza"
-        }
-      ]
-    },
-    {
-      "tipo": "productos",
-      "version": 1,
-      "titulo": "Para la picada",
-      "items": [
-        {
-          "oferta_id": "01926b3a-0000-7000-8000-0000000000b1",
-          "comercio_id": "01926b3a-0000-7000-8000-000000000002",
-          "nombre": "Tabla clásica",
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000c1",
+          "comercio_id": "01926b3a-0000-7000-8000-0000000000a1",
+          "comercio_nombre": "Don Julio Pizza",
+          "nombre": "Muzzarella",
           "precio": {
-            "centavos": 12000,
+            "centavos": 8500,
             "moneda": "ARS"
           },
-          "imagen": "https://cdn.ejemplo/tabla.jpg",
+          "distancia_m": 420,
+          "demora_min": 35,
+          "reputacion": {
+            "promedio": 4.7,
+            "cantidad": 180
+          },
+          "pedidos_mes": 62,
+          "sello": "más pedida",
+          "agregar": true
+        },
+        {
+          "oferta_id": "01926b3a-0000-7000-8000-0000000000c2",
+          "comercio_id": "01926b3a-0000-7000-8000-0000000000a1",
+          "nombre": "Fugazzeta",
+          "precio": {
+            "centavos": 9800,
+            "moneda": "ARS"
+          },
+          "distancia_m": 420,
+          "demora_min": 40,
           "agregar": true
         }
       ]
     },
     {
-      "tipo": "checkout",
+      "tipo": "respuestas",
       "version": 1,
-      "comercio_id": "01926b3a-0000-7000-8000-000000000002",
-      "medios": [
-        "efectivo",
-        "transferencia"
-      ],
-      "total": {
-        "centavos": 12000,
-        "moneda": "ARS"
-      },
-      "nota": "Pagás al local, no a Vereda."
+      "opciones": [
+        {
+          "texto": "Muzza",
+          "valor": "muzza"
+        },
+        {
+          "texto": "Fugazzeta",
+          "valor": "fugazzeta"
+        },
+        {
+          "texto": "Napolitana"
+        },
+        {
+          "texto": "Con calabresa"
+        },
+        {
+          "texto": "Otra cosa"
+        }
+      ]
     }
   ]
 }

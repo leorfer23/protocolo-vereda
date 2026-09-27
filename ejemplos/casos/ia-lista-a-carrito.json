@@ -1,0 +1,35 @@
+{
+  "$comentario": "Casos de ia.json#/$defs/pedido_lista_a_carrito.",
+  "esquema": "ia.json#/$defs/pedido_lista_a_carrito",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "ingredientes con grupo.",
+      "doc": {
+        "comercio_id": "01926b3a-0000-7000-8000-0000000000a3",
+        "ingredientes": [
+          {
+            "nombre": "papa",
+            "cantidad": 1.1,
+            "unidad": "kg",
+            "platos": [
+              "milanesa con puré",
+              "carne al horno"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "sin comercio_id.",
+      "doc": {
+        "ingredientes": [
+          {
+            "nombre": "papa"
+          }
+        ]
+      }
+    }
+  ]
+}
