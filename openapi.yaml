@@ -221,6 +221,7 @@ paths:
         - { name: abierto, in: query, schema: { type: boolean }, description: "Filtra por `abierto_ahora`: horarios, o `apertura_manual` mientras esté vigente." }
         - { name: modalidad, in: query, schema: { type: string, enum: [inmediata, franja, consolidada, ronda, punto_entrega, retiro] } }
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
+        - { name: agrupar, in: query, schema: { type: string, enum: [casa] }, description: "`casa`: de cada marca vuelve una sola sucursal, la primera en el orden pedido, con `otras_sucursales` (docs/sucursales.md). Ausente: cada sucursal es un resultado." }
         - { name: q, in: query, schema: { type: string }, description: "Texto libre, también semántico" }
       responses:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/comercio.json" } } } } }
@@ -285,6 +286,25 @@ paths:
         "200": { description: Actualizado, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "422": { $ref: "#/components/responses/Error" }
+  /comercios/{id}/sucursales:
+    get:
+      operationId: verSucursales
+      tags: [comercios]
+      summary: Las sucursales de una casa (la marca)
+      description: |
+        Las que nombran a esta casa en `sucursal_de`, con su ficha. Con `lat` y `lng` vienen ordenadas
+        por distancia, con `distancia_km` y `llega` (si ese punto está en su zona de entrega). Una
+        casa sin sucursales responde la lista vacía (docs/sucursales.md).
+      security: []
+      parameters:
+        - { $ref: "#/components/parameters/ifNoneMatch" }
+        - { $ref: "#/components/parameters/id" }
+        - { name: lat, in: query, schema: { type: number } }
+        - { name: lng, in: query, schema: { type: number } }
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { type: object, required: [comercio], properties: { comercio: { $ref: "esquemas/comercio.json" }, distancia_km: { type: number }, llega: { type: boolean } } } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { $ref: "#/components/responses/Error" }
   /comercios/{id}/reputacion:
     get:
       operationId: verReputacion
@@ -1300,6 +1320,7 @@ paths:
         - { name: lng, in: query, required: true, schema: { type: number } }
         - { name: atributos, in: query, schema: { type: string }, description: "Filtro por igualdad exacta, clave=valor separados por coma: sin_tacc=true,varietal=malbec. Vocabulario sugerido por rubro en docs/atributos.md" }
         - { name: orden, in: query, schema: { type: string, enum: [ranking, distancia, precio, reputacion], default: ranking } }
+        - { name: agrupar, in: query, schema: { type: string, enum: [casa] }, description: "`casa`: de cada marca vuelve una sola sucursal, la primera en el orden pedido, con `otras_sucursales` (docs/sucursales.md). Ausente: cada sucursal es un resultado." }
         - { name: con_video, in: query, schema: { type: boolean, default: false }, description: "Solo ofertas con al menos un clip en `videos`" }
         - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
         - { name: cursor, in: query, schema: { type: string }, description: El `cursor_siguiente` de la página anterior }
@@ -1312,10 +1333,37 @@ paths:
     post:
       operationId: crearCarrito
       tags: [carrito]
-      summary: Crear un carrito (a un comercio) o desde una lista (se resuelve contra comercios)
+      summary: Crear un carrito (a un comercio o a una marca) o desde una lista (se resuelve contra comercios)
+      description: |
+        Con `casa` en lugar de `comercio_id` el carrito se le pide a la marca: el nodo aplica el
+        `ruteo` público de la casa y el carrito nace en una sucursal, con `ruteo` diciendo por qué
+        (docs/sucursales.md). Hace falta `direccion` o `punto` para saber qué sucursales llegan; para
+        retirar, `modalidad: retiro`. Con `lista_id`, la elección ya mira el stock de lo que pide la lista.
+        Un `comercio_id` de una casa con `vende: false` responde 422 `comercio_no_vende`.
       security: [ { sesion: [] }, { mandato: [armar] } ]
-      requestBody: { content: { application/json: { schema: { type: object, properties: { comercio_id: { type: string }, lista_id: { type: string }, direccion: { $ref: "esquemas/comunes.json#/$defs/direccion" } } } } } }
-      responses: { "201": { description: Creado, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } } }
+      requestBody: { content: { application/json: { schema: { type: object, properties: { comercio_id: { type: string }, casa: { $ref: "esquemas/comunes.json#/$defs/identidad" }, lista_id: { type: string }, direccion: { $ref: "esquemas/comunes.json#/$defs/direccion" }, punto: { $ref: "esquemas/comunes.json#/$defs/punto" }, modalidad: { type: string, enum: [retiro], description: "Solo con casa: el carrito es para retirar, y llegan todas las sucursales abiertas." } } } } } }
+      responses:
+        "201": { description: Creado, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }
+        "409": { description: "Con casa y ruteo.modo elige_comprador: 'elegir_sucursal', con detalle.sucursales (identidad, nombre_sucursal, distancia_km, abierto_ahora). Se crea de nuevo con el comercio_id elegido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /carritos/{id}/sucursal:
+    post:
+      operationId: mudarCarrito
+      tags: [carrito]
+      summary: Mudar el carrito a otra sucursal de la misma marca
+      description: |
+        Solo mientras no está confirmado. Los ítems pasan por `oferta_id` (el mismo en todas las
+        sucursales si la oferta es heredada) o, si no, por `ean`; lo que no está queda en `faltantes`.
+        Precio y stock se revalidan con los de la sucursal nueva, y vuelve a elegirse la modalidad si la
+        de antes no existe allá. Un comercio que no comparte casa con el del carrito responde 422
+        `no_es_sucursal` (docs/sucursales.md).
+      security: [ { sesion: [] }, { mandato: [armar] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [comercio_id], properties: { comercio_id: { type: string } } } } } }
+      responses:
+        "200": { description: "El carrito, ya en la otra sucursal", content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }
+        "410": { $ref: "#/components/responses/CarritoVencido" }
+        "422": { $ref: "#/components/responses/Error" }
   /carritos/{id}/items:
     post:
       operationId: agregarItemCarrito
@@ -2736,6 +2784,7 @@ components:
               oferta: { $ref: "esquemas/oferta.json" }
               comercio: { $ref: "esquemas/comercio.json" }
               distancia_km: { type: number }
+              otras_sucursales: { type: integer, minimum: 0, description: "Solo con agrupar=casa: cuántas sucursales más de la misma marca tienen esta oferta y llegan al punto." }
         cursor_siguiente: { type: string, description: "Ausente cuando no hay más páginas. Opaco: se manda tal cual en 'cursor'." }
     PaginaDeViajes:
       type: object

@@ -7,8 +7,10 @@
   "required": ["id", "estado", "items", "vence"],
   "properties": {
     "id": { "type": "string" },
+    "comercio_id": {"$ref": "comunes.json#/$defs/id", "readOnly": true, "description": "El comercio (la sucursal, si se pidió a la marca) al que se le arma el carrito."},
+    "ruteo": {"type": "object", "readOnly": true, "description": "Solo en un carrito pedido a la marca: por qué nació en esta sucursal (docs/sucursales.md, ruteo).", "required": ["casa", "modo"], "properties": {"casa": {"$ref": "comunes.json#/$defs/identidad"}, "modo": {"type": "string", "enum": ["cercana_con_todo", "cercana", "prioridad", "elegida"]}, "motivo": {"type": "string", "description": "Para mostrar: 'la más cercana con todo lo que pediste'."}}},
     "estado": { "type": "string", "enum": ["valido", "incompleto", "no_disponible"], "description": "'no_disponible': algún ítem, cupo o franja dejó de estar disponible desde que se agregó." },
-    "faltantes": { "type": "array", "items": { "type": "object", "properties": { "item_id": { "type": "string" }, "grupo_id": { "type": "string" }, "mensaje": { "type": "string" }, "opciones": { "type": "array", "items": { "type": "string" } } } } },
+    "faltantes": { "type": "array", "items": { "type": "object", "properties": { "item_id": { "type": "string" }, "grupo_id": { "type": "string" }, "mensaje": { "type": "string" }, "en_sucursales": { "type": "array", "items": { "$ref": "comunes.json#/$defs/identidad" }, "description": "Otras sucursales de la misma marca que sí lo tienen y cumplen su ruteo. Se muda con POST /carritos/{id}/sucursal." }, "opciones": { "type": "array", "items": { "type": "string" } } } } },
     "items": { "type": "array", "items": { "$ref": "pedido.json#/$defs/item" } },
     "modalidad": { "$ref": "pedido.json#/properties/modalidad" },
     "modalidades_disponibles": { "type": "array", "items": { "$ref": "modalidad.json" } },

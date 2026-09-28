@@ -9,6 +9,7 @@
   "properties": {
     "usuario": { "$ref": "comunes.json#/$defs/identidad" },
     "comercio": { "$ref": "comunes.json#/$defs/identidad" },
+    "casa": { "$ref": "comunes.json#/$defs/identidad", "readOnly": true, "description": "Si el comercio es sucursal: su casa (la marca), para mostrar 'Marca · Sucursal'. El pedido sigue siendo de la sucursal." },
     "repartidor": { "$ref": "comunes.json#/$defs/identidad" },
     "partes": { "$ref": "#/$defs/partes" },
     "asignacion": {
