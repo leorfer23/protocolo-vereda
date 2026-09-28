@@ -5,6 +5,7 @@ Lo que cambia en el protocolo después de publicarlo, del más nuevo al más vie
 ## 2026-09-28
 
 - **Alta de comercio por MCP y skill para comercios** (`mcp/herramientas.json`, `skills/vereda-comercio/SKILL.md`). Herramienta nueva `comercio_crear` sobre `crearComercio` (`POST /comercios`), con scope `administrar`: un agente puede dar de alta el comercio de la persona que le otorgó el mandato, y ella queda como dueña. Hasta ahora el alta solo existía por API. `skills/vereda-comercio` es una skill CC0 para que cualquier agente abra y administre un comercio: conectarse, alta mínima, ficha, catálogo, operación y verificación. Ningún cliente cambia.
+- **Marca y redes del comercio** (`esquemas/comercio.json`). `marca` opcional: `logo` (imagen), `color_primario` y `color_secundario` (`#RRGGBB`), elegidos por el comercio; cada app decide cómo los usa. `redes` opcional y pública: `instagram`, `tiktok`, `x`, `facebook`, `youtube`, `whatsapp` y `telefono` (E.164), `email`, `sitio_web`. Se editan con `editarComercio` / `comercio_editar`. Ningún cliente cambia: los dos son opcionales.
 
 ## 2026-09-27
 

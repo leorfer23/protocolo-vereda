@@ -32,7 +32,10 @@ Nunca inventes datos del comercio: dirección, precios, horarios, CUIT o cuenta 
 Todo con `comercio_editar` (solo los campos que cambian):
 
 - `descripcion` y `notas_para_agentes`: lo que un mostrador le diría a un cliente.
-- `imagenes`: el logo primero, después vidriera o local. `[{url, alt}]`. Con `endpoints.medios`, subilas antes con `medio_subir` y usá la `url` que devuelve.
+- `descripcion` del negocio y actividad: `tipo` de la lista y `subtipo` libre (ej. `distribuidora mayorista de alimentos`).
+- `marca`: `logo` (`{url, alt}`, cuadrado o casi), `color_primario` y `color_secundario` en `#RRGGBB`. Si la persona trae el logo, proponé los dos colores sacados de él y confirmalos con ella.
+- `redes`: `instagram`, `tiktok`, `x`, `facebook`, `youtube` (usuario sin @ o URL), `whatsapp` y `telefono` en formato internacional (`+5491122334455`), `email`, `sitio_web`. Son públicas; `privado.contacto` es solo para el nodo.
+- `imagenes`: vidriera, local, productos. `[{url, alt}]`. Con `endpoints.medios`, subilas antes con `medio_subir` y usá la `url` que devuelve.
 - `horarios`: franjas `{dias, desde, hasta}`. Vacío es siempre abierto. `apertura_manual` abre o cierra ya.
 - `medios_cobro`: `efectivo`, `transferencia`, `qr_interoperable`. `tarjeta` la pone el nodo solo cuando hay un cobrador conectado (`cobrador_conectar`). Con efectivo, `efectivo.monto_maximo` y `efectivo.pedidos_entregados_minimo` protegen al comercio.
 - `privado.cuenta_cobro` pide firma fresca de la persona: si el nodo la exige, que lo haga ella desde la app.
