@@ -5,12 +5,12 @@
     {
       "name": "buscar_comercios",
       "description": "Comercios que entregan en un lugar, ordenados por cercanía, precio y confiabilidad (fórmula pública). Ej: 'pizzerías abiertas cerca de casa', 'verdulerías con retiro'. Si un resultado trae verificacion.homonimos_cerca > 0, hay otro comercio con el mismo nombre cerca: decíselo a la persona y, para distinguirlos, usá ver_verificacion. No requiere mandato.",
-      "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "lat": { "type": "number" }, "lng": { "type": "number" }, "tipo": { "type": "string" }, "abierto": { "type": "boolean" }, "modalidad": { "type": "string" }, "q": { "type": "string", "description": "Texto libre: 'comida liviana', 'sin tacc'" }, "orden": { "type": "string", "enum": ["ranking", "distancia", "precio", "reputacion"], "default": "ranking", "description": "Mismo criterio que la API. 'ranking' es la fórmula pública de docs/ranking-y-despacho.md." } } }
+      "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "lat": { "type": "number" }, "lng": { "type": "number" }, "tipo": { "type": "string" }, "abierto": { "type": "boolean" }, "modalidad": { "type": "string" }, "q": { "type": "string", "description": "Texto libre: 'comida liviana', 'sin tacc'" }, "agrupar": { "type": "string", "enum": ["casa"], "description": "'casa': una sola sucursal por marca, la primera en el orden, con otras_sucursales. Usalo para mostrar marcas y no la misma varias veces." }, "orden": { "type": "string", "enum": ["ranking", "distancia", "precio", "reputacion"], "default": "ranking", "description": "Mismo criterio que la API. 'ranking' es la fórmula pública de docs/ranking-y-despacho.md." } } }
     },
     {
       "name": "buscar_ofertas",
       "description": "Busca productos, platos o servicios entre comercios cercanos, por texto, atributos o código de barras. Ej: 'leche sin lactosa', 'quién tiene tomate más barato', ean 7790742001009. 'atributos' filtra por igualdad exacta ({\"sin_tacc\": true, \"varietal\": \"malbec\"}) y cada resultado trae los atributos de la oferta para leer y comparar (marca, contenido_neto, bodega, cosecha, calorias_100g...). El vocabulario sugerido por rubro está en docs/atributos.md. Con con_video, lo que se puede ver en video cerca. Devuelve una página: resultados y, si hay más, cursor_siguiente. No requiere mandato.",
-      "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "q": { "type": "string" }, "ean": { "type": "string" }, "lat": { "type": "number" }, "lng": { "type": "number" }, "atributos": { "type": "object", "description": "Filtro por igualdad exacta sobre los atributos de la oferta. Claves sugeridas por rubro en docs/atributos.md: sin_tacc, vegano, marca, varietal, cosecha, organico, calorias_100g..." }, "orden": { "type": "string", "enum": ["ranking", "distancia", "precio", "reputacion"], "default": "ranking", "description": "Mismo criterio que la API. 'ranking' es la fórmula pública de docs/ranking-y-despacho.md." }, "con_video": { "type": "boolean", "default": false, "description": "Solo lo que tiene clip: 'qué hay en video cerca'." }, "limite": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 }, "cursor": { "type": "string", "description": "El cursor_siguiente de la respuesta anterior, para seguir." } } }
+      "inputSchema": { "type": "object", "required": ["lat", "lng"], "properties": { "q": { "type": "string" }, "ean": { "type": "string" }, "lat": { "type": "number" }, "lng": { "type": "number" }, "atributos": { "type": "object", "description": "Filtro por igualdad exacta sobre los atributos de la oferta. Claves sugeridas por rubro en docs/atributos.md: sin_tacc, vegano, marca, varietal, cosecha, organico, calorias_100g..." }, "agrupar": { "type": "string", "enum": ["casa"], "description": "'casa': una sola sucursal por marca, la primera en el orden, con otras_sucursales. Usalo para mostrar marcas y no la misma varias veces." }, "orden": { "type": "string", "enum": ["ranking", "distancia", "precio", "reputacion"], "default": "ranking", "description": "Mismo criterio que la API. 'ranking' es la fórmula pública de docs/ranking-y-despacho.md." }, "con_video": { "type": "boolean", "default": false, "description": "Solo lo que tiene clip: 'qué hay en video cerca'." }, "limite": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 }, "cursor": { "type": "string", "description": "El cursor_siguiente de la respuesta anterior, para seguir." } } }
     },
     {
       "name": "ver_carta",
@@ -53,9 +53,19 @@
       "inputSchema": { "type": "object", "properties": { "desde": { "type": "integer", "minimum": 1 }, "limite": { "type": "integer", "minimum": 1, "maximum": 500 } } }
     },
     {
+      "name": "sucursales_ver",
+      "description": "Las sucursales de una marca (la casa): nombre de cada local, dirección, si está abierta y, con lat/lng, a qué distancia y si llega. Ej: '¿qué sucursales de Santa Elena hay cerca?', '¿cuál está abierta ahora?'. Pública.",
+      "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string", "description": "La casa." }, "lat": { "type": "number" }, "lng": { "type": "number" } } }
+    },
+    {
       "name": "carrito_crear",
-      "description": "Empieza un carrito a un comercio, o desde una lista de compras (que se resuelve contra comercios). Requiere scope 'armar'.",
-      "inputSchema": { "type": "object", "properties": { "comercio_id": { "type": "string" }, "lista_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "'casa', 'trabajo'; usa las direcciones guardadas del usuario" } } }
+      "description": "Empieza un carrito a un comercio, a una marca con sucursales ('casa': nace en la sucursal que atiende la dirección, la abierta más cercana, y lo dice en 'sucursal_elegida'; si la persona prefiere otra, carrito_mudar), o desde una lista de compras (que se resuelve contra comercios). Ej: 'pedile a Santa Elena', 'armá el pedido en Santa Elena Caballito'. Requiere scope 'armar'.",
+      "inputSchema": { "type": "object", "properties": { "comercio_id": { "type": "string" }, "casa": { "type": "string", "description": "Identidad de la marca (la casa), en lugar de comercio_id." }, "modalidad": { "type": "string", "enum": ["retiro"], "description": "Solo con casa: es para retirar." }, "lista_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "'casa', 'trabajo'; usa las direcciones guardadas del usuario" } } }
+    },
+    {
+      "name": "carrito_mudar",
+      "description": "Muda el carrito a otra sucursal de la misma marca: los productos pasan tal cual si los tiene, y lo que no queda en faltantes. Precio y stock pasan a ser los de la sucursal nueva. Usalo cuando un faltante dice en_sucursales ('en Caballito sí hay') y la persona acepta. Solo antes de confirmar. Requiere scope 'armar'.",
+      "inputSchema": { "type": "object", "required": ["carrito_id", "comercio_id"], "properties": { "carrito_id": { "type": "string" }, "comercio_id": { "type": "string", "description": "La sucursal a la que se muda." } } }
     },
     {
       "name": "carrito_agregar",

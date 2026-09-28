@@ -49,14 +49,23 @@ Todo con `comercio_editar` (solo los campos que cambian):
 - `stock_actualizar` para faltantes; `promocion_crear` para promos.
 - Una distribuidora que vende por bulto: una oferta por presentación (ej. "Caja x 12") con su precio, y la unidad en la descripción.
 
-## 5. Operar
+## 5. Sucursales
+
+Una marca con varios locales: cada local es un comercio (`docs/sucursales.md`).
+
+1. Creá primero la casa (la marca). Si no vende al público, `vende: false`.
+2. Cada local con `comercio_crear` y `sucursal_de` (identidad de la casa), `nombre_sucursal` ("Caballito"), su dirección, zona, horarios, modalidades y cuenta de cobro. La misma dueña en todos.
+3. Para cargar el catálogo una sola vez: ofertas en la casa y `hereda_catalogo: true` en cada sucursal. Cada una manda su stock y, si quiere, su precio con `stock_actualizar`.
+4. Quien compra cae en la sucursal que llega a su dirección. Cómo se abastece cada local (un depósito, traspasos) es de la marca: publicá en cada sucursal el stock que puede vender.
+
+## 6. Operar
 
 - `pedidos_del_comercio` es la bandeja. `pedido_aceptar` o `pedido_rechazar` dentro de `plazo_aceptacion_min`; si no, el pedido se cancela y cuenta como rechazado.
 - `pedido_listo`, `pedido_entregar`, `pedido_asignar` según quién lleva.
 - `ver_mensajes` y `enviar_mensaje` para hablar con el comprador dentro del pedido.
 - `metricas_del_comercio` y `exportar_comercio` (solo la dueña) para sus números y sus datos.
 
-## 6. Verificación
+## 7. Verificación
 
 No hace falta para vender. `verificacion` se completa sola cuando el comercio verifica CUIT, foto geolocalizada y cuenta de cobro (`ver_verificacion`). No existe tilde azul ni nadie que apruebe.
 

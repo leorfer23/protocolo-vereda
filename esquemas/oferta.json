@@ -191,6 +191,11 @@
     "comercio_id": {
       "$ref": "comunes.json#/$defs/id"
     },
+    "heredada_de": {
+      "$ref": "comunes.json#/$defs/identidad",
+      "readOnly": true,
+      "description": "En una sucursal con hereda_catalogo: la casa de la que viene esta oferta. Nombre, fotos, opciones y atributos se editan en la casa; la sucursal pisa solo stock, disponible y precio (docs/sucursales.md)."
+    },
     "tipo": {
       "type": "string",
       "enum": [
