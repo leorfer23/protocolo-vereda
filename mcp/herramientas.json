@@ -59,7 +59,7 @@
     },
     {
       "name": "carrito_crear",
-      "description": "Empieza un carrito a un comercio, a una marca con sucursales ('casa': el nodo elige la sucursal con la regla pública de la marca y dice por qué en 'ruteo'), o desde una lista de compras (que se resuelve contra comercios). Si la marca deja elegir, responde elegir_sucursal con las opciones: mostráselas a la persona. Ej: 'pedile a Santa Elena', 'armá el pedido en Santa Elena Caballito'. Requiere scope 'armar'.",
+      "description": "Empieza un carrito a un comercio, a una marca con sucursales ('casa': nace en la sucursal que atiende la dirección, la abierta más cercana, y lo dice en 'sucursal_elegida'; si la persona prefiere otra, carrito_mudar), o desde una lista de compras (que se resuelve contra comercios). Ej: 'pedile a Santa Elena', 'armá el pedido en Santa Elena Caballito'. Requiere scope 'armar'.",
       "inputSchema": { "type": "object", "properties": { "comercio_id": { "type": "string" }, "casa": { "type": "string", "description": "Identidad de la marca (la casa), en lugar de comercio_id." }, "modalidad": { "type": "string", "enum": ["retiro"], "description": "Solo con casa: es para retirar." }, "lista_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "'casa', 'trabajo'; usa las direcciones guardadas del usuario" } } }
     },
     {

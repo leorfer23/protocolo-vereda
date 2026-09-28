@@ -1335,22 +1335,20 @@ paths:
       tags: [carrito]
       summary: Crear un carrito (a un comercio o a una marca) o desde una lista (se resuelve contra comercios)
       description: |
-        Con `casa` en lugar de `comercio_id` el carrito se le pide a la marca: el nodo aplica el
-        `ruteo` público de la casa y el carrito nace en una sucursal, con `ruteo` diciendo por qué
-        (docs/sucursales.md). Hace falta `direccion` o `punto` para saber qué sucursales llegan; para
-        retirar, `modalidad: retiro`. Con `lista_id`, la elección ya mira el stock de lo que pide la lista.
+        Con `casa` en lugar de `comercio_id` el carrito nace en tu sucursal: la abierta más cercana
+        que llega a `direccion` o `punto` (en retiro, `modalidad: retiro`, todas), con
+        `sucursal_elegida` diciendo cuál y por qué. Se cambia con mudarCarrito (docs/sucursales.md).
         Un `comercio_id` de una casa con `vende: false` responde 422 `comercio_no_vende`.
       security: [ { sesion: [] }, { mandato: [armar] } ]
       requestBody: { content: { application/json: { schema: { type: object, properties: { comercio_id: { type: string }, casa: { $ref: "esquemas/comunes.json#/$defs/identidad" }, lista_id: { type: string }, direccion: { $ref: "esquemas/comunes.json#/$defs/direccion" }, punto: { $ref: "esquemas/comunes.json#/$defs/punto" }, modalidad: { type: string, enum: [retiro], description: "Solo con casa: el carrito es para retirar, y llegan todas las sucursales abiertas." } } } } } }
       responses:
         "201": { description: Creado, content: { application/json: { schema: { $ref: "#/components/schemas/Carrito" } } } }
-        "409": { description: "Con casa y ruteo.modo elige_comprador: 'elegir_sucursal', con detalle.sucursales (identidad, nombre_sucursal, distancia_km, abierto_ahora). Se crea de nuevo con el comercio_id elegido.", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "422": { $ref: "#/components/responses/Error" }
   /carritos/{id}/sucursal:
     post:
       operationId: mudarCarrito
       tags: [carrito]
-      summary: Mudar el carrito a otra sucursal de la misma marca
+      summary: Mudar el carrito a otra sucursal de la misma casa
       description: |
         Solo mientras no está confirmado. Los ítems pasan por `oferta_id` (el mismo en todas las
         sucursales si la oferta es heredada) o, si no, por `ean`; lo que no está queda en `faltantes`.
