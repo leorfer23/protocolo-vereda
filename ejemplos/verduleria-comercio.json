@@ -5,6 +5,8 @@
   "nombre": "Verdulería La Huerta",
   "descripcion": "Verdulería de barrio hace 22 años. Vamos al Mercado Central martes y viernes.",
   "tipo": "verduleria",
+  "marca": { "logo": { "url": "https://vereda.ar/medios/lahuerta-logo.png", "alt": "Logo de La Huerta: una zanahoria verde" }, "color_primario": "#2E7D32", "color_secundario": "#F9A825" },
+  "redes": { "instagram": "verduleria.lahuerta", "whatsapp": "+5491145678901", "telefono": "+541148765432" },
   "ubicacion": {
     "direccion": { "texto": "Yatay 850, Almagro", "punto": { "lat": -34.6055, "lng": -58.4215 }, "localidad": "CABA", "provincia": "Buenos Aires" },
     "zona_entrega": [ { "lat": -34.59, "lng": -58.43 }, { "lat": -34.59, "lng": -58.41 }, { "lat": -34.62, "lng": -58.41 }, { "lat": -34.62, "lng": -58.43 }, { "lat": -34.59, "lng": -58.43 } ]
