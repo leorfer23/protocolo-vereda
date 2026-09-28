@@ -2,6 +2,10 @@
 
 Lo que cambia en el protocolo después de publicarlo, del más nuevo al más viejo. Un cambio **incompatible** obliga a los clientes a actualizarse.
 
+## 2026-09-28
+
+- **Alta de comercio por MCP y skill para comercios** (`mcp/herramientas.json`, `skills/vereda-comercio/SKILL.md`). Herramienta nueva `comercio_crear` sobre `crearComercio` (`POST /comercios`), con scope `administrar`: un agente puede dar de alta el comercio de la persona que le otorgó el mandato, y ella queda como dueña. Hasta ahora el alta solo existía por API. `skills/vereda-comercio` es una skill CC0 para que cualquier agente abra y administre un comercio: conectarse, alta mínima, ficha, catálogo, operación y verificación. Ningún cliente cambia.
+
 ## 2026-09-27
 
 - **Chat IA v2: widgets, herramientas y adheridos** (`esquemas/ia-widgets.json`, `docs/ia/capacidad.md`, `openapi.yaml`, `mcp/herramientas.json`, `datos/recetas.json`, `datos/sinonimos.json`). Widgets nuevos `bienvenida`, `respuestas`, `mazo`, `podio`, `promo`; `tarjeta_producto` suma distancia/demora/reputación/`pedidos_mes`/variantes/`sello`; `carrito` y `checkout` atan a `carrito_id` real, con `grupo`/`nota`/`faltantes`. Rutas `POST /ia/catalogo/buscar`, `POST /ia/receta-a-lista`, `POST /ia/lista-a-carrito`, `GET /ia/promos`, `GET /ia/mis-pedidos` (+ MCP). Ficha pública `comercio.ia_chat` (`adherido`, `vigente_hasta`): el chat del nodo solo muestra adheridos; app/búsqueda/ranking y MCP del agente propio siguen neutrales. Orquestación: el modelo entiende y redacta, el nodo ejecuta; fórmula pública del podio en `docs/ia/capacidad.md`. Atributos recomendados `gusto`, `tamano`, `porciones` (más `contenido_neto`/`contenido_unidad`). Ningún cliente se rompe: tipos viejos siguen; sin `ia` todo en 501.
