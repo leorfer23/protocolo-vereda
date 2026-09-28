@@ -269,7 +269,9 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
 - Un viaje inventado en `GET /viajes/{id}` responde `404` con `esquemas/error.json`: lo mismo
   que un viaje ajeno, para no revelar cuáles existen.
 - Reseña dentro de la ventana de 7 días y rechazada fuera de ella
-  (`fuera_de_ventana_resena`), una por par.
+  (`fuera_de_ventana_resena`), una por par. Con `oferta_id`: acepta una por producto que
+  llegó, rechaza la segunda del mismo producto (`409`) y una oferta ajena al pedido (`422
+  oferta_no_esta_en_el_pedido`); `GET /ofertas/{id}/resenas` la lista.
 - Mandato: tope por período (`pedir:<centavos>`, atómico bajo dos pedidos simultáneos),
   revocación inmediata, y que `POST /yo/claves/rotar` **nunca** se pueda invocar con un
   mandato de agente (`docs/claves-y-firmas.md`: "Rotar nunca se puede hacer por mandato").
