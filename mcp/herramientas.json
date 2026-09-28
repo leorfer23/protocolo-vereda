@@ -58,6 +58,11 @@
       "inputSchema": { "type": "object", "properties": { "comercio_id": { "type": "string" }, "lista_id": { "type": "string" }, "direccion_etiqueta": { "type": "string", "description": "'casa', 'trabajo'; usa las direcciones guardadas del usuario" } } }
     },
     {
+      "name": "carrito_agregar_varios",
+      "description": "Agrega varios productos al carrito en una sola llamada (\"una muzza grande y una birra\", la lista de una receta ya elegida). Si no pasás carrito_id, arma el carrito en el local del primer producto. Si un producto tiene tamaños y no elegiste, va el primero. Devuelve el carrito y los que no se pudieron agregar, con el motivo. Mejor que carrito_crear + carrito_agregar uno por uno. Scope 'armar'.",
+      "inputSchema": { "type": "object", "required": ["items"], "properties": { "carrito_id": { "type": "string", "description": "Carrito donde agregar. Vacío: uno nuevo." }, "items": { "type": "array", "minItems": 1, "maxItems": 30, "items": { "type": "object", "required": ["oferta_id"], "properties": { "oferta_id": { "type": "string" }, "variante_id": { "type": "string" }, "cantidad": { "type": "number", "exclusiveMinimum": 0, "description": "Default 1." } } } } } }
+    },
+    {
       "name": "carrito_agregar",
       "description": "Agrega un ítem con sus opciones. La respuesta dice si el carrito está válido o qué falta elegir (ej: 'falta Tamaño: chica o grande'), en texto que podés repetirle a la persona. Requiere 'armar'.",
       "inputSchema": { "type": "object", "required": ["carrito_id", "oferta_id", "cantidad"], "properties": { "carrito_id": { "type": "string" }, "oferta_id": { "type": "string" }, "variante_id": { "type": "string" }, "cantidad": { "type": "number" }, "opciones": { "type": "array", "items": { "type": "object", "properties": { "grupo_id": { "type": "string" }, "opcion_id": { "type": "string" } } } }, "modificador_libre": { "type": "string" }, "preferencia_sustitucion": { "type": "string", "enum": ["similar_ok", "misma_marca", "preguntar", "quitar"] } } }
