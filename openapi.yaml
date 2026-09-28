@@ -386,6 +386,20 @@ paths:
         "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { $ref: "esquemas/oferta.json" } } } }
         "304": { $ref: "#/components/responses/SinCambios" }
         "404": { $ref: "#/components/responses/Error" }
+  /ofertas/{id}/resenas:
+    get:
+      operationId: listarResenasDeOferta
+      tags: [ofertas, resenas]
+      summary: "Las reseñas públicas de un producto: las que traen ese 'oferta_id'"
+      description: |
+        Firmadas y visibles con las mismas reglas que las del comercio (docs/resenas.md, Reseñas de
+        producto). El número ya calculado viene en `reputacion` de `verOferta`; esto es el detalle.
+      security: []
+      parameters: [ { $ref: "#/components/parameters/ifNoneMatch" }, { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/resena.json" } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { $ref: "#/components/responses/Error" }
   /comercios/{id}/promociones:
     get:
       operationId: listarPromociones
@@ -2018,7 +2032,7 @@ paths:
       responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { $ref: "esquemas/mensaje.json" } } } } } }
 
   /resenas:
-    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", description: "Si la sesión administra el comercio del pedido, la reseña es del comercio: 'autor' es el comercio, 'rol_autor' es 'comercio' y la firma el nodo con la clave del comercio que custodia, aunque la persona custodie la suya. Quien compró o repartió el pedido reseña como sí mismo. Un 'autor' que no sea quien escribe ni el comercio que administra responde 403 'no_es_tu_resena' (docs/resenas.md).", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada, content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, "409": { description: Ya reseñado o pedido no entregado } } }
+    post: { operationId: crearResena, tags: [resenas], summary: "Reseñar un pedido entregado (dentro de 7 días de la entrega, una por par)", description: "Si la sesión administra el comercio del pedido, la reseña es del comercio: 'autor' es el comercio, 'rol_autor' es 'comercio' y la firma el nodo con la clave del comercio que custodia, aunque la persona custodie la suya. Quien compró o repartió el pedido reseña como sí mismo. Un 'autor' que no sea quien escribe ni el comercio que administra responde 403 'no_es_tu_resena'. Con 'oferta_id' es la reseña de un producto del pedido: 'destinatario' es el comercio, una por autor, pedido y oferta, y una oferta que no llegó en el pedido responde 422 'oferta_no_esta_en_el_pedido' (docs/resenas.md).", security: [ { sesion: [] } ], requestBody: { content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, responses: { "201": { description: Publicada, content: { application/json: { schema: { $ref: "esquemas/resena.json" } } } }, "409": { description: Ya reseñado o pedido no entregado }, "422": { $ref: "#/components/responses/Error" } } }
   /resenas/{id}/respuesta:
     post:
       operationId: responderResena

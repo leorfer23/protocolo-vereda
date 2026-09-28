@@ -236,6 +236,30 @@ a sí mismo con otra identidad.
 Quien compró o repartió el pedido reseña siempre como sí mismo, aunque además administre el
 comercio.
 
+## Reseñas de producto
+
+Quien compró puede reseñar, además del local, **cada producto** que le llegó: la misma reseña
+(`esquemas/resena.json`) con `oferta_id`. Sirve para decir "la fugazzeta 5, la muzza 3" sin bajarle
+la nota al local entero, y deja un registro de lo que te gustó que viaja con tu clave.
+
+- **Mismas reglas**: pedido entregado, 7 días desde la entrega, firmada, no se edita ni se borra, el
+  comercio responde. Se hace visible con la del comercio al comprador, o al cerrar la ventana.
+- **Destinatario**: el comercio del pedido. `oferta_id` tiene que ser un ítem que llegó (no uno
+  faltante): si no, `422 oferta_no_esta_en_el_pedido`.
+- **Una por autor, pedido y oferta**, aparte de la del comercio: reseñar tres productos y el local
+  son cuatro reseñas.
+- **Puntaje solo alcanza**: `texto` es opcional, como siempre. Una app puede ofrecer las estrellas de
+  un toque.
+- **Peso**: el mismo `w = c · v · r · k · f`, con el comercio del pedido para `c` y `r`. Las mismas
+  señales de ráfaga y dueño, contadas sobre las reseñas de producto de ese comercio.
+- **Promedio de la oferta**: el ponderado de arriba con el **promedio del comercio** en lugar de `µ`:
+  un plato nuevo arranca con la nota de su cocina, no con la de la red. Va en `reputacion` de la
+  oferta.
+- **No entra en la reputación del comercio**: el local ya tiene su reseña de ese pedido; contar
+  también sus productos pesaría doble a quien reseña más.
+
+Lectura: `GET /ofertas/{id}/resenas` (pública, con ETag). Escritura: `POST /resenas` de siempre.
+
 ## Reseñas al repartidor y del repartidor
 
 Comprador y comercio reseñan al repartidor de un pedido entregado, y el repartidor a los dos. Los
@@ -245,7 +269,8 @@ pesos cambian porque un repartidor no tiene cercanía que proteger ni lo elige n
 
 ## Superficie de API
 
-Una sola operación nueva: `GET /comercios/{id}/reputacion`.
+Una operación nueva para el desglose: `GET /comercios/{id}/reputacion`. Las reseñas de producto se
+leen con `GET /ofertas/{id}/resenas`.
 
 El desglose no va dentro de `verComercio` porque esa respuesta es **pública y cacheada con ETag**, y
 la parte "para vos" cambia con cada sesión: meterlas juntas obligaría a `Cache-Control: private` en
