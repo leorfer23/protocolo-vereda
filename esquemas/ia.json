@@ -214,6 +214,11 @@
           "type": "integer",
           "minimum": 0
         },
+        "tokens_cache": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tokens de entrada leídos del cache del proveedor (el prefijo estable del chat). Ya están incluidos en tokens_entrada."
+        },
         "tokens_salida": {
           "type": "integer",
           "minimum": 0

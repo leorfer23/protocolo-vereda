@@ -1018,7 +1018,7 @@
   },
   {
     "name": "ia_catalogo_buscar",
-    "description": "Búsqueda compacta de catálogo (determinista, con sinónimos). Por defecto NEUTRAL: no filtra por adheridos al chat de IA del nodo. Scope 'leer'. Ej: 'fugazzeta cerca'.",
+    "description": "Busca productos que llegan a un punto por texto libre ('pizza de fugazzeta', 'algo dulce para la merienda', 'cerveza'), términos, gusto, rubro del comercio (tipo) o si están abiertos. Entiende sinónimos (muzza/muzzarella, fuga/fugazzeta). Devuelve tarjetas compactas con oferta_id, nombre, precio, foto, local, distancia, reputación y pedidos del mes. Por defecto NEUTRAL: con solo_adheridos=true, solo comercios adheridos al chat de IA del nodo. Determinista. Scope 'leer'.",
     "inputSchema": {
       "type": "object",
       "required": ["q", "lat", "lng"],
@@ -1038,7 +1038,7 @@
   },
   {
     "name": "ia_receta_a_lista",
-    "description": "Pasá platos y cantidad de personas; te arma la lista de ingredientes (tabla CC0 + modelo solo para huecos). Scope 'leer' o 'armar'. Ej: 'milanesa con puré, carne al horno, fideos a la boloñesa para 2'.",
+    "description": "Pasá platos y cantidad de personas; te arma la lista de ingredientes con cantidades (tabla CC0 + modelo solo para huecos). Un ingrediente que sirve a varios platos va una sola vez. Scope 'leer' o 'armar'. Ej: 'milanesa con puré, carne al horno, fideos a la boloñesa para 2'.",
     "inputSchema": {
       "type": "object",
       "required": ["platos", "personas"],
@@ -1050,7 +1050,7 @@
   },
   {
     "name": "ia_lista_a_carrito",
-    "description": "De una lista de ingredientes armá un carrito REAL en un comercio, con grupo por plato y faltantes. Scope 'armar'.",
+    "description": "De una lista de ingredientes (de ia_receta_a_lista) armá un carrito REAL en un comercio: elige el producto del local para cada ingrediente, redondea a envases enteros (0,24 kg de fideos → 1 paquete de 500 g) y devuelve el carrito con cada ítem agrupado por plato y los faltantes. Scope 'armar'.",
     "inputSchema": {
       "type": "object",
       "required": ["comercio_id", "ingredientes"],
@@ -1073,7 +1073,7 @@
   },
   {
     "name": "ia_promos",
-    "description": "Promos cerca. Scope 'leer'. Por defecto solo adheridos al chat de IA; pasá solo_adheridos=false para neutral.",
+    "description": "Promociones y destacados cerca de un punto, con foto y precio. Sirve para abrir la charla o cuando la persona pide ofertas. Por defecto solo adheridos al chat de IA; pasá solo_adheridos=false para neutral. Determinista. Scope 'leer'.",
     "inputSchema": {
       "type": "object",
       "required": ["lat", "lng"],
@@ -1082,6 +1082,20 @@
         "lng": { "type": "number" },
         "limite": { "type": "integer" },
         "solo_adheridos": { "type": "boolean" }
+      }
+    }
+  },
+  {
+    "name": "ia_comercios_cerca",
+    "description": "Los comercios adheridos al chat de IA del nodo que entregan (o tienen retiro) en un punto: nombre, rubro, foto de portada, si están abiertos ahora, distancia, demora, reputación y hasta 3 productos destacados con foto. Sirve para elegir local (qué súper, qué pizzería) o descubrir el barrio. Filtrá por rubro con tipo (supermercado, restaurante, panaderia, verduleria, almacen). Determinista. Scope 'leer'.",
+    "inputSchema": {
+      "type": "object",
+      "required": ["lat", "lng"],
+      "properties": {
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "tipo": { "type": "string", "description": "Rubro del comercio (esquemas/comercio.json)." },
+        "abierto_ahora": { "type": "boolean" }
       }
     }
   },

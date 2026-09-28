@@ -23,9 +23,7 @@
         "tipo": "checkout",
         "version": 1,
         "carrito_id": "01926b3a-0000-7000-8000-0000000000e1",
-        "medios": [
-          "efectivo"
-        ],
+        "medios": ["efectivo"],
         "total": {
           "centavos": 100,
           "moneda": "ARS"
@@ -38,9 +36,7 @@
       "doc": {
         "tipo": "checkout",
         "version": 1,
-        "medios": [
-          "tarjeta"
-        ],
+        "medios": ["tarjeta"],
         "total": {
           "centavos": 100,
           "moneda": "ARS"
@@ -191,9 +187,7 @@
         "tipo": "bienvenida",
         "version": 1,
         "titulo": "¡Hola, Ana! ¿Qué buscamos hoy?",
-        "sugerencias": [
-          "Quiero una pizza"
-        ],
+        "sugerencias": ["Quiero una pizza"],
         "promos": [
           {
             "oferta_id": "01926b3a-0000-7000-8000-0000000000d1",
@@ -254,6 +248,205 @@
         "tipo": "bienvenida",
         "version": 1,
         "foo": true
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "grilla con fotos y filtros como chips.",
+      "doc": {
+        "tipo": "grilla",
+        "version": 1,
+        "id": "w1",
+        "titulo": "Pizzas cerca",
+        "tarjetas": [
+          {
+            "oferta_id": "01a0e5c4-c037-7b22-b8a6-f145c7fc8f19",
+            "comercio_id": "01a0e5c4-c025-7024-8c38-f2cb461f8d49",
+            "comercio_nombre": "Pizzería La Corrientes",
+            "nombre": "Fugazzeta rellena",
+            "precio": { "centavos": 1650000, "moneda": "ARS" },
+            "imagen": "https://vereda.test/medios/fugazzeta.jpg",
+            "imagenes": [
+              "https://vereda.test/medios/fugazzeta.jpg",
+              "https://vereda.test/medios/fugazzeta-2.jpg"
+            ],
+            "abierto": true,
+            "agregar": true
+          }
+        ],
+        "filtros": [
+          { "id": "abierto", "texto": "Abiertas ya", "activo": true }
+        ],
+        "mas": true
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "comercios para elegir, con portada y destacados.",
+      "doc": {
+        "tipo": "comercios",
+        "version": 1,
+        "id": "w2",
+        "titulo": "¿En qué súper?",
+        "locales": [
+          {
+            "comercio_id": "01a0e5c4-bfbd-7cd0-9298-6d4f78cdf409",
+            "nombre": "Súper El Sol",
+            "rubro": "supermercado",
+            "portada": "https://vereda.test/medios/el-sol.jpg",
+            "abierto": true,
+            "distancia_m": 350,
+            "destacados": [
+              {
+                "oferta_id": "01a0e5c4-c037-7b22-b8a6-f145c7fc8f19",
+                "comercio_id": "01a0e5c4-c025-7024-8c38-f2cb461f8d49",
+                "comercio_nombre": "Pizzería La Corrientes",
+                "nombre": "Fugazzeta rellena",
+                "precio": { "centavos": 1650000, "moneda": "ARS" },
+                "imagen": "https://vereda.test/medios/fugazzeta.jpg",
+                "imagenes": [
+                  "https://vereda.test/medios/fugazzeta.jpg",
+                  "https://vereda.test/medios/fugazzeta-2.jpg"
+                ],
+                "abierto": true,
+                "agregar": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "producto con la tarjeta (nombre del contrato) y cantidad.",
+      "doc": {
+        "tipo": "producto",
+        "version": 1,
+        "id": "w3",
+        "tarjeta": {
+          "oferta_id": "01a0e5c4-c037-7b22-b8a6-f145c7fc8f19",
+          "comercio_id": "01a0e5c4-c025-7024-8c38-f2cb461f8d49",
+          "comercio_nombre": "Pizzería La Corrientes",
+          "nombre": "Fugazzeta rellena",
+          "precio": { "centavos": 1650000, "moneda": "ARS" },
+          "imagen": "https://vereda.test/medios/fugazzeta.jpg",
+          "imagenes": [
+            "https://vereda.test/medios/fugazzeta.jpg",
+            "https://vereda.test/medios/fugazzeta-2.jpg"
+          ],
+          "abierto": true,
+          "agregar": true
+        },
+        "cantidad": {
+          "valor": 1,
+          "unidad": "unidad",
+          "minimo": 1,
+          "paso": 1,
+          "maximo": 5
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "historial para repetir en un toque.",
+      "doc": {
+        "tipo": "historial",
+        "version": 1,
+        "id": "w4",
+        "pedidos": [
+          {
+            "pedido_id": "01a0e5c4-aaaa-7bbb-8ccc-000000000001",
+            "comercio_nombre": "Pizzería La Corrientes",
+            "fecha": "2026-09-20",
+            "resumen": "Fugazzeta rellena, Flan casero",
+            "total": { "centavos": 2100000, "moneda": "ARS" },
+            "imagenes": ["https://vereda.test/medios/fugazzeta.jpg"]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "estado del pedido en vivo.",
+      "doc": {
+        "tipo": "pedido_estado",
+        "version": 1,
+        "id": "w5",
+        "pedido_id": "01a0e5c4-aaaa-7bbb-8ccc-000000000002",
+        "comercio_nombre": "Pizzería La Corrientes",
+        "estado": "aceptado",
+        "pasos": [
+          {
+            "estado": "pendiente",
+            "etiqueta": "Lo recibió el local",
+            "hecho": true
+          },
+          {
+            "estado": "aceptado",
+            "etiqueta": "Lo están preparando",
+            "hecho": true
+          },
+          { "estado": "en_camino", "etiqueta": "Va en camino", "hecho": false }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "navegar a una pantalla de la app.",
+      "doc": {
+        "tipo": "navegar",
+        "version": 1,
+        "id": "w6",
+        "destino": {
+          "pantalla": "comercio",
+          "id": "01a0e5c4-c025-7024-8c38-f2cb461f8d49"
+        },
+        "texto": "Ver el local"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "checkout con reparto {concepto, monto} y medios como strings.",
+      "doc": {
+        "tipo": "checkout",
+        "version": 1,
+        "id": "w7",
+        "carrito_id": "01a0e5c4-bbbb-7ccc-8ddd-000000000001",
+        "comercio_nombre": "Pizzería La Corrientes",
+        "medios": ["efectivo", "transferencia"],
+        "total": { "centavos": 1800000, "moneda": "ARS" },
+        "envio": { "centavos": 150000, "moneda": "ARS" },
+        "reparto": [
+          {
+            "concepto": "Para el local",
+            "monto": { "centavos": 1650000, "moneda": "ARS" }
+          },
+          {
+            "concepto": "Para quien lo lleva",
+            "monto": { "centavos": 150000, "moneda": "ARS" }
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "una línea del reparto sin monto no vale.",
+      "doc": {
+        "tipo": "checkout",
+        "version": 1,
+        "medios": ["efectivo"],
+        "total": { "centavos": 100, "moneda": "ARS" },
+        "reparto": [{ "concepto": "Para el local" }]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "navegar a una pantalla que no existe.",
+      "doc": {
+        "tipo": "navegar",
+        "version": 1,
+        "destino": { "pantalla": "configuracion" },
+        "texto": "Ir"
       }
     }
   ]
