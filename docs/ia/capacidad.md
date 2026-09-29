@@ -125,7 +125,7 @@ Los medios con IA solo existen si `ia.medios` los lista. El resultado es un **bo
 
 ### La Libreta (memoria de la persona)
 
-Lo que la IA sabe de cada persona vive en su **Libreta** (`docs/ia/libreta.md`, `esquemas/libreta.json`): órdenes, hechos, alias y cómo quiere que le hablen, cifrada con una clave de la persona, visible y editable en "Tu IA", y en `GET /yo/exportar`, `POST /yo/borrar` y la mudanza. El nodo la anuncia con `libreta` en `ia.funciones.comprador`. El índice, esta semana y la voz llegan al modelo en cada turno; el resto se busca con `mi_libreta_buscar`. Adentro del chat de IA del nodo, y solo ahí, el podio puede sumar un término personal, siempre visible en `razon_personal`.
+Lo que la IA sabe de cada persona vive en su **Libreta** (`docs/ia/libreta.md`, `esquemas/libreta.json`): órdenes, hechos, alias y cómo quiere que le hablen, cifrada con una clave de la persona, visible y editable en "Tu IA", y en `GET /yo/exportar`, `POST /yo/borrar` y la mudanza. El nodo la anuncia con `libreta` en `ia.funciones.comprador`. El índice, esta semana y la voz llegan al modelo en cada turno; el resto se busca con `mi_libreta_buscar`. Adentro del chat de IA del nodo, y solo ahí, el podio suma un término personal (`+ 0.20 · personal`), siempre visible en `razon_personal`.
 
 ## Consumo auditable
 

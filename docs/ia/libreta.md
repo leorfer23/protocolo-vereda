@@ -28,7 +28,7 @@ Cada línea es corta (hasta 200 caracteres) y tiene un solo `tipo` (`esquemas/li
 | Nivel | Tope | Qué llega al modelo |
 | --- | --- | --- |
 | **Índice** | 1200 caracteres, sumando el `texto` de sus líneas activas | Entero, en cada turno |
-| **Esta semana** | 600 caracteres | Entero, en cada turno. El nodo lo rehace desde cero con lo que pasó en los últimos 14 días |
+| **Esta semana** | 600 caracteres | Entero, en cada turno. El nodo lo arma desde cero con una plantilla, sin modelo, con lo que pasó en los últimos 14 días |
 | **Detalle** | 200 líneas | Nada por defecto. Se busca con `mi_libreta_buscar` |
 | **Archivo** | 1000 líneas | Nada. Solo aparece si una búsqueda lo pide explícitamente |
 
@@ -36,7 +36,7 @@ La línea `voz` va aparte, con sus 600 caracteres, y también llega en cada turn
 
 **Los topes se cumplen rechazando, nunca recortando.** Una escritura que no entra responde `422 libreta_llena`, con `detalle.nivel`, `detalle.tope` y `detalle.usados`, y la frase dice qué hacer ("tu índice está lleno: bajá o borrá una línea para sumar esta"). El nodo nunca corta una línea por la mitad ni borra otra para hacer lugar.
 
-**Esta semana no es memoria nueva.** Es un resumen que el nodo rehace, de cero, con las líneas que se usaron y los pedidos de los últimos 14 días ("esta semana pediste dos veces en La Corrientes; estás probando panaderías"). No puede afirmar nada que no esté en una línea o en un pedido, y no se edita: se regenera.
+**Esta semana no es memoria nueva.** Es una **plantilla** que el nodo llena de cero con lo que pasó en los últimos 14 días: tus pedidos, los carritos que tenés abiertos y las sustituciones que esperan tu respuesta ("esta semana pediste dos veces en La Corrientes; tenés un carrito abierto en Don Julio; una sustitución espera tu respuesta"). **No llama al modelo ni cuesta tokens**, así que se arma aunque tengas la IA pausada o inactiva. Como es plantilla, no puede afirmar nada que no esté en un pedido, un carrito o una sustitución, y no se edita: se regenera.
 
 **Las órdenes van siempre al índice.** Una restricción tiene que llegar en cada turno. Si una `orden` nueva no entra, la respuesta es `libreta_llena` y decidís vos qué bajar. Un `hecho` o un `alias` que no entra en el índice va al detalle.
 
@@ -112,7 +112,7 @@ La app puede aprender qué te interesa en la pantalla de inicio (qué rubros toc
 
 - **El índice, esta semana y la voz** llegan en cada turno, en el bloque de contexto que escribe el nodo, marcados como tuyos. Las órdenes se obedecen sin nombrarlas.
 - **El detalle** se busca con `mi_libreta_buscar` cuando hace falta ("¿qué era lo que me gustaba de la panadería de la esquina?").
-- **Término personal en el podio.** Adentro del chat de IA de tu nodo, y solo ahí, el podio puede sumar un término personal a la fórmula pública (`docs/ia/capacidad.md`):
+- **Término personal en el podio.** Adentro del chat de IA de tu nodo, y solo ahí, el podio suma un término personal a la fórmula pública (`docs/ia/capacidad.md`), con este peso fijo:
 
   ```
   score_chat = score_público + 0.20 · personal

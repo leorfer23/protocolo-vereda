@@ -95,7 +95,7 @@
     },
     "esta_semana": {
       "type": "object",
-      "description": "Resumen que el nodo rehace desde cero con las líneas usadas y los pedidos de los últimos 14 días. No es memoria nueva: no afirma nada que no esté en una línea o en un pedido. No se edita.",
+      "description": "Plantilla determinista que el nodo llena desde cero con lo de los últimos 14 días: pedidos, carritos abiertos y sustituciones pendientes. Sin llamada al modelo ni tokens. No es memoria nueva: no afirma nada que no esté en un pedido, un carrito o una sustitución. No se edita.",
       "required": ["texto", "desde", "rehecha"],
       "additionalProperties": false,
       "properties": {
