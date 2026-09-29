@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vereda.ar/esquemas/v1/pagina.json",
   "title": "Página del comercio",
-  "description": "La página pública del comercio, tipo Linktree: bloques en el orden que elige el comercio, sobre el tema visual de Vereda. Son datos, no HTML: cada app (web, iOS, Android) y cada agente la dibuja igual y de forma segura. La edita la dueña o su agente con editarComercio (docs/pagina.md).",
+  "description": "La página pública del comercio, tipo Linktree y vidriera a la vez: widgets en el orden que elige el comercio, sobre el tema visual de Vereda. Son datos, no HTML: cada app (web, iOS, Android) y cada agente la dibuja igual y de forma segura. La edita la dueña o su agente con editarComercio (docs/pagina.md).",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -28,12 +28,13 @@
           "type": "string",
           "enum": [
             "liso",
+            "color",
             "primario",
             "degradado",
             "imagen"
           ],
           "default": "liso",
-          "description": "'liso': el fondo de Vereda. 'primario': el color de marca. 'degradado': de primario a secundario. 'imagen': 'fondo_imagen'."
+          "description": "'liso': el fondo de Vereda. 'color': 'colores.fondo'. 'primario': el color de marca. 'degradado': de primario a secundario. 'imagen': 'fondo_imagen'."
         },
         "fondo_imagen": {
           "$ref": "comunes.json#/$defs/imagen"
@@ -72,6 +73,33 @@
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{6}$",
           "description": "Pisa el color de los botones. Ausente: marca.color_primario."
+        },
+        "colores": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "La paleta a mano, si el comercio quiere más que los colores de marca. Cada uno opcional. Las apps garantizan contraste: si un texto no se lee contra su fondo, lo oscurecen o aclaran, sin cambiar el tono.",
+          "properties": {
+            "fondo": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Con fondo 'color'."
+            },
+            "superficie": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Tarjetas y bloques con fondo 'superficie'."
+            },
+            "texto": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Texto principal."
+            },
+            "acento": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Botones y enlaces. Pisa 'acento'."
+            }
+          }
         }
       }
     },
@@ -138,14 +166,23 @@
       "additionalProperties": false,
       "properties": {
         "fondo": {
-          "type": "string",
-          "enum": [
-            "ninguno",
-            "superficie",
-            "primario",
-            "secundario"
-          ],
-          "description": "Contra qué color se dibuja. 'primario' y 'secundario' son los de marca."
+          "description": "Contra qué se dibuja el bloque: 'ninguno', 'superficie', los de marca ('primario', 'secundario') o cualquier #RRGGBB.",
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ninguno",
+                "superficie",
+                "primario",
+                "secundario"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": ""
+            }
+          ]
         },
         "alineacion": {
           "type": "string",
@@ -160,6 +197,35 @@
             "normal",
             "completo"
           ]
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Color del texto y los íconos del bloque. Ausente: el que contraste con su fondo."
+        },
+        "acento": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Color de los botones del bloque. Ausente: el del tema."
+        },
+        "esquinas": {
+          "type": "string",
+          "enum": [
+            "redondeadas",
+            "rectas",
+            "pildora"
+          ],
+          "description": "Pisa las del tema en este bloque."
+        },
+        "espacio": {
+          "type": "string",
+          "enum": [
+            "compacto",
+            "normal",
+            "amplio"
+          ],
+          "default": "normal",
+          "description": "Aire arriba y abajo del bloque."
         }
       }
     },
@@ -205,6 +271,15 @@
         "destacado": {
           "type": "boolean",
           "default": false
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Color de este botón. Ausente: el del bloque o el tema."
+        },
+        "imagen": {
+          "$ref": "comunes.json#/$defs/imagen",
+          "description": "Miniatura a la izquierda del botón, en lugar del ícono."
         }
       }
     },
@@ -313,6 +388,16 @@
         },
         "portada_video": {
           "$ref": "comunes.json#/$defs/video"
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "centrado",
+            "banner",
+            "compacto"
+          ],
+          "default": "banner",
+          "description": "'centrado': logo redondo grande y todo al medio, tipo Linktree. 'banner': franja de color o portada con el logo encima y el texto a la izquierda, tipo vidriera. 'compacto': logo chico al lado del nombre."
         }
       }
     },
@@ -357,6 +442,16 @@
           "type": "string",
           "maxLength": 80,
           "description": "Abre el catálogo en esta categoría."
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "boton",
+            "tarjeta",
+            "barra_fija"
+          ],
+          "default": "tarjeta",
+          "description": "'boton': un botón. 'tarjeta': botón grande con la sucursal que atiende y a qué distancia. 'barra_fija': queda abajo de la pantalla mientras se recorre la página."
         }
       }
     },
