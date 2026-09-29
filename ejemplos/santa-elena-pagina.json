@@ -55,12 +55,6 @@
       "id": "links",
       "enlaces": [
         {
-          "texto": "Lista de precios mayoristas",
-          "url": "https://example.com/santa-elena/lista.pdf",
-          "icono": "descarga",
-          "color": "#141414"
-        },
-        {
           "texto": "Cómo llegar a la sede central",
           "url": "https://maps.app.goo.gl/NaTKuuW5iSx1W4AJ9",
           "icono": "mapa"
@@ -84,12 +78,12 @@
       "titulo": "Preguntas",
       "preguntas": [
         {
-          "pregunta": "¿Venden por mayor?",
-          "respuesta": "Sí, por unidad y por bulto."
+          "pregunta": "¿Cómo pago?",
+          "respuesta": "En efectivo, al recibir o al retirar."
         },
         {
-          "pregunta": "¿Cómo pago?",
-          "respuesta": "Efectivo al recibir o al retirar."
+          "pregunta": "¿Cuánto sale el envío?",
+          "respuesta": "$5.000, y es gratis en compras desde $20.000."
         }
       ]
     }
