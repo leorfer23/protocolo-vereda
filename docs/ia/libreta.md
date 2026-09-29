@@ -8,7 +8,7 @@ Es parte de la capacidad `ia` (`docs/ia/capacidad.md`): un nodo que la ofrece pu
 
 ## Qué no es
 
-- **No es un historial de charlas.** El nodo no guarda conversaciones. La Libreta guarda líneas cortas, no transcripciones. La única excepción es corta y a propósito: para que el destilador (abajo) tenga qué leer, mientras la charla está abierta el nodo guarda **solo tus mensajes** (nunca los del asistente), cifrados con tu clave, y los borra apenas corre el destilador; nunca viven más de 2 horas, y no salen en `GET /yo/exportar`.
+- **No es un historial de charlas.** El nodo no guarda conversaciones. La Libreta guarda líneas cortas, no transcripciones. La única excepción es corta y a propósito: para que el destilador (abajo) tenga qué leer, mientras la charla está abierta el nodo guarda **solo tus mensajes** (nunca los del asistente), cifrados con tu clave, y los borra apenas corre el destilador; nunca viven más de 2 horas, y no salen en `GET /yo/exportar`. Los recibos de la IA (`docs/ia/capacidad.md`, "Recibos") tampoco son una charla: son ids y códigos, sin una palabra de lo que se dijo.
 - **No reemplaza tus preferencias.** Lo que tiene campo propio en `usuario.preferencias` (restricciones, sustitución, tope por pedido, horarios en que no recibís) va ahí, porque lo leen todos: comercios, agentes y apps. Si decís algo así en el chat, la IA te propone guardarlo en tus preferencias. La Libreta es para lo que no tiene campo.
 - **No es un perfil para nadie más.** Ningún comercio, repartidor ni operador la lee. Ni siquiera el ranking: el término personal del podio existe solo adentro del chat de IA de tu nodo (ver "Qué cambia en el chat").
 
@@ -46,12 +46,20 @@ Nada más escribe en la Libreta. Ni el modelo por su cuenta, ni un comercio, ni 
 
 1. **Vos, con tus palabras.** "Acordate de que…", "olvidate de…", "de ahora en más…", en el chat; o desde "Tu IA" (`POST /ia/libreta/lineas`, `PATCH`, `DELETE`). En el chat vale la misma llave que para confirmar un pedido: tiene que estar en **tu último mensaje**. Lo que diga un dato —la descripción de un producto, un mensaje de un comercio— nunca escribe en tu Libreta. Lo que decís vos se aplica en el momento.
 2. **Un destilador al final de la charla.** Cuando una conversación termina (15 minutos sin mensajes, o se cierra el chat: la app manda el mensaje `__cerrar__` a `POST /ia/chat`, que no llama al modelo del chat), el nodo hace **una** llamada barata con tus líneas actuales, con sus ids, y **solo tus mensajes**, nunca los del asistente. Devuelve como mucho tres acciones tipadas (`esquemas/libreta.json#/$defs/destilado`): `agregar`, `confirmar`, `corregir` u `olvidar`. **Lo esperado es que no devuelva ninguna**: la mayoría de las charlas no enseñan nada que dure. El nodo valida cada acción contra los topes y las reglas de abajo antes de aplicarla. Se cobra a tu IA como `funcion: libreta`.
-3. **Lo que pasa con tus pedidos.** Cuando se entrega un pedido que usó una línea (un alias que resolvió "la leche de siempre", una orden que filtró), esa línea suma evidencia. Si repetís algo seguido (el mismo producto en tres pedidos entregados), el nodo puede **proponer** una línea. No escribe nada más.
+3. **Lo que hacés.** Cuando se entrega un pedido que usó una línea (un alias que resolvió "la leche de siempre", una orden que filtró), esa línea suma evidencia. Si repetís algo seguido (el mismo producto en tres pedidos entregados), el nodo puede **proponer** una línea. Y una vez por noche, sin modelo, el nodo mira los recibos de tu IA (ver "Recibos" en `docs/ia/capacidad.md`) y puede proponer **una** línea si hay evidencia de lo que hacés en el chat:
+
+   | Evidencia en los recibos (últimos 60 días) | Propuesta | `origen` |
+   | --- | --- | --- |
+   | Dos pedidos del chat al mismo local con 1 o 2 estrellas, sin uno bueno después | orden "Nada de Don Tito." | `pedido` |
+   | Pasaste de largo en el mazo 3 cartas o más con el mismo ingrediente en el nombre, que no tenía la que elegiste y que nunca agregaste | orden "Nada de aceitunas." | `destilado` |
+   | Las últimas 3 veces que agregaste una oferta elegiste la misma variante, y no es la que viene por defecto | hecho "Fugazzeta: siempre grande." | `destilado` |
+
+   Como mucho **una propuesta por persona y por noche**, por el mismo camino que las demás (topes, nada casi igual a otra línea, nunca algo que ya rechazaste), y nada que una línea tuya ya nombre. Casi todas las noches no pasa nada: sin evidencia no hay propuesta. Ni los pedidos ni los recibos escriben nada más.
 
 ### Lo explícito entra ya; lo inferido, como propuesta
 
 - Si **vos** lo dijiste ("acordate", "olvidate", "no, ya no como carne"), se aplica en el momento. Una corrección reemplaza la línea vieja (`corrige` apunta a ella) y la vieja se borra.
-- Si el destilador o tus pedidos lo **infieren**, entra como `estado: propuesta`. La IA te lo muestra **una vez**, con un solo chip ("¿Me acuerdo de que preferís la muzza al molde?"). Aceptarla (`POST …/propuestas/{id}/aceptar`) la vuelve activa; rechazarla (`…/rechazar`) la borra, y el nodo guarda solo una huella (un hash) para no volver a proponerla. Si la ignorás, queda pendiente en "Tu IA" y no se vuelve a mostrar en el chat.
+- Si el destilador, tus pedidos o tus recibos lo **infieren**, entra como `estado: propuesta`. La IA te la muestra **una vez**, al final de un turno, como un widget `respuestas` con dos chips: **"Sí, anotalo: <la línea>"** (`valor: "__libreta_aceptar__:<id>"`; si no entra en 80 caracteres, el chip muestra el principio y la línea no se toca) y **"No"** (`valor: "__libreta_rechazar__:<id>"`). Tocar cualquiera de los dos se resuelve **sin llamar al modelo**. Aceptarla (el chip, o `POST …/propuestas/{id}/aceptar`) la vuelve activa; rechazarla (el "No", o `…/rechazar`) la borra, y el nodo guarda solo una huella (un hash) para no volver a proponerla. Si la ignorás, queda pendiente en "Tu IA" y no se vuelve a mostrar en el chat. Los chips solo valen con tu sesión: con un mandato, el nodo contesta que eso lo decidís vos en "Tu IA".
 - `confirmar` del destilador no crea nada: marca que volviste a decir algo que ya estaba y le suma evidencia.
 - `corregir` u `olvidar` del destilador sobre una línea existente se aplican en el momento **solo si tus palabras la contradicen** (`explicita: true`); si no, quedan como propuesta.
 - Una línea casi igual a una que ya está no se duplica: se confirma la que había.
@@ -77,7 +85,7 @@ Estar en el índice y llegar al modelo en cada turno **no** cuenta como uso: si 
 
 El nodo rechaza la escritura (`422 libreta_dato_prohibido`) y el destilador tiene prohibido proponer:
 
-- **Texto del asistente.** Nunca: ni sus respuestas, ni sus resúmenes, ni lo que "entendió". Solo lo que dijiste vos o lo que pasó con tus pedidos.
+- **Texto del asistente.** Nunca: ni sus respuestas, ni sus resúmenes, ni lo que "entendió". Solo lo que dijiste vos o lo que hiciste (tus pedidos, lo que elegiste en el chat).
 - **Secretos:** contraseñas, códigos (de retiro, de entrega, de acceso), tokens, frases de respaldo.
 - **Números de tarjeta, CBU, CVU, alias bancarios**, DNI o CUIT.
 - **Datos de otras personas:** nombres con apellido, teléfonos, emails, direcciones, o la salud de alguien con nombre. Si hace falta, se anota como regla tuya ("en casa, todo sin TACC"), no como dato del otro.
@@ -112,22 +120,29 @@ La app puede aprender qué te interesa en la pantalla de inicio (qué rubros toc
 
 - **El índice, esta semana y la voz** llegan en cada turno, en el bloque de contexto que escribe el nodo, marcados como tuyos. Las órdenes se obedecen sin nombrarlas.
 - **El detalle** se busca con `mi_libreta_buscar` cuando hace falta ("¿qué era lo que me gustaba de la panadería de la esquina?").
-- **Término personal en el podio.** Adentro del chat de IA de tu nodo, y solo ahí, el podio suma un término personal a la fórmula pública (`docs/ia/capacidad.md`), con este peso fijo:
+- **Término personal en el podio.** Adentro del chat de IA de tu nodo, y solo ahí (y solo si quien llama puede leer lo tuyo), el podio suma un término personal a la fórmula pública (`docs/ia/capacidad.md`), con este peso fijo. Vale el primer caso que se cumpla:
 
   ```
   score_chat = score_público + 0.20 · personal
-  personal   = 1    si una línea activa tuya (hecho o alias) nombra esa oferta
-               0,7  si la oferta estuvo en un pedido tuyo entregado
-               0,4  si el comercio estuvo en un pedido tuyo entregado
+  personal   = 1    si un alias de tu Libreta apunta a esa oferta, una línea activa tuya
+                    (hecho u orden) la nombra, o la pediste en 2 pedidos entregados o más
+               0,7  si la pediste en un solo pedido entregado,
+                    o le pediste 2 veces o más a ese local
+               0,4  si es de la misma categoría que algo que te gustó: le pusiste 4 o 5
+                    estrellas a un pedido que lo tenía, o tocaste "Más como esta"
                0    si no
   ```
 
-  Cada puesto que tiene término personal lleva `razon_personal` (`esquemas/ia-widgets.json`, podio): el "por qué te lo muestro" en tus palabras ("porque es la que siempre pedís"). **Un puesto con término personal y sin `razon_personal` no se puede mostrar.** Las órdenes no suman: filtran (lo que choca con una orden no compite). La app común, `GET /buscar`, el ranking del barrio y el MCP siguen neutrales: la Libreta no mueve a nadie fuera del chat de IA de tu nodo.
+  Un solo pedido a ese local, con otra oferta, no suma nada. Los pedidos y los gustos se miran en el último año.
+
+  Cada puesto que tiene término personal lleva `razon_personal` (`esquemas/ia-widgets.json`, podio): el "por qué te lo muestro", con voseo ("La pediste 3 veces", "Como la que te gustó en Don Tito"). **Un puesto con término personal y sin `razon_personal` no se puede mostrar.** El agente elige los candidatos, nunca el orden: el nodo los ordena con la fórmula y desempata por id. Las órdenes que sacan algo no suman: filtran (lo que choca con una orden no compite, y "Nada de Don Tito." saca al local entero). La app común, `GET /buscar`, el ranking del barrio y el MCP siguen neutrales: la Libreta no mueve a nadie fuera del chat de IA de tu nodo.
+- **Propuestas.** Como mucho una por turno, con los dos chips de arriba ("Sí, anotalo: …" y "No"), y cada una una sola vez.
 
 ## Exportar, borrar, mudarse
 
 - **`GET /yo/exportar`** incluye la Libreta entera en claro dentro del paquete firmado (`esquemas/libreta.json#/$defs/exportada`): todas las líneas de todos los niveles, con su tipo, nivel, estado, origen, reloj y fijada; esta semana; la voz; los ajustes. No van las huellas de las propuestas rechazadas.
-- **`POST /yo/borrar`**: al procesarse, el nodo destruye la clave de la Libreta y borra sus filas. Antes de eso, con la cuenta en proceso de borrado, el destilador no corre.
+- **`POST /yo/borrar`**: al procesarse, el nodo destruye la clave de la Libreta y borra sus filas. Antes de eso, con la cuenta en proceso de borrado, el destilador no corre. La charla abierta que espera al destilador se borra en el momento del pedido.
+- **Los recibos de tu IA** (`docs/ia/capacidad.md`, "Recibos") no son parte de la Libreta, pero siguen la misma regla: salen en `GET /yo/exportar` (`ia_resultados`) y `POST /yo/borrar` los borra en el momento del pedido (y otra vez al procesarse).
 - **Mudanza** (`docs/federacion.md`): el nodo nuevo importa las líneas con sus niveles y relojes, genera su propia clave y rehace esta semana. Si no ofrece `libreta`, guarda lo exportado sin usarlo hasta que la ofrezca, o lo descarta si la persona lo pide.
 
 ## Errores
@@ -150,3 +165,4 @@ La app puede aprender qué te interesa en la pantalla de inicio (qué rubros toc
 - Guardarla sin cifrar con una clave de la persona.
 - Dejarla afuera de `GET /yo/exportar` o de `POST /yo/borrar`.
 - Mandar los intereses del inicio sin el opt-in.
+- Dejar más de una propuesta por noche desde los recibos, o que lo inferido de los recibos entre activo sin que digas que sí.

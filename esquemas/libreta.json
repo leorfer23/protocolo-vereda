@@ -17,7 +17,7 @@
     "origen": {
       "type": "string",
       "enum": ["dicho", "destilado", "pedido", "inicio", "mudanza"],
-      "description": "dicho: la persona lo dijo o lo escribió. destilado: lo propuso el destilador de fin de charla. pedido: salió de sus pedidos. inicio: intereses de la pantalla de inicio, solo con el opt-in. mudanza: llegó importado de otro nodo."
+      "description": "dicho: la persona lo dijo o lo escribió. destilado: lo propuso el destilador de fin de charla, o el pase nocturno por lo que la persona hace en el chat (un ingrediente que siempre pasa de largo, la variante de siempre). pedido: salió de sus pedidos (el mismo producto en tres entregas, un local con malas estrellas dos veces). inicio: intereses de la pantalla de inicio, solo con el opt-in. mudanza: llegó importado de otro nodo."
     },
     "destino_alias": {
       "type": "object",

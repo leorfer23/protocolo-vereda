@@ -127,6 +127,27 @@ Los medios con IA solo existen si `ia.medios` los lista. El resultado es un **bo
 
 Lo que la IA sabe de cada persona vive en su **Libreta** (`docs/ia/libreta.md`, `esquemas/libreta.json`): órdenes, hechos, alias y cómo quiere que le hablen, cifrada con una clave de la persona, visible y editable en "Tu IA", y en `GET /yo/exportar`, `POST /yo/borrar` y la mudanza. El nodo la anuncia con `libreta` en `ia.funciones.comprador`. El índice, esta semana y la voz llegan al modelo en cada turno; el resto se busca con `mi_libreta_buscar`. Adentro del chat de IA del nodo, y solo ahí, el podio suma un término personal (`+ 0.20 · personal`), siempre visible en `razon_personal`.
 
+### Qué guarda el nodo de tu IA
+
+El nodo no guarda conversaciones. Además del consumo que va al extracto, de la IA de cada persona guarda solo esto:
+
+| Qué | Cuánto vive | Exportar / borrar |
+| --- | --- | --- |
+| **La Libreta** (`docs/ia/libreta.md`): líneas cortas, cifradas con tu clave | Hasta que la borres | Entera en `GET /yo/exportar`; `POST /yo/borrar` destruye la clave |
+| **La charla abierta**: solo tus mensajes (nunca los del asistente), cifrados con tu clave, para que el destilador de la Libreta tenga qué leer | Hasta que corre el destilador, **como mucho 2 horas** | No sale en `GET /yo/exportar`; `POST /yo/borrar` la borra en el momento |
+| **Los recibos** (abajo): ids y códigos de lo que el chat te mostró y lo que hiciste después | **90 días**; después, solo conteos semanales anónimos | En `GET /yo/exportar` (`ia_resultados`); `POST /yo/borrar` los borra en el momento |
+
+#### Recibos: la IA aprende de lo que hacés, no de lo que opina el modelo
+
+Por cada turno del chat que la persona hace **con su sesión**, el nodo anota un recibo del turno y uno por cada producto que mostró; después, ligado a ese turno, lo que pasó. Un agente con mandato no deja recibos: no le enseña nada a la IA de la persona.
+
+- **Solo ids, códigos cerrados y números. Nunca texto.** Ni lo que dijo la persona ni lo que respondió el asistente: un recibo no tiene dónde guardarlo. Campos: `evento`, `turno`, `widget` y `widget_id`, `posicion`, `personal` (el puesto del podio llevaba término personal), `oferta_id`, `variante_id`, `comercio_id`, `carrito_id`, `pedido_id`, `linea_id`, `estrellas`, `via`, `motivo`, `duracion_ms` y `creado`.
+- **`evento`**: `turno`, `mostrado`, `paso` (pasó de largo una carta del mazo), `mas_como_esta`, `agregado`, `quitado`, `confirmado`, `entregado`, `estrellas`, `propuesta_hecha`, `propuesta_aceptada`, `propuesta_rechazada`, `aviso_usado`, `aviso_descartado`.
+- **`via`** (solo en `turno`): `modelo`, `sin_modelo`, `toque`, `bienvenida`. **`motivo`** es siempre un código (`^[a-z_]{1,40}$`): la falla de un turno (el código de error de la spec), el detector de una propuesta o por qué se descartó un aviso.
+- **90 días.** Después, el barrido los suma en conteos por semana, widget y evento, **sin persona**, y los borra.
+- **Exportar y borrar.** Salen en `GET /yo/exportar`, en `ia_resultados`. `POST /yo/borrar` los borra en el momento del pedido, y otra vez al procesarse.
+- **Para qué.** Una vez por noche, sin modelo, el nodo mira los recibos de cada persona y puede dejar **como mucho una propuesta** en su Libreta (`docs/ia/libreta.md`, "Quién escribe"). Nunca una regla: lo inferido espera que la persona diga que sí. Con los conteos anónimos, el operador puede ver qué funciona; el nodo nunca cambia sus propias instrucciones solo.
+
 ## Consumo auditable
 
 Cada respuesta exitosa trae `consumo`: `tokens_entrada`, `tokens_salida`, `costo_usd`, `generacion`, y opcionalmente `imagenes`, `segundos_video`, `unidad` (`tokens` \| `imagen` \| `segundo_video` \| `mixto`). El nodo suma `costo_usd` al extracto. Si falla antes del proveedor, no hay `consumo`.
