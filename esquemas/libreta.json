@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/libreta.json",
+  "title": "La Libreta de la IA",
+  "description": "La memoria de la IA de una persona: líneas cortas de cuatro tipos (orden, hecho, alias, voz) en cuatro niveles con topes duros (índice, esta semana, detalle, archivo). Vive en su nodo, cifrada con una clave de la persona; ella la ve y la edita entera, y viaja en /yo/exportar, /yo/borrar y la mudanza. Un agente externo con mandato 'leer' solo la lee. Ver docs/ia/libreta.md.",
+  "$defs": {
+    "tipo": {
+      "type": "string",
+      "enum": ["orden", "hecho", "alias", "voz"],
+      "description": "orden: instrucción que vale siempre, se obedece en silencio y nunca se cita. hecho: algo que la IA sabe de la persona. alias: un nombre de la persona para una oferta, un comercio o la etiqueta de una dirección. voz: cómo quiere que le hablen; hay una sola y se reescribe entera."
+    },
+    "nivel": {
+      "type": "string",
+      "enum": ["indice", "detalle", "archivo"],
+      "description": "indice: llega al modelo en cada turno (tope 1200 caracteres sumando sus líneas activas). detalle: se busca con mi_libreta_buscar (tope 200 líneas). archivo: solo si una búsqueda lo pide (tope 1000 líneas). La voz no tiene nivel."
+    },
+    "origen": {
+      "type": "string",
+      "enum": ["dicho", "destilado", "pedido", "inicio", "mudanza"],
+      "description": "dicho: la persona lo dijo o lo escribió. destilado: lo propuso el destilador de fin de charla, o el pase nocturno por lo que la persona hace en el chat (un ingrediente que siempre pasa de largo, la variante de siempre). pedido: salió de sus pedidos (el mismo producto en tres entregas, un local con malas estrellas dos veces). inicio: intereses de la pantalla de inicio, solo con el opt-in. mudanza: llegó importado de otro nodo."
+    },
+    "destino_alias": {
+      "type": "object",
+      "description": "A qué apunta un alias. Una dirección se nombra por su etiqueta, nunca por la calle.",
+      "oneOf": [
+        {
+          "required": ["oferta_id"],
+          "properties": { "oferta_id": { "$ref": "comunes.json#/$defs/id" }, "variante_id": { "type": "string" } },
+          "additionalProperties": false
+        },
+        {
+          "required": ["comercio_id"],
+          "properties": { "comercio_id": { "$ref": "comunes.json#/$defs/id" } },
+          "additionalProperties": false
+        },
+        {
+          "required": ["direccion_etiqueta"],
+          "properties": { "direccion_etiqueta": { "type": "string", "minLength": 1, "maxLength": 40, "description": "La etiqueta de una dirección guardada ('casa', 'oficina'), como en mis_direcciones." } },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "alias": {
+      "type": "object",
+      "required": ["frase", "destino"],
+      "additionalProperties": false,
+      "properties": {
+        "frase": { "type": "string", "minLength": 1, "maxLength": 80, "description": "Cómo lo dice la persona: 'la leche de siempre', 'lo de Tito'." },
+        "destino": { "$ref": "#/$defs/destino_alias" }
+      }
+    },
+    "linea": {
+      "type": "object",
+      "description": "Una línea de la Libreta. El texto se guarda cifrado con la clave de la persona; acá viaja en claro, solo hacia ella o hacia su agente con 'leer'.",
+      "required": ["id", "tipo", "texto", "estado", "origen", "creada", "reloj"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "comunes.json#/$defs/id" },
+        "tipo": { "$ref": "#/$defs/tipo" },
+        "texto": { "type": "string", "minLength": 1, "maxLength": 600, "description": "Hasta 200 caracteres; la voz, hasta 600." },
+        "nivel": { "$ref": "#/$defs/nivel" },
+        "estado": {
+          "type": "string",
+          "enum": ["activa", "propuesta"],
+          "description": "propuesta: lo infirió el destilador o un pedido y espera que la persona lo acepte. No llega al modelo hasta que la acepta."
+        },
+        "origen": { "$ref": "#/$defs/origen" },
+        "alias": { "$ref": "#/$defs/alias" },
+        "fijada": { "type": "boolean", "default": false, "description": "La fijó la persona: no baja de nivel con el reloj. Solo ella la fija." },
+        "creada": { "$ref": "comunes.json#/$defs/instante" },
+        "reloj": { "$ref": "comunes.json#/$defs/instante", "description": "La última evidencia de que sirve: se usó, se aplicó en un pedido o se dijo de nuevo. Estar en el índice no cuenta." },
+        "usos_30d": { "type": "integer", "minimum": 0, "description": "Evidencias de los últimos 30 días. Informativo." },
+        "corrige": { "$ref": "comunes.json#/$defs/id", "description": "La línea que esta reemplazó por una corrección. La vieja ya no existe." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "tipo": { "const": "voz" } } },
+          "then": { "not": { "anyOf": [{ "required": ["nivel"] }, { "required": ["alias"] }] } },
+          "else": { "required": ["nivel"], "properties": { "texto": { "maxLength": 200 } } }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "alias" } } },
+          "then": { "required": ["alias"] },
+          "else": { "not": { "required": ["alias"] } }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "orden" }, "estado": { "const": "activa" } }, "required": ["tipo", "estado"] },
+          "then": { "properties": { "nivel": { "const": "indice" } } }
+        },
+        {
+          "if": { "properties": { "estado": { "const": "propuesta" } }, "required": ["estado"] },
+          "then": { "properties": { "origen": { "enum": ["destilado", "pedido"] } } }
+        }
+      ]
+    },
+    "esta_semana": {
+      "type": "object",
+      "description": "Plantilla determinista que el nodo llena desde cero con lo de los últimos 14 días: pedidos, carritos abiertos y sustituciones pendientes. Sin llamada al modelo ni tokens. No es memoria nueva: no afirma nada que no esté en un pedido, un carrito o una sustitución. No se edita.",
+      "required": ["texto", "desde", "rehecha"],
+      "additionalProperties": false,
+      "properties": {
+        "texto": { "type": "string", "maxLength": 600 },
+        "desde": { "type": "string", "format": "date", "description": "Primer día de la ventana de 14 días." },
+        "rehecha": { "$ref": "comunes.json#/$defs/instante" }
+      }
+    },
+    "ajustes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "intereses_del_inicio": {
+          "type": "boolean",
+          "default": false,
+          "description": "Opt-in: la app puede mandar los intereses de la pantalla de inicio como líneas 'hecho' con origen 'inicio'. Apagado por defecto. Apagarlo borra en el momento esas líneas."
+        }
+      }
+    },
+    "libreta": {
+      "type": "object",
+      "description": "GET /ia/libreta: lo que llega al modelo en cada turno (índice, esta semana, voz), las propuestas pendientes, cuánto hay en detalle y archivo, y los ajustes.",
+      "required": ["indice", "propuestas", "conteos", "ajustes"],
+      "additionalProperties": false,
+      "properties": {
+        "indice": {
+          "type": "object",
+          "required": ["lineas", "caracteres"],
+          "additionalProperties": false,
+          "properties": {
+            "lineas": {
+              "type": "array",
+              "items": {
+                "allOf": [
+                  { "$ref": "#/$defs/linea" },
+                  { "properties": { "nivel": { "const": "indice" }, "estado": { "const": "activa" }, "tipo": { "not": { "const": "voz" } } } }
+                ]
+              }
+            },
+            "caracteres": { "type": "integer", "minimum": 0, "maximum": 1200, "description": "Suma del texto de las líneas del índice. Nunca pasa de 1200: el nodo rechaza la escritura antes." }
+          }
+        },
+        "esta_semana": { "$ref": "#/$defs/esta_semana" },
+        "voz": {
+          "allOf": [
+            { "$ref": "#/$defs/linea" },
+            { "properties": { "tipo": { "const": "voz" }, "estado": { "const": "activa" } } }
+          ]
+        },
+        "propuestas": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "allOf": [
+              { "$ref": "#/$defs/linea" },
+              { "properties": { "estado": { "const": "propuesta" } } }
+            ]
+          }
+        },
+        "conteos": {
+          "type": "object",
+          "required": ["detalle", "archivo"],
+          "additionalProperties": false,
+          "properties": {
+            "detalle": { "type": "integer", "minimum": 0, "maximum": 200 },
+            "archivo": { "type": "integer", "minimum": 0, "maximum": 1000 }
+          }
+        },
+        "ajustes": { "$ref": "#/$defs/ajustes" }
+      }
+    },
+    "nueva_linea": {
+      "type": "object",
+      "description": "POST /ia/libreta/lineas: la persona anota algo ('acordate'). Entra activa. Una orden va siempre al índice; un hecho o un alias va al índice si entra y si no al detalle, salvo que pida 'nivel'.",
+      "required": ["tipo", "texto"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "$ref": "#/$defs/tipo" },
+        "texto": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "alias": { "$ref": "#/$defs/alias" },
+        "nivel": { "type": "string", "enum": ["indice", "detalle"] },
+        "origen": { "type": "string", "enum": ["dicho", "inicio"], "default": "dicho", "description": "'inicio' solo con ajustes.intereses_del_inicio; si no, 403 intereses_del_inicio_apagado." },
+        "fijada": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "tipo": { "const": "voz" } } },
+          "then": { "not": { "anyOf": [{ "required": ["nivel"] }, { "required": ["alias"] }] } },
+          "else": { "properties": { "texto": { "maxLength": 200 } } }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "alias" } } },
+          "then": { "required": ["alias"] },
+          "else": { "not": { "required": ["alias"] } }
+        },
+        {
+          "if": { "properties": { "origen": { "const": "inicio" } }, "required": ["origen"] },
+          "then": { "properties": { "tipo": { "const": "hecho" } } }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "orden" } } },
+          "then": { "properties": { "nivel": { "const": "indice" } } }
+        }
+      ]
+    },
+    "editar_linea": {
+      "type": "object",
+      "description": "PATCH /ia/libreta/lineas/{id}: la persona cambia el texto, la sube o la baja de nivel, la fija o la saca del archivo. Cambiar el texto no reinicia el reloj.",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "texto": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "nivel": { "$ref": "#/$defs/nivel" },
+        "fijada": { "type": "boolean" },
+        "alias": { "$ref": "#/$defs/alias" }
+      }
+    },
+    "pedido_buscar": {
+      "type": "object",
+      "description": "POST /ia/libreta/buscar y la herramienta mi_libreta_buscar: texto completo en español más los alias, sobre las líneas activas. Sin 'niveles', busca en el detalle.",
+      "required": ["q"],
+      "additionalProperties": false,
+      "properties": {
+        "q": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "niveles": { "type": "array", "uniqueItems": true, "minItems": 1, "items": { "$ref": "#/$defs/nivel" }, "default": ["detalle"] },
+        "limite": { "type": "integer", "minimum": 1, "maximum": 20, "default": 8 }
+      }
+    },
+    "respuesta_buscar": {
+      "type": "object",
+      "required": ["lineas"],
+      "additionalProperties": false,
+      "properties": {
+        "lineas": { "type": "array", "maxItems": 20, "items": { "$ref": "#/$defs/linea" } }
+      }
+    },
+    "pagina_lineas": {
+      "type": "object",
+      "description": "GET /ia/libreta/lineas?nivel=: las líneas activas de un nivel, de la de reloj más nuevo a la más vieja.",
+      "required": ["lineas"],
+      "additionalProperties": false,
+      "properties": {
+        "lineas": { "type": "array", "maxItems": 200, "items": { "$ref": "#/$defs/linea" } },
+        "cursor_siguiente": { "type": "string" }
+      }
+    },
+    "accion": {
+      "type": "object",
+      "description": "Una acción del destilador de fin de charla. Es interna del nodo; se publica para que todos los nodos la implementen igual. 'agregar' siempre entra como propuesta. 'corregir' y 'olvidar' se aplican ya solo con explicita: true (las palabras de la persona contradicen la línea); si no, son propuesta. 'confirmar' solo mueve el reloj.",
+      "required": ["accion"],
+      "additionalProperties": false,
+      "properties": {
+        "accion": { "type": "string", "enum": ["agregar", "confirmar", "corregir", "olvidar"] },
+        "linea_id": { "$ref": "comunes.json#/$defs/id" },
+        "tipo": { "type": "string", "enum": ["orden", "hecho", "alias"], "description": "Solo con 'agregar'. El destilador no escribe la voz." },
+        "texto": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "alias": { "$ref": "#/$defs/alias" },
+        "explicita": { "type": "boolean", "default": false }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "accion": { "const": "agregar" } } },
+          "then": { "required": ["tipo", "texto"], "not": { "required": ["linea_id"] } },
+          "else": { "required": ["linea_id"], "not": { "anyOf": [{ "required": ["tipo"] }, { "required": ["alias"] }] } }
+        },
+        {
+          "if": { "properties": { "accion": { "const": "corregir" } } },
+          "then": { "required": ["texto"] }
+        },
+        {
+          "if": { "properties": { "accion": { "enum": ["confirmar", "olvidar"] } } },
+          "then": { "not": { "required": ["texto"] } }
+        }
+      ]
+    },
+    "destilado": {
+      "type": "object",
+      "description": "Lo que devuelve el destilador: como mucho tres acciones, y casi siempre ninguna.",
+      "required": ["acciones"],
+      "additionalProperties": false,
+      "properties": {
+        "acciones": { "type": "array", "maxItems": 3, "items": { "$ref": "#/$defs/accion" } }
+      }
+    },
+    "exportada": {
+      "type": "object",
+      "description": "La Libreta dentro del paquete de GET /yo/exportar: todas las líneas de todos los niveles, en claro, con sus relojes. Sin las huellas de las propuestas rechazadas.",
+      "required": ["lineas", "ajustes"],
+      "additionalProperties": false,
+      "properties": {
+        "lineas": { "type": "array", "items": { "$ref": "#/$defs/linea" } },
+        "esta_semana": { "$ref": "#/$defs/esta_semana" },
+        "ajustes": { "$ref": "#/$defs/ajustes" }
+      }
+    }
+  }
+}

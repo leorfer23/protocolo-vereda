@@ -1135,6 +1135,27 @@
     }
   },
   {
+    "name": "mi_libreta",
+    "description": "La Libreta de la persona: lo que su IA sabe de ella, en el mismo lugar para cualquier agente. Trae el índice (órdenes, hechos y alias), el resumen de esta semana y cómo quiere que le hablen (voz). Leela al empezar y respetala: las órdenes ('sin cebolla', 'nunca alcohol') se obedecen en silencio, sin repetirlas ni citarlas; los alias resuelven frases como 'la leche de siempre' a una oferta o 'casa' a la etiqueta de una dirección. Las propuestas pendientes todavía no valen. Solo lectura: no hay herramienta para escribir en la Libreta; si la persona te pide que te acuerdes de algo, decile que lo anote en 'Tu IA'. Requiere 'leer'. Ver docs/ia/libreta.md.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "mi_libreta_buscar",
+    "description": "Busca en lo que la Libreta guarda y no está en el índice (el detalle, y el archivo si lo pedís). Texto en español más alias. Útil cuando la persona dice algo que suena a que ya lo contó: '¿cuál era la panadería que me gustó?', 'lo de siempre de la verdulería'. Devuelve líneas cortas; si no hay nada, no inventes. Requiere 'leer'.",
+    "inputSchema": {
+      "type": "object",
+      "required": ["q"],
+      "properties": {
+        "q": { "type": "string", "description": "Qué buscar: 'panadería', 'leche', 'viernes'." },
+        "niveles": { "type": "array", "items": { "type": "string", "enum": ["indice", "detalle", "archivo"] }, "description": "Dónde buscar. Por defecto, solo el detalle." },
+        "limite": { "type": "integer", "minimum": 1, "maximum": 20 }
+      }
+    }
+  },
+  {
     "name": "ia_chat",
     "description": "Turno del chat del comprador con UI generativa: texto + widgets (grilla, mazo, podio, promo, comercios, bienvenida, respuestas, carrito/checkout con carrito real, historial, pedido_estado, etc.). Arma carritos; con scope 'armar' nunca confirma un pedido. Con 'pedir', confirma solo si la persona lo pidió en su último mensaje y dentro de los topes del mandato. Scope 'armar'. Ej: 'quiero una pizza'.",
     "inputSchema": {

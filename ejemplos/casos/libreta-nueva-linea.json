@@ -1,0 +1,73 @@
+{
+  "$comentario": "Casos de POST /ia/libreta/lineas (esquemas/libreta.json#/$defs/nueva_linea): lo que anota la persona.",
+  "esquema": "libreta.json#/$defs/nueva_linea",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "acordate de una orden.",
+      "doc": {
+        "tipo": "orden",
+        "texto": "Sin cebolla en nada."
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "una orden no se manda al detalle.",
+      "doc": {
+        "tipo": "orden",
+        "texto": "Sin cebolla.",
+        "nivel": "detalle"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "alias a una oferta.",
+      "doc": {
+        "tipo": "alias",
+        "texto": "La leche de siempre.",
+        "alias": {
+          "frase": "la leche de siempre",
+          "destino": {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000c9"
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "interés del inicio, con el opt-in prendido (el nodo lo comprueba).",
+      "doc": {
+        "tipo": "hecho",
+        "texto": "Mira mucho panaderías.",
+        "origen": "inicio"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "desde el inicio solo llegan hechos.",
+      "doc": {
+        "tipo": "orden",
+        "texto": "Mostrame panaderías.",
+        "origen": "inicio"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "nadie anota por la API como si fuera el destilador.",
+      "doc": {
+        "tipo": "hecho",
+        "texto": "x",
+        "origen": "destilado"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "la voz no tiene nivel.",
+      "doc": {
+        "tipo": "voz",
+        "texto": "Cortito.",
+        "nivel": "indice"
+      }
+    }
+  ]
+}

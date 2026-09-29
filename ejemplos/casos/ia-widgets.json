@@ -448,6 +448,54 @@
         "destino": { "pantalla": "configuracion" },
         "texto": "Ir"
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "podio del chat con término personal: el puesto lleva razon_personal.",
+      "doc": {
+        "tipo": "podio",
+        "version": 1,
+        "titulo": "Estas no te las podés perder",
+        "puestos": [
+          {
+            "puesto": 1,
+            "razon": "más pedida",
+            "tarjeta": {
+              "oferta_id": "01926b3a-0000-7000-8000-0000000000c2",
+              "nombre": "Fugazzeta",
+              "precio": {
+                "centavos": 9800,
+                "moneda": "ARS"
+              }
+            },
+            "razon_personal": "La pediste 3 veces"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "razon_personal vacía no dice por qué.",
+      "doc": {
+        "tipo": "podio",
+        "version": 1,
+        "titulo": "Estas no te las podés perder",
+        "puestos": [
+          {
+            "puesto": 1,
+            "razon": "más pedida",
+            "tarjeta": {
+              "oferta_id": "01926b3a-0000-7000-8000-0000000000c2",
+              "nombre": "Fugazzeta",
+              "precio": {
+                "centavos": 9800,
+                "moneda": "ARS"
+              }
+            },
+            "razon_personal": ""
+          }
+        ]
+      }
     }
   ]
 }

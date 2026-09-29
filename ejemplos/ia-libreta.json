@@ -1,0 +1,92 @@
+{
+  "$comentario": "GET /ia/libreta de una persona que usa el chat hace unos meses (docs/ia/libreta.md). Tiene una orden, dos hechos y un alias en el índice, la voz, el resumen de esta semana y una propuesta del destilador que todavía no aceptó.",
+  "indice": {
+    "lineas": [
+      {
+        "id": "01926b3a-0000-7000-8000-000000000101",
+        "tipo": "orden",
+        "texto": "Sin cebolla en nada.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "fijada": true,
+        "creada": "2026-07-02T21:14:00-03:00",
+        "reloj": "2026-09-26T20:40:00-03:00",
+        "usos_30d": 6
+      },
+      {
+        "id": "01926b3a-0000-7000-8000-000000000102",
+        "tipo": "alias",
+        "texto": "La leche de siempre es la entera en sachet de El Tambo.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "alias": {
+          "frase": "la leche de siempre",
+          "destino": {
+            "oferta_id": "01926b3a-0000-7000-8000-0000000000c9"
+          }
+        },
+        "creada": "2026-08-10T09:02:00-03:00",
+        "reloj": "2026-09-27T10:15:00-03:00",
+        "usos_30d": 3
+      },
+      {
+        "id": "01926b3a-0000-7000-8000-000000000103",
+        "tipo": "hecho",
+        "texto": "Los viernes pide pizza para cuatro.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-08-22T20:31:00-03:00",
+        "reloj": "2026-09-26T20:40:00-03:00",
+        "usos_30d": 4
+      },
+      {
+        "id": "01926b3a-0000-7000-8000-000000000104",
+        "tipo": "hecho",
+        "texto": "Le gusta probar panaderías nuevas.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "destilado",
+        "creada": "2026-09-05T08:45:00-03:00",
+        "reloj": "2026-09-21T08:50:00-03:00",
+        "usos_30d": 2
+      }
+    ],
+    "caracteres": 144
+  },
+  "esta_semana": {
+    "texto": "Esta semana pediste dos veces en Pizzería La Corrientes y una vez en Panadería Don Julio, que era nueva para vos.",
+    "desde": "2026-09-15",
+    "rehecha": "2026-09-29T04:00:00-03:00"
+  },
+  "voz": {
+    "id": "01926b3a-0000-7000-8000-000000000105",
+    "tipo": "voz",
+    "texto": "Cortito y al grano. Sin emojis. Si hay algo nuevo en el barrio, contame.",
+    "estado": "activa",
+    "origen": "dicho",
+    "creada": "2026-07-02T21:20:00-03:00",
+    "reloj": "2026-09-12T19:00:00-03:00"
+  },
+  "propuestas": [
+    {
+      "id": "01926b3a-0000-7000-8000-000000000106",
+      "tipo": "hecho",
+      "texto": "Prefiere la muzza al molde.",
+      "nivel": "detalle",
+      "estado": "propuesta",
+      "origen": "destilado",
+      "creada": "2026-09-26T21:05:00-03:00",
+      "reloj": "2026-09-26T21:05:00-03:00"
+    }
+  ],
+  "conteos": {
+    "detalle": 14,
+    "archivo": 3
+  },
+  "ajustes": {
+    "intereses_del_inicio": false
+  }
+}

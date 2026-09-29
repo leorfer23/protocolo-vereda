@@ -406,7 +406,7 @@
     },
     "respuestas": {
       "type": "object",
-      "description": "Chips sobre el campo de texto. Tocar manda ese texto (o valor) como mensaje.",
+      "description": "Chips sobre el campo de texto. Tocar manda ese texto (o valor) como mensaje. Una propuesta de la Libreta llega como dos chips, 'Sí, anotalo: …' con valor '__libreta_aceptar__:<id>' y 'No' con valor '__libreta_rechazar__:<id>'; el nodo los resuelve sin llamar al modelo (docs/ia/libreta.md).",
       "required": ["tipo", "version", "opciones"],
       "additionalProperties": false,
       "properties": {
@@ -480,6 +480,12 @@
             "additionalProperties": false,
             "properties": {
               "puesto": { "type": "integer", "minimum": 1, "maximum": 3 },
+              "razon_personal": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "description": "El 'por qué te lo muestro' personal: presente si y solo si el término personal de la Libreta movió este puesto, con voseo ('La pediste 3 veces', 'Como la que te gustó en Don Tito'). Existe solo adentro del chat de IA del nodo; el ranking, la búsqueda y la app común siguen neutrales (docs/ia/libreta.md). Un cliente que no lo conoce lo ignora."
+              },
               "tarjeta": { "$ref": "#/$defs/tarjeta_producto" },
               "razon": {
                 "type": "string",

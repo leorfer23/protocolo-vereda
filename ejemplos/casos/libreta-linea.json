@@ -1,0 +1,247 @@
+{
+  "$comentario": "Casos de una línea de la Libreta (esquemas/libreta.json#/$defs/linea, docs/ia/libreta.md).",
+  "esquema": "libreta.json#/$defs/linea",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "hecho activo en el índice, dicho por la persona.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "hecho",
+        "texto": "Le gusta la fugazzeta rellena.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "orden fijada en el índice.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "orden",
+        "texto": "Nunca me ofrezcas alcohol.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00",
+        "fijada": true
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "una orden activa no puede estar en el detalle: tiene que llegar en cada turno.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "orden",
+        "texto": "Sin cebolla.",
+        "nivel": "detalle",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "alias a la etiqueta de una dirección.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "alias",
+        "texto": "'Casa' es la de Palermo.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00",
+        "alias": {
+          "frase": "casa",
+          "destino": {
+            "direccion_etiqueta": "casa"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "un alias no apunta a una calle: solo a una etiqueta, una oferta o un comercio.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "alias",
+        "texto": "casa",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00",
+        "alias": {
+          "frase": "casa",
+          "destino": {
+            "calle": "Gorriti 4800"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "un alias sin destino no se puede resolver.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "alias",
+        "texto": "la leche de siempre",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "solo un alias lleva 'alias'.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "hecho",
+        "texto": "Le gusta la fugazzeta rellena.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00",
+        "alias": {
+          "frase": "x",
+          "destino": {
+            "comercio_id": "01926b3a-0000-7000-8000-00000000011e"
+          }
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "la voz, de hasta 600 caracteres y sin nivel.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "voz",
+        "texto": "Cortito. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "la voz no tiene nivel.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "voz",
+        "texto": "Cortito.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "un hecho pasa de 200 caracteres.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "hecho",
+        "texto": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "la voz pasa de 600 caracteres.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "voz",
+        "texto": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "propuesta del destilador, esperando que la acepte.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "hecho",
+        "texto": "Le gusta la fugazzeta rellena.",
+        "nivel": "detalle",
+        "estado": "propuesta",
+        "origen": "destilado",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "lo que dijo la persona entra activo, nunca como propuesta.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "hecho",
+        "texto": "Le gusta la fugazzeta rellena.",
+        "nivel": "indice",
+        "estado": "propuesta",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "sin reloj no se puede saber si baja de nivel.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "hecho",
+        "texto": "Le gusta la fugazzeta rellena.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "línea del archivo, que corrigió otra.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "hecho",
+        "texto": "Le gusta la fugazzeta rellena.",
+        "nivel": "archivo",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00",
+        "corrige": "01926b3a-0000-7000-8000-000000000115"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'resumen' no es un tipo de línea: la Libreta no guarda texto del asistente.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000114",
+        "tipo": "resumen",
+        "texto": "Le gusta la fugazzeta rellena.",
+        "nivel": "indice",
+        "estado": "activa",
+        "origen": "dicho",
+        "creada": "2026-09-01T12:00:00-03:00",
+        "reloj": "2026-09-20T12:00:00-03:00"
+      }
+    }
+  ]
+}

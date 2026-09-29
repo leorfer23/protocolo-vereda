@@ -115,7 +115,7 @@ no existe otra. El nodo bloqueado tiene los objetos que firmó y puede comprobar
 
 ## Mudanza
 
-`GET /yo/exportar` devuelve un paquete firmado con identidad, historial de claves, reseñas y preferencias. El nodo nuevo lo importa y publica una **declaración de mudanza** (`comunes.json#/$defs/mudanza`) en `GET /actores/{identidad}/mudanza`.
+`GET /yo/exportar` devuelve un paquete firmado con identidad, historial de claves, reseñas, preferencias y la Libreta de la IA (`docs/ia/libreta.md`: el nodo nuevo la importa con sus niveles y relojes y la cifra con una clave propia). El nodo nuevo lo importa y publica una **declaración de mudanza** (`comunes.json#/$defs/mudanza`) en `GET /actores/{identidad}/mudanza`.
 
 **La declaración la firma el actor, no el nodo.** Esa es toda la diferencia: `marta@vereda.ar → marta@otro.ar` vale porque la firmó la clave de Marta, y esa clave se verifica contra su historial, que viaja en el paquete con los avales encadenados. El nodo viejo no tiene que estar de acuerdo, ni estar vivo.
 
