@@ -1,0 +1,66 @@
+{
+  "$comentario": "GET /ia/avisos de una persona que prendió los avisos (docs/ia/avisos.md): un vigía que se cumplió y sonó, y una reposición que cayó en horas de silencio y quedó pendiente sin push.",
+  "avisos": [
+    {
+      "id": "01926b3a-0000-7000-8000-000000000201",
+      "tipo": "vigia",
+      "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+      "estado": "pendiente",
+      "creado": "2026-09-29T11:42:00-03:00",
+      "vence": "2026-10-02T11:42:00-03:00",
+      "titulo": "Bajó el aceite",
+      "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+      "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+      "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+      "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+      "precio_antes": {
+        "centavos": 329000,
+        "moneda": "ARS"
+      },
+      "precio_ahora": {
+        "centavos": 289000,
+        "moneda": "ARS"
+      },
+      "push": {
+        "enviado": true,
+        "instante": "2026-09-29T11:42:05-03:00"
+      }
+    },
+    {
+      "id": "01926b3a-0000-7000-8000-000000000202",
+      "tipo": "reposicion",
+      "clave": "reposicion:01926b3a-0000-7000-8000-000000000215:01926b3a-0000-7000-8000-000000000228",
+      "estado": "pendiente",
+      "creado": "2026-09-29T07:00:00-03:00",
+      "vence": "2026-10-03T07:00:00-03:00",
+      "titulo": "¿Reponés el café?",
+      "cuerpo": "El café en grano de Tostadero Boedo te dura unas tres semanas y la última vez lo compraste hace 18 días.",
+      "oferta_id": "01926b3a-0000-7000-8000-000000000215",
+      "comercio_id": "01926b3a-0000-7000-8000-00000000021f",
+      "ritmo_dias": 21,
+      "push": {
+        "enviado": false,
+        "sin_push": "horas_de_silencio"
+      }
+    },
+    {
+      "id": "01926b3a-0000-7000-8000-000000000203",
+      "tipo": "promo_adherido",
+      "clave": "promo_adherido:01926b3a-0000-7000-8000-000000000220:01926b3a-0000-7000-8000-000000000232",
+      "estado": "descartado",
+      "creado": "2026-09-24T18:10:00-03:00",
+      "vence": "2026-09-27T18:10:00-03:00",
+      "titulo": "Una promo para vos",
+      "cuerpo": "Panadería Don Julio tiene medialunas 2x1 hasta el domingo.",
+      "comercio_id": "01926b3a-0000-7000-8000-000000000220",
+      "push": {
+        "enviado": false,
+        "sin_push": "tope_diario"
+      },
+      "descartado": {
+        "instante": "2026-09-24T19:00:00-03:00",
+        "motivo": "mal_momento"
+      }
+    }
+  ]
+}

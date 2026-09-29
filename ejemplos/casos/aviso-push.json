@@ -99,6 +99,23 @@
         "titulo": "Pedido nuevo",
         "cuerpo": "Entró un pedido."
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "Aviso de la IA (docs/ia/avisos.md): abre el aviso, sin producto ni precio; solo el nombre público del comercio.",
+      "doc": {
+        "titulo": "Pasó lo que esperabas",
+        "cuerpo": "Se cumplió uno de tus vigías en Almacén Don Tito.",
+        "datos": {
+          "evento": "01920000-0000-7000-8000-00000000e002",
+          "tipo": "ia.aviso",
+          "rol": "comprador",
+          "entidad": {
+            "tipo": "aviso_ia",
+            "id": "01926b3a-0000-7000-8000-000000000201"
+          }
+        }
+      }
     }
   ]
 }

@@ -1,0 +1,35 @@
+{
+  "$comentario": "GET /ia/vigias: el vigía del aceite ya se cumplió (queda 7 días en la lista) y uno activo sobre un comercio.",
+  "vigias": [
+    {
+      "id": "01926b3a-0000-7000-8000-00000000020a",
+      "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+      "condicion": {
+        "tipo": "precio_hasta",
+        "monto": {
+          "centavos": 300000,
+          "moneda": "ARS"
+        }
+      },
+      "etiqueta": "Aceite de girasol 1,5 L en Almacén Don Tito, a $3.000 o menos",
+      "estado": "cumplido",
+      "creado": "2026-09-20T10:00:00-03:00",
+      "vence": "2026-10-20T10:00:00-03:00",
+      "disparos_max": 1,
+      "disparos": 1
+    },
+    {
+      "id": "01926b3a-0000-7000-8000-00000000020b",
+      "comercio_id": "01926b3a-0000-7000-8000-000000000221",
+      "condicion": {
+        "tipo": "abre"
+      },
+      "etiqueta": "Cuando abra Heladería La Esquina",
+      "estado": "activo",
+      "creado": "2026-09-28T16:00:00-03:00",
+      "vence": "2026-10-28T16:00:00-03:00",
+      "disparos_max": 1,
+      "disparos": 0
+    }
+  ]
+}

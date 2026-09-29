@@ -1,0 +1,19 @@
+{
+  "$comentario": "GET /ia/yo/avisos: avisos prendidos con los tipos por defecto (promo_adherido apagado), un push por día y silencio de 22 a 9.",
+  "activos": true,
+  "tipos": {
+    "pedido_demorado": true,
+    "sustitucion": true,
+    "reposicion": true,
+    "vigia": true,
+    "promo_adherido": false
+  },
+  "por_dia": 1,
+  "horas_de_silencio": {
+    "desde": "22:00",
+    "hasta": "09:00"
+  },
+  "zona_horaria": "America/Argentina/Buenos_Aires",
+  "en_pausa": false,
+  "ignorados_seguidos": 1
+}

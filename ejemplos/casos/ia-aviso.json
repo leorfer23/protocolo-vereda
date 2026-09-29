@@ -1,0 +1,447 @@
+{
+  "$comentario": "Casos de un aviso de la IA (esquemas/ia-avisos.json#/$defs/aviso, docs/ia/avisos.md).",
+  "esquema": "ia-avisos.json#/$defs/aviso",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "vigía cumplido que sonó.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "sin push por horas de silencio: queda pendiente para el chat.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": false,
+          "sin_push": "horas_de_silencio"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "un push que no sonó dice por qué.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": false
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "un push que sonó no tiene motivo para no sonar.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00",
+          "sin_push": "tope_diario"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'es_viernes' no es un tipo: solo eventos.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "es_viernes",
+        "clave": "es_viernes:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "la clave empieza por el tipo.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "cualquier-cosa",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "un aviso de vigía nombra su vigía.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "pedido demorado con su pedido.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "pedido_demorado",
+        "clave": "pedido_demorado:01926b3a-0000-7000-8000-00000000023c",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        },
+        "pedido_id": "01926b3a-0000-7000-8000-00000000023c"
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "sustitución sin pedido.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "sustitucion",
+        "clave": "sustitucion:01926b3a-0000-7000-8000-00000000023c",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "reposición sin ritmo.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "reposicion",
+        "clave": "reposicion:01926b3a-0000-7000-8000-000000000214:01926b3a-0000-7000-8000-000000000228",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "descartado con motivo.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "descartado",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        },
+        "descartado": {
+          "instante": "2026-09-29T12:00:00-03:00",
+          "motivo": "ya_lo_tengo"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "descartado sin decir cuándo ni por qué.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "descartado",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "pendiente no puede traer descarte.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "vence": "2026-10-02T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        },
+        "descartado": {
+          "instante": "2026-09-29T12:00:00-03:00",
+          "motivo": "ya_lo_tengo"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "sin vence: un aviso siempre vence.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000201",
+        "tipo": "vigia",
+        "clave": "vigia:01926b3a-0000-7000-8000-00000000020a:1",
+        "estado": "pendiente",
+        "creado": "2026-09-29T11:42:00-03:00",
+        "titulo": "Bajó el aceite",
+        "cuerpo": "El aceite de girasol 1,5 L de Almacén Don Tito está a $2.890. Pediste que te avisara a $3.000 o menos.",
+        "vigia_id": "01926b3a-0000-7000-8000-00000000020a",
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "precio_antes": {
+          "centavos": 329000,
+          "moneda": "ARS"
+        },
+        "precio_ahora": {
+          "centavos": 289000,
+          "moneda": "ARS"
+        },
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T11:42:05-03:00"
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "sustitución que sonó aunque ya había sonado un vigía ese día: los avisos de un pedido en curso no tienen tope diario.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000205",
+        "tipo": "sustitucion",
+        "clave": "sustitucion:01926b3a-0000-7000-8000-00000000023c",
+        "estado": "pendiente",
+        "creado": "2026-09-29T21:05:00-03:00",
+        "vence": "2026-09-29T22:05:00-03:00",
+        "titulo": "Te proponen un cambio",
+        "cuerpo": "Almacén Don Tito no tiene la leche entera en sachet y te propone la de caja, al mismo precio.",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000023c",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T21:05:03-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "una sustitución nunca queda callada por el tope diario.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000205",
+        "tipo": "sustitucion",
+        "clave": "sustitucion:01926b3a-0000-7000-8000-00000000023c",
+        "estado": "pendiente",
+        "creado": "2026-09-29T21:05:00-03:00",
+        "vence": "2026-09-29T22:05:00-03:00",
+        "titulo": "Te proponen un cambio",
+        "cuerpo": "Almacén Don Tito no tiene la leche entera en sachet y te propone la de caja, al mismo precio.",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000023c",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "push": {
+          "enviado": false,
+          "sin_push": "tope_diario"
+        }
+      }
+    }
+  ]
+}

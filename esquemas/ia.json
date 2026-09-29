@@ -116,6 +116,7 @@
             "type": "string",
             "enum": [
               "chat",
+              "avisos",
               "pedido_propuesto",
               "buscar",
               "sugerir",
@@ -295,6 +296,10 @@
         "pago_previo_pendiente": {
           "type": "boolean",
           "description": "true si exige_pago_previo y el mes anterior no está marcado recibido: la IA no puede pasar a activa."
+        },
+        "avisos": {
+          "$ref": "ia-avisos.json#/$defs/preferencias",
+          "description": "Las preferencias de los avisos de la IA (docs/ia/avisos.md), si el nodo ofrece 'avisos'. Se cambian con PUT /ia/yo/avisos."
         }
       }
     },

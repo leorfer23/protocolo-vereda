@@ -44,7 +44,7 @@
             "evento": { "$ref": "comunes.json#/$defs/id", "description": "El id del evento que lo disparó." },
             "tipo": { "type": "string", "description": "El tipo del evento (docs/eventos.md). Una app que no lo conoce igual muestra el aviso." },
             "rol": { "type": "string", "enum": ["comprador", "comercio", "repartidor"], "description": "Como quién lo recibe esta persona: decide qué pantalla abre al tocarlo." },
-            "entidad": { "type": "object", "required": ["tipo", "id"], "properties": { "tipo": { "type": "string", "enum": ["pedido", "viaje"] }, "id": { "$ref": "comunes.json#/$defs/id" } }, "additionalProperties": false },
+            "entidad": { "type": "object", "required": ["tipo", "id"], "properties": { "tipo": { "type": "string", "enum": ["pedido", "viaje", "aviso_ia"], "description": "aviso_ia: un aviso de la IA (docs/ia/avisos.md); la app abre el chat y lo lee con GET /ia/avisos." }, "id": { "$ref": "comunes.json#/$defs/id" } }, "additionalProperties": false },
             "comercio": { "$ref": "comunes.json#/$defs/id", "description": "Solo con rol 'comercio': cuál de los comercios que administra la persona." }
           },
           "additionalProperties": false

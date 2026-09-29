@@ -55,6 +55,7 @@ Cabecera `Vereda-Firma: ed25519=<base64url>` sobre el cuerpo crudo, con la clave
 | `atestacion.recibida` | Alguien atestiguó sobre el actor. En `cliente_frecuente` es el aviso para que la persona acepte o rechace |
 | `denuncia.recibida`, `denuncia.respondida`, `denuncia.estado_cambiado` | Denuncias de suplantación. Públicos: la denuncia ya lo es |
 | `reclamo.recibido`, `reclamo.resuelto`, `reclamo.contradicho`, `reclamo.vencido` | Reclamos de propiedad de una ficha. `reclamo.resuelto` es el cambio de dueño |
+| `ia.aviso` | Nació un aviso de la IA de la persona (`docs/ia/avisos.md`), con el aviso entero en `datos.aviso`. Solo a ella, en sus sesiones; nunca a un agente ni a otro actor. Sale aunque el push no suene |
 | `clave.rotada`, `clave.comprometida` | Claves de un actor o del nodo (público). Quien tenga la clave en caché la vuelve a pedir |
 
 ## Idempotencia
