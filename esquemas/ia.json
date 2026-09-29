@@ -123,7 +123,8 @@
               "receta_a_lista",
               "lista_a_carrito",
               "promos",
-              "mis_pedidos"
+              "mis_pedidos",
+              "libreta"
             ]
           }
         }
@@ -467,7 +468,8 @@
             "chat",
             "pedido_propuesto",
             "buscar",
-            "sugerir"
+            "sugerir",
+            "libreta"
           ]
         },
         "instante": {

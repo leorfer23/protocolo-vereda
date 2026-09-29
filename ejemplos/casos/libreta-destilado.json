@@ -1,0 +1,150 @@
+{
+  "$comentario": "Casos de lo que devuelve el destilador de fin de charla (esquemas/libreta.json#/$defs/destilado): como mucho tres acciones y casi siempre ninguna.",
+  "esquema": "libreta.json#/$defs/destilado",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "lo esperado: la charla no enseñó nada que dure.",
+      "doc": {
+        "acciones": []
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "agregar un hecho (entra como propuesta).",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "agregar",
+            "tipo": "hecho",
+            "texto": "Prefiere la muzza al molde."
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "confirmar una línea que la persona volvió a decir.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "confirmar",
+            "linea_id": "01926b3a-0000-7000-8000-000000000103"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "corregir con las palabras de la persona: se aplica ya.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "corregir",
+            "linea_id": "01926b3a-0000-7000-8000-000000000103",
+            "texto": "Los viernes pide pizza para seis.",
+            "explicita": true
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "olvidar una línea.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "olvidar",
+            "linea_id": "01926b3a-0000-7000-8000-000000000104"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "más de tres acciones.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "confirmar",
+            "linea_id": "01926b3a-0000-7000-8000-000000000101"
+          },
+          {
+            "accion": "confirmar",
+            "linea_id": "01926b3a-0000-7000-8000-000000000102"
+          },
+          {
+            "accion": "confirmar",
+            "linea_id": "01926b3a-0000-7000-8000-000000000103"
+          },
+          {
+            "accion": "confirmar",
+            "linea_id": "01926b3a-0000-7000-8000-000000000104"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "el destilador no escribe la voz.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "agregar",
+            "tipo": "voz",
+            "texto": "Hablale formal."
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "agregar no apunta a una línea existente.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "agregar",
+            "tipo": "hecho",
+            "texto": "x",
+            "linea_id": "01926b3a-0000-7000-8000-000000000103"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "corregir sin el texto nuevo.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "corregir",
+            "linea_id": "01926b3a-0000-7000-8000-000000000103"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "confirmar sin decir qué línea.",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "confirmar"
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "una acción que no es del vocabulario (el destilador no resume).",
+      "doc": {
+        "acciones": [
+          {
+            "accion": "resumir",
+            "texto": "Charlamos de pizza."
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -480,6 +480,12 @@
             "additionalProperties": false,
             "properties": {
               "puesto": { "type": "integer", "minimum": 1, "maximum": 3 },
+              "razon_personal": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "description": "El 'por qué te lo muestro' personal: presente si y solo si el término personal de la Libreta movió este puesto ('porque es la que siempre pedís'). Existe solo adentro del chat de IA del nodo; el ranking, la búsqueda y la app común siguen neutrales (docs/ia/libreta.md). Un cliente que no lo conoce lo ignora."
+              },
               "tarjeta": { "$ref": "#/$defs/tarjeta_producto" },
               "razon": {
                 "type": "string",
