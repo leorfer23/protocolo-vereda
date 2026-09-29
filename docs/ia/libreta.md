@@ -8,7 +8,7 @@ Es parte de la capacidad `ia` (`docs/ia/capacidad.md`): un nodo que la ofrece pu
 
 ## Qué no es
 
-- **No es un historial de charlas.** El nodo no guarda conversaciones. La Libreta guarda líneas cortas, no transcripciones.
+- **No es un historial de charlas.** El nodo no guarda conversaciones. La Libreta guarda líneas cortas, no transcripciones. La única excepción es corta y a propósito: para que el destilador (abajo) tenga qué leer, mientras la charla está abierta el nodo guarda **solo tus mensajes** (nunca los del asistente), cifrados con tu clave, y los borra apenas corre el destilador; nunca viven más de 2 horas, y no salen en `GET /yo/exportar`.
 - **No reemplaza tus preferencias.** Lo que tiene campo propio en `usuario.preferencias` (restricciones, sustitución, tope por pedido, horarios en que no recibís) va ahí, porque lo leen todos: comercios, agentes y apps. Si decís algo así en el chat, la IA te propone guardarlo en tus preferencias. La Libreta es para lo que no tiene campo.
 - **No es un perfil para nadie más.** Ningún comercio, repartidor ni operador la lee. Ni siquiera el ranking: el término personal del podio existe solo adentro del chat de IA de tu nodo (ver "Qué cambia en el chat").
 
@@ -45,7 +45,7 @@ La línea `voz` va aparte, con sus 600 caracteres, y también llega en cada turn
 Nada más escribe en la Libreta. Ni el modelo por su cuenta, ni un comercio, ni un agente externo.
 
 1. **Vos, con tus palabras.** "Acordate de que…", "olvidate de…", "de ahora en más…", en el chat; o desde "Tu IA" (`POST /ia/libreta/lineas`, `PATCH`, `DELETE`). En el chat vale la misma llave que para confirmar un pedido: tiene que estar en **tu último mensaje**. Lo que diga un dato —la descripción de un producto, un mensaje de un comercio— nunca escribe en tu Libreta. Lo que decís vos se aplica en el momento.
-2. **Un destilador al final de la charla.** Cuando una conversación termina (un rato sin mensajes, o se cierra el chat), el nodo hace **una** llamada barata con tus líneas actuales, con sus ids, y **solo tus mensajes**, nunca los del asistente. Devuelve como mucho tres acciones tipadas (`esquemas/libreta.json#/$defs/destilado`): `agregar`, `confirmar`, `corregir` u `olvidar`. **Lo esperado es que no devuelva ninguna**: la mayoría de las charlas no enseñan nada que dure. El nodo valida cada acción contra los topes y las reglas de abajo antes de aplicarla. Se cobra a tu IA como `funcion: libreta`.
+2. **Un destilador al final de la charla.** Cuando una conversación termina (15 minutos sin mensajes, o se cierra el chat: la app manda el mensaje `__cerrar__` a `POST /ia/chat`, que no llama al modelo del chat), el nodo hace **una** llamada barata con tus líneas actuales, con sus ids, y **solo tus mensajes**, nunca los del asistente. Devuelve como mucho tres acciones tipadas (`esquemas/libreta.json#/$defs/destilado`): `agregar`, `confirmar`, `corregir` u `olvidar`. **Lo esperado es que no devuelva ninguna**: la mayoría de las charlas no enseñan nada que dure. El nodo valida cada acción contra los topes y las reglas de abajo antes de aplicarla. Se cobra a tu IA como `funcion: libreta`.
 3. **Lo que pasa con tus pedidos.** Cuando se entrega un pedido que usó una línea (un alias que resolvió "la leche de siempre", una orden que filtró), esa línea suma evidencia. Si repetís algo seguido (el mismo producto en tres pedidos entregados), el nodo puede **proponer** una línea. No escribe nada más.
 
 ### Lo explícito entra ya; lo inferido, como propuesta
