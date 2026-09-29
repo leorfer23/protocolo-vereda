@@ -121,7 +121,7 @@ Herramientas (OpenAPI + MCP + uso interno del chat), compactas:
 
 #### Fórmula pública del podio
 
-Cuando el nodo arma un `podio` desde una búsqueda (`mostrar_widget` con `buscar`), toma hasta 20 tarjetas de adheridos que llegan —si al menos 3 nombran lo buscado en su nombre, compiten solo esas— y las ordena con este score público:
+Todo `podio` sale ordenado por este score público. Cuando el nodo lo arma desde una búsqueda (`mostrar_widget` con `buscar`), toma hasta 20 tarjetas de adheridos que llegan —si al menos 3 nombran lo buscado en su nombre, compiten solo esas— y las ordena así:
 
 ```
 score = 0.35 · cercanía + 0.25 · reputación + 0.25 · pedidos + 0.15 · coincidencia
@@ -135,7 +135,7 @@ coincidencia = fracción de los términos buscados, ya expandidos con datos/sino
 
 Quedan los 3 primeros; un empate no tiene orden garantizado. La `razon` de cada puesto nombra el término que más vale **sin ponderar** (ante un empate, en este orden): `la más cerca`, `mejor reputación`, `la más pedida del mes`, `la que más pega con lo que pediste`. El `sello` es el del lugar en el podio (el nodo de referencia usa "La reina del barrio", "Plata" y "Bronce"), no una afirmación sobre el producto.
 
-Si el agente elige él las tarjetas (pasa `productos` en vez de `buscar`), el orden es el suyo y la `razon` es la que él escribió o, si no escribió ninguna, una por datos (muy pedida, buena reputación, a la vuelta). En los dos casos las tarjetas salen del catálogo del chat y sus datos de la base. No hay posiciones pagas ni boost oculto por adhesión más allá del filtro previo de adheridos.
+Si el agente elige él las tarjetas (pasa `productos` en vez de `buscar`), elige los candidatos, **nunca el orden**: el nodo **siempre** reordena el podio con este mismo score, y el `sello` sigue al lugar que sale de la fórmula. La `razon` es la que el agente escribió o, si no escribió ninguna, una por datos (muy pedida, buena reputación, a la vuelta). En los dos casos las tarjetas salen del catálogo del chat y sus datos de la base. No hay posiciones pagas ni boost oculto por adhesión más allá del filtro previo de adheridos.
 
 También siguen:
 
@@ -186,6 +186,7 @@ Igual que antes: `GET /ia/yo/extracto`, y en `gastos_publicados` los opcionales 
 - Cobrar margen o intermediar plata.
 - Publicar en el catálogo, la ficha o un mensaje sin que la persona lo confirme.
 - Confirmar un pedido sin las dos llaves, o con más permiso que el de quien llama al chat (un mandato `armar` nunca confirma; la sesión respeta `tope_por_pedido`).
+- Ordenar un `podio` con otro criterio que la fórmula pública, aunque el agente haya elegido los candidatos.
 - Mandarle al modelo la dirección exacta o un punto más fino que ~100 m.
 - Cobrar el checkout del chat por Vereda o forzar tarjeta del nodo: solo medios del comercio.
 - Dejar el tope solo en manos del gateway/proveedor: el nodo responde `tope_ia_alcanzado`.

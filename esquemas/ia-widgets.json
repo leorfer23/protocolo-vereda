@@ -458,7 +458,7 @@
     },
     "podio": {
       "type": "object",
-      "description": "Hasta tres recomendadas, en orden, con su razón. Desde una búsqueda, el nodo las ordena con la fórmula pública de docs/ia/capacidad.md.",
+      "description": "Hasta tres recomendadas, en orden, con su razón. El nodo siempre las ordena con la fórmula pública de docs/ia/capacidad.md, también cuando el agente elige los candidatos: el agente elige cuáles, nunca el orden.",
       "required": ["tipo", "version", "titulo", "puestos"],
       "additionalProperties": false,
       "properties": {
