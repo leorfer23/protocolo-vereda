@@ -1,0 +1,97 @@
+{
+  "$comentario": "La página de Santa Elena, una distribuidora con sucursales: encabezado con logo, botón para pedir en la sucursal que te atiende, aviso de promo, productos, sucursales en el mapa, redes y WhatsApp.",
+  "tema": {
+    "modo": "auto",
+    "fondo": "liso",
+    "tipografia": "redonda",
+    "esquinas": "redondeadas",
+    "botones": "llenos"
+  },
+  "bloques": [
+    {
+      "tipo": "encabezado",
+      "id": "arriba",
+      "mostrar": [
+        "logo",
+        "nombre",
+        "descripcion",
+        "abierto_ahora",
+        "reputacion"
+      ]
+    },
+    {
+      "tipo": "pedir",
+      "id": "pedir",
+      "texto": "Hacé tu pedido"
+    },
+    {
+      "tipo": "aviso",
+      "id": "envio-gratis",
+      "texto": "Envío gratis en compras desde $20.000",
+      "tono": "promo"
+    },
+    {
+      "tipo": "productos",
+      "id": "ofertas",
+      "titulo": "Precios de hoy",
+      "origen": "con_promocion",
+      "limite": 8,
+      "forma": "carrusel"
+    },
+    {
+      "tipo": "sucursales",
+      "id": "locales",
+      "titulo": "Nuestros locales",
+      "forma": "mapa_y_lista"
+    },
+    {
+      "tipo": "enlaces",
+      "id": "links",
+      "enlaces": [
+        {
+          "texto": "Lista de precios mayoristas",
+          "url": "https://example.com/santa-elena/lista.pdf",
+          "icono": "descarga"
+        },
+        {
+          "texto": "Cómo llegar a la sede central",
+          "url": "https://maps.app.goo.gl/NaTKuuW5iSx1W4AJ9",
+          "icono": "mapa"
+        }
+      ]
+    },
+    {
+      "tipo": "whatsapp",
+      "id": "wa",
+      "texto": "Escribinos",
+      "mensaje": "Hola Santa Elena, quería consultar por…"
+    },
+    {
+      "tipo": "redes",
+      "id": "redes",
+      "forma": "iconos"
+    },
+    {
+      "tipo": "preguntas",
+      "id": "faq",
+      "titulo": "Preguntas",
+      "preguntas": [
+        {
+          "pregunta": "¿Venden por mayor?",
+          "respuesta": "Sí, por unidad y por bulto."
+        },
+        {
+          "pregunta": "¿Cómo pago?",
+          "respuesta": "Efectivo al recibir o al retirar."
+        }
+      ]
+    }
+  ],
+  "compartir": {
+    "titulo": "Santa Elena — precios reales todos los días",
+    "imagen": {
+      "url": "https://medios.ar.protocolovereda.com/0f7a87fd59518b20d2309ca994d129a2cc21aa732876de00721793db8a9e499a.jpg",
+      "alt": "Logo de Santa Elena"
+    }
+  }
+}

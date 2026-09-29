@@ -53,6 +53,11 @@
       "inputSchema": { "type": "object", "properties": { "desde": { "type": "integer", "minimum": 1 }, "limite": { "type": "integer", "minimum": 1, "maximum": 500 } } }
     },
     {
+      "name": "pagina_ver",
+      "description": "La página pública de un comercio (tipo Linktree) por su nombre corto o identidad: la ficha, los bloques en orden y de quién es la página. Leela antes de cambiarla. Para cambiarla, comercio_editar con 'pagina' (docs/pagina.md). Ej: 'mostrame cómo quedó mi página', 'la página de santa-elena'. Pública.",
+      "inputSchema": { "type": "object", "required": ["nombre"], "properties": { "nombre": { "type": "string", "description": "'santa-elena' o 'santa-elena@ar.protocolovereda.com'." } } }
+    },
+    {
       "name": "sucursales_ver",
       "description": "Las sucursales de una marca (la casa): nombre de cada local, dirección, si está abierta y, con lat/lng, a qué distancia y si llega. Ej: '¿qué sucursales de Santa Elena hay cerca?', '¿cuál está abierta ahora?'. Pública.",
       "inputSchema": { "type": "object", "required": ["comercio_id"], "properties": { "comercio_id": { "type": "string", "description": "La casa." }, "lat": { "type": "number" }, "lng": { "type": "number" } } }
@@ -219,7 +224,7 @@
     },
     {
       "name": "comercio_editar",
-      "description": "Cambia la ficha del comercio propio: descripción, marca (logo y colores), redes y teléfono públicos, horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. También abre o cierra ya, pisando los horarios, con 'apertura_manual' ({abierto, hasta?}; null la quita). Ej: 'cerramos los lunes', 'cerrá hasta las 18', 'hoy abrimos aunque sea feriado', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Cambiar la cuenta de cobro (privado.cuenta_cobro) pide firma fresca de la persona: si el nodo la exige, eso no lo podés hacer vos, pedile que lo haga desde la app (docs/acceso.md, punto 7). Requiere scope 'administrar'.",
+      "description": "Cambia la ficha del comercio propio: descripción, marca (logo y colores), redes y teléfono públicos, la página pública ('pagina': tema y bloques, docs/pagina.md; manda la página entera), horarios, modalidades de entrega y sus precios, política de cancelación, medios de cobro, cómo asigna repartidores (propios, del comprador, pool, en qué orden y qué hacer si nadie acepta) y su lista de repartidores propios, notas para agentes y política de datos. También abre o cierra ya, pisando los horarios, con 'apertura_manual' ({abierto, hasta?}; null la quita). Ej: 'cerramos los lunes', 'cerrá hasta las 18', 'hoy abrimos aunque sea feriado', 'subí el envío a $2.000 hasta 5 km', 'primero mis repartidores y después el pool', 'no guardes lista de clientes'. Nadie aprueba el cambio: queda publicado. Cambiar la cuenta de cobro (privado.cuenta_cobro) pide firma fresca de la persona: si el nodo la exige, eso no lo podés hacer vos, pedile que lo haga desde la app (docs/acceso.md, punto 7). Requiere scope 'administrar'.",
       "inputSchema": {
         "type": "object",
         "required": [

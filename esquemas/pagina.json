@@ -1,0 +1,1020 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/pagina.json",
+  "title": "Página del comercio",
+  "description": "La página pública del comercio, tipo Linktree: bloques en el orden que elige el comercio, sobre el tema visual de Vereda. Son datos, no HTML: cada app (web, iOS, Android) y cada agente la dibuja igual y de forma segura. La edita la dueña o su agente con editarComercio (docs/pagina.md).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bloques"
+  ],
+  "properties": {
+    "tema": {
+      "type": "object",
+      "description": "Cómo se ve, dentro de lo que ofrece Vereda. Los colores salen de 'marca'. Todo opcional: sin tema, el de Vereda.",
+      "additionalProperties": false,
+      "properties": {
+        "modo": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "claro",
+            "oscuro"
+          ],
+          "default": "auto",
+          "description": "'auto' sigue al dispositivo de quien mira."
+        },
+        "fondo": {
+          "type": "string",
+          "enum": [
+            "liso",
+            "primario",
+            "degradado",
+            "imagen"
+          ],
+          "default": "liso",
+          "description": "'liso': el fondo de Vereda. 'primario': el color de marca. 'degradado': de primario a secundario. 'imagen': 'fondo_imagen'."
+        },
+        "fondo_imagen": {
+          "$ref": "comunes.json#/$defs/imagen"
+        },
+        "tipografia": {
+          "type": "string",
+          "enum": [
+            "vereda",
+            "redonda",
+            "serif",
+            "mono",
+            "manuscrita"
+          ],
+          "default": "vereda",
+          "description": "Familias que traen todas las apps. No se cargan fuentes externas."
+        },
+        "esquinas": {
+          "type": "string",
+          "enum": [
+            "redondeadas",
+            "rectas",
+            "pildora"
+          ],
+          "default": "redondeadas"
+        },
+        "botones": {
+          "type": "string",
+          "enum": [
+            "llenos",
+            "contorno",
+            "suaves"
+          ],
+          "default": "llenos"
+        },
+        "acento": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Pisa el color de los botones. Ausente: marca.color_primario."
+        }
+      }
+    },
+    "bloques": {
+      "type": "array",
+      "maxItems": 60,
+      "items": {
+        "$ref": "#/$defs/bloque"
+      },
+      "description": "En orden. Las apps ignoran un tipo que no conocen, así un bloque nuevo no rompe a nadie."
+    },
+    "compartir": {
+      "type": "object",
+      "description": "Cómo se ve la página al compartirla (WhatsApp, Instagram). Ausente: nombre, descripción y logo de la ficha.",
+      "additionalProperties": false,
+      "properties": {
+        "titulo": {
+          "type": "string",
+          "maxLength": 70
+        },
+        "descripcion": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "imagen": {
+          "$ref": "comunes.json#/$defs/imagen"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "visible": {
+      "type": "object",
+      "description": "Cuándo se ve el bloque. Ausente: siempre. Sirve para una promo del finde o un aviso de feriado.",
+      "additionalProperties": false,
+      "properties": {
+        "desde": {
+          "$ref": "comunes.json#/$defs/instante"
+        },
+        "hasta": {
+          "$ref": "comunes.json#/$defs/instante"
+        },
+        "dias": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "lu",
+              "ma",
+              "mi",
+              "ju",
+              "vi",
+              "sa",
+              "do"
+            ]
+          }
+        }
+      }
+    },
+    "estilo_bloque": {
+      "type": "object",
+      "description": "Ajustes del bloque dentro del tema. Todo opcional: sin esto el bloque se ve con el tema de la página.",
+      "additionalProperties": false,
+      "properties": {
+        "fondo": {
+          "type": "string",
+          "enum": [
+            "ninguno",
+            "superficie",
+            "primario",
+            "secundario"
+          ],
+          "description": "Contra qué color se dibuja. 'primario' y 'secundario' son los de marca."
+        },
+        "alineacion": {
+          "type": "string",
+          "enum": [
+            "izquierda",
+            "centro"
+          ]
+        },
+        "ancho": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "completo"
+          ]
+        }
+      }
+    },
+    "enlace": {
+      "type": "object",
+      "required": [
+        "texto",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "texto": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 2000,
+          "pattern": "^(https://|mailto:|tel:|vereda://)",
+          "description": "https, mailto:, tel: o vereda:// (una ficha, una oferta, una promo). Nada de javascript: ni data:."
+        },
+        "icono": {
+          "type": "string",
+          "enum": [
+            "enlace",
+            "instagram",
+            "tiktok",
+            "x",
+            "facebook",
+            "youtube",
+            "whatsapp",
+            "telefono",
+            "email",
+            "mapa",
+            "pedido",
+            "regalo",
+            "estrella",
+            "info",
+            "descarga"
+          ],
+          "description": "Uno del set de Vereda: las apps los dibujan todos igual."
+        },
+        "destacado": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "bloque": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/b_encabezado"
+        },
+        {
+          "$ref": "#/$defs/b_pedir"
+        },
+        {
+          "$ref": "#/$defs/b_enlaces"
+        },
+        {
+          "$ref": "#/$defs/b_redes"
+        },
+        {
+          "$ref": "#/$defs/b_whatsapp"
+        },
+        {
+          "$ref": "#/$defs/b_texto"
+        },
+        {
+          "$ref": "#/$defs/b_imagen"
+        },
+        {
+          "$ref": "#/$defs/b_galeria"
+        },
+        {
+          "$ref": "#/$defs/b_video"
+        },
+        {
+          "$ref": "#/$defs/b_productos"
+        },
+        {
+          "$ref": "#/$defs/b_promociones"
+        },
+        {
+          "$ref": "#/$defs/b_sucursales"
+        },
+        {
+          "$ref": "#/$defs/b_horarios"
+        },
+        {
+          "$ref": "#/$defs/b_resenas"
+        },
+        {
+          "$ref": "#/$defs/b_aviso"
+        },
+        {
+          "$ref": "#/$defs/b_preguntas"
+        },
+        {
+          "$ref": "#/$defs/b_separador"
+        }
+      ]
+    },
+    "b_encabezado": {
+      "type": "object",
+      "description": "Logo, nombre y descripción de la ficha. Si no está en la página, las apps lo ponen arriba igual: una página siempre dice de quién es.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "encabezado"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "mostrar": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "logo",
+              "nombre",
+              "descripcion",
+              "reputacion",
+              "abierto_ahora",
+              "verificacion"
+            ]
+          },
+          "description": "Ausente: logo, nombre, descripción y abierto_ahora."
+        },
+        "portada": {
+          "$ref": "comunes.json#/$defs/imagen",
+          "description": "Imagen ancha detrás del encabezado."
+        },
+        "portada_video": {
+          "$ref": "comunes.json#/$defs/video"
+        }
+      }
+    },
+    "b_pedir": {
+      "type": "object",
+      "description": "El botón para comprar. Lleva al catálogo de la sucursal que atiende a quien mira (docs/sucursales.md) o de la que se fije.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "pedir"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "texto": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "Ausente: 'Hacé tu pedido'."
+        },
+        "sucursal": {
+          "$ref": "comunes.json#/$defs/identidad",
+          "description": "Fija una sucursal. Ausente: la que atiende a quien mira."
+        },
+        "categoria": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Abre el catálogo en esta categoría."
+        }
+      }
+    },
+    "b_enlaces": {
+      "type": "object",
+      "description": "Lista de botones a donde el comercio quiera: el corazón de una página tipo Linktree.",
+      "required": [
+        "tipo",
+        "id",
+        "enlaces"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "enlaces"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "enlaces": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "items": {
+            "$ref": "#/$defs/enlace"
+          }
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "botones",
+            "lista",
+            "grilla"
+          ],
+          "default": "botones"
+        }
+      }
+    },
+    "b_redes": {
+      "type": "object",
+      "description": "Las redes de la ficha ('redes'), como íconos o botones. No repite datos: los lee de la ficha.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "redes"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "cuales": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "instagram",
+              "tiktok",
+              "x",
+              "facebook",
+              "youtube",
+              "whatsapp",
+              "telefono",
+              "email",
+              "sitio_web"
+            ]
+          },
+          "description": "Cuáles y en qué orden. Ausente: todas las que tenga la ficha."
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "iconos",
+            "botones"
+          ],
+          "default": "iconos"
+        }
+      }
+    },
+    "b_whatsapp": {
+      "type": "object",
+      "description": "Botón para escribir por WhatsApp al número de la ficha, con un mensaje ya escrito.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "whatsapp"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "texto": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "mensaje": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Lo que aparece escrito al abrir el chat."
+        }
+      }
+    },
+    "b_texto": {
+      "type": "object",
+      "description": "Texto libre con formato mínimo: **negrita**, _itálica_, [enlace](https://…) y saltos de línea. Nada de HTML: las apps lo muestran como texto.",
+      "required": [
+        "tipo",
+        "id",
+        "texto"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "texto"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "texto": {
+          "type": "string",
+          "maxLength": 3000
+        }
+      }
+    },
+    "b_imagen": {
+      "type": "object",
+      "description": "Una imagen, con enlace opcional.",
+      "required": [
+        "tipo",
+        "id",
+        "imagen"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "imagen"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "imagen": {
+          "$ref": "comunes.json#/$defs/imagen"
+        },
+        "enlace": {
+          "$ref": "#/$defs/enlace"
+        },
+        "proporcion": {
+          "type": "string",
+          "enum": [
+            "original",
+            "cuadrada",
+            "ancha",
+            "vertical"
+          ],
+          "default": "original"
+        }
+      }
+    },
+    "b_galeria": {
+      "type": "object",
+      "description": "Varias imágenes en carrusel o grilla.",
+      "required": [
+        "tipo",
+        "id",
+        "imagenes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "galeria"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "imagenes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "$ref": "comunes.json#/$defs/imagen"
+          }
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "carrusel",
+            "grilla"
+          ],
+          "default": "carrusel"
+        }
+      }
+    },
+    "b_video": {
+      "type": "object",
+      "description": "Un clip corto, con las mismas reglas que los videos de la ficha (docs/medios.md).",
+      "required": [
+        "tipo",
+        "id",
+        "video"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "video"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "video": {
+          "$ref": "comunes.json#/$defs/video"
+        }
+      }
+    },
+    "b_productos": {
+      "type": "object",
+      "description": "Productos del catálogo, en vivo: precio y stock de la sucursal que atiende a quien mira.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "productos"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "origen": {
+          "type": "string",
+          "enum": [
+            "elegidos",
+            "categoria",
+            "mas_vendidos",
+            "con_promocion",
+            "nuevos"
+          ],
+          "default": "elegidos"
+        },
+        "ofertas": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "$ref": "comunes.json#/$defs/id"
+          },
+          "description": "Con 'elegidos': cuáles y en qué orden."
+        },
+        "categoria": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Con 'categoria'."
+        },
+        "limite": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24,
+          "default": 8
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "grilla",
+            "carrusel",
+            "lista"
+          ],
+          "default": "carrusel"
+        }
+      }
+    },
+    "b_promociones": {
+      "type": "object",
+      "description": "Las promociones activas de la sucursal que atiende a quien mira.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "promociones"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "limite": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "default": 4
+        }
+      }
+    },
+    "b_sucursales": {
+      "type": "object",
+      "description": "Las sucursales de la marca (docs/sucursales.md), con abierto/cerrado y cuál le llega a quien mira.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "sucursales"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "mapa",
+            "lista",
+            "mapa_y_lista"
+          ],
+          "default": "mapa_y_lista"
+        }
+      }
+    },
+    "b_horarios": {
+      "type": "object",
+      "description": "Los horarios de la ficha, con 'abierto ahora'.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "horarios"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        }
+      }
+    },
+    "b_resenas": {
+      "type": "object",
+      "description": "La reputación y las últimas reseñas firmadas (docs/resenas.md). Solo muestra: no se eligen ni se esconden reseñas.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "resenas"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "limite": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3
+        }
+      }
+    },
+    "b_aviso": {
+      "type": "object",
+      "description": "Una franja para avisar algo: un feriado, una promo, un corte.",
+      "required": [
+        "tipo",
+        "id",
+        "texto"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "aviso"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "texto": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "tono": {
+          "type": "string",
+          "enum": [
+            "info",
+            "promo",
+            "alerta"
+          ],
+          "default": "info"
+        },
+        "enlace": {
+          "$ref": "#/$defs/enlace"
+        }
+      }
+    },
+    "b_preguntas": {
+      "type": "object",
+      "description": "Preguntas frecuentes, que se abren de a una.",
+      "required": [
+        "tipo",
+        "id",
+        "preguntas"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "preguntas"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "preguntas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "items": {
+            "type": "object",
+            "required": [
+              "pregunta",
+              "respuesta"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "pregunta": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "respuesta": {
+                "type": "string",
+                "maxLength": 1500
+              }
+            }
+          }
+        }
+      }
+    },
+    "b_separador": {
+      "type": "object",
+      "description": "Espacio o línea entre bloques.",
+      "required": [
+        "tipo",
+        "id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "const": "separador"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]{1,40}$",
+          "description": "Lo elige quien edita; único en la página. Sirve para que un agente mueva o cambie un bloque sin reescribir los demás."
+        },
+        "titulo": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Encabezado opcional arriba del bloque."
+        },
+        "visible": {
+          "$ref": "#/$defs/visible"
+        },
+        "estilo": {
+          "$ref": "#/$defs/estilo_bloque"
+        },
+        "forma": {
+          "type": "string",
+          "enum": [
+            "espacio",
+            "linea"
+          ],
+          "default": "espacio"
+        }
+      }
+    }
+  }
+}

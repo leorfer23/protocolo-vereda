@@ -32,6 +32,7 @@ MAPA = {
     "repartidor-bici.json": "repartidor.json",
     "sostenimiento.json": "sostenimiento.json",
     "calles-zona.json": "calles.json",
+    "santa-elena-pagina.json": "pagina.json",
 }
 
 fallos = 0

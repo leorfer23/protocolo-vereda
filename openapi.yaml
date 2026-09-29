@@ -286,6 +286,25 @@ paths:
         "200": { description: Actualizado, content: { application/json: { schema: { $ref: "esquemas/comercio.json" } } } }
         "403": { $ref: "#/components/responses/NoEsElDueno" }
         "422": { $ref: "#/components/responses/Error" }
+  /paginas/{nombre}:
+    get:
+      operationId: verPagina
+      tags: [comercios]
+      summary: La página pública de un comercio, por su nombre corto
+      description: |
+        `nombre` es la parte local de la identidad (`santa-elena` de `santa-elena@ar.protocolovereda.com`)
+        o la identidad entera. Devuelve la ficha y la página a mostrar: la propia o, en una sucursal sin
+        página, la de su casa, con `pagina_de` diciendo de quién es. Sin página en ninguno de los dos,
+        `pagina` no viene y las apps arman una con encabezado, pedir, redes y sucursales (docs/pagina.md).
+        Pública: es lo que se comparte en `https://<app>/@<nombre>`.
+      security: []
+      parameters:
+        - { $ref: "#/components/parameters/ifNoneMatch" }
+        - { name: nombre, in: path, required: true, schema: { type: string, maxLength: 200 } }
+      responses:
+        "200": { description: OK, headers: { ETag: { $ref: "#/components/headers/ETag" }, Cache-Control: { $ref: "#/components/headers/CacheControl" } }, content: { application/json: { schema: { type: object, required: [comercio], properties: { comercio: { $ref: "esquemas/comercio.json" }, pagina: { $ref: "esquemas/pagina.json" }, pagina_de: { $ref: "esquemas/comunes.json#/$defs/identidad" } } } } } }
+        "304": { $ref: "#/components/responses/SinCambios" }
+        "404": { $ref: "#/components/responses/Error" }
   /comercios/{id}/sucursales:
     get:
       operationId: verSucursales

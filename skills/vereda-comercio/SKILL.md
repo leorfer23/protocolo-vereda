@@ -58,14 +58,24 @@ Una marca con varios locales: cada local es un comercio (`docs/sucursales.md`).
 3. Para cargar el catálogo una sola vez: ofertas en la casa y `hereda_catalogo: true` en cada sucursal. Cada una manda su stock y, si quiere, su precio con `stock_actualizar`.
 4. Quien compra cae en la sucursal que llega a su dirección. Cómo se abastece cada local (un depósito, traspasos) es de la marca: publicá en cada sucursal el stock que puede vender.
 
-## 6. Operar
+## 6. Página pública
+
+Cada comercio tiene una página tipo Linktree en `https://<app>/@<nombre>` (`docs/pagina.md`). Se arma con bloques, no con HTML.
+
+1. `pagina_ver` con el nombre corto para ver cómo está.
+2. Proponé la página en palabras ("arriba el logo y el botón de pedir, después las promos, el mapa de locales y las preguntas") y confirmala con la persona.
+3. `comercio_editar` con `pagina`: `tema` (modo, fondo, tipografía, esquinas, botones) y `bloques` en orden, cada uno con un `id` único. Se manda la página entera.
+4. Productos, precios, horarios y sucursales no se copian: los bloques los leen en vivo.
+5. Pasale el link `@<nombre>` para que lo ponga en su bio y en el local.
+
+## 7. Operar
 
 - `pedidos_del_comercio` es la bandeja. `pedido_aceptar` o `pedido_rechazar` dentro de `plazo_aceptacion_min`; si no, el pedido se cancela y cuenta como rechazado.
 - `pedido_listo`, `pedido_entregar`, `pedido_asignar` según quién lleva.
 - `ver_mensajes` y `enviar_mensaje` para hablar con el comprador dentro del pedido.
 - `metricas_del_comercio` y `exportar_comercio` (solo la dueña) para sus números y sus datos.
 
-## 7. Verificación
+## 8. Verificación
 
 No hace falta para vender. `verificacion` se completa sola cuando el comercio verifica CUIT, foto geolocalizada y cuenta de cobro (`ver_verificacion`). No existe tilde azul ni nadie que apruebe.
 
