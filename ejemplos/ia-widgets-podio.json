@@ -1,5 +1,5 @@
 {
-  "$comentario": "Flujo pizza: podio de fugazzetas + checkout.",
+  "$comentario": "Flujo pizza: podio de fugazzetas + checkout. El podio sale de buscar 'fugazzeta' y está ordenado con la fórmula pública de docs/ia/capacidad.md (coincidencia 0,5 en los tres): 0,729 · 0,689 · 0,528.",
   "rol": "asistente",
   "texto": "Estas no te las podés perder:",
   "widgets": [
@@ -10,8 +10,8 @@
       "puestos": [
         {
           "puesto": 1,
-          "razon": "más pedida",
-          "sello": "top",
+          "razon": "la más pedida del mes",
+          "sello": "La reina del barrio",
           "tarjeta": {
             "oferta_id": "01926b3a-0000-7000-8000-0000000000c2",
             "comercio_id": "01926b3a-0000-7000-8000-0000000000a1",
@@ -20,9 +20,9 @@
               "centavos": 9800,
               "moneda": "ARS"
             },
-            "pedidos_mes": 88,
+            "pedidos_mes": 140,
             "reputacion": {
-              "promedio": 4.8,
+              "promedio": 4.6,
               "cantidad": 210
             },
             "distancia_m": 420,
@@ -31,7 +31,8 @@
         },
         {
           "puesto": 2,
-          "razon": "más cerca",
+          "razon": "la más cerca",
+          "sello": "Plata",
           "tarjeta": {
             "oferta_id": "01926b3a-0000-7000-8000-0000000000c3",
             "comercio_id": "01926b3a-0000-7000-8000-0000000000a4",
@@ -40,13 +41,19 @@
               "centavos": 9200,
               "moneda": "ARS"
             },
-            "distancia_m": 180,
+            "pedidos_mes": 8,
+            "reputacion": {
+              "promedio": 3.8,
+              "cantidad": 40
+            },
+            "distancia_m": 60,
             "agregar": true
           }
         },
         {
           "puesto": 3,
           "razon": "mejor reputación",
+          "sello": "Bronce",
           "tarjeta": {
             "oferta_id": "01926b3a-0000-7000-8000-0000000000c4",
             "comercio_id": "01926b3a-0000-7000-8000-0000000000a5",
@@ -55,10 +62,12 @@
               "centavos": 11000,
               "moneda": "ARS"
             },
+            "pedidos_mes": 5,
             "reputacion": {
               "promedio": 4.9,
               "cantidad": 95
             },
+            "distancia_m": 900,
             "agregar": true
           }
         }

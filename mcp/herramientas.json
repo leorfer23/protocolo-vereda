@@ -1136,7 +1136,7 @@
   },
   {
     "name": "ia_chat",
-    "description": "Turno del chat del comprador con UI generativa: texto + widgets (mazo, podio, promo, bienvenida, respuestas, carrito/checkout con carrito real, etc.). No compra sola: la persona confirma con el carrito. Scope 'armar'. Ej: 'quiero una pizza'.",
+    "description": "Turno del chat del comprador con UI generativa: texto + widgets (grilla, mazo, podio, promo, comercios, bienvenida, respuestas, carrito/checkout con carrito real, historial, pedido_estado, etc.). Arma carritos; con scope 'armar' nunca confirma un pedido. Con 'pedir', confirma solo si la persona lo pidió en su último mensaje y dentro de los topes del mandato. Scope 'armar'. Ej: 'quiero una pizza'.",
     "inputSchema": {
       "type": "object",
       "required": [
