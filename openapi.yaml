@@ -797,15 +797,26 @@ paths:
       tags: [ia, carrito]
       summary: "Turno del chat del comprador: texto + widgets tipados (UI generativa)"
       description: |
-        Respuesta con `mensaje` (texto y/o widgets de esquemas/ia-widgets.json: mazo, podio,
-        promo, bienvenida, respuestas, carrito/checkout con carrito_id real, etc.). La app
-        dibuja los tipos que conoce e ignora el resto. El modelo solo entiende y redacta; el
-        nodo ejecuta las herramientas (catalogo/buscar, receta-a-lista, …) y arma los widgets.
-        En el chat del nodo solo hay comercios con `ia_chat.adherido`. Las acciones (agregar,
-        confirmar) las ejecuta la persona — la IA no compra sola (docs/ia/capacidad.md).
-        JSON completo por defecto. Con `Accept: text/event-stream` el nodo puede streamear el
-        mensaje (opcional; si no, responde application/json igual). Chat vacío: el nodo puede
-        devolver `bienvenida` sin llamar al modelo.
+        Respuesta con `mensaje` (texto y/o widgets de esquemas/ia-widgets.json: grilla, mazo,
+        podio, promo, comercios, producto, respuestas, carrito, checkout, historial,
+        pedido_estado, navegar, bienvenida). La app dibuja los tipos que conoce e ignora el
+        resto. El agente del nodo usa las herramientas del MCP como la persona y compone la
+        respuesta con widgets; el nodo pone precios, fotos y totales desde la base. En el chat
+        del nodo solo hay comercios con `ia_chat.adherido`. Confirmar un pedido lo hace la
+        persona con `confirmarCarrito` — la IA no compra sola (docs/ia/capacidad.md).
+
+        Un toque sobre un widget va en `accion` (esquemas/ia-widgets.json#/$defs/accion_chat):
+        elegir, agregar, cantidad, quitar, ir_a_pagar, repetir, ver_producto, ver_carta y
+        confirmado se resuelven sin modelo; responder, filtro, elegir_comercio, mas_como_esta y
+        ver_mas vuelven al agente como un turno. Chat vacío: `bienvenida` sin llamar al modelo.
+
+        JSON completo por defecto. Con `Accept: text/event-stream` el nodo streamea el turno
+        como Server-Sent Events, en este orden posible:
+        `accion` (evento_accion: un paso del agente con su etiqueta, `inicio` y `fin`, para el
+        estado cargando), `texto` (`{"delta": "…"}`, pedazos del texto), `widget` (cada widget
+        apenas está listo), `mensaje` (la respuesta_chat completa, siempre al final) y `error`
+        (error.json, si algo falla después de empezar). Si falla antes del primer evento, el
+        nodo responde el error de siempre con su código HTTP.
       security: [ { sesion: [] }, { mandato: [armar] } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia-widgets.json#/$defs/pedido_chat" } } } }
       responses:
@@ -813,7 +824,7 @@ paths:
           description: Mensaje del asistente + consumo
           content:
             application/json: { schema: { $ref: "esquemas/ia-widgets.json#/$defs/respuesta_chat" } }
-            text/event-stream: { schema: { type: string, description: "SSE opcional: eventos con fragmentos o el mensaje final." } }
+            text/event-stream: { schema: { type: string, description: "SSE: eventos accion, texto, widget, mensaje (final) y error. Ver la descripción de la operación." } }
         "401": { $ref: "#/components/responses/Error" }
         "403": { description: "ia_no_activada o fuera_de_mandato", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "422": { description: "funcion_ia_no_ofrecida u otro", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }

@@ -3,8 +3,16 @@
   "licencia": "CC0-1.0",
   "grupos": [
     {
+      "canonico": "cerveza",
+      "terminos": [
+        "birra",
+        "cerveza"
+      ]
+    },
+    {
       "canonico": "muzzarella",
       "terminos": [
+        "muza",
         "muzza",
         "muzzarella",
         "mozzarella",

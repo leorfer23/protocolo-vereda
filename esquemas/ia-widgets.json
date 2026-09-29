@@ -24,6 +24,11 @@
         { "$ref": "#/$defs/mazo" },
         { "$ref": "#/$defs/podio" },
         { "$ref": "#/$defs/promo" },
+        { "$ref": "#/$defs/grilla" },
+        { "$ref": "#/$defs/comercios" },
+        { "$ref": "#/$defs/historial" },
+        { "$ref": "#/$defs/pedido_estado" },
+        { "$ref": "#/$defs/navegar" },
         { "$ref": "#/$defs/desconocido" }
       ]
     },
@@ -37,10 +42,7 @@
           "minimum": 0,
           "maximum": 5
         },
-        "cantidad": {
-          "type": "integer",
-          "minimum": 0
-        }
+        "cantidad": { "type": "integer", "minimum": 0 }
       }
     },
     "variante_corta": {
@@ -108,6 +110,30 @@
           "type": "string",
           "maxLength": 40,
           "description": "Etiqueta corta en bienvenida.promos (ej. '2x1', 'hoy')."
+        },
+        "precio_antes": {
+          "$ref": "comunes.json#/$defs/monto",
+          "description": "Precio tachado cuando hay promoción."
+        },
+        "imagenes": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "type": "string", "format": "uri" },
+          "description": "Galería de fotos."
+        },
+        "video": {
+          "type": "object",
+          "required": ["url"],
+          "additionalProperties": false,
+          "properties": {
+            "url": { "type": "string", "format": "uri" },
+            "poster": { "type": "string", "format": "uri" }
+          },
+          "description": "Clip vertical corto."
+        },
+        "abierto": {
+          "type": "boolean",
+          "description": "El local está abierto ahora."
         }
       }
     },
@@ -156,14 +182,32 @@
     },
     "producto": {
       "type": "object",
-      "required": ["tipo", "version", "item"],
+      "required": ["tipo", "version"],
       "additionalProperties": false,
       "properties": {
         "tipo": { "const": "producto" },
         "version": { "$ref": "#/$defs/version" },
         "id": { "type": "string", "maxLength": 64 },
-        "item": { "$ref": "#/$defs/tarjeta_producto" }
-      }
+        "item": {
+          "$ref": "#/$defs/tarjeta_producto",
+          "deprecated": true,
+          "description": "Nombre viejo de 'tarjeta'; los clientes nuevos leen 'tarjeta'."
+        },
+        "cantidad": {
+          "type": "object",
+          "required": ["valor", "unidad"],
+          "additionalProperties": false,
+          "properties": {
+            "valor": { "type": "number" },
+            "unidad": { "type": "string" },
+            "minimo": { "type": "number" },
+            "paso": { "type": "number" },
+            "maximo": { "type": "number" }
+          }
+        },
+        "tarjeta": { "$ref": "#/$defs/tarjeta_producto" }
+      },
+      "anyOf": [{ "required": ["tarjeta"] }, { "required": ["item"] }]
     },
     "carrito": {
       "type": "object",
@@ -194,7 +238,10 @@
                 "required": ["valor", "unidad"],
                 "properties": {
                   "valor": { "type": "number" },
-                  "unidad": { "type": "string" }
+                  "unidad": { "type": "string" },
+                  "minimo": { "type": "number" },
+                  "paso": { "type": "number" },
+                  "maximo": { "type": "number" }
                 }
               },
               "subtotal": { "$ref": "comunes.json#/$defs/monto" },
@@ -207,7 +254,11 @@
                 "type": "string",
                 "maxLength": 200,
                 "description": "Nota corta: '2 platos', 'sin cebolla'."
-              }
+              },
+              "item_id": { "type": "string" },
+              "imagen": { "type": "string", "format": "uri" },
+              "precio_unitario": { "$ref": "comunes.json#/$defs/monto" },
+              "variante": { "type": "string", "maxLength": 80 }
             }
           }
         },
@@ -224,7 +275,11 @@
             }
           }
         },
-        "total": { "$ref": "comunes.json#/$defs/monto" }
+        "total": { "$ref": "comunes.json#/$defs/monto" },
+        "editable": {
+          "type": "boolean",
+          "description": "La app muestra cantidades editables (acciones cantidad y quitar)."
+        }
       }
     },
     "checkout": {
@@ -251,7 +306,31 @@
           "description": "Solo medios del comercio. Nunca cobro por Vereda. Con efectivo, la app puede pedir paga_con."
         },
         "total": { "$ref": "comunes.json#/$defs/monto" },
-        "nota": { "type": "string", "maxLength": 200 }
+        "nota": { "type": "string", "maxLength": 200 },
+        "comercio_nombre": { "type": "string" },
+        "envio": { "$ref": "comunes.json#/$defs/monto" },
+        "entrega": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "modalidad": { "type": "string" },
+            "direccion_etiqueta": { "type": "string", "maxLength": 60 },
+            "eta": { "type": "string", "format": "date-time" }
+          }
+        },
+        "reparto": {
+          "type": "array",
+          "description": "Cómo se reparte el total, como en el checkout de la app: cada línea con su concepto y su monto.",
+          "items": {
+            "type": "object",
+            "required": ["concepto", "monto"],
+            "additionalProperties": false,
+            "properties": {
+              "concepto": { "type": "string", "maxLength": 80 },
+              "monto": { "$ref": "comunes.json#/$defs/monto" }
+            }
+          }
+        }
       }
     },
     "recomendacion": {
@@ -351,6 +430,11 @@
               }
             }
           }
+        },
+        "modo": {
+          "type": "string",
+          "enum": ["respuesta", "filtro"],
+          "default": "respuesta"
         }
       }
     },
@@ -440,13 +524,13 @@
     },
     "pedido_chat": {
       "type": "object",
-      "required": ["mensaje", "lat", "lng"],
+      "required": ["lat", "lng"],
       "additionalProperties": false,
       "properties": {
         "mensaje": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 2000
+          "maxLength": 2000,
+          "description": "Lo que escribió la persona. Vacío con historial vacío abre el chat (bienvenida)."
         },
         "historial": {
           "type": "array",
@@ -456,8 +540,10 @@
         "lat": { "type": "number" },
         "lng": { "type": "number" },
         "comercio_id": { "type": "string" },
-        "carrito_id": { "type": "string" }
-      }
+        "carrito_id": { "type": "string" },
+        "accion": { "$ref": "#/$defs/accion_chat" }
+      },
+      "anyOf": [{ "required": ["mensaje"] }, { "required": ["accion"] }]
     },
     "respuesta_chat": {
       "type": "object",
@@ -490,7 +576,12 @@
               "respuestas",
               "mazo",
               "podio",
-              "promo"
+              "promo",
+              "grilla",
+              "comercios",
+              "historial",
+              "pedido_estado",
+              "navegar"
             ]
           },
           "description": "Cualquier string que no sea uno de los tipos conocidos."
@@ -502,6 +593,243 @@
         }
       },
       "additionalProperties": true
+    },
+    "tarjeta_comercio": {
+      "type": "object",
+      "description": "Un local para elegir con los ojos (docs/ia/harness.md §5.2).",
+      "required": ["comercio_id", "nombre", "abierto"],
+      "additionalProperties": false,
+      "properties": {
+        "comercio_id": { "type": "string" },
+        "nombre": { "type": "string", "maxLength": 120 },
+        "rubro": { "type": "string", "maxLength": 80 },
+        "portada": { "type": "string", "format": "uri" },
+        "galeria": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "type": "string", "format": "uri" }
+        },
+        "abierto": { "type": "boolean" },
+        "distancia_m": { "type": "integer", "minimum": 0 },
+        "demora_min": { "type": "integer", "minimum": 0 },
+        "reputacion": { "$ref": "#/$defs/reputacion_corta" },
+        "envio": { "$ref": "comunes.json#/$defs/monto" },
+        "nuevo": { "type": "boolean" },
+        "destacados": {
+          "type": "array",
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/tarjeta_producto" }
+        }
+      }
+    },
+    "grilla": {
+      "type": "object",
+      "description": "Grilla de 2 columnas con fotos para descubrir.",
+      "required": ["tipo", "version", "tarjetas"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "grilla" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "titulo": { "type": "string", "maxLength": 80 },
+        "tarjetas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/tarjeta_producto" }
+        },
+        "filtros": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["id", "texto"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "maxLength": 64 },
+              "texto": { "type": "string", "maxLength": 40 },
+              "activo": { "type": "boolean" }
+            }
+          }
+        },
+        "mas": {
+          "type": "boolean",
+          "description": "Hay más resultados (acción ver_mas)."
+        }
+      }
+    },
+    "comercios": {
+      "type": "object",
+      "description": "Locales para elegir o conocer.",
+      "required": ["tipo", "version", "locales"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "comercios" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "titulo": { "type": "string", "maxLength": 80 },
+        "locales": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/tarjeta_comercio" }
+        }
+      }
+    },
+    "historial": {
+      "type": "object",
+      "description": "Pedidos anteriores de la persona, para repetir en un toque.",
+      "required": ["tipo", "version", "pedidos"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "historial" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "titulo": { "type": "string", "maxLength": 80 },
+        "pedidos": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["pedido_id", "comercio_nombre", "fecha"],
+            "additionalProperties": false,
+            "properties": {
+              "pedido_id": { "type": "string" },
+              "comercio_id": { "type": "string" },
+              "comercio_nombre": { "type": "string" },
+              "fecha": { "type": "string", "format": "date" },
+              "resumen": { "type": "string", "maxLength": 300 },
+              "total": { "$ref": "comunes.json#/$defs/monto" },
+              "imagenes": {
+                "type": "array",
+                "maxItems": 3,
+                "items": { "type": "string", "format": "uri" }
+              },
+              "estado": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "pedido_estado": {
+      "type": "object",
+      "description": "Seguimiento de un pedido; la app lo actualiza con los eventos del nodo.",
+      "required": ["tipo", "version", "pedido_id", "estado", "pasos"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "pedido_estado" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "pedido_id": { "type": "string" },
+        "comercio_nombre": { "type": "string" },
+        "estado": { "type": "string" },
+        "pasos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["estado", "etiqueta", "hecho"],
+            "additionalProperties": false,
+            "properties": {
+              "estado": { "type": "string" },
+              "etiqueta": { "type": "string", "maxLength": 80 },
+              "hecho": { "type": "boolean" },
+              "instante": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "eta": { "type": "string", "format": "date-time" },
+        "repartidor": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "nombre": { "type": "string" } }
+        }
+      }
+    },
+    "navegar": {
+      "type": "object",
+      "description": "Lleva a una pantalla de la app.",
+      "required": ["tipo", "version", "destino", "texto"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "const": "navegar" },
+        "version": { "$ref": "#/$defs/version" },
+        "id": { "type": "string", "maxLength": 64 },
+        "destino": {
+          "type": "object",
+          "required": ["pantalla"],
+          "additionalProperties": false,
+          "properties": {
+            "pantalla": {
+              "type": "string",
+              "enum": [
+                "comercio",
+                "producto",
+                "carrito",
+                "pedido",
+                "tu_ia",
+                "direcciones"
+              ]
+            },
+            "id": { "type": "string" }
+          }
+        },
+        "texto": { "type": "string", "maxLength": 60 },
+        "auto": { "type": "boolean", "default": false }
+      }
+    },
+    "accion_chat": {
+      "type": "object",
+      "description": "Un toque sobre un widget (docs/ia/harness.md §5.4).",
+      "required": ["tipo"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "elegir",
+            "agregar",
+            "cantidad",
+            "quitar",
+            "ir_a_pagar",
+            "repetir",
+            "ver_producto",
+            "ver_carta",
+            "elegir_comercio",
+            "confirmado",
+            "responder",
+            "filtro",
+            "mas_como_esta",
+            "ver_mas"
+          ]
+        },
+        "widget_id": { "type": "string", "maxLength": 64 },
+        "oferta_id": { "type": "string" },
+        "variante_id": { "type": "string" },
+        "cantidad": { "type": "number", "exclusiveMinimum": 0 },
+        "carrito_id": { "type": "string" },
+        "item_id": { "type": "string" },
+        "pedido_id": { "type": "string" },
+        "comercio_id": { "type": "string" },
+        "filtro_id": { "type": "string", "maxLength": 64 },
+        "activo": { "type": "boolean" },
+        "texto": { "type": "string", "maxLength": 2000 },
+        "valor": {
+          "description": "Número en 'cantidad'; texto en 'responder'.",
+          "type": ["number", "string"]
+        }
+      }
+    },
+    "evento_accion": {
+      "type": "object",
+      "description": "Evento 'accion' del stream: un paso del agente, para el estado cargando (§5.5).",
+      "required": ["tool", "etiqueta", "estado"],
+      "additionalProperties": false,
+      "properties": {
+        "tool": { "type": "string" },
+        "etiqueta": { "type": "string", "maxLength": 80 },
+        "estado": { "type": "string", "enum": ["inicio", "fin"] }
+      }
     }
   }
 }
