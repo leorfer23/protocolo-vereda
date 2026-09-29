@@ -1,6 +1,6 @@
 # Avisos de la IA: que te escriba primero, solo si vos querés
 
-Normalmente tu IA habla cuando vos le hablás. Los avisos son la excepción: la IA te escribe primero, pero **solo si los prendiste**, **como mucho una vez por día** y **solo porque pasó algo concreto**. Nunca porque "es viernes" o porque hace rato que no pedís. **El silencio es el default.**
+Normalmente tu IA habla cuando vos le hablás. Los avisos son la excepción: la IA te escribe primero, pero **solo si los prendiste**, **como mucho una vez por día** (salvo los de un pedido en curso) y **solo porque pasó algo concreto**. Nunca porque "es viernes" o porque hace rato que no pedís. **El silencio es el default.**
 
 Es parte de la capacidad `ia` (`docs/ia/capacidad.md`): un nodo que la ofrece publica `avisos` en `ia.funciones.comprador`. Sin eso, las rutas de este documento responden `501 no_implementado`.
 
@@ -17,7 +17,7 @@ Cada aviso nace de un hecho que el nodo puede comprobar. El nodo los evalúa **s
 
 | `tipo` | Cuándo | Default al prender |
 | --- | --- | --- |
-| `pedido_demorado` | Un pedido tuyo en curso pasó 20 minutos de su `eta` sin entregarse | prendido |
+| `pedido_demorado` | Un pedido tuyo en curso pasó 20 minutos de su `eta` (la hora prometida) sin entregarse | prendido |
 | `sustitucion` | El comercio te propone un reemplazo en un pedido en preparación (`item.sustitucion_propuesta`) y todavía no respondiste. Vence con la sustitución | prendido |
 | `reposicion` | Algo que comprás seguido se te estaría por terminar, según tu ritmo de compra: "el café te dura unas tres semanas" | prendido |
 | `vigia` | Se cumplió algo que vos pediste vigilar: "avisame cuando baje el aceite" | prendido |
@@ -50,8 +50,9 @@ Un vigía es algo que le pedís a la IA que mire por vos: una oferta o un comerc
 
 ## Topes: pocos y duros
 
-- **Como mucho un push por día**, sumando todos los tipos (`por_dia`: 1, o 0 para no recibir ninguno y ver los avisos solo al abrir el chat). El día corre en tu `zona_horaria`.
-- **Horas de silencio.** De 22 a 9 por defecto; las cambiás en `horas_de_silencio`. Nunca suena en ese rango.
+- **Como mucho un push por día** de `reposicion`, `vigia` y `promo_adherido`, sumando los tres (`por_dia`: 1, o 0 para no recibir ninguno y ver los avisos solo al abrir el chat). El día corre en tu `zona_horaria`.
+- **Los avisos de un pedido en curso no tienen tope diario.** `sustitucion` y `pedido_demorado` son sobre un pedido que está pasando ahora: no cuentan para el tope y el tope no los frena. Sigue valiendo todo lo demás: los dos opt-in, el tipo prendido, `por_dia: 0`, un aviso por clave y la pausa por ignorados.
+- **Horas de silencio.** De 22 a 9 por defecto; las cambiás en `horas_de_silencio`. Nunca suena en ese rango, salvo un `sustitucion` o un `pedido_demorado` de un pedido que **sigue activo en ese momento**.
 - **Un aviso por clave.** Cada aviso tiene una `clave` que dice qué lo disparó (`pedido_demorado:<pedido>`, `reposicion:<oferta>:<última compra>`, `vigia:<vigía>:<disparo>`). La misma clave nunca genera dos avisos.
 - **Si no los usás, se callan.** Después de **4 avisos seguidos ignorados** (vencieron sin que los abrieras ni los descartaras), el nodo deja de mandar pushes: `en_pausa: true`. Vuelve cuando retomás: abrís un aviso, usás el chat o los prendés de nuevo en "Tu IA".
 
@@ -101,7 +102,7 @@ Todas con la sesión de la persona: es consentimiento, igual que `/ia/yo`.
 - `POST /ia/avisos/{id}/usar` (`usarAvisoIa`) y `POST /ia/avisos/{id}/descartar` (`descartarAvisoIa`, con `motivo` opcional).
 - `POST /ia/vigias` (`crearVigia`), `GET /ia/vigias` (`listarVigias`), `DELETE /ia/vigias/{id}` (`borrarVigia`).
 
-Un mandato no lee ni configura los avisos de nadie, y ningún agente externo recibe avisos ni pone vigías en esta versión. El evento `ia.aviso` (`docs/eventos.md`) llega solo a las sesiones de la persona.
+Un mandato no lee ni configura los avisos de nadie, y ningún agente externo recibe avisos ni pone vigías en esta versión. **En v1 no hay herramientas MCP para avisos ni vigías:** es a propósito, no un olvido. El evento `ia.aviso` (`docs/eventos.md`) llega solo a las sesiones de la persona.
 
 ## Datos
 
@@ -123,7 +124,7 @@ Un mandato no lee ni configura los avisos de nadie, y ningún agente externo rec
 ## Lo que un nodo NO puede hacer
 
 - Mandar un aviso sin los dos opt-in, o de un tipo que la persona apagó.
-- Mandar más de un push por día, o en horas de silencio.
+- Mandar más de un push por día de `reposicion`, `vigia` y `promo_adherido`, o sonar en horas de silencio (salvo `sustitucion` o `pedido_demorado` de un pedido que sigue activo).
 - Inventar un tipo de aviso, o escribir por reloj ("hace mucho que no pedís", "es viernes").
 - Usar el modelo para decidir si avisa.
 - Mandar un `promo_adherido` que no coincide con la Libreta, o de un comercio no adherido.

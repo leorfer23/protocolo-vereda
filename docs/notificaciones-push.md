@@ -73,7 +73,7 @@ Esto y nada más. Un nodo no suma avisos por su cuenta: la persona tiene que pod
 - Los textos son los de la tabla, en el idioma del barrio, y los escribe el nodo. La app no los arma: si llega un tipo nuevo que no conoce, igual muestra el aviso.
 - Cada nodo avisa a quien registró el dispositivo en él, por los eventos que ese nodo ve. Un comprador de otro nodo recibe el aviso de su propio nodo cuando le llega el evento federado.
 - El chat (`mensaje.nuevo`) queda fuera de esta versión.
-- `ia.aviso` es el único aviso que no sale de un cambio de estado sino de la IA de la persona, y tiene sus propios topes: dos opt-in, como mucho uno por día, horas de silencio y pausa después de 4 ignorados (`docs/ia/avisos.md`). En el aviso, `entidad` es `{tipo: aviso_ia, id}`. Vive hasta el `vence` del aviso.
+- `ia.aviso` es el único aviso que no sale de un cambio de estado sino de la IA de la persona, y tiene sus propios topes: dos opt-in, como mucho uno por día (salvo `sustitucion` y `pedido_demorado`, de un pedido en curso), horas de silencio y pausa después de 4 ignorados (`docs/ia/avisos.md`). En el aviso, `entidad` es `{tipo: aviso_ia, id}`. Vive hasta el `vence` del aviso.
 
 ## Qué lleva el aviso
 

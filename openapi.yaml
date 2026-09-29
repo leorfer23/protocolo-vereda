@@ -770,8 +770,8 @@ paths:
       tags: [ia, yo]
       summary: "Prender, apagar o ajustar los avisos de mi IA"
       description: |
-        `activos` es el opt-in. `por_dia` es 0 o 1: nunca más de un push por día, todos los tipos
-        juntos. `en_pausa` e `ignorados_seguidos` son de solo lectura; prender los avisos de
+        `activos` es el opt-in. `por_dia` es 0 o 1: nunca más de un push por día de `reposicion`,
+        `vigia` y `promo_adherido` juntos; `sustitucion` y `pedido_demorado` no cuentan. `en_pausa` e `ignorados_seguidos` son de solo lectura; prender los avisos de
         nuevo saca la pausa. Solo sesión (docs/ia/avisos.md).
       security: [ { sesion: [] } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/preferencias" } } } }

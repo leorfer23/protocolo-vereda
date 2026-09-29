@@ -402,6 +402,46 @@
           "instante": "2026-09-29T11:42:05-03:00"
         }
       }
+    },
+    {
+      "espera": "valido",
+      "porque": "sustitución que sonó aunque ya había sonado un vigía ese día: los avisos de un pedido en curso no tienen tope diario.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000205",
+        "tipo": "sustitucion",
+        "clave": "sustitucion:01926b3a-0000-7000-8000-00000000023c",
+        "estado": "pendiente",
+        "creado": "2026-09-29T21:05:00-03:00",
+        "vence": "2026-09-29T22:05:00-03:00",
+        "titulo": "Te proponen un cambio",
+        "cuerpo": "Almacén Don Tito no tiene la leche entera en sachet y te propone la de caja, al mismo precio.",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000023c",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "push": {
+          "enviado": true,
+          "instante": "2026-09-29T21:05:03-03:00"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "una sustitución nunca queda callada por el tope diario.",
+      "doc": {
+        "id": "01926b3a-0000-7000-8000-000000000205",
+        "tipo": "sustitucion",
+        "clave": "sustitucion:01926b3a-0000-7000-8000-00000000023c",
+        "estado": "pendiente",
+        "creado": "2026-09-29T21:05:00-03:00",
+        "vence": "2026-09-29T22:05:00-03:00",
+        "titulo": "Te proponen un cambio",
+        "cuerpo": "Almacén Don Tito no tiene la leche entera en sachet y te propone la de caja, al mismo precio.",
+        "pedido_id": "01926b3a-0000-7000-8000-00000000023c",
+        "comercio_id": "01926b3a-0000-7000-8000-00000000021e",
+        "push": {
+          "enviado": false,
+          "sin_push": "tope_diario"
+        }
+      }
     }
   ]
 }
