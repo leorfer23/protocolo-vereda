@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vereda.ar/esquemas/v1/ia-avisos.json",
+  "title": "Avisos de la IA",
+  "description": "Mensajes que la IA del nodo le manda a la persona sin que ella hable primero: solo con opt-in (aparte de prender la IA), como mucho un push por día, solo por eventos que el nodo comprueba sin modelo. El silencio es el default. Ver docs/ia/avisos.md.",
+  "$defs": {
+    "tipo": {
+      "type": "string",
+      "enum": ["pedido_demorado", "sustitucion", "reposicion", "vigia", "promo_adherido"],
+      "description": "pedido_demorado: un pedido en curso pasó 20 min de su eta. sustitucion: el comercio propone un reemplazo sin respuesta. reposicion: algo que la persona compra seguido se estaría por terminar, según su ritmo. vigia: se cumplió un vigía que puso la persona. promo_adherido: promo de un comercio adherido que coincide con su Libreta."
+    },
+    "hora": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+    },
+    "preferencias": {
+      "type": "object",
+      "description": "GET/PUT /ia/yo/avisos, y 'avisos' en GET /ia/yo. Solo la sesión de la persona. Todo apagado hasta que ella lo prende.",
+      "required": ["activos"],
+      "additionalProperties": false,
+      "properties": {
+        "activos": { "type": "boolean", "default": false, "description": "El opt-in. Aparte de que la IA esté activa: prender la IA no prende los avisos." },
+        "tipos": {
+          "type": "object",
+          "description": "Qué tipos avisan. Ausente un tipo: su default (todos prendidos salvo promo_adherido).",
+          "additionalProperties": false,
+          "properties": {
+            "pedido_demorado": { "type": "boolean", "default": true },
+            "sustitucion": { "type": "boolean", "default": true },
+            "reposicion": { "type": "boolean", "default": true },
+            "vigia": { "type": "boolean", "default": true },
+            "promo_adherido": { "type": "boolean", "default": false }
+          }
+        },
+        "por_dia": { "type": "integer", "minimum": 0, "maximum": 1, "default": 1, "description": "Pushes por día, todos los tipos juntos. 0: ninguno; los avisos se ven solo al abrir el chat. Nunca más de 1." },
+        "horas_de_silencio": {
+          "type": "object",
+          "required": ["desde", "hasta"],
+          "additionalProperties": false,
+          "properties": {
+            "desde": { "$ref": "#/$defs/hora" },
+            "hasta": { "$ref": "#/$defs/hora" }
+          },
+          "default": { "desde": "22:00", "hasta": "09:00" }
+        },
+        "zona_horaria": { "type": "string", "pattern": "^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+)+)$", "default": "America/Argentina/Buenos_Aires", "description": "Zona IANA en la que corren el día y las horas de silencio." },
+        "en_pausa": { "type": "boolean", "readOnly": true, "description": "Solo lectura: después de 4 avisos seguidos ignorados, el nodo deja de mandar pushes hasta que la persona retoma (abre un aviso, usa el chat o vuelve a prender los avisos)." },
+        "ignorados_seguidos": { "type": "integer", "minimum": 0, "maximum": 4, "readOnly": true }
+      }
+    },
+    "aviso": {
+      "type": "object",
+      "description": "Un aviso. El texto lo arma el nodo con plantillas, sin modelo. En el push va solo lo que dice docs/notificaciones-push.md; el detalle se lee acá, con la sesión.",
+      "required": ["id", "tipo", "clave", "estado", "creado", "vence", "titulo", "cuerpo", "push"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "comunes.json#/$defs/id" },
+        "tipo": { "$ref": "#/$defs/tipo" },
+        "clave": { "type": "string", "minLength": 3, "maxLength": 200, "pattern": "^(pedido_demorado|sustitucion|reposicion|vigia|promo_adherido):", "description": "Qué lo disparó. La misma clave nunca genera dos avisos. Ej. 'pedido_demorado:<pedido_id>', 'reposicion:<oferta_id>:<pedido de la última compra>', 'vigia:<vigia_id>:<disparo>'." },
+        "estado": { "type": "string", "enum": ["pendiente", "usado", "descartado", "vencido"] },
+        "creado": { "$ref": "comunes.json#/$defs/instante" },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "titulo": { "type": "string", "maxLength": 80 },
+        "cuerpo": { "type": "string", "maxLength": 240, "description": "Adentro de la app puede nombrar el producto y el precio: no es el texto del push." },
+        "pedido_id": { "$ref": "comunes.json#/$defs/id" },
+        "oferta_id": { "$ref": "comunes.json#/$defs/id" },
+        "comercio_id": { "$ref": "comunes.json#/$defs/id" },
+        "vigia_id": { "$ref": "comunes.json#/$defs/id" },
+        "precio_antes": { "$ref": "comunes.json#/$defs/monto" },
+        "precio_ahora": { "$ref": "comunes.json#/$defs/monto" },
+        "ritmo_dias": { "type": "integer", "minimum": 1, "description": "Reposición: la mediana de días entre compras." },
+        "push": {
+          "type": "object",
+          "required": ["enviado"],
+          "additionalProperties": false,
+          "properties": {
+            "enviado": { "type": "boolean" },
+            "instante": { "$ref": "comunes.json#/$defs/instante" },
+            "sin_push": {
+              "type": "string",
+              "enum": ["tope_diario", "horas_de_silencio", "en_pausa", "por_dia_cero", "sin_dispositivo"],
+              "description": "Por qué no sonó. El aviso igual queda pendiente y se ve al abrir el chat."
+            }
+          },
+          "if": { "properties": { "enviado": { "const": false } } },
+          "then": { "required": ["sin_push"], "not": { "required": ["instante"] } },
+          "else": { "required": ["instante"], "not": { "required": ["sin_push"] } }
+        },
+        "descartado": {
+          "type": "object",
+          "required": ["instante", "motivo"],
+          "additionalProperties": false,
+          "properties": {
+            "instante": { "$ref": "comunes.json#/$defs/instante" },
+            "motivo": { "$ref": "#/$defs/motivo_descarte" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "estado": { "const": "descartado" } } },
+          "then": { "required": ["descartado"] },
+          "else": { "not": { "required": ["descartado"] } }
+        },
+        {
+          "if": { "properties": { "tipo": { "enum": ["pedido_demorado", "sustitucion"] } } },
+          "then": { "required": ["pedido_id"] }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "vigia" } } },
+          "then": { "required": ["vigia_id"] }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "reposicion" } } },
+          "then": { "required": ["oferta_id", "ritmo_dias"] }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "promo_adherido" } } },
+          "then": { "required": ["comercio_id"] }
+        }
+      ]
+    },
+    "motivo_descarte": {
+      "type": "string",
+      "enum": ["ya_lo_tengo", "no_me_interesa", "no_de_este_tipo", "mal_momento"],
+      "description": "Lo que aprende el nodo: ya_lo_tengo reinicia el ciclo de reposición; no_me_interesa calla esa oferta o ese comercio en ese tipo por 90 días; no_de_este_tipo apaga el tipo; mal_momento, solo este aviso."
+    },
+    "descartar": {
+      "type": "object",
+      "description": "POST /ia/avisos/{id}/descartar. Sin motivo, no_me_interesa.",
+      "additionalProperties": false,
+      "properties": {
+        "motivo": { "$ref": "#/$defs/motivo_descarte" }
+      }
+    },
+    "lista_avisos": {
+      "type": "object",
+      "required": ["avisos"],
+      "additionalProperties": false,
+      "properties": {
+        "avisos": { "type": "array", "items": { "$ref": "#/$defs/aviso" } },
+        "cursor_siguiente": { "type": "string" }
+      }
+    },
+    "condicion": {
+      "type": "object",
+      "description": "Qué tiene que pasar. precio_hasta y baja_de_precio y vuelve_stock miran una oferta; abre y promo_nueva, un comercio.",
+      "required": ["tipo"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "type": "string", "enum": ["precio_hasta", "baja_de_precio", "vuelve_stock", "abre", "promo_nueva"] },
+        "monto": { "$ref": "comunes.json#/$defs/monto" },
+        "porcentaje": { "type": "integer", "minimum": 1, "maximum": 90 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "tipo": { "const": "precio_hasta" } } },
+          "then": { "required": ["monto"], "not": { "required": ["porcentaje"] } }
+        },
+        {
+          "if": { "properties": { "tipo": { "const": "baja_de_precio" } } },
+          "then": { "required": ["porcentaje"], "not": { "required": ["monto"] } }
+        },
+        {
+          "if": { "properties": { "tipo": { "enum": ["vuelve_stock", "abre", "promo_nueva"] } } },
+          "then": { "not": { "anyOf": [{ "required": ["monto"] }, { "required": ["porcentaje"] }] } }
+        }
+      ]
+    },
+    "nueva_vigia": {
+      "type": "object",
+      "description": "POST /ia/vigias. Mira una oferta o un comercio, nunca una búsqueda abierta. 'vence' como mucho 90 días después; sin él, el nodo pone 30 días.",
+      "required": ["condicion"],
+      "additionalProperties": false,
+      "properties": {
+        "oferta_id": { "$ref": "comunes.json#/$defs/id" },
+        "comercio_id": { "$ref": "comunes.json#/$defs/id" },
+        "condicion": { "$ref": "#/$defs/condicion" },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "disparos_max": { "type": "integer", "minimum": 1, "maximum": 3, "default": 1 }
+      },
+      "oneOf": [
+        { "required": ["oferta_id"], "not": { "required": ["comercio_id"] }, "properties": { "condicion": { "properties": { "tipo": { "enum": ["precio_hasta", "baja_de_precio", "vuelve_stock"] } } } } },
+        { "required": ["comercio_id"], "not": { "required": ["oferta_id"] }, "properties": { "condicion": { "properties": { "tipo": { "enum": ["abre", "promo_nueva"] } } } } }
+      ]
+    },
+    "vigia": {
+      "type": "object",
+      "description": "Un vigía puesto por la persona. Lo evalúa el nodo con sus eventos públicos, sin modelo y sin costo.",
+      "required": ["id", "condicion", "estado", "creado", "vence", "disparos_max", "disparos", "etiqueta"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "comunes.json#/$defs/id" },
+        "oferta_id": { "$ref": "comunes.json#/$defs/id" },
+        "comercio_id": { "$ref": "comunes.json#/$defs/id" },
+        "condicion": { "$ref": "#/$defs/condicion" },
+        "precio_al_crear": { "$ref": "comunes.json#/$defs/monto", "description": "Con baja_de_precio: el precio contra el que se mide." },
+        "etiqueta": { "type": "string", "maxLength": 120, "description": "La escribe el nodo desde los datos: 'Aceite de girasol 1,5 L en Almacén Don Tito, a $3.000 o menos'." },
+        "estado": { "type": "string", "enum": ["activo", "cumplido", "vencido"] },
+        "creado": { "$ref": "comunes.json#/$defs/instante" },
+        "vence": { "$ref": "comunes.json#/$defs/instante" },
+        "disparos_max": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "disparos": { "type": "integer", "minimum": 0, "maximum": 3 }
+      },
+      "oneOf": [
+        { "required": ["oferta_id"], "not": { "required": ["comercio_id"] } },
+        { "required": ["comercio_id"], "not": { "required": ["oferta_id"] } }
+      ]
+    },
+    "lista_vigias": {
+      "type": "object",
+      "required": ["vigias"],
+      "additionalProperties": false,
+      "properties": {
+        "vigias": { "type": "array", "items": { "$ref": "#/$defs/vigia" } }
+      }
+    },
+    "exportados": {
+      "type": "object",
+      "description": "Lo de los avisos dentro de GET /yo/exportar: preferencias, vigías y avisos de los últimos 90 días.",
+      "required": ["preferencias", "vigias", "avisos"],
+      "additionalProperties": false,
+      "properties": {
+        "preferencias": { "$ref": "#/$defs/preferencias" },
+        "vigias": { "type": "array", "items": { "$ref": "#/$defs/vigia" } },
+        "avisos": { "type": "array", "items": { "$ref": "#/$defs/aviso" } }
+      }
+    }
+  }
+}

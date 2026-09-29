@@ -131,6 +131,10 @@ Cada respuesta exitosa trae `consumo`: `tokens_entrada`, `tokens_salida`, `costo
 
 Igual que antes: `GET /ia/yo/extracto`, y en `gastos_publicados` los opcionales `gastos.tokens_ia` y `aportes_ia_recibidos` (`docs/sostenimiento.md`).
 
+## Avisos: la IA escribe primero solo si la persona quiere
+
+Un nodo **puede** dejar que la IA le escriba primero a la persona (`docs/ia/avisos.md`, `esquemas/ia-avisos.json`), y lo anuncia con `avisos` en `ia.funciones.comprador`. Es un opt-in aparte de prender la IA (`PUT /ia/yo/avisos`), apagado por defecto: como mucho un push por día, solo por eventos que el nodo comprueba sin modelo (`pedido_demorado`, `sustitucion`, `reposicion`, `vigia`, `promo_adherido`), con horas de silencio y pausa después de 4 ignorados. El silencio es el default. Los avisos no se cobran: no llaman al modelo.
+
 ## Errores
 
 | Qué pasa | Estado | Código |

@@ -1,0 +1,109 @@
+{
+  "$comentario": "Casos de POST /ia/vigias (esquemas/ia-avisos.json#/$defs/nueva_vigia).",
+  "esquema": "ia-avisos.json#/$defs/nueva_vigia",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "avisame cuando el aceite esté a $3.000 o menos.",
+      "doc": {
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "condicion": {
+          "tipo": "precio_hasta",
+          "monto": {
+            "centavos": 300000,
+            "moneda": "ARS"
+          }
+        },
+        "vence": "2026-10-29T00:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "baja de precio de 15 %, dos disparos, sin vence (el nodo pone 30 días).",
+      "doc": {
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "condicion": {
+          "tipo": "baja_de_precio",
+          "porcentaje": 15
+        },
+        "disparos_max": 2
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "avisame cuando abra la heladería.",
+      "doc": {
+        "comercio_id": "01926b3a-0000-7000-8000-000000000221",
+        "condicion": {
+          "tipo": "abre"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "'abre' mira un comercio, no una oferta.",
+      "doc": {
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "condicion": {
+          "tipo": "abre"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "precio sobre un comercio no tiene sentido.",
+      "doc": {
+        "comercio_id": "01926b3a-0000-7000-8000-000000000221",
+        "condicion": {
+          "tipo": "precio_hasta",
+          "monto": {
+            "centavos": 100000,
+            "moneda": "ARS"
+          }
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "precio_hasta sin monto.",
+      "doc": {
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "condicion": {
+          "tipo": "precio_hasta"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "una oferta y un comercio a la vez.",
+      "doc": {
+        "oferta_id": "01926b3a-0000-7000-8000-000000000214",
+        "comercio_id": "01926b3a-0000-7000-8000-000000000221",
+        "condicion": {
+          "tipo": "vuelve_stock"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "nunca una búsqueda abierta.",
+      "doc": {
+        "q": "sushi cerca",
+        "condicion": {
+          "tipo": "promo_nueva"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "más de 3 disparos.",
+      "doc": {
+        "comercio_id": "01926b3a-0000-7000-8000-000000000221",
+        "condicion": {
+          "tipo": "promo_nueva"
+        },
+        "disparos_max": 5
+      }
+    }
+  ]
+}

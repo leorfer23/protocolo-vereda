@@ -66,12 +66,14 @@ Esto y nada más. Un nodo no suma avisos por su cuenta: la persona tiene que pod
 | `pago.confirmado` | comprador | Pago confirmado | {comercio} recibió tu pago. |
 | `pago.vencido` | comprador | Venció el pago | Venció el plazo para pagar tu pedido de {comercio}. |
 | `viaje.ofrecido` | el repartidor al que se le ofrece | Viaje disponible | Tenés un viaje para aceptar. |
+| `ia.aviso` | comprador, solo si prendió los avisos de su IA | Según el tipo de aviso | Según el tipo de aviso (`docs/ia/avisos.md`): nunca el producto, el precio ni el monto; como mucho el nombre del comercio. |
 
 - **Comercio** es cada persona que lo administra con permiso `pedidos`: la dueña y los miembros del equipo que lo tienen (`docs/equipo.md`). El comercio como identidad no tiene teléfono.
 - Nadie recibe el aviso de lo que hizo él mismo.
 - Los textos son los de la tabla, en el idioma del barrio, y los escribe el nodo. La app no los arma: si llega un tipo nuevo que no conoce, igual muestra el aviso.
 - Cada nodo avisa a quien registró el dispositivo en él, por los eventos que ese nodo ve. Un comprador de otro nodo recibe el aviso de su propio nodo cuando le llega el evento federado.
 - El chat (`mensaje.nuevo`) queda fuera de esta versión.
+- `ia.aviso` es el único aviso que no sale de un cambio de estado sino de la IA de la persona, y tiene sus propios topes: dos opt-in, como mucho uno por día, horas de silencio y pausa después de 4 ignorados (`docs/ia/avisos.md`). En el aviso, `entidad` es `{tipo: aviso_ia, id}`. Vive hasta el `vence` del aviso.
 
 ## Qué lleva el aviso
 

@@ -1,0 +1,57 @@
+{
+  "$comentario": "Casos de las preferencias de avisos (esquemas/ia-avisos.json#/$defs/preferencias).",
+  "esquema": "ia-avisos.json#/$defs/preferencias",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "el default: apagados.",
+      "doc": {
+        "activos": false
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "prendidos, solo en el chat, sin push.",
+      "doc": {
+        "activos": true,
+        "por_dia": 0
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "nunca más de un push por día.",
+      "doc": {
+        "activos": true,
+        "por_dia": 3
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "sin decir si están prendidos.",
+      "doc": {
+        "por_dia": 1
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "un tipo que no existe.",
+      "doc": {
+        "activos": true,
+        "tipos": {
+          "recordatorio_semanal": true
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "hora mal escrita.",
+      "doc": {
+        "activos": true,
+        "horas_de_silencio": {
+          "desde": "10pm",
+          "hasta": "09:00"
+        }
+      }
+    }
+  ]
+}

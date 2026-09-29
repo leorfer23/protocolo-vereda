@@ -751,6 +751,133 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "404": { description: "No hay extracto de ese período (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "501": { description: "Este nodo no ofrece IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/yo/avisos:
+    get:
+      operationId: verAvisosIa
+      tags: [ia, yo]
+      summary: "Mis preferencias de avisos de la IA: si me escribe primero, qué tipos, cuántos por día y cuándo no"
+      description: |
+        Apagados hasta que la persona los prende, aparte de prender la IA (docs/ia/avisos.md).
+        Solo sesión: un mandato no lee ni configura la IA de nadie. Sin `avisos` en
+        `ia.funciones.comprador`, 501.
+      security: [ { sesion: [] } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/preferencias" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    put:
+      operationId: configurarAvisosIa
+      tags: [ia, yo]
+      summary: "Prender, apagar o ajustar los avisos de mi IA"
+      description: |
+        `activos` es el opt-in. `por_dia` es 0 o 1: nunca más de un push por día, todos los tipos
+        juntos. `en_pausa` e `ignorados_seguidos` son de solo lectura; prender los avisos de
+        nuevo saca la pausa. Solo sesión (docs/ia/avisos.md).
+      security: [ { sesion: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/preferencias" } } } }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/preferencias" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "422": { description: "cuerpo_invalido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/avisos:
+    get:
+      operationId: listarAvisosIa
+      tags: [ia, yo]
+      summary: "Los avisos de mi IA, los pendientes primero"
+      description: |
+        Incluye los que no sonaron (tope del día, horas de silencio, pausa): la app los muestra al
+        abrir el chat. Un aviso vive 90 días. Solo sesión (docs/ia/avisos.md).
+      security: [ { sesion: [] } ]
+      parameters:
+        - { name: estado, in: query, schema: { type: string, enum: [pendiente, usado, descartado, vencido] } }
+        - { name: limite, in: query, schema: { type: integer, minimum: 1, maximum: 50, default: 20 } }
+        - { name: cursor, in: query, schema: { type: string }, description: El `cursor_siguiente` de la página anterior }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/lista_avisos" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "422": { description: "Cursor vencido o ajeno (parametro_invalido)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/avisos/{id}/usar:
+    post:
+      operationId: usarAvisoIa
+      tags: [ia, yo]
+      summary: "Marcar que abrí o usé un aviso"
+      description: |
+        pendiente → usado. Cuenta como retomar: saca la pausa por ignorados. Solo sesión
+        (docs/ia/avisos.md).
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/aviso" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { description: "No existe o no es tuyo (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "Ya no está pendiente (aviso_no_pendiente)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/avisos/{id}/descartar:
+    post:
+      operationId: descartarAvisoIa
+      tags: [ia, yo]
+      summary: "Descartar un aviso, diciendo por qué si quiero"
+      description: |
+        pendiente → descartado. Descartar enseña, sin tocar la Libreta: `ya_lo_tengo` reinicia
+        el ciclo de reposición, `no_me_interesa` (el default) calla esa oferta o ese comercio en
+        ese tipo por 90 días, `no_de_este_tipo` apaga el tipo y `mal_momento` afecta solo a este
+        aviso. Un descarte nunca cuenta como ignorado. Solo sesión (docs/ia/avisos.md).
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      requestBody: { required: false, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/descartar" } } } }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/aviso" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { description: "No existe o no es tuyo (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "409": { description: "Ya no está pendiente (aviso_no_pendiente)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/vigias:
+    get:
+      operationId: listarVigias
+      tags: [ia, yo]
+      summary: "Mis vigías: lo que le pedí a la IA que mire por mí"
+      description: |
+        Los activos y los cumplidos o vencidos de los últimos 7 días. Solo sesión
+        (docs/ia/avisos.md).
+      security: [ { sesion: [] } ]
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/lista_vigias" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+    post:
+      operationId: crearVigia
+      tags: [ia, yo]
+      summary: "Poner un vigía: avisame cuando baje, vuelva, abra o haya promo"
+      description: |
+        Sobre una oferta (`precio_hasta`, `baja_de_precio`, `vuelve_stock`) o un comercio
+        (`abre`, `promo_nueva`), nunca sobre una búsqueda abierta. Vence siempre: como mucho a los
+        90 días; sin `vence`, a los 30. Dispara de 1 a 3 veces. Hasta 10 activos. Lo evalúa el
+        nodo con sus eventos públicos, sin modelo y sin costo. Solo sesión: en el chat, la IA lo
+        pone solo si la persona lo pidió en su último mensaje (docs/ia/avisos.md).
+      security: [ { sesion: [] } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/nueva_vigia" } } } }
+      responses:
+        "201": { description: Puesto, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/vigia" } } } }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { description: "La oferta o el comercio no existen (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "tope_de_vigias (más de 10 activos), vigia_invalido (vence a más de 90 días, o la condición no corresponde) o cuerpo_invalido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+  /ia/vigias/{id}:
+    delete:
+      operationId: borrarVigia
+      tags: [ia, yo]
+      summary: "Sacar un vigía"
+      description: |
+        Se borra en el momento. Los avisos que ya disparó quedan. Solo sesión (docs/ia/avisos.md).
+      security: [ { sesion: [] } ]
+      parameters: [ { $ref: "#/components/parameters/id" } ]
+      responses:
+        "204": { description: Borrado }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { description: "No existe o no es tuyo (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /ia/comercios/{id}/catalogo-desde-fotos:
     post:
       operationId: iaCatalogoDesdeFotos
