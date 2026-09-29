@@ -1,11 +1,11 @@
 # La página del comercio
 
-Cada comercio tiene una página pública, tipo Linktree, que cualquiera abre sin cuenta: `https://<app>/@santa-elena`. Es lo que el comercio pone en su bio de Instagram, en el cartel del local y en su estado de WhatsApp.
+Cada comercio tiene una página pública, tipo Linktree y vidriera a la vez, que cualquiera abre sin cuenta: `https://<app>/@santa-elena`. Es lo que el comercio pone en su bio de Instagram, en el cartel del local y en su estado de WhatsApp.
 
-La página son **datos, no HTML**: un tema y una lista de bloques (`esquemas/pagina.json`) que vive en la ficha, en `pagina`. Así:
+La página son **datos, no HTML**: un tema y una lista de widgets (bloques) (`esquemas/pagina.json`) que vive en la ficha, en `pagina`. Así:
 
 - **Todas se parecen a Vereda.** Tipografías, íconos, botones y espaciados son los de Vereda, en cada app. El comercio elige entre opciones cerradas, no inventa estilos.
-- **Cada una es del comercio.** Elige qué bloques, en qué orden, con qué textos, colores, fondo y fotos. Nadie aprueba la página.
+- **Cada una es del comercio.** Arma la página con los widgets que quiera, en el orden que quiera: pone, saca y reordena; elige colores (los de marca o cualquier otro, página por página y widget por widget), fondo, fotos y videos. Nadie aprueba la página. Se edita igual por su agente, por la API o desde la webapp del comercio.
 - **Se arma con el agente.** "Poné arriba el botón de pedir, después las promos y al final las preguntas": el agente lee la página (`pagina_ver`), la cambia y la guarda entera con `comercio_editar`.
 - **Es segura por construcción.** No hay HTML, scripts, fuentes externas ni CSS. Los enlaces son `https`, `mailto:`, `tel:` o `vereda://`. Las apps dibujan cada bloque con sus propios componentes.
 - **Está viva.** Productos, precios, stock, promociones, horarios, sucursales y reseñas se leen al mostrar la página, de la sucursal que atiende a quien mira (`docs/sucursales.md`). La página nunca repite datos de la ficha: los referencia.
@@ -17,7 +17,8 @@ La página son **datos, no HTML**: un tema y una lista de bloques (`esquemas/pag
 | Campo | Opciones |
 | --- | --- |
 | `modo` | `auto` (sigue al dispositivo), `claro`, `oscuro` |
-| `fondo` | `liso`, `primario`, `degradado` (primario → secundario), `imagen` |
+| `fondo` | `liso`, `color` (`colores.fondo`), `primario`, `degradado` (primario → secundario), `imagen` |
+| `colores` | Paleta a mano: `fondo`, `superficie`, `texto`, `acento`, cualquier #RRGGBB |
 | `tipografia` | `vereda`, `redonda`, `serif`, `mono`, `manuscrita` |
 | `esquinas` | `redondeadas`, `rectas`, `pildora` |
 | `botones` | `llenos`, `contorno`, `suaves` |
@@ -44,7 +45,9 @@ Las apps garantizan contraste legible: si un color de marca no contrasta con el 
 | `preguntas` | Preguntas frecuentes |
 | `separador` | Espacio o línea |
 
-Todo bloque lleva `id` (lo elige quien edita, único en la página: el nodo responde `422 documento_invalido` si se repite), `titulo` opcional, `visible` (desde, hasta, días: una promo del finde se muestra sola) y `estilo` (fondo, alineación, ancho) dentro del tema.
+El `encabezado` tiene tres formas: `centrado` (logo redondo grande, tipo Linktree), `banner` (franja o portada con el logo encima, tipo vidriera; el default) y `compacto`. `pedir` puede ser `boton`, `tarjeta` (con la sucursal que atiende y la distancia; el default) o `barra_fija` abajo de la pantalla. Cada enlace puede tener su color y una miniatura.
+
+Todo bloque lleva `id` (lo elige quien edita, único en la página: el nodo responde `422 documento_invalido` si se repite), `titulo` opcional, `visible` (desde, hasta, días: una promo del finde se muestra sola) y `estilo`: fondo (`superficie`, los de marca o cualquier #RRGGBB), color del texto, acento, esquinas, alineación, ancho y aire.
 
 Una app que no conoce un `tipo` lo saltea: un bloque nuevo nunca rompe una página vieja.
 

@@ -5,6 +5,7 @@ Lo que cambia en el protocolo después de publicarlo, del más nuevo al más vie
 ## 2026-09-29
 
 - **Página pública del comercio, tipo Linktree** (`docs/pagina.md`, `esquemas/pagina.json`, `esquemas/comercio.json`, `openapi.yaml`, `mcp/herramientas.json`, `ejemplos/santa-elena-pagina.json`). `comercio.pagina`: un `tema` elegido entre opciones de Vereda (modo, fondo, tipografía, esquinas, botones, acento) y `bloques` en orden (`encabezado`, `pedir`, `enlaces`, `redes`, `whatsapp`, `texto`, `imagen`, `galeria`, `video`, `productos`, `promociones`, `sucursales`, `horarios`, `resenas`, `aviso`, `preguntas`, `separador`), con `visible` por fecha y día y `estilo` por bloque. Datos, no HTML: sin scripts, fuentes ni CSS; enlaces solo https, mailto, tel y vereda. Lo vivo (productos, precios, horarios, sucursales, reseñas) se lee al mostrar. Ruta nueva `verPagina` (`GET /paginas/{nombre}`) por nombre corto, con la página de la casa para una sucursal sin página; herramienta MCP `pagina_ver`. Se edita con `editarComercio`. Ningún cliente cambia.
+- **Página: widgets con colores libres** (`esquemas/pagina.json`, `docs/pagina.md`). Tema con `fondo: color` y paleta `colores` (fondo, superficie, texto, acento); `estilo` por widget con fondo, color y acento en cualquier #RRGGBB, esquinas y aire; `encabezado.forma` (`centrado` tipo Linktree, `banner` tipo vidriera, `compacto`); `pedir.forma` (`boton`, `tarjeta`, `barra_fija`); color y miniatura por enlace. Las apps garantizan contraste. Todo opcional.
 
 ## 2026-09-28
 
