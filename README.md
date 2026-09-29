@@ -29,7 +29,7 @@ Es un protocolo, no una app. Cualquiera puede correr un nodo, construir un clien
 
 | Carpeta | Contenido |
 | --- | --- |
-| `esquemas/` | 34 esquemas JSON (draft 2020-12): acceso y respaldo de la clave, comercio, equipo del comercio, oferta, promoción, modalidad, carrito, pedido, pago, sostenimiento del nodo, repartidor, usuario, reseña, denuncia, reclamo, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, calles de la zona, evento, error, comunes, IA/widgets, recetas y sinónimos del chat IA |
+| `esquemas/` | 37 esquemas JSON (draft 2020-12): acceso y respaldo de la clave, comercio, equipo del comercio, oferta, promoción, modalidad, carrito, pedido, pago, sostenimiento del nodo, repartidor, usuario, reseña, denuncia, reclamo, suscripción, lista, catálogo maestro, ronda, grupo, viaje, mandato, mensaje, cotización, calles de la zona, evento, error, comunes, IA/widgets, la Libreta de la IA (`libreta.json`, docs/ia/libreta.md), los avisos de la IA (`ia-avisos.json`, docs/ia/avisos.md), recetas y sinónimos del chat IA |
 | `datos/` | Tablas CC0 del chat IA: `recetas.json` (~40 platos argentinos → ingredientes por persona) y `sinonimos.json` (muzza↔muzzarella, …) |
 | `openapi.yaml` | La API abierta, rutas `/acceso` en la raíz del dominio y el resto bajo `/v1` (incl. herramientas del chat IA). Apps y agentes usan las mismas |
 | `mcp/herramientas.json` | Las 76 herramientas del servidor MCP —del lado del usuario, del comercio y del repartidor—, con descripciones para asistentes |

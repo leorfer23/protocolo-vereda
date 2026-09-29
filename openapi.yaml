@@ -855,14 +855,15 @@ paths:
         (`abre`, `promo_nueva`), nunca sobre una búsqueda abierta. Vence siempre: como mucho a los
         90 días; sin `vence`, a los 30. Dispara de 1 a 3 veces. Hasta 10 activos. Lo evalúa el
         nodo con sus eventos públicos, sin modelo y sin costo. Solo sesión: en el chat, la IA lo
-        pone solo si la persona lo pidió en su último mensaje (docs/ia/avisos.md).
+        pone solo si la persona lo pidió en su último mensaje ("avisame cuando/si…" sobre precio,
+        stock, promo o que abra), con un monto que ella dijo, uno por turno (docs/ia/avisos.md).
       security: [ { sesion: [] } ]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/nueva_vigia" } } } }
       responses:
         "201": { description: Puesto, content: { application/json: { schema: { $ref: "esquemas/ia-avisos.json#/$defs/vigia" } } } }
         "401": { $ref: "#/components/responses/Error" }
         "404": { description: "La oferta o el comercio no existen (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
-        "422": { description: "tope_de_vigias (más de 10 activos), vigia_invalido (vence a más de 90 días, o la condición no corresponde) o cuerpo_invalido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
+        "422": { description: "tope_de_vigias (más de 10 activos), vigia_invalido (vence en el pasado o a más de 90 días, porcentaje fuera de 1 a 90, o la condición no corresponde) o cuerpo_invalido", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
         "501": { description: "Este nodo no ofrece avisos de la IA (no_implementado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
   /ia/vigias/{id}:
     delete:

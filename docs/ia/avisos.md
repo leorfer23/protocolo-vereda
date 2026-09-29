@@ -41,12 +41,24 @@ Un vigía es algo que le pedís a la IA que mire por vos: una oferta o un comerc
 | `abre` | El comercio abre |
 | `promo_nueva` | El comercio publica una promoción nueva |
 
-- Los creás con tu sesión (`POST /ia/vigias`) o diciéndolo en el chat ("avisame cuando…"). En el chat vale la misma llave que para confirmar un pedido: tiene que estar en **tu último mensaje**. El modelo no pone vigías por su cuenta.
+- Los creás con tu sesión (`POST /ia/vigias`) o diciéndolo en el chat ("avisame cuando…", abajo). El modelo no pone vigías por su cuenta.
 - **Vencen siempre.** `vence` es obligatorio, como mucho 90 días después de crearlo. Si no decís hasta cuándo, 30 días.
 - **Disparan pocas veces.** `disparos_max` entre 1 y 3 (1 por defecto). Al llegar, el vigía queda `cumplido`.
 - Hasta **10 vigías activos** por persona. El undécimo responde `422 tope_de_vigias`.
 - Los evalúa el nodo con los eventos públicos que ya publica (`oferta.precio_cambiado`, `oferta.stock_cambiado`, `comercio.abierto`) y las promociones nuevas: no busca, no llama al modelo y no cuesta nada.
 - Un vigía no sabe qué te importa más allá de lo que pediste. Solo mira una oferta o un comercio concreto, nunca una búsqueda abierta.
+
+#### Desde el chat
+
+"Avisame cuando el aceite baje de 3 mil" pone un vigía, con las mismas llaves que confirmar un pedido:
+
+- **Tu último mensaje lo pide.** Tiene que decir "avisame cuando…" o "avisame si…" sobre un precio (que baje, que cueste tanto), el stock (que vuelva, que haya), una promo o que abra un local. "Avisame si te falta algo" no es un vigía. Lo que diga un mensaje anterior, un producto o un comercio no pone nada.
+- **La condición es la que pediste.** Si hablaste de precio, el vigía es de precio; no puede ser de otra cosa. El `monto` de `precio_hasta` tiene que ser **uno que dijiste** ("3.000", "3 mil", "3 lucas"); si no dijiste cuánto, es `baja_de_precio`, con el porcentaje que dijiste o uno chico que fija el nodo.
+- **Solo con tu sesión.** Un mandato nunca pone vigías, ni desde el chat ni por MCP.
+- **Vence a los 30 días** si no dijiste hasta cuándo; si lo dijiste, como mucho 90.
+- **Uno por turno.** Un mensaje pone como mucho un vigía.
+- **La confirmación la escribe el nodo, sin modelo**: qué mira y hasta cuándo ("Listo, te aviso: …. Queda puesto hasta el 29/10."). Si tenés los avisos apagados, o el tipo `vigia` apagado, te lo dice: el vigía mira igual, pero no te escribe hasta que los prendas.
+- Los topes y errores son los mismos que con `POST /ia/vigias` (10 activos, `tope_de_vigias`; `vigia_invalido`).
 
 ## Topes: pocos y duros
 
@@ -78,6 +90,8 @@ pendiente ──▶ usado        la persona lo abrió o actuó (POST /ia/avisos/
 | `mal_momento` | Nada más que este aviso. Cuenta como respuesta, no como ignorado |
 
 Sin `motivo`, es `no_me_interesa`. Un descarte nunca cuenta para la pausa por ignorados: descartar es responder.
+
+Qué botón manda qué motivo lo decide cada app; la spec solo fija los cuatro. Lo esperable: la X que cierra el aviso manda `mal_momento` (no enseña nada), y "No me interesa" manda `no_me_interesa`. Como descartar sin `motivo` es `no_me_interesa`, una X que no manda motivo enseña más de lo que parece.
 
 ## Qué lleva el push
 
@@ -116,7 +130,7 @@ Un mandato no lee ni configura los avisos de nadie, y ningún agente externo rec
 | --- | --- | --- |
 | El nodo no ofrece `avisos` | 501 | `no_implementado` |
 | Más de 10 vigías activos | 422 | `tope_de_vigias` |
-| Vigía sin `vence`, o a más de 90 días | 422 | `vigia_invalido` |
+| `vence` en el pasado o a más de 90 días, o `porcentaje` fuera de 1 a 90 | 422 | `vigia_invalido` |
 | La condición no corresponde (precio sobre un comercio, `abre` sobre una oferta) | 422 | `vigia_invalido` |
 | El aviso ya no está pendiente | 409 | `aviso_no_pendiente` |
 | No existe o no es tuyo | 404 | `no_encontrado` |
