@@ -4,7 +4,7 @@ Cada comercio tiene una página pública, tipo Linktree y vidriera a la vez, que
 
 La página son **datos, no HTML**: un tema y una lista de widgets (bloques) (`esquemas/pagina.json`) que vive en la ficha, en `pagina`. Así:
 
-- **Todas se parecen a Vereda.** Tipografías, íconos, botones y espaciados son los de Vereda, en cada app. El comercio elige entre opciones cerradas, no inventa estilos.
+- **Todas se sienten Vereda.** Tipografías, íconos, componentes y espaciados son los de Vereda, en cada app. Colores, orden, fotos y videos son del comercio; no hay fuentes ni CSS propios.
 - **Cada una es del comercio.** Arma la página con los widgets que quiera, en el orden que quiera: pone, saca y reordena; elige colores (los de marca o cualquier otro, página por página y widget por widget), fondo, fotos y videos. Nadie aprueba la página. Se edita igual por su agente, por la API o desde la webapp del comercio.
 - **Se arma con el agente.** "Poné arriba el botón de pedir, después las promos y al final las preguntas": el agente lee la página (`pagina_ver`), la cambia y la guarda entera con `comercio_editar`.
 - **Es segura por construcción.** No hay HTML, scripts, fuentes externas ni CSS. Los enlaces son `https`, `mailto:`, `tel:` o `vereda://`. Las apps dibujan cada bloque con sus propios componentes.
