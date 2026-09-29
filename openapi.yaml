@@ -819,10 +819,17 @@ paths:
         Respuesta con `mensaje` (texto y/o widgets de esquemas/ia-widgets.json: grilla, mazo,
         podio, promo, comercios, producto, respuestas, carrito, checkout, historial,
         pedido_estado, navegar, bienvenida). La app dibuja los tipos que conoce e ignora el
-        resto. El agente del nodo usa las herramientas del MCP como la persona y compone la
-        respuesta con widgets; el nodo pone precios, fotos y totales desde la base. En el chat
-        del nodo solo hay comercios con `ia_chat.adherido`. Confirmar un pedido lo hace la
-        persona con `confirmarCarrito` — la IA no compra sola (docs/ia/capacidad.md).
+        resto. El agente del nodo es un loop de hasta 6 pasos con las herramientas del MCP del
+        propio nodo, ejecutadas como la persona, y compone la respuesta con widgets; el nodo pone
+        precios, fotos y totales desde la base y descarta ids inventados. En el chat del nodo
+        solo hay comercios con `ia_chat.adherido`.
+
+        El agente arma carritos. Confirma un pedido solo con dos llaves —el modelo llama
+        `carrito_confirmar` y la persona lo pidió en su último mensaje— y dentro del permiso de
+        quien llama: con un mandato `armar` nunca confirma (hace falta `pedir`, con sus topes y
+        su `confirmar_siempre`); con la sesión, respeta `preferencias.tope_por_pedido`. La
+        persona también confirma sola desde el checkout con `confirmarCarrito`. Al modelo le
+        llega la ubicación redondeada a ~100 m, nunca la dirección (docs/ia/capacidad.md).
 
         Un toque sobre un widget va en `accion` (esquemas/ia-widgets.json#/$defs/accion_chat):
         elegir, agregar, cantidad, quitar, ir_a_pagar, repetir, ver_producto, ver_carta y

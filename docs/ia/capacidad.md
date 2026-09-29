@@ -30,32 +30,41 @@ Si no está `activa` → `403 ia_no_activada`. Tope → `429 tope_ia_alcanzado` 
 
 ## Funciones: proponen, no escriben
 
-Toda función **devuelve un borrador** (o un mensaje con widgets). Confirmarlo es un paso aparte con los endpoints que ya existen, o con el mandato de la persona cuando corresponda. La IA del nodo nunca compra sola ni publica sola.
+Las funciones del comercio y las de un solo tiro del comprador (`iaPedidoPropuesto`, `iaBuscar`, `iaSugerir`) **devuelven un borrador**. Confirmarlo es un paso aparte con los endpoints que ya existen, o con el mandato de la persona cuando corresponda. La IA del nodo nunca publica sola.
+
+El chat del comprador es la excepción, y está acotada: **arma carritos** de la persona (se editan y se tiran sin costo) y **confirma un pedido solo con dos llaves y dentro del mandato de quien llama** (ver "Confirmar" abajo). Nunca compra por iniciativa propia.
 
 ### Comprador — chat con UI generativa
 
-`POST /ia/chat` (`iaChat`, mandato `armar` o sesión): un turno de conversación. El cuerpo manda `mensaje`, `lat`/`lng`, historial opcional y, si hay, `comercio_id` / `carrito_id`. La respuesta es un `mensaje` (`esquemas/ia-widgets.json#/$defs/mensaje`) con `texto` y/o `widgets` tipados que la app dibuja con componentes Vereda:
+`POST /ia/chat` (`iaChat`, sesión o mandato `armar`): un turno de conversación. El cuerpo manda `mensaje` (o `accion`, un toque sobre un widget), `lat`/`lng`, historial opcional y, si hay, `comercio_id` / `carrito_id`. La respuesta es un `mensaje` (`esquemas/ia-widgets.json#/$defs/mensaje`) con `texto` y/o `widgets` tipados que la app dibuja con componentes Vereda. Todo producto va como `tarjeta_producto` y todo local como `tarjeta_comercio`; precios, fotos, stock y totales los pone el nodo desde la base.
 
 | `tipo` | Qué dibuja |
 | --- | --- |
-| `elegir_categoria` | Chips/lista de categorías |
+| `grilla` | Grilla de 2 columnas con fotos para explorar (hasta 24), con `filtros` como chips y `mas` si hay más |
+| `mazo` | Cartas apiladas (Paso / ¡Esta! / Más como esta), hasta 12 |
+| `podio` | Hasta 3 puestos, con `razon` y `sello` (fórmula abajo) |
+| `promo` | Carta grande con `sello` |
+| `comercios` | Locales para elegir (`tarjeta_comercio`: portada, abierto, distancia, demora, reputación, destacados) |
+| `producto` | Una tarjeta, con la cantidad de la oferta si la tiene |
 | `productos` | Tarjetas (foto, precio, Agregar) |
-| `producto` | Una tarjeta |
+| `respuestas` | Chips sobre el campo; tocar = mandar ese texto/valor |
 | `carrito` | Carrito **real** (`carrito_id`); ítems con `grupo` / `nota`; `faltantes` |
 | `checkout` | Sobre `carrito_id` real; medios `efectivo` (con `paga_con` al confirmar) / `transferencia` |
+| `historial` | Pedidos anteriores de la persona, para repetir en un toque |
+| `pedido_estado` | Seguimiento de un pedido con sus `pasos`; la app lo actualiza con los eventos del nodo |
+| `navegar` | Botón que lleva a una pantalla de la app (`comercio`, `producto`, `carrito`, `pedido`, `tu_ia`, `direcciones`); con `auto` la app va sola |
+| `bienvenida` | Home del chat vacío (sin llamar al modelo): título, promos, volver a pedir, sugerencias |
+| `elegir_categoria` | Chips/lista de categorías |
 | `recomendacion` | Texto + ítems opcionales |
 | `comercio` | Ficha corta del local |
-| `bienvenida` | Home del chat vacío (sin llamar al modelo): título, promos, volver a pedir, sugerencias |
-| `respuestas` | Chips sobre el campo; tocar = mandar ese texto/valor |
-| `mazo` | Cartas apiladas (Paso / ¡Esta! / Más como esta) |
-| `podio` | Hasta 3 puestos con `razon` pública |
-| `promo` | Carta grande con `sello` |
+
+El agente del nodo de referencia emite `grilla`, `mazo`, `podio`, `promo`, `comercios`, `producto`, `respuestas`, `carrito`, `checkout`, `historial`, `pedido_estado` y `navegar`, más `bienvenida` sin modelo. `productos`, `elegir_categoria`, `recomendacion` y `comercio` siguen en el contrato para quien los use.
 
 **Regla de compatibilidad:** el cliente **ignora** widgets cuyo `tipo` no conoce y degrada a texto si lo hay. En el esquema, un tipo desconocido **valida** como objeto genérico (`desconocido`: `tipo` + `version` + props libres) para que el mensaje no falle entero; la app igual lo saltea. Los tipos conocidos se validan estrictos. `version` de los conocidos es `1` en esta revisión.
 
-Las acciones (agregar al carrito, confirmar pedido) las ejecuta la **persona** (o su agente) con `crearCarrito` / `agregarItemCarrito` / `confirmarCarrito` — el widget solo propone. El carrito del chat **reusa** el carrito del nodo (`carrito_id`).
+**Toques.** Un toque sobre un widget va en `accion` (`esquemas/ia-widgets.json#/$defs/accion_chat`). `elegir`, `agregar`, `cantidad`, `quitar`, `ir_a_pagar`, `repetir`, `ver_producto`, `ver_carta` y `confirmado` los resuelve el nodo al instante, **sin modelo**, sobre el carrito real de la persona. `responder`, `filtro`, `elegir_comercio`, `mas_como_esta` y `ver_mas` se convierten en un mensaje y vuelven al agente como un turno. El carrito del chat **es** el carrito del nodo (`carrito_id`); el pedido que sale de él lleva `via.canal: agente`.
 
-Respuesta completa por defecto. Streaming SSE (`Accept: text/event-stream`) es opcional: el nodo puede mandar el mismo `mensaje` armado por partes; si no lo ofrece, responde JSON como siempre (mismo espíritu que `GET /eventos` en `docs/eventos.md`).
+Respuesta completa por defecto. Con `Accept: text/event-stream` el nodo puede streamear el turno como SSE: `accion` (un paso del agente con su etiqueta, `inicio` y `fin`), `texto` (`{"delta": …}`), `widget` (cada uno apenas está listo), `mensaje` (la respuesta completa, siempre al final) y `error`. Si no lo ofrece, responde JSON como siempre (mismo espíritu que `GET /eventos` en `docs/eventos.md`).
 
 Chat vacío: el nodo puede devolver un widget `bienvenida` **sin** llamar al modelo (gratis): promos de adheridos cerca, volver a pedir, sugerencias.
 
@@ -68,12 +77,37 @@ Los usuarios pagan el costo de tokens de su IA; los comercios pueden adherirse (
 - Por **MCP**, el agente propio de la persona es **neutral** por defecto (`solo_adheridos` ausente o false).
 - Cobro de la adhesión: P2P a la cuenta del operador; Vereda nunca toca plata.
 
-#### Orquestación: el modelo entiende y redacta, el nodo ejecuta
+#### Orquestación: un agente con herramientas; los datos los pone el nodo
 
-El modelo **no** llama herramientas a ciegas. En cada turno:
+Cada turno es un **loop agente**: el modelo decide qué herramientas llamar, el nodo las ejecuta y le devuelve los resultados, hasta que el modelo termina.
 
-1. El modelo entiende el mensaje y devuelve un JSON compacto `{intencion, terminos, gusto, comercio, platos, personas, …}` (`buscar` \| `refinar` \| `elegir` \| `armar_carro` \| `checkout` \| `charla`) y redacta la respuesta corta en **voseo**.
-2. El **nodo** ejecuta las herramientas deterministas, arma los widgets y guarda en el historial los ids de ofertas/carrito mostrados (así "de fugazzeta" y "esa" funcionan).
+1. **Qué recibe el modelo.** Un **prefijo fijo**, idéntico para todas las personas y todos los turnos para que el proveedor lo cachee: la skill del vendedor y las definiciones de las herramientas, en un orden fijo. Después, un bloque de **contexto** que escribe el nodo y que se marca como dato, no como instrucción: nombre de pila, día y franja horaria, el punto de la persona redondeado (ver "Qué ve el modelo"), los locales adheridos que llegan y si están abiertos, los últimos pedidos, "lo de siempre" si lo hay, y el carrito y el local de la charla. Por último, el historial reciente (el nodo de referencia usa los últimos 16 mensajes) y el mensaje.
+2. **Pasos.** El modelo contesta con texto y/o llamadas a herramientas. Hasta **6 pasos** por turno. En el último, o cuando el turno ya gastó el tope de costo por turno que fija el operador (el nodo de referencia usa USD 0,02), el nodo pide la respuesta sin herramientas. Un paso que falla o vuelve vacío se reintenta una vez con el modelo de respaldo; si falla después de haber dicho algo o con un carrito armado, el nodo responde con lo que tiene.
+3. **Herramientas.** Son **las del MCP del propio nodo** (`mcp/herramientas.json`), una lista fija, ejecutadas como la persona y **bajo el mandato de quien llama** (ver "Confirmar"). Una herramienta fuera de la lista vuelve como error al modelo. El nodo completa lo que la política del chat exige: el punto de la persona y `solo_adheridos=true` en las búsquedas. Las lecturas pueden correr en paralelo; las escrituras van en orden.
+4. **Widgets.** El modelo muestra cosas con `mostrar_widget`, una herramienta propia del chat (no está en el MCP): pasa un `tipo` y los ids que le devolvieron las herramientas, o `buscar` para que el nodo busque y elija en el mismo paso. **El nodo arma cada widget desde la base** —precios, fotos, totales, stock—, descarta los ids inventados o que no están en el catálogo del chat (solo adheridos que llegan) y valida el resultado contra `esquemas/ia-widgets.json`. El modelo nunca escribe un precio. Un paso que solo mostró widgets cierra el turno sin volver al modelo.
+5. **Siempre algo para mirar.** Si se confirmó un pedido, el nodo agrega su `pedido_estado`; si el turno tocó un carrito, el `carrito` y abajo su `checkout`; si no hubo widget, un `mazo` con lo que encontraron las búsquedas. Hasta 8 widgets por mensaje.
+6. **Texto corto.** Unas dos líneas en **voseo**. El nodo corta lo que se pasa de largo y saca ids o nombres de campo que se hayan filtrado.
+
+El nodo de referencia le da al chat, en este orden: para buscar y conocer, `ia_catalogo_buscar`, `ia_comercios_cerca`, `ver_comercio`, `ver_carta`, `ver_oferta`, `ver_resenas`, `ver_reputacion` e `ia_promos`; de la persona, `mi_vereda`, `ia_mis_pedidos`, `mis_preferencias`, `mis_direcciones` y `estado_pedido`; de carrito, `carrito_agregar_varios`, `carrito_crear`, `carrito_agregar`, `carrito_quitar`, `carrito_modalidad`, `carrito_resolver` y `carrito_confirmar`; de recetas, `ia_receta_a_lista` e `ia_lista_a_carrito`; y `mostrar_widget`. Quedan afuera a propósito las búsquedas neutrales (`buscar_comercios`, `buscar_ofertas`: el chat muestra solo adheridos) y todo lo de comercio, repartidor y administración.
+
+#### Confirmar: dos llaves y el mandato de quien llama
+
+El chat puede cerrar un pedido, pero no por su cuenta:
+
+- **Llave 1:** el modelo tiene que llamar `carrito_confirmar`.
+- **Llave 2:** el nodo comprueba en el **último mensaje de la persona** —lo que escribió o tocó en este turno— que ella pidió cerrarlo ("confirmo", "dale, pedilo", "mandalo"). Ante la duda, no. Un asentimiento suelto ("sí", "ok", "va") cuenta solo si el mensaje anterior del asistente mostró un `checkout`, y una negación delante ("no", "todavía no", "esperá") lo anula. Lo que diga un dato —la descripción de un producto, el mensaje de un comercio, un resultado de herramienta— nunca cuenta. Si falta la llave, la herramienta vuelve con error al modelo, que muestra el checkout y espera.
+- **El mandato de quien llama.** El chat del nodo actúa con el permiso de quien lo llamó, nunca con más. Con un mandato, puede lo que ese mandato puede: con `armar` arma carritos pero **no confirma**; para confirmar hace falta `pedir`, y valen sus topes y su `confirmar_siempre` (`docs/mandatos.md`). Con la sesión de la persona, el chat actúa como un mandato implícito `vereda-ia` de `armar` + `pedir` con el tope de `preferencias.tope_por_pedido`: un pedido por encima de ese tope no lo confirma el chat; muestra el checkout y lo confirma ella.
+- Cada confirmación lleva una clave de idempotencia por turno: un reintento del modelo no duplica el pedido.
+
+La persona también confirma sola desde el `checkout` con `confirmarCarrito`, como en cualquier otra pantalla; la app le avisa al chat con la acción `confirmado`.
+
+#### Qué ve el modelo
+
+El texto del chat de IA va al proveedor del modelo a través del gateway: **no** está cifrado de punta a punta como el chat entre las partes (`docs/datos-y-privacidad.md`). Por eso el nodo manda lo mínimo:
+
+- **Ubicación redondeada a ~100 m** (tres decimales de lat/lng). Nunca la dirección exacta, la calle ni la altura. De las direcciones guardadas, el modelo ve solo las etiquetas ('casa', 'oficina'), igual que cualquier agente con `leer`.
+- Nombre de pila, no el nombre completo. Ni teléfono ni email.
+- El nodo no guarda la charla: el historial lo tiene la app y lo manda en cada turno.
 
 Herramientas (OpenAPI + MCP + uso interno del chat), compactas:
 
@@ -87,16 +121,21 @@ Herramientas (OpenAPI + MCP + uso interno del chat), compactas:
 
 #### Fórmula pública del podio
 
-Cuando el nodo arma un widget `podio`, ordena hasta 3 tarjetas candidatas con un score público (misma idea que el ranking del barrio, calibrado al chat):
+Todo `podio` sale ordenado por este score público. Cuando el nodo lo arma desde una búsqueda (`mostrar_widget` con `buscar`), toma hasta 20 tarjetas de adheridos que llegan —si al menos 3 nombran lo buscado en su nombre, compiten solo esas— y las ordena así:
 
 ```
-score = 0.35 · 1/(1 + distancia_m/2000)
-      + 0.30 · (reputacion.promedio / 5)
-      + 0.20 · min(1, pedidos_mes / 40)
-      + 0.15 · coincidencia
+score = 0.35 · cercanía + 0.25 · reputación + 0.25 · pedidos + 0.15 · coincidencia
+
+cercanía     = 1 / (1 + distancia_m / 500)        (distancia 0 o desconocida → 1)
+reputación   = reputacion.promedio / 5            (0 si no tiene reseñas)
+pedidos      = pedidos_mes / (pedidos_mes + 10)   (entregados del mes, agregado anónimo)
+coincidencia = fracción de los términos buscados, ya expandidos con datos/sinonimos.json,
+               que aparecen en nombre + descripción (0,5 si no hay términos)
 ```
 
-`coincidencia` ∈ [0, 1] es cuánto matchea el texto/gusto pedido (1 = exacto tras sinónimos). Cada puesto lleva una `razon` en castellano que refleja el término que más aportó (`más cerca`, `mejor reputación`, `más pedida`, `más parecida a lo que pediste`). No hay posiciones pagas ni boost oculto por adhesión más allá del filtro previo de adheridos.
+Quedan los 3 primeros; un empate no tiene orden garantizado. La `razon` de cada puesto nombra el término que más vale **sin ponderar** (ante un empate, en este orden): `la más cerca`, `mejor reputación`, `la más pedida del mes`, `la que más pega con lo que pediste`. El `sello` es el del lugar en el podio (el nodo de referencia usa "La reina del barrio", "Plata" y "Bronce"), no una afirmación sobre el producto.
+
+Si el agente elige él las tarjetas (pasa `productos` en vez de `buscar`), elige los candidatos, **nunca el orden**: el nodo **siempre** reordena el podio con este mismo score, y el `sello` sigue al lugar que sale de la fórmula. La `razon` es la que el agente escribió o, si no escribió ninguna, una por datos (muy pedida, buena reputación, a la vuelta). En los dos casos las tarjetas salen del catálogo del chat y sus datos de la base. No hay posiciones pagas ni boost oculto por adhesión más allá del filtro previo de adheridos.
 
 También siguen:
 
@@ -144,7 +183,11 @@ Igual que antes: `GET /ia/yo/extracto`, y en `gastos_publicados` los opcionales 
 
 ## Lo que un nodo NO puede hacer
 
-- Cobrar margen, intermediar plata, o escribir en catálogo/chat/carrito sin confirmación.
+- Cobrar margen o intermediar plata.
+- Publicar en el catálogo, la ficha o un mensaje sin que la persona lo confirme.
+- Confirmar un pedido sin las dos llaves, o con más permiso que el de quien llama al chat (un mandato `armar` nunca confirma; la sesión respeta `tope_por_pedido`).
+- Ordenar un `podio` con otro criterio que la fórmula pública, aunque el agente haya elegido los candidatos.
+- Mandarle al modelo la dirección exacta o un punto más fino que ~100 m.
 - Cobrar el checkout del chat por Vereda o forzar tarjeta del nodo: solo medios del comercio.
 - Dejar el tope solo en manos del gateway/proveedor: el nodo responde `tope_ia_alcanzado`.
 - Mostrar IA en la app sin publicar `ia`.

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://vereda.ar/esquemas/v1/ia-widgets.json",
   "title": "Widgets de la IA del comprador",
-  "description": "UI generativa del chat del comprador: cada mensaje puede traer widgets tipados que la app dibuja con componentes Vereda. El cliente IGNORA tipos que no conoce y degrada a texto (docs/ia/capacidad.md). Acciones (agregar, confirmar) las ejecuta la persona con los endpoints de siempre — la IA propone, nunca compra sola.",
+  "description": "UI generativa del chat del comprador: cada mensaje puede traer widgets tipados que la app dibuja con componentes Vereda. El cliente IGNORA tipos que no conoce y degrada a texto (docs/ia/capacidad.md). Los datos de cada widget (precios, fotos, totales) los pone el nodo desde la base, nunca el modelo. El agente arma carritos; un pedido se confirma solo si la persona lo pidió en su último mensaje y dentro del mandato de quien llama.",
   "$defs": {
     "version": {
       "type": "integer",
@@ -458,7 +458,7 @@
     },
     "podio": {
       "type": "object",
-      "description": "Tres recomendadas con razón pública (fórmula en docs/ia/capacidad.md).",
+      "description": "Hasta tres recomendadas, en orden, con su razón. El nodo siempre las ordena con la fórmula pública de docs/ia/capacidad.md, también cuando el agente elige los candidatos: el agente elige cuáles, nunca el orden.",
       "required": ["tipo", "version", "titulo", "puestos"],
       "additionalProperties": false,
       "properties": {
@@ -484,9 +484,13 @@
               "razon": {
                 "type": "string",
                 "maxLength": 120,
-                "description": "Razón pública: 'más pedida', 'más cerca', 'mejor reputación'."
+                "description": "Por qué está en el podio, en castellano. Con la fórmula pública es el término que más vale: 'la más cerca', 'mejor reputación', 'la más pedida del mes', 'la que más pega con lo que pediste'."
               },
-              "sello": { "type": "string", "maxLength": 40 }
+              "sello": {
+                "type": "string",
+                "maxLength": 40,
+                "description": "El del lugar en el podio (ej. 'La reina del barrio', 'Plata', 'Bronce'), no una afirmación sobre el producto."
+              }
             }
           }
         }
