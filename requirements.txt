@@ -1,0 +1,9 @@
+# validar.py, generar-vectores.py y la suite de conformidad (python3 -m conformidad).
+# python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+cryptography
+jsonschema
+openapi-spec-validator
+pyyaml
+referencing
+requests
+rfc8785

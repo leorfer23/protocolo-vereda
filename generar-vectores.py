@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Genera ejemplos/vectores-firma.json. Determinista: correrlo dos veces da el mismo archivo.
 
-    pip install cryptography rfc8785 && python3 generar-vectores.py
+    .venv/bin/pip install -r requirements.txt && .venv/bin/python generar-vectores.py
 """
-import json, hashlib, base64, os
-import rfc8785
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives import serialization as sz
+import json, hashlib, base64, os, sys
+try:
+    import rfc8785
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives import serialization as sz
+except ModuleNotFoundError as e:
+    sys.exit(f"falta el módulo {e.name}: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/python generar-vectores.py")
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 b64u = lambda b: base64.urlsafe_b64encode(b).rstrip(b"=").decode()

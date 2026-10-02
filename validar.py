@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Valida los ejemplos contra los esquemas, el OpenAPI y los vectores de firma."""
-import json, sys, glob, os, re, yaml, hashlib, base64
-from openapi_spec_validator import validate
-import rfc8785
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
-from cryptography.hazmat.primitives import serialization as sz
-from cryptography.exceptions import InvalidSignature
-from jsonschema import Draft202012Validator
+import json, sys, glob, os, re, hashlib, base64
+try:
+    import yaml
+    from openapi_spec_validator import validate
+    import rfc8785
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+    from cryptography.hazmat.primitives import serialization as sz
+    from cryptography.exceptions import InvalidSignature
+    from jsonschema import Draft202012Validator
+except ModuleNotFoundError as e:
+    sys.exit(f"falta el módulo {e.name}: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/python validar.py")
 
 from conformidad.oraculo import cargar as cargar_esquemas
 from conformidad import registro as reg
@@ -420,4 +424,5 @@ for m in malos:
     print(f"✗ {m}")
 print(f"{total - len(malos)}/{total} vectores de acceso y respaldo: bytes reproducidos y firmas verificadas")
 
+print(f"\n✗ validar.py: {fallos} {'falla' if fallos == 1 else 'fallas'} (buscá las líneas con ✗)" if fallos else "\n✓ validar.py: 0 fallas")
 sys.exit(1 if fallos else 0)
