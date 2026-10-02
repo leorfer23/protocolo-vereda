@@ -12,9 +12,9 @@ para tener el visto bueno antes de escribir un test.
 ## Lo que ya existe y no se repite
 
 `validar.py` ya prueba que la spec es consistente **consigo misma**, sin red: los ejemplos
-contra los esquemas, los 67 casos límite de `ejemplos/casos/*.json`, `openapi.yaml` contra
-OAS 3.1, que las 69 operaciones tengan `operationId`, que las 12 lecturas públicas declaren
-`ETag`/`Cache-Control`/`304`, y los 11 vectores de `ejemplos/vectores-firma.json` (JCS,
+contra los esquemas, los casos límite de `ejemplos/casos/*.json`, `openapi.yaml` contra
+OAS 3.1, que todas las operaciones tengan `operationId`, que las lecturas públicas declaren
+`ETag`/`Cache-Control`/`304`, y los vectores de `ejemplos/vectores-firma.json` (JCS,
 firma Ed25519, request RFC 9421).
 
 La suite de conformidad prueba algo distinto: que un **nodo corriendo**, en su propia URL,
@@ -63,7 +63,7 @@ evita que la suite se desactualice sola frente a la spec:
   `ejemplos/mandato.json` el de `POST /mandatos`, y así con cada ejemplo que ya tiene un
   esquema asignado en `validar.py`. Antes de enviarlos se regeneran los campos que tienen
   que ser únicos por corrida (`id`, marcas de tiempo).
-- **Desde `ejemplos/casos/*.json`**: son 67 casos ya clasificados `valido`/`invalido` por
+- **Desde `ejemplos/casos/*.json`**: son casos ya clasificados `valido`/`invalido` por
   esquema. Un caso `invalido` se manda tal cual como cuerpo de la operación que crea o
   edita ese recurso, y se espera `422` con `esquemas/error.json`; un caso `valido` se
   espera aceptado. Agregar un caso límite a `ejemplos/casos/oferta.json` (por ejemplo) le
@@ -119,7 +119,7 @@ prueba la próxima vez que corre, sin tocar el código de la suite.
    La cuenta es la misma de `validar.py` (`conformidad/registro.py`), y
    `conformidad/pruebas/verificar_registro_con_vectores.py` prueba que aprueba el vector y rechaza
    una entrada reescrita. Un registro vacío queda omitido, no aprobado.
-6. *Negativos sin sesión.* Los 74 casos de `ejemplos/casos/*.json` puestos como cuerpo de
+6. *Negativos sin sesión.* Los casos de `ejemplos/casos/*.json` puestos como cuerpo de
    la operación de escritura correspondiente, sin credenciales: se espera `401`, no `422`
    ni `500` — que el nodo pida autenticación antes que validar el cuerpo.
 
