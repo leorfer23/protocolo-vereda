@@ -207,6 +207,46 @@ paths:
         "304": { $ref: "#/components/responses/SinCambios" }
         "404": { description: "Este nodo no tiene calles cargadas (no_encontrado)", content: { application/json: { schema: { $ref: "esquemas/error.json" } } } }
 
+  /zona-entrega/resolver:
+    post:
+      operationId: resolverZonaEntrega
+      tags: [mi-comercio]
+      summary: "Armar una zona de entrega desde un radio, localidades o un dibujo, sin guardarla, para mostrarla en un mapa"
+      description: |
+        Recibe una `forma` (`esquemas/comercio.json#/$defs/forma_zona`) y devuelve las áreas que
+        quedarían, la superficie y los nombres que no pudo resolver. No guarda nada: es para que la
+        persona vea la zona en un mapa y confirme antes de `editarComercio` o `crearComercio`
+        (docs/zona-entrega.md). Un radio sin `centro` pide `comercio`, para usar el punto de su
+        dirección.
+
+        Con `localidades` o `menos`, el nodo busca cada nombre en los límites de OpenStreetMap que
+        tiene cargados (docs/mapa.md). Un nombre que es más de un lugar no se adivina: vuelve en
+        `sin_resolver` con sus candidatos, y `zona_entrega` no viene. Un nodo sin límites cargados
+        responde 422 `localidades_no_disponibles`; el radio y el dibujo andan igual.
+
+        Un dibujo con anillos que se cruzan, huecos fuera de su borde o más vértices de los que el
+        nodo acepta responde 422 `zona_invalida`, con el área en `detalle`.
+
+        Sin `comercio` (un alta que todavía no existe) alcanza la sesión o el mandato; con `comercio`,
+        hace falta el permiso `datos` en él, como para editarlo.
+      security: [ { sesion: [] }, { mandato: [administrar] } ]
+      x-permiso-equipo: [datos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [forma]
+              properties:
+                forma: { $ref: "esquemas/comercio.json#/$defs/forma_zona" }
+                areas: { type: array, minItems: 1, items: { $ref: "esquemas/comunes.json#/$defs/area" }, description: "Con forma 'dibujo': los vértices que marcó o ajustó la persona." }
+                comercio: { $ref: "esquemas/comunes.json#/$defs/id", description: "El comercio cuya dirección es el centro de un radio sin 'centro'." }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: "esquemas/comercio.json#/$defs/zona_resuelta" } } } }
+        "403": { $ref: "#/components/responses/NoEsElDueno" }
+        "422": { $ref: "#/components/responses/Error" }
+
   /comercios:
     get:
       operationId: buscarComercios
@@ -237,6 +277,9 @@ paths:
         cuando el comercio verifica CUIT, foto geolocalizada y cuenta de cobro; no es una
         habilitación y no hace falta para vender. La reputación se construye solo con reseñas
         firmadas de pedidos entregados.
+
+        `ubicacion.zona_entrega` puede venir como forma en vez de coordenadas: `{"forma": {"tipo":
+        "radio", "radio_km": 15}}` y el nodo arma el polígono desde la dirección (docs/zona-entrega.md).
 
         Una modalidad con envío con `codigo_entrega` `siempre` o `solo_efectivo` pide que el nodo
         aloje la foto de la entrega (`endpoints.medios`): sin eso quien entrega no tiene dónde
@@ -272,6 +315,11 @@ paths:
 
         Cambiar `privado.cuenta_cobro` pide firma fresca de quien la cambia (docs/acceso.md, punto 7);
         el resto de la ficha no.
+
+        `ubicacion.zona_entrega` acepta el anillo de 1.0 o una `forma` (radio, localidades o dibujo,
+        docs/zona-entrega.md). Con radio o localidades el nodo arma las áreas y las guarda; la
+        respuesta las trae. Un nombre de localidad que es más de un lugar responde 422
+        `localidad_ambigua` con los candidatos en `detalle`; un dibujo inválido, 422 `zona_invalida`.
 
         Una modalidad con envío con `codigo_entrega` `siempre` o `solo_efectivo` pide que el nodo
         aloje la foto de la entrega (`endpoints.medios`): sin eso quien entrega no tiene dónde

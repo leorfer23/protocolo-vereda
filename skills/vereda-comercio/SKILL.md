@@ -20,7 +20,7 @@ Vereda es un protocolo abierto de comercio de barrio. Un comercio se da de alta 
 3. Juntá lo mínimo y mostráselo antes de crear:
    - `nombre`, `tipo` (`restaurante`, `almacen`, `verduleria`, `supermercado`, `catering`, `productor`, `panaderia`, `farmacia`, `otro`) y `subtipo` libre (ej. `distribuidora`).
    - `ubicacion.direccion`: `texto` y `punto` `{lat, lng}`. Si no publica la dirección (un productor sin local), `publica_direccion: false`.
-   - `ubicacion.zona_entrega`: anillo cerrado de puntos (el primero igual al último, 4 como mínimo).
+   - `ubicacion.zona_entrega`: no le pidas coordenadas. Proponé `{"forma": {"tipo": "radio", "radio_km": 15}}` o lo que diga en palabras (localidades, "menos tal barrio"), armala con `zona_entrega_resolver`, mostrásela en un mapa y usala cuando la confirme (`docs/zona-entrega.md`). El anillo cerrado de puntos de 1.0 sigue valiendo.
    - `modalidades`: al menos una. La más simple es `{"id": "retiro", "tipo": "retiro", "precio_envio": {"modo": "gratis"}}`.
    - `politica_cancelacion`: `texto` en sus palabras y `hasta_estado` (`pagado`, `aceptado`, `preparando`, `listo`, `asignado`).
 4. `comercio_crear` con esa ficha. Guardá el `id` que devuelve.

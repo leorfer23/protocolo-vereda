@@ -63,6 +63,9 @@ MAPA_DEFS = {
     "ia-widgets-super.json": "ia-widgets.json#/$defs/mensaje",
     "ia-widgets-podio.json": "ia-widgets.json#/$defs/mensaje",
     "ia-libreta.json": "libreta.json#/$defs/libreta",
+    "zona-santa-elena-15km.json": "comercio.json#/$defs/zona_entrega",
+    "zona-pilar-del-viso.json": "comercio.json#/$defs/zona_entrega",
+    "zona-resuelta-ambigua.json": "comercio.json#/$defs/zona_resuelta",
 }
 for ej, ref in MAPA_DEFS.items():
     doc = json.load(open(os.path.join(EJ, ej)))
