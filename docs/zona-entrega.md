@@ -46,7 +46,7 @@ El comercio, la app o un agente mandan una `forma`. El nodo la resuelve a áreas
   El nodo busca el nombre en los límites que tiene cargados y guarda el id, para que la forma diga
   siempre lo mismo. Un nombre que es más de un lugar no se adivina: 422 `localidad_ambigua` con los
   candidatos en `detalle` (en `resolverZonaEntrega`, en `sin_resolver`).
-- **Radio en el plano.** Los vértices salen de la fórmula de destino sobre una esfera de 6371 km,
+- **Radio en el plano.** Los vértices salen de la fórmula de destino sobre una esfera de 6371,0088 km (el radio medio de WGS84),
   el primero hacia el norte y en el sentido de las agujas del reloj, con cinco decimales. Lo que
   se compara es ese polígono, no el círculo.
 - **Tamaño.** Hasta 50 áreas y 50 huecos por área. El nodo puede simplificar los límites de OSM
