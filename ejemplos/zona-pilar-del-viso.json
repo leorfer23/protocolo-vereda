@@ -1,0 +1,63 @@
+{
+  "$comentario": "Una zona por localidades con un hueco y dos áreas separadas: llega a Pilar, Del Viso y Villa Rosa, pero no al barrio cerrado Los Robles. Las coordenadas están dibujadas a mano y los ids de OpenStreetMap son de ejemplo: la especificación no trae datos de OSM (docs/mapa.md).",
+  "forma": {
+    "tipo": "localidades",
+    "localidades": [
+      {
+        "osm": "relation/1000001",
+        "nombre": "Pilar",
+        "en": "Pilar, Buenos Aires"
+      },
+      {
+        "osm": "relation/1000002",
+        "nombre": "Del Viso",
+        "en": "Pilar, Buenos Aires"
+      },
+      {
+        "osm": "relation/1000003",
+        "nombre": "Villa Rosa",
+        "en": "Pilar, Buenos Aires"
+      }
+    ],
+    "menos": [
+      {
+        "osm": "way/2000001",
+        "nombre": "Los Robles",
+        "en": "Del Viso, Pilar, Buenos Aires"
+      }
+    ]
+  },
+  "areas": [
+    {
+      "nombre": "Pilar y Del Viso",
+      "borde": [
+        { "lat": -34.4, "lng": -58.95 },
+        { "lat": -34.4, "lng": -58.8 },
+        { "lat": -34.47, "lng": -58.76 },
+        { "lat": -34.52, "lng": -58.8 },
+        { "lat": -34.52, "lng": -58.95 },
+        { "lat": -34.4, "lng": -58.95 }
+      ],
+      "huecos": [
+        [
+          { "lat": -34.45, "lng": -58.85 },
+          { "lat": -34.45, "lng": -58.83 },
+          { "lat": -34.47, "lng": -58.83 },
+          { "lat": -34.47, "lng": -58.85 },
+          { "lat": -34.45, "lng": -58.85 }
+        ]
+      ]
+    },
+    {
+      "nombre": "Villa Rosa",
+      "borde": [
+        { "lat": -34.36, "lng": -58.9 },
+        { "lat": -34.36, "lng": -58.86 },
+        { "lat": -34.39, "lng": -58.86 },
+        { "lat": -34.39, "lng": -58.9 },
+        { "lat": -34.36, "lng": -58.9 }
+      ]
+    }
+  ],
+  "resuelta": "2026-10-02T10:00:00-03:00"
+}

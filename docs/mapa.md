@@ -62,6 +62,15 @@ De **OpenStreetMap**, bajadas **una vez** por el operador del nodo, nunca en tie
 Un nodo sin calles cargadas responde `404 no_encontrado`: servirlas es **opcional**. La app dibuja
 entonces su cuadrícula genérica, que no dice nada de ningún lugar real.
 
+### Límites de localidades y barrios
+
+Del mismo extracto el operador puede bajar los límites de localidades y barrios (relaciones
+`boundary=administrative` y áreas con `place` o barrios cerrados con nombre). No se sirven a las
+apps: el nodo los usa para armar una zona de entrega por localidades ("Pilar y Del Viso",
+docs/zona-entrega.md). Se buscan por nombre y se guardan por id (`relation/…`, `way/…`). Un nodo
+sin límites cargados responde `422 localidades_no_disponibles` a esa forma; el radio y el dibujo
+andan igual.
+
 ## Atribución (ODbL)
 
 Los datos de OpenStreetMap son libres bajo la Open Database License con una condición: decir de
@@ -72,6 +81,8 @@ OpenStreetMap, `licencia: "ODbL-1.0"` y `url: "https://www.openstreetmap.org/cop
   chica), y lo enlaza a `url`. Nunca lo tapa ni lo esconde detrás de un menú.
 - **El nodo** sirve el archivo tal como lo derivó de OSM: si lo modifica (recorta, simplifica),
   sigue siendo una base derivada bajo ODbL, y la atribución va igual.
+- **Una zona armada con límites de OSM** también sale de OSM: la app que la dibuja muestra la
+  misma atribución.
 - La especificación (CC0) no incluye datos de OpenStreetMap: el ejemplo tiene coordenadas dibujadas
   a mano. Los datos viven en cada nodo, con su licencia.
 

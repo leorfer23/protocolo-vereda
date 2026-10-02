@@ -81,6 +81,32 @@
         "$ref": "#/$defs/punto"
       }
     },
+    "area": {
+      "type": "object",
+      "description": "Un pedazo de zona: un borde y, si hace falta, huecos adentro (un barrio cerrado al que no se llega). Un punto está en el área si está dentro del borde, o sobre él, y no está dentro de ningún hueco.",
+      "required": [
+        "borde"
+      ],
+      "properties": {
+        "nombre": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Opcional, para mostrarla: 'Pilar', 'Del Viso'."
+        },
+        "borde": {
+          "$ref": "#/$defs/poligono"
+        },
+        "huecos": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "$ref": "#/$defs/poligono"
+          },
+          "description": "Anillos adentro del borde que no son parte del área. No se tocan entre sí."
+        }
+      },
+      "additionalProperties": false
+    },
     "direccion": {
       "type": "object",
       "description": "Dirección argentina: texto libre del usuario más un punto que él confirmó en el mapa. El texto manda; el punto sirve para ruteo.",

@@ -1,0 +1,20 @@
+{
+  "$comentario": "Lo que devuelve resolverZonaEntrega cuando un nombre es más de un lugar: no hay zona para mostrar hasta que la persona elija cuál San Miguel. Ids de ejemplo.",
+  "sin_resolver": [
+    {
+      "nombre": "San Miguel",
+      "candidatos": [
+        {
+          "osm": "relation/1000010",
+          "nombre": "San Miguel",
+          "en": "San Miguel, Buenos Aires"
+        },
+        {
+          "osm": "relation/1000011",
+          "nombre": "San Miguel",
+          "en": "Merlo, Buenos Aires"
+        }
+      ]
+    }
+  ]
+}

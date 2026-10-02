@@ -1,0 +1,447 @@
+{
+  "$comentario": "Casos de la zona de entrega (docs/zona-entrega.md), sobre comercio.json#/$defs/zona_entrega.",
+  "esquema": "comercio.json#/$defs/zona_entrega",
+  "casos": [
+    {
+      "espera": "valido",
+      "porque": "El anillo de 1.0 sigue valiendo: es una sola área sin huecos.",
+      "doc": [
+        {
+          "lat": -34.59,
+          "lng": -58.43
+        },
+        {
+          "lat": -34.59,
+          "lng": -58.41
+        },
+        {
+          "lat": -34.62,
+          "lng": -58.41
+        },
+        {
+          "lat": -34.62,
+          "lng": -58.43
+        },
+        {
+          "lat": -34.59,
+          "lng": -58.43
+        }
+      ]
+    },
+    {
+      "espera": "valido",
+      "porque": "Radio de 15 km con las áreas que armó el nodo.",
+      "doc": {
+        "forma": {
+          "tipo": "radio",
+          "radio_km": 15
+        },
+        "areas": [
+          {
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              }
+            ]
+          }
+        ],
+        "resuelta": "2026-10-02T10:00:00-03:00"
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Radio al escribir: solo la forma, el nodo arma las áreas.",
+      "doc": {
+        "forma": {
+          "tipo": "radio",
+          "radio_km": 15
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Radio con centro propio y un barrio restado por nombre.",
+      "doc": {
+        "forma": {
+          "tipo": "radio",
+          "radio_km": 8,
+          "centro": {
+            "lat": -34.6,
+            "lng": -58.42
+          },
+          "menos": [
+            {
+              "nombre": "Los Robles"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Localidades por nombre, como las escribe la persona.",
+      "doc": {
+        "forma": {
+          "tipo": "localidades",
+          "localidades": [
+            {
+              "nombre": "Pilar"
+            },
+            {
+              "nombre": "Del Viso"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Dibujo con dos áreas separadas, una con un hueco.",
+      "doc": {
+        "forma": {
+          "tipo": "dibujo"
+        },
+        "areas": [
+          {
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              }
+            ],
+            "huecos": [
+              [
+                {
+                  "lat": -34.6,
+                  "lng": -58.425
+                },
+                {
+                  "lat": -34.6,
+                  "lng": -58.42
+                },
+                {
+                  "lat": -34.61,
+                  "lng": -58.42
+                },
+                {
+                  "lat": -34.61,
+                  "lng": -58.425
+                },
+                {
+                  "lat": -34.6,
+                  "lng": -58.425
+                }
+              ]
+            ]
+          },
+          {
+            "nombre": "Otra",
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "valido",
+      "porque": "Dibujo ajustado a partir de un radio.",
+      "doc": {
+        "forma": {
+          "tipo": "dibujo",
+          "partio_de": {
+            "tipo": "radio",
+            "radio_km": 15
+          }
+        },
+        "areas": [
+          {
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un dibujo sin áreas no dice dónde se entrega.",
+      "doc": {
+        "forma": {
+          "tipo": "dibujo"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un dibujo no puede partir de otro dibujo.",
+      "doc": {
+        "forma": {
+          "tipo": "dibujo",
+          "partio_de": {
+            "tipo": "dibujo"
+          }
+        },
+        "areas": [
+          {
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Radio de 0 km.",
+      "doc": {
+        "forma": {
+          "tipo": "radio",
+          "radio_km": 0
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Radio sin radio_km.",
+      "doc": {
+        "forma": {
+          "tipo": "radio"
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Localidades sin ninguna localidad.",
+      "doc": {
+        "forma": {
+          "tipo": "localidades",
+          "localidades": []
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una localidad sin nombre ni osm.",
+      "doc": {
+        "forma": {
+          "tipo": "localidades",
+          "localidades": [
+            {
+              "en": "Pilar, Buenos Aires"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un id de OpenStreetMap que no es relation ni way.",
+      "doc": {
+        "forma": {
+          "tipo": "localidades",
+          "localidades": [
+            {
+              "osm": "node/123"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Una forma que no existe.",
+      "doc": {
+        "forma": {
+          "tipo": "cuadras",
+          "cuadras": 10
+        }
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Un borde de tres puntos no cierra un área.",
+      "doc": {
+        "forma": {
+          "tipo": "dibujo"
+        },
+        "areas": [
+          {
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Áreas sin forma: el objeto siempre dice cómo se armó.",
+      "doc": {
+        "areas": [
+          {
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "espera": "invalido",
+      "porque": "Campo inventado en un área.",
+      "doc": {
+        "forma": {
+          "tipo": "dibujo"
+        },
+        "areas": [
+          {
+            "borde": [
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.41
+              },
+              {
+                "lat": -34.62,
+                "lng": -58.43
+              },
+              {
+                "lat": -34.59,
+                "lng": -58.43
+              }
+            ],
+            "precio": 100
+          }
+        ]
+      }
+    }
+  ]
+}

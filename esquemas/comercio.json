@@ -27,7 +27,7 @@
       "required": ["direccion", "zona_entrega"],
       "properties": {
         "direccion": { "$ref": "comunes.json#/$defs/direccion" },
-        "zona_entrega": { "$ref": "comunes.json#/$defs/poligono" },
+        "zona_entrega": { "$ref": "#/$defs/zona_entrega" },
         "publica_direccion": { "type": "boolean", "default": true, "description": "Un productor sin local puede ocultarla." }
       }
     },
@@ -225,6 +225,89 @@
     }
   },
   "$defs": {
+    "zona_entrega": {
+      "title": "Zona de entrega",
+      "description": "Dónde entrega el comercio (docs/zona-entrega.md). Dos formas válidas: el anillo de 1.0 (un área sin huecos) o un objeto con la forma pedida y las áreas que resolvió el nodo. Lo que cuenta para saber si un punto cae adentro son siempre las áreas guardadas, nunca la forma.",
+      "oneOf": [
+        { "$ref": "comunes.json#/$defs/poligono", "description": "La forma de 1.0: un solo anillo cerrado. Sigue valiendo y es lo mismo que una sola área sin huecos." },
+        {
+          "type": "object",
+          "required": ["forma"],
+          "properties": {
+            "forma": { "$ref": "#/$defs/forma_zona" },
+            "areas": { "type": "array", "minItems": 1, "maxItems": 50, "items": { "$ref": "comunes.json#/$defs/area" }, "description": "La geometría resuelta: un punto está en la zona si está en alguna área. Con 'radio' o 'localidades' la escribe el nodo y lo que venga se ignora; con 'dibujo' la manda el comercio. El nodo siempre la devuelve." },
+            "resuelta": { "$ref": "comunes.json#/$defs/instante", "readOnly": true, "description": "Cuándo armó el nodo las áreas. Lo escribe el nodo." }
+          },
+          "if": { "properties": { "forma": { "properties": { "tipo": { "const": "dibujo" } } } } },
+          "then": { "required": ["areas"] },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "forma_zona": {
+      "title": "Forma de una zona de entrega",
+      "description": "Cómo se armó la zona, en los términos de la persona y no en coordenadas. El nodo la guarda tal cual, con los ids de OpenStreetMap ya resueltos, para volver a armarla o mostrar de dónde salió.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["tipo", "radio_km"],
+          "properties": {
+            "tipo": { "const": "radio" },
+            "radio_km": { "type": "number", "exclusiveMinimum": 0, "maximum": 100, "description": "'15 km desde el local'. Es lo que propone la app por defecto." },
+            "centro": { "$ref": "comunes.json#/$defs/punto", "description": "Ausente: el punto de ubicacion.direccion. Si la dirección cambia, el nodo vuelve a armar las áreas." },
+            "menos": { "$ref": "#/$defs/localidades_zona", "description": "Lo que se resta del círculo: 'menos el barrio Los Robles'." }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["tipo", "localidades"],
+          "properties": {
+            "tipo": { "const": "localidades" },
+            "localidades": { "$ref": "#/$defs/localidades_zona", "minItems": 1, "description": "'Pilar, Del Viso y Villa Rosa': la unión de sus límites." },
+            "menos": { "$ref": "#/$defs/localidades_zona", "description": "Lo que se resta de la unión, como un barrio cerrado en el medio. Queda como hueco." }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["tipo"],
+          "properties": {
+            "tipo": { "const": "dibujo" },
+            "partio_de": { "description": "Si la persona ajustó una forma de las otras dos, cuál era. Solo para mostrarlo: las áreas mandan.", "$ref": "#/$defs/forma_zona", "not": { "required": ["tipo"], "properties": { "tipo": { "const": "dibujo" } } } }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "localidades_zona": {
+      "type": "array",
+      "maxItems": 30,
+      "items": { "$ref": "#/$defs/localidad_zona" }
+    },
+    "localidad_zona": {
+      "type": "object",
+      "description": "Una localidad o un barrio de OpenStreetMap. Al escribir alcanza el nombre; el nodo lo busca en los límites que tiene cargados y guarda el id. Un nombre que coincide con más de uno responde 422 localidad_ambigua con los candidatos.",
+      "anyOf": [ { "required": ["osm"] }, { "required": ["nombre"] } ],
+      "properties": {
+        "osm": { "type": "string", "pattern": "^(relation|way)/[0-9]+$", "description": "El objeto de OpenStreetMap con el límite: 'relation/1224652'." },
+        "nombre": { "type": "string", "maxLength": 120, "description": "Como lo dice la persona: 'Del Viso'." },
+        "en": { "type": "string", "maxLength": 120, "readOnly": true, "description": "Dónde queda, para distinguir homónimos: 'Pilar, Buenos Aires'. Lo escribe el nodo." }
+      },
+      "additionalProperties": false
+    },
+    "zona_resuelta": {
+      "title": "Zona resuelta, sin guardar",
+      "description": "Lo que devuelve resolverZonaEntrega: la zona como quedaría, para mostrarla en un mapa antes de que la persona confirme. No guarda nada.",
+      "type": "object",
+      "properties": {
+        "zona_entrega": { "$ref": "#/$defs/zona_entrega", "description": "Ausente si quedó algún nombre sin resolver: hasta que cada nombre sea un solo lugar no hay nada que mostrar." },
+        "sin_resolver": { "type": "array", "items": { "type": "object", "required": ["nombre", "candidatos"], "properties": { "nombre": { "type": "string" }, "candidatos": { "type": "array", "description": "Vacío: el nodo no conoce ningún lugar con ese nombre.", "items": { "$ref": "#/$defs/localidad_zona" } } }, "additionalProperties": false }, "description": "Los nombres que no son un solo lugar. Preguntale a la persona cuál, y volvé a resolver con el osm." },
+        "superficie_km2": { "type": "number", "minimum": 0 },
+        "vertices": { "type": "integer", "minimum": 0, "description": "Cuántos puntos tienen las áreas, sumando bordes y huecos." }
+      },
+      "additionalProperties": false
+    },
     "metricas": {
       "title": "Métricas de un comercio",
       "description": "Agregados de la actividad del comercio en un período, para su propio tablero. Nunca dicen quién: no llevan identidad, id de usuario, dirección ni nada con lo que se pueda reconstruir a una persona. Un nodo que no puede agregar sin identificar, no publica la métrica.",
