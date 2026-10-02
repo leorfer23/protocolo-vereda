@@ -3,3 +3,6 @@ __pycache__/
 .DS_Store
 node_modules/
 .env
+.venv/
+graphify-out/
+.claude/worktrees/
